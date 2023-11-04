@@ -1,11 +1,27 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
-
 import * as s from "./lib/sstate";
-import { useContainer, useSPrimitive } from "./lib/sstate.react";
+import { debugOut } from "./lib/sstate.debug";
+import { globalState, popHistory, pushHistory } from "./lib/sstate.history";
+import {
+  useContainer,
+  useSPrimitive,
+  useSubToStruct,
+} from "./lib/sstate.react";
 import { construct, serialize } from "./lib/sstate.serialization";
-import { MutationHashable } from "./lib/state/MutationHashable";
-import { subscribe } from "./lib/state/Subbable";
+import { useLinkedArray } from "./lib/state/LinkedArray";
+
+/**
+ * TODO:
+ * - Redo
+ * - Multiple types in array
+ * - Smarter array history
+ * - useHistory
+ *    - returns [history, push, pop] ?
+ *
+ * TODO EVENTUALLY
+ * - Test non-state primitives
+ */
 
 export class BusLine extends s.Struct<BusLine> {
   readonly distance = s.number();
@@ -17,9 +33,11 @@ export class BusLine extends s.Struct<BusLine> {
     this.buses.push(lion);
   }
 
-  // clear() {
-  //   while (this.buses.pop()) {}
-  // }
+  clear() {
+    pushHistory(() => {
+      while (this.buses.pop()) {}
+    });
+  }
 }
 
 export class Bus extends s.Struct<Bus> {
@@ -36,23 +54,39 @@ function App() {
   return (
     <>
       <div>
-        <CountButton num={busLine.distance} />
-        <CountButton num={busLine.stops} />
-        <button onClick={() => busLine.addBus("hello world")}>Add bus</button>
-        {/* <button
-          onClick={() => {
-            for (let i = 0; i < 100; i++) {
+        <button onClick={() => popHistory()}>undo</button>
+        <button onClick={() => popHistory()}>redo</button>
+        <br></br>
+        <CountButton name="distance" num={busLine.distance} />
+        <CountButton name="stops" num={busLine.stops} />
+        <br></br>
+        <button
+          onClick={() =>
+            pushHistory(() => {
               busLine.addBus("hello world");
-            }
+            })
+          }
+        >
+          Add bus
+        </button>
+        <button
+          onClick={() => {
+            performance.mark("1");
+            pushHistory(() => {
+              for (let i = 0; i < 10000; i++) {
+                busLine.addBus("hello world");
+              }
+            });
+            performance.mark("2");
+            performance.measure("Add 10000 items", "1", "2");
+            console.log("Added 10000");
           }}
         >
           Add 100
         </button>
         <button
           onClick={() => {
-            for (let i = 0; i < 100; i++) {
-              busLine.clear();
-            }
+            busLine.clear();
           }}
         >
           remove all
@@ -65,10 +99,12 @@ function App() {
           }}
         >
           construct test
-        </button> */}
+        </button>
       </div>
-      <BusList />
-      <ProjectDebug />
+      <div style={{ display: "flex", flexDirection: "row" }}>
+        <ProjectDebug />
+        <BusList />
+      </div>
     </>
   );
 }
@@ -77,28 +113,29 @@ function BusList() {
   const [tracks] = useContainer(busLine.buses);
   return (
     <div>
-      hello
       {tracks.map((track) => {
-        return <TrackA tracks={tracks} key={track._id} track={track} />;
+        return <BusEditor tracks={tracks} key={track._id} track={track} />;
       })}
     </div>
   );
 }
 
-function CountButton({ num }: { num: s.SNumber }) {
+function CountButton({ num, name }: { num: s.SNumber; name: string }) {
   const [count, setCount] = useSPrimitive(num);
   return (
     <button
       onClick={() => {
-        setCount((prev) => prev + 1);
+        pushHistory(() => {
+          setCount((prev) => prev + 1);
+        });
       }}
     >
-      count is {count}
+      {name} is {count}
     </button>
   );
 }
 
-const TrackA = React.memo(function TrackAImpl({
+const BusEditor = React.memo(function TrackAImpl({
   track,
   tracks,
 }: {
@@ -106,36 +143,78 @@ const TrackA = React.memo(function TrackAImpl({
   tracks: s.SArray<Bus>;
 }) {
   const [name, setName] = useSPrimitive(track.name);
+  const [edit, setEdit] = useState(name);
+
+  useEffect(() => {
+    setEdit(name);
+  }, [name]);
+
+  function commitEdit() {
+    if (edit !== name) {
+      pushHistory(() => {
+        setName(edit);
+      });
+    }
+  }
 
   return (
     <div>
       <input
         type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
+        value={edit}
+        onChange={(e) => setEdit(e.target.value)}
+        onBlur={() => commitEdit()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            commitEdit();
+          }
+        }}
       ></input>
-      <button onClick={() => tracks.remove(track)}>x</button>
+      <button
+        onClick={() =>
+          pushHistory(() => {
+            tracks.remove(track);
+          })
+        }
+      >
+        x
+      </button>
     </div>
   );
 });
 
 function ProjectDebug() {
   useSubToStruct(busLine);
-  return <pre style={{ textAlign: "left" }}>{busLine.serialize()}</pre>;
+  const [history] = useLinkedArray(globalState.history);
+
+  return (
+    <div>
+      <pre style={{ textAlign: "left", width: 300 }}>{debugOut(busLine)}</pre>
+      {/* <button
+        onClick={() => {
+          setState({});
+        }}
+      >
+        refresh {globalState.history.length}
+      </button> */}
+      {history.map((entry, i) => {
+        return (
+          <details key={i}>
+            <summary>
+              {i}, modified {entry.prevObjects.size} objects
+            </summary>
+            <pre style={{ textAlign: "left" }}>
+              {Array.from(entry.prevObjects.entries()).map(([id, value]) => {
+                return `${id}: ${JSON.stringify(JSON.parse(value), null, 2)}`;
+              })}
+            </pre>
+          </details>
+        );
+      })}
+    </div>
+  );
 }
 
 export default App;
 
 (window as any).project = busLine;
-
-function useSubToStruct<S extends s.Struct<any>>(obj: S) {
-  const [, setHash] = useState(() => MutationHashable.getMutationHash(obj));
-
-  useEffect(() => {
-    return subscribe(obj, () => {
-      setHash((prev) => (prev + 1) % Number.MAX_SAFE_INTEGER);
-    });
-  }, [obj]);
-
-  return obj;
-}

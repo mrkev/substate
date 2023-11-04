@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import type { SPrimitive, StateDispath } from "./state/LinkedState";
-import { subscribe } from "./state/Subbable";
 import { SArray, SState, Struct } from "./sstate";
 import { useSubscribeToSubbableMutationHashable } from "./state/LinkedMap";
+import type { SPrimitive, StateDispath } from "./state/LinkedState";
+import { MutationHashable } from "./state/MutationHashable";
+import { subscribe } from "./state/Subbable";
 
 export function useSPrimitive<S>(
   linkedState: SPrimitive<S>
@@ -54,4 +55,16 @@ export function useContainer<S extends SState<unknown> | Struct<any>>(
   );
 
   return [linkedArray, setter];
+}
+
+export function useSubToStruct<S extends Struct<any>>(obj: S) {
+  const [, setHash] = useState(() => MutationHashable.getMutationHash(obj));
+
+  useEffect(() => {
+    return subscribe(obj, () => {
+      setHash((prev) => (prev + 1) % Number.MAX_SAFE_INTEGER);
+    });
+  }, [obj]);
+
+  return obj;
 }

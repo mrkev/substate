@@ -1,27 +1,126 @@
-# React + TypeScript + Vite
+# Substate
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Usage
 
-Currently, two official plugins are available:
+1. Primitives:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- `sub.string()`
+- `sub.number()`
+- `sub.boolean()`
+- `sub.nil()`
 
-## Expanding the ESLint configuration
+```tsx
+import * as sub from "@mrkev/substate";
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+const count = sub.number();
 
-- Configure the top-level `parserOptions` property like this:
-
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
+function App() {
+  const [count, setCount] = useSubstate(count);
+  return (
+    <div>
+      <button onClick={() => setCount(count + 1)}>count is {count}</button>
+    </div>
+  );
+}
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+1. Arrays
+
+- `sub.array()`
+
+```tsx
+import * as sub from "@mrkev/substate";
+
+const timestamps = sub.array(sub.number());
+
+function App() {
+  const timestamps = useSubarray(timestamps);
+  return (
+    <div>
+      <button
+        onClick={() => {
+          const time = new Date().getTime();
+          timestamps.push(time);
+        }}
+      >
+        record time
+      </button>
+
+      <ul>
+        {timestamps.map((time) => {
+          return <li>{time}</li>;
+        })}
+      </ul>
+    </div>
+  );
+}
+```
+
+1. Structs (named objects with known shapes)
+
+- `sub.Struct`
+- `sub.create(...)`
+
+```tsx
+import * as sub from "@mrkev/substate";
+
+class Person extends sub.Struct<Person> {
+  age = sub.number();
+  children = sub.array(Person);
+}
+
+// create a new person with sub.create()...
+const person = sub.create(Person, {
+  age: 52,
+  children: [
+    sub.create(Person, {
+      age: 25,
+      children: [],
+    }),
+  ],
+});
+
+function App() {
+  // ...and subscribe via `useStruct(...)`
+  let person = useStruct(person);
+
+  // ...or create and subscribe via `useCreateStruct(...)`
+  person = useCreateStruct(Person, {
+    age: 52,
+    children: [
+      sub.create(Person, {
+        age: 25,
+        children: [],
+      }),
+    ],
+  });
+
+  return <Person person={person} />;
+}
+
+function Person(props: { person: Person }) {
+  const person = useStruct(props.person);
+  return (
+    <div>
+      age: {person.age}
+      <button
+        onClick={() => {
+          const newPerson = sub.create(Person, {
+            age: 30,
+            children: [],
+          });
+          person.push(newPerson);
+        }}
+      >
+        add child
+      </button>
+      children:
+      <ul>
+        {person.children.map((person) => {
+          return <Person person={person} />;
+        })}
+      </ul>
+    </div>
+  );
+}
+```

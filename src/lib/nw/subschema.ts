@@ -15,6 +15,7 @@ import {
 } from "./nwschema";
 import { NWInLax, NWInUnion, NWOut } from "./nwschema.types";
 import { SubInLax, SubInLaxUnion, SubOut, SubOutLax } from "./subschema.types";
+import { nanoid } from "nanoid";
 
 //////// Schema ////////
 
@@ -277,7 +278,7 @@ class SubArray<T extends SubSchema<unknown>>
   private readonly schema: NWArray<NWInLax<SubOutLax<T>>>;
 
   constructor(subs: T[], schema: NWArray<NWInLax<SubOutLax<T>>>) {
-    super(subs);
+    super(subs, nanoid(5));
     this.schema = schema;
     this.subs = subs;
     for (const sub of subs) {

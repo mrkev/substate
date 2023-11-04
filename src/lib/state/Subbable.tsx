@@ -29,7 +29,7 @@ export function notify(
   target: Subbable,
   priority: "task" | "microtask" | "immediate" = "immediate"
 ) {
-  console.log("SENDNG NOTIF:", subbable._subscriptors.size, subbable);
+  // console.log("SENDING NOTIF:", subbable._subscriptors.size, subbable);
   switch (priority) {
     case "immediate":
       subbable._subscriptors.forEach((cb) => {

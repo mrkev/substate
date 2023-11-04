@@ -2,6 +2,8 @@ import { nanoid } from "nanoid";
 import { useCallback, useEffect, useState } from "react";
 import { MutationHashable, SubbableContainer } from "./MutationHashable";
 import { Subbable, notify, subscribe } from "./Subbable";
+import { globalState } from "../sstate.history";
+import { serialize } from "../sstate.serialization";
 
 export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
 export type StateChangeHandler<S> = (value: S) => void;
@@ -19,20 +21,32 @@ export interface LS<T> extends Subbable, Contained {
  * LinkedState is a Subbable, a single atomic primitive
  */
 export class SPrimitive<S> implements LS<S> {
-  readonly _id = nanoid(5);
+  readonly _id: string;
   private _value: Readonly<S>;
   _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
   _container: SubbableContainer | null = null;
 
-  constructor(initialValue: S) {
+  constructor(initialValue: S, id: string) {
     this._value = initialValue;
+    this._id = id;
+    globalState.knownObjects.set(this._id, this);
   }
 
   static of<T>(val: T) {
-    return new this<T>(val);
+    return new this<T>(val, nanoid(5));
   }
 
   set(value: Readonly<S>): void {
+    if (
+      globalState.HISTORY_RECORDING != false &&
+      // save orignal only. We might make multiple operations on this data structure
+      globalState.HISTORY_RECORDING.get(this._id) == null
+    ) {
+      const serialized = serialize(this);
+      console.log("SAVING", this._id, "with value", serialized);
+      globalState.HISTORY_RECORDING.set(this._id, serialized);
+    }
+
     this._value = value;
     notify(this, this);
     if (this._container != null) {
@@ -59,7 +73,10 @@ export class SPrimitive<S> implements LS<S> {
   }
 
   toJSON() {
-    return this._value;
+    return {
+      _value: this._value,
+      _id: this._id,
+    };
   }
 }
 
@@ -183,33 +200,6 @@ class SRecord<TSchema extends Record<string, LS<any>>>
   }
 }
 
-function primitive<T extends number | string | boolean>(val: T): SPrimitive<T> {
-  return new SPrimitive(val);
-}
-
-function number(val: number) {
-  return new SPrimitive(val);
-}
-
-function record<TSchema extends Record<string, LS<any>>>(
-  schema: TSchema
-): SRecord<TSchema> {
-  return new SRecord<TSchema>(schema);
-}
-
-const a = record({
-  zoo: record({
-    animals: record({
-      lions: number(3),
-    }),
-  }),
-  park: record({
-    animals: record({
-      lions: number(3),
-    }),
-  }),
-});
-
 type BrowserTarget<T extends LS<any>> =
   // Records
   T extends SRecord<infer E>
@@ -219,8 +209,8 @@ type BrowserTarget<T extends LS<any>> =
     ? void
     : never;
 
-a.browse((a) => a.park.animals.lions);
-(window as any).a = a;
+// a.browse((a) => a.park.animals.lions);
+// (window as any).a = a;
 
 // a.child("here");
 // a.browse((foo) => foo.here.there);

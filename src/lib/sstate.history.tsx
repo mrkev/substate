@@ -1,70 +1,41 @@
-import { Struct } from "./sstate";
-import { construct } from "./sstate.serialization";
+import { WeakRefMap } from "./WeakRefMap";
+import { SArray, Struct } from "./sstate";
+import { replace } from "./sstate.serialization";
+import { LinkedArray } from "./state/LinkedArray";
 import { SPrimitive } from "./state/LinkedState";
 
-type KnowableObject = Struct<any> | SPrimitive<any>;
-
-class WeakRefMap<T extends WeakKey> {
-  private readonly map: Map<string, WeakRef<T>> = new Map();
-  private readonly cleanFactor: number = 100; // TODO: make 100000, larger
-  private actionCounter = 0;
-
-  private _clean() {
-    console.log("WeakRefMap: cleaning...");
-    for (const [key, value] of this.map.entries()) {
-      if (value.deref() == null) {
-        this.map.delete(key);
-      }
-    }
-  }
-
-  set(id: string, value: T) {
-    this.map.set(id, new WeakRef(value));
-    this.actionCounter++;
-    if (this.actionCounter > this.cleanFactor) {
-      this._clean();
-      this.actionCounter = 0;
-    }
-  }
-
-  get(id: string): T | null {
-    return this.map.get(id)?.deref() ?? null;
-  }
-
-  print() {
-    for (const [key, value] of this.map.entries()) {
-      console.log(key, value.deref() ?? null);
-    }
-  }
-}
+export type KnowableObject = Struct<any> | SPrimitive<any> | SArray<any>;
 
 class GlobalState {
   HISTORY_RECORDING: Map<string, string> | false = false;
-  readonly knownObjects = new WeakRefMap<KnowableObject>();
-  history: Array<{ prevObjects: Map<string, string> }> = [];
+  readonly knownObjects = new WeakRefMap<KnowableObject>(10_000);
+  history: LinkedArray<{ prevObjects: Map<string, string> }> =
+    LinkedArray.create();
+
+  constructor() {
+    (window as any).globalState = this;
+  }
 }
 
 export const globalState = new GlobalState();
-(window as any).globalState = globalState;
 
-export async function pushHistory(
-  obj: KnowableObject,
-  action: () => Promise<void>
-) {
+export async function pushHistory(action: () => void | Promise<void>) {
   if (globalState.HISTORY_RECORDING) {
     return await action();
   }
 
   globalState.HISTORY_RECORDING = new Map();
   await action();
-  // for (const [key, value] of globalState.RECORDING.entries()) {
-  // }
-  globalState.history.push({ prevObjects: globalState.HISTORY_RECORDING });
+  const recorded = globalState.HISTORY_RECORDING;
   globalState.HISTORY_RECORDING = false;
-  console.log("GLBOAL", globalState);
+
+  // Make sure it's after we stop recording! We don't want to record this history change!!
+  if (recorded.size > 0) {
+    globalState.history.push({ prevObjects: recorded });
+  }
 }
 
-export function popHistory(serialized: string) {
+export function popHistory() {
   const { history, knownObjects } = globalState;
   const prev = history.pop();
   if (prev == null) {
@@ -73,22 +44,17 @@ export function popHistory(serialized: string) {
 
   for (const [id, serialized] of prev.prevObjects) {
     const object = knownObjects.get(id);
+
     if (object == null) {
       throw new Error(`no known object with ${id} found`);
     }
 
-    const constructed = construct(serialized, object.constructor);
-
     if (object instanceof SPrimitive) {
-      assertSPrimitive(constructed);
-      object.replace(object.get());
+      replace(serialized, object);
     }
-  }
-  // const prevState = construct(serialized, state.constructor);
-}
 
-function assertSPrimitive<T>(value: unknown): asserts value is SPrimitive<any> {
-  if (!(value instanceof SPrimitive)) {
-    throw new Error("not an sprimitive"); // assertion error
+    if (object instanceof SArray) {
+      replace(serialized, object);
+    }
   }
 }

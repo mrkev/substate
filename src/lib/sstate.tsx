@@ -68,6 +68,31 @@ export class Struct<Child extends Struct<any>>
 
   private readonly stateKeys: Map<keyof Child, null> = new Map();
 
+  _initConstructed(args: Record<string, any> | null) {
+    if (args == null) {
+      return;
+    }
+
+    const self = this as any;
+
+    for (const key in args) {
+      self[key] = args[key];
+      const child = self[key];
+
+      if (child instanceof SArray) {
+        (this.stateKeys as Map<string, any>).set(key, null);
+        child._container = this;
+        // todo ARG FOR ARRAY
+      }
+
+      if (child instanceof SPrimitive) {
+        (this.stateKeys as Map<string, any>).set(key, null);
+        child._container = this;
+      }
+    }
+    globalState.knownObjects.set(this._id, this);
+  }
+
   // TODO: checked at the create(...) function level
   _init(args: Record<string, any> | null) {
     // TODO, we subscribe to children. If my child subscribes to me instead, they can keep the destroy function.
@@ -82,11 +107,11 @@ export class Struct<Child extends Struct<any>>
     for (const key in args) {
       let child = self[key];
       if (child instanceof UNINITIALIZED_PRIMITIVE) {
-        self[key] = new SPrimitive(args[key]);
+        self[key] = SPrimitive.of(args[key]);
       }
 
       if (child instanceof UNINITIALIZED_ARRAY) {
-        self[key] = new SArray(child.schema, args[key]);
+        self[key] = new SArray(child.schema, args[key], nanoid(5));
       }
 
       // Act on initialized keys
@@ -95,18 +120,15 @@ export class Struct<Child extends Struct<any>>
       if (child instanceof SArray) {
         (this.stateKeys as Map<string, any>).set(key, null);
         child._container = this;
-        // const unsub = subscribe(child, this._childChanged.bind(this));
-        // console.log("SArray container:", obj, "<-", res);
         // todo ARG FOR ARRAY
       }
 
       if (child instanceof SPrimitive) {
         (this.stateKeys as Map<string, any>).set(key, null);
         child._container = this;
-        // const unsub = subscribe(child, this._childChanged.bind(this));
-        // console.log("SPrimitive container:", obj, "<-", res);
       }
     }
+    globalState.knownObjects.set(this._id, this);
   }
 
   _childChanged(child: Subbable) {
@@ -117,6 +139,7 @@ export class Struct<Child extends Struct<any>>
     }
   }
 
+  // unnecesary?
   _destroy() {
     this._container = null;
     this._unsub?.();
@@ -128,7 +151,7 @@ export class Struct<Child extends Struct<any>>
       ? null
       : SPrimitiveFieldsToSOut<Child>
   ) {
-    this._id = this._kind + "." + nanoid(5);
+    this._id = nanoid(5);
     // We don't actually do anything here. create() initializes structs
   }
 
@@ -176,10 +199,8 @@ export function create2<S extends { new (...args: any[]): Struct<any> }>(
   klass: S,
   arg: PropsForStruct<InstanceType<S>>
 ): InstanceType<S> {
-  const res = new klass(arg) as any;
-  console.log("INITIALIZING");
+  const res = new klass() as any;
   res._init(arg);
-  globalState.knownObjects.set(res._id, res);
   return res;
 }
 
@@ -216,14 +237,19 @@ export interface SState<T> {}
 export class SArray<
   T extends SState<unknown> | Struct<any>
 > extends LinkedArray<T> {
-  private schema: (SState<unknown> | typeof Struct)[];
+  _schema: (SState<unknown> | typeof Struct)[];
   // private readonly schema: NWArray<NWInLax<SubOutLax<T>>>;
   // private container: SubContainer | null = null;
 
-  constructor(schema: (SState<unknown> | typeof Struct)[], val: T[]) {
-    super(val);
+  constructor(
+    schema: (SState<unknown> | typeof Struct)[],
+    val: T[],
+    id: string
+  ) {
+    super(val, id);
     // this.schema = schema;
-    this.schema = schema;
+    this._schema = schema;
+    globalState.knownObjects.set(this._id, this);
     // for (const sub of subs) {
     //   if ("container" in sub) {
     //     sub.container = this;
@@ -293,23 +319,21 @@ export class SArray<
 function string(value?: string): SString {
   return value == null
     ? (new UNINITIALIZED_PRIMITIVE() as any)
-    : new SString(value);
+    : SString.of(value);
 }
 
-function number(value: number): SNumber;
-function number(value?: undefined): SNumber;
 function number(value?: number): SPrimitive<number> {
   return value == null
     ? (new UNINITIALIZED_PRIMITIVE() as any)
-    : new SNumber(value);
+    : SNumber.of(value);
 }
 
 function boolean(value: boolean) {
-  return new SPrimitive(value);
+  return SPrimitive.of(value);
 }
 
 function nil(value: null) {
-  return new SPrimitive(value);
+  return SPrimitive.of(value);
 }
 
 class Foo extends Struct<Foo> {}
@@ -327,7 +351,7 @@ function array<T extends SState<unknown> | typeof Struct>(
 ): SArray<Instantiate<T>> {
   return val == null
     ? (new UNINITIALIZED_ARRAY(schema) as any)
-    : new SArray(schema, val);
+    : new SArray(schema, val, nanoid(5));
 }
 // function record<T extends Record<string, LS<any>>>(
 //   schema: T

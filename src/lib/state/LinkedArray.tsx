@@ -4,6 +4,8 @@ import { useSubscribeToSubbableMutationHashable } from "./LinkedMap";
 import { StateChangeHandler, StateDispath } from "./LinkedState";
 import { MutationHashable, SubbableContainer } from "./MutationHashable";
 import { Subbable, notify, subscribe } from "./Subbable";
+import { globalState } from "../sstate.history";
+import { serialize } from "../sstate.serialization";
 // import { serialize } from "../sstate.serialization";
 // import { globalState } from "../sstate.history";
 
@@ -30,18 +32,19 @@ export type ArrayWithoutIndexer<T> = Omit<
 export class LinkedArray<S>
   implements ArrayWithoutIndexer<S>, Subbable, SubbableContainer
 {
-  readonly _id = nanoid(5);
+  readonly _id: string;
   private _array: Array<S>;
   _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
   _hash: number = 0;
   _container: SubbableContainer | null = null;
 
-  constructor(initialValue: Array<S>) {
+  constructor(initialValue: Array<S>, id: string) {
     this._array = initialValue;
+    this._id = id;
     for (const elem of this._array) {
       if (typeof elem === "object" && elem != null && "_container" in elem) {
         elem._container = this;
-        console.log("CONTAINER OF", elem, "<=", this);
+        // console.log("CONTAINER OF", elem, "<=", this);
       }
     }
   }
@@ -52,6 +55,18 @@ export class LinkedArray<S>
     if (this._container != null) {
       this._container._childChanged(this);
     }
+  }
+
+  private mutate<V>(mutator: (clone: Array<S>) => V): V {
+    this._saveForHistory();
+    const result = mutator(this._array);
+    MutationHashable.mutated(this);
+    notify(this, this);
+
+    if (this._container != null) {
+      this._container._childChanged(this);
+    }
+    return result;
   }
 
   _getRaw(): ReadonlyArray<S> {
@@ -69,20 +84,7 @@ export class LinkedArray<S>
   }
 
   public static create<T>(initialValue?: Array<T>) {
-    return new this(initialValue ?? []);
-  }
-
-  private mutate<V>(mutator: (clone: Array<S>) => V): V {
-    console.log("ARRAY_MUTATED", this);
-    const result = mutator(this._array);
-    MutationHashable.mutated(this);
-    notify(this, this);
-
-    // if ("_container" in this && this._container != null) {
-    //   notify(this._container, null);
-    //   MutationHashable.mutated(this._container as any);
-    // }
-    return result;
+    return new this(initialValue ?? [], nanoid(5));
   }
 
   // Array<S> interface
@@ -133,22 +135,35 @@ export class LinkedArray<S>
     });
   }
 
-  // _saveForHistory() {
-  //   if (
-  //     globalState.HISTORY_RECORDING == false ||
-  //     // save orignal only. We might make multiple operations on this data structure
-  //     globalState.HISTORY_RECORDING.get(this._id) != null
-  //   ) {
-  //     return;
-  //   }
-  //   const serialized = serialize(this);
-  //   globalState.HISTORY_RECORDING.set(this._id, serialized);
-  // }
+  _saveForHistory() {
+    if (
+      globalState.HISTORY_RECORDING == false ||
+      // save orignal only. We might make multiple operations on this data structure
+      globalState.HISTORY_RECORDING.get(this._id) != null
+    ) {
+      return;
+    }
+    const serialized = serialize(this as any);
+    globalState.HISTORY_RECORDING.set(this._id, serialized);
+  }
+
+  _replace(arr: LinkedArray<S>) {
+    this._array = arr._array;
+    for (const elem of this._array) {
+      if (typeof elem === "object" && elem != null && "_container" in elem) {
+        elem._container = this;
+      }
+    }
+
+    MutationHashable.mutated(this);
+    notify(this, this);
+    if (this._container != null) {
+      this._container._childChanged(this);
+    }
+  }
 
   // Array<S> interface, mutates
   push(...items: S[]): number {
-    // this._saveForHistory();
-    console.log("PUSHING ITEMS", this, "<-", items);
     if (items.length < 1) {
       return this.length;
     }
@@ -156,10 +171,7 @@ export class LinkedArray<S>
     for (const x of items) {
       if (typeof x === "object" && x != null && "_container" in x) {
         x._container = this;
-        // TODO, we subscribe to children. If my child subscribes to me instead, they can keep the destroy function.
-        // If not, I keep the destroy function and can use it when I remove a child
-        const unsub = subscribe(x as any, this._childChanged.bind(this));
-        console.log("CONTAINER OF", x, "<=", this);
+        // console.log("CONTAINER OF", x, "<=", this);
       }
     }
 
