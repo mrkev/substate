@@ -2,11 +2,18 @@
 
 import { nanoid } from "nanoid";
 import { globalState } from "./sstate.history";
-import { LinkedArray } from "./state/LinkedArray";
-import type { Contained, LS, StateChangeHandler } from "./state/LinkedState";
-import { SPrimitive } from "./state/LinkedState";
-import { MutationHashable, SubbableContainer } from "./state/MutationHashable";
-import { Subbable, notify } from "./state/Subbable";
+import { LinkedArray } from "./lib/state/LinkedArray";
+import type {
+  Contained,
+  LS,
+  StateChangeHandler,
+} from "./lib/state/LinkedState";
+import { SPrimitive } from "./lib/state/LinkedState";
+import {
+  MutationHashable,
+  SubbableContainer,
+} from "./lib/state/MutationHashable";
+import { Subbable, notify } from "./lib/state/Subbable";
 
 class SString extends SPrimitive<string> {}
 class SNumber extends SPrimitive<number> {}

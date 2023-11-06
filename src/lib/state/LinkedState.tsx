@@ -2,8 +2,8 @@ import { nanoid } from "nanoid";
 import { useCallback, useEffect, useState } from "react";
 import { MutationHashable, SubbableContainer } from "./MutationHashable";
 import { Subbable, notify, subscribe } from "./Subbable";
-import { globalState } from "../sstate.history";
-import { serialize } from "../sstate.serialization";
+import { globalState } from "../../sstate.history";
+import { serialize } from "../../sstate.serialization";
 
 export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
 export type StateChangeHandler<S> = (value: S) => void;

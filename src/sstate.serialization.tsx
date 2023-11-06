@@ -2,9 +2,9 @@ import { assertSArray, assertSPrimitive, assertStruct } from "./assertions";
 import * as s from "./sstate";
 import { Struct } from "./sstate";
 import { KnowableObject } from "./sstate.history";
-import { LinkedArray } from "./state/LinkedArray";
-import { SPrimitive } from "./state/LinkedState";
-import { exhaustive } from "./state/Subbable";
+import { LinkedArray } from "./lib/state/LinkedArray";
+import { SPrimitive } from "./lib/state/LinkedState";
+import { exhaustive } from "./lib/state/Subbable";
 
 type Serialized =
   | Readonly<{

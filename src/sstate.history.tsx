@@ -1,8 +1,8 @@
 import { WeakRefMap } from "./WeakRefMap";
 import { SArray, Struct } from "./sstate";
 import { replace } from "./sstate.serialization";
-import { LinkedArray } from "./state/LinkedArray";
-import { SPrimitive } from "./state/LinkedState";
+import { LinkedArray } from "./lib/state/LinkedArray";
+import { SPrimitive } from "./lib/state/LinkedState";
 
 export type KnowableObject = Struct<any> | SPrimitive<any> | SArray<any>;
 

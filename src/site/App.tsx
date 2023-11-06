@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
-import * as s from "./lib/sstate";
-import { debugOut } from "./lib/sstate.debug";
-import { globalState, popHistory, pushHistory } from "./lib/sstate.history";
-import {
-  useContainer,
-  useSPrimitive,
-  useSubToStruct,
-} from "./lib/sstate.react";
-import { construct, serialize } from "./lib/sstate.serialization";
-import { useLinkedArray } from "./lib/state/LinkedArray";
+import * as s from "../sstate";
+import { debugOut } from "../sstate.debug";
+import { globalState, popHistory, pushHistory } from "../sstate.history";
+import { useContainer, useSPrimitive, useSubToStruct } from "../sstate.react";
+import { construct, serialize } from "../sstate.serialization";
+import { useLinkedArray } from "../lib/state/LinkedArray";
 
 /**
  * TODO:

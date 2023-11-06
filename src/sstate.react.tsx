@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { SArray, SState, Struct } from "./sstate";
-import { useSubscribeToSubbableMutationHashable } from "./state/LinkedMap";
-import type { SPrimitive, StateDispath } from "./state/LinkedState";
-import { MutationHashable } from "./state/MutationHashable";
-import { subscribe } from "./state/Subbable";
+import { useSubscribeToSubbableMutationHashable } from "./lib/state/LinkedMap";
+import type { SPrimitive, StateDispath } from "./lib/state/LinkedState";
+import { MutationHashable } from "./lib/state/MutationHashable";
+import { subscribe } from "./lib/state/Subbable";
 
 export function useSPrimitive<S>(
   linkedState: SPrimitive<S>

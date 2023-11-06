@@ -1,4 +1,4 @@
-import * as s from "../lib/sstate";
+import * as s from "./sstate";
 import { pushHistory } from "./sstate.history";
 import { beforeEach, describe, expect, it } from "vitest";
 

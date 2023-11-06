@@ -3,13 +3,13 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "main": "./dist/sstate.umd.cjs",
-  "module": "./dist/sstate.js",
-  "types": "./dist/lib/sstate.d.ts",
+  "main": "./dist/simple-state.umd.cjs",
+  "module": "./dist/simple-state.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/sstate.js",
-      "require": "./dist/sstate.umd.cjs"
+      "import": "./dist/simple-state.js",
+      "require": "./dist/simple-state.umd.cjs"
     }
   },
   "files": [

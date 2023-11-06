@@ -1,5 +1,5 @@
 import { SArray, Struct } from "./sstate";
-import { SPrimitive } from "./state/LinkedState";
+import { SPrimitive } from "./lib/state/LinkedState";
 
 export function assertSPrimitive<T>(
   value: unknown

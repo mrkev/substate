@@ -1,11 +1,11 @@
-import * as nw from "./lib/nw/nwschema";
+import * as nw from "../lib/nw/nwschema";
 import {
   Concretized,
   SubNumber,
   useSubToObjectCached,
   useSubbable,
-} from "./lib/nw/subschema";
-import { useLinkedArray } from "./lib/state/LinkedArray";
+} from "../lib/nw/subschema";
+import { useLinkedArray } from "../lib/state/LinkedArray";
 
 export type Track = Concretized<typeof Track>;
 export const Track = nw.object({
