@@ -8,7 +8,7 @@ export class BusLine extends s.Struct<BusLine> {
   readonly buses = s.array([Bus]);
 
   addBus(name: string) {
-    const lion = s.create2(Bus, { name });
+    const lion = s.create(Bus, { name });
     this.buses.push(lion);
   }
 
@@ -23,17 +23,17 @@ export class Bus extends s.Struct<Bus> {
   readonly name = s.string();
 }
 
-let busLine = s.create2(BusLine, {
+let busLine = s.create(BusLine, {
   distance: 0,
   stops: 0,
-  buses: [s.create2(Bus, { name: "hello" })],
+  buses: [s.create(Bus, { name: "hello" })],
 });
 
 beforeEach(() => {
-  busLine = s.create2(BusLine, {
+  busLine = s.create(BusLine, {
     distance: 0,
     stops: 0,
-    buses: [s.create2(Bus, { name: "hello" })],
+    buses: [s.create(Bus, { name: "hello" })],
   });
 });
 

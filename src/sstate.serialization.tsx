@@ -1,10 +1,10 @@
 import { assertSArray, assertSPrimitive, assertStruct } from "./assertions";
-import * as s from "./sstate";
-import { Struct } from "./sstate";
-import { KnowableObject } from "./sstate.history";
 import { LinkedArray } from "./lib/state/LinkedArray";
 import { SPrimitive } from "./lib/state/LinkedState";
 import { exhaustive } from "./lib/state/Subbable";
+import * as s from "./sstate";
+import { Struct } from "./sstate";
+import { KnowableObject } from "./sstate.history";
 
 type Serialized =
   | Readonly<{
@@ -24,6 +24,8 @@ type Serialized =
         [key: string]: Serialized;
       };
     }>;
+
+type SimplifiedData = Serialized | string | boolean | number | null;
 
 export function simplifyPrimitive(obj: SPrimitive<any>): Serialized {
   return {
@@ -51,7 +53,7 @@ const STRUCT_IGNORE_KEYS = new Set([
 
 export function simplifyStruct(obj: Struct<any>): Serialized {
   // const result: Record<any, any> = { _kind: this._kind };
-  const result: Record<any, any> = {};
+  const result: Record<string, any> = {};
   const keys = Object.keys(obj);
 
   for (const key of keys) {

@@ -14,6 +14,9 @@ import { useLinkedArray } from "../lib/state/LinkedArray";
  * - Smarter array history
  * - useHistory
  *    - returns [history, push, pop] ?
+ * - history for strcuts means recording when a prop changes
+ * - I can use it with clips, for exmaple
+ * - Clips can be structs, super.updated() trigers update?
  *
  * TODO EVENTUALLY
  * - Test non-state primitives
@@ -25,7 +28,7 @@ export class BusLine extends s.Struct<BusLine> {
   readonly buses = s.array([Bus]);
 
   addBus(name: string) {
-    const lion = s.create2(Bus, { name });
+    const lion = s.create(Bus, { name });
     this.buses.push(lion);
   }
 
@@ -40,10 +43,10 @@ export class Bus extends s.Struct<Bus> {
   readonly name = s.string();
 }
 
-const busLine = s.create2(BusLine, {
+const busLine = s.create(BusLine, {
   distance: 0,
   stops: 0,
-  buses: [s.create2(Bus, { name: "hello" })],
+  buses: [s.create(Bus, { name: "hello" })],
 });
 
 function App() {

@@ -4,7 +4,7 @@ import { useSubscribeToSubbableMutationHashable } from "./LinkedMap";
 import { StateChangeHandler, StateDispath } from "./LinkedState";
 import { MutationHashable, SubbableContainer } from "./MutationHashable";
 import { Subbable, notify, subscribe } from "./Subbable";
-import { globalState } from "../../sstate.history";
+import { globalState, saveForHistory } from "../../sstate.history";
 import { serialize } from "../../sstate.serialization";
 // import { serialize } from "../sstate.serialization";
 // import { globalState } from "../sstate.history";
@@ -58,7 +58,7 @@ export class LinkedArray<S>
   }
 
   private mutate<V>(mutator: (clone: Array<S>) => V): V {
-    this._saveForHistory();
+    saveForHistory(this as any);
     const result = mutator(this._array);
     MutationHashable.mutated(this);
     notify(this, this);
@@ -133,18 +133,6 @@ export class LinkedArray<S>
     return this.mutate((clone) => {
       return clone.shift();
     });
-  }
-
-  _saveForHistory() {
-    if (
-      globalState.HISTORY_RECORDING == false ||
-      // save orignal only. We might make multiple operations on this data structure
-      globalState.HISTORY_RECORDING.get(this._id) != null
-    ) {
-      return;
-    }
-    const serialized = serialize(this as any);
-    globalState.HISTORY_RECORDING.set(this._id, serialized);
   }
 
   _replace(arr: LinkedArray<S>) {

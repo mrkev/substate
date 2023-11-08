@@ -202,7 +202,7 @@ export class Struct<Child extends Struct<any>>
   }
 }
 
-export function create2<S extends { new (...args: any[]): Struct<any> }>(
+export function create<S extends { new (...args: any[]): Struct<any> }>(
   klass: S,
   arg: PropsForStruct<InstanceType<S>>
 ): InstanceType<S> {

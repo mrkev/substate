@@ -1,6 +1,6 @@
 import { WeakRefMap } from "./WeakRefMap";
 import { SArray, Struct } from "./sstate";
-import { replace } from "./sstate.serialization";
+import { replace, serialize } from "./sstate.serialization";
 import { LinkedArray } from "./lib/state/LinkedArray";
 import { SPrimitive } from "./lib/state/LinkedState";
 
@@ -9,8 +9,12 @@ export type KnowableObject = Struct<any> | SPrimitive<any> | SArray<any>;
 class GlobalState {
   HISTORY_RECORDING: Map<string, string> | false = false;
   readonly knownObjects = new WeakRefMap<KnowableObject>(10_000);
-  history: LinkedArray<{ prevObjects: Map<string, string> }> =
-    LinkedArray.create();
+  readonly history = LinkedArray.create<{
+    prevObjects: Map<string, string>;
+  }>();
+  readonly redoStack = LinkedArray.create<{
+    prevObjects: Map<string, string>;
+  }>(); // TODO
 
   constructor() {
     (window as any).globalState = this;
@@ -18,6 +22,20 @@ class GlobalState {
 }
 
 export const globalState = new GlobalState();
+
+export function saveForHistory(obj: KnowableObject) {
+  if (
+    globalState.HISTORY_RECORDING == false ||
+    // save object on first call only.
+    // We might make multiple operations on this data structure but we only
+    // want the "original"
+    globalState.HISTORY_RECORDING.get(obj._id) != null
+  ) {
+    return;
+  }
+  const serialized = serialize(obj);
+  globalState.HISTORY_RECORDING.set(obj._id, serialized);
+}
 
 export async function pushHistory(action: () => void | Promise<void>) {
   if (globalState.HISTORY_RECORDING) {

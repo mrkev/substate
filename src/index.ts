@@ -10,6 +10,6 @@ export {
   string,
 } from "./sstate";
 export { debugOut } from "./sstate.debug";
-export { globalState, popHistory, pushHistory } from "./sstate.history";
+export { globalState, popHistory as undo, pushHistory } from "./sstate.history";
 export { useContainer, useSPrimitive, useSubToStruct } from "./sstate.react";
 export { construct, serialize } from "./sstate.serialization";
