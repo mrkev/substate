@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import * as s from "../index";
 import { useContainer, usePrimitive, useStructure } from "../index";
-import { useLinkedArray } from "../lib/state/LinkedArray";
+import { LinkedArray, useLinkedArray } from "../lib/state/LinkedArray";
 import { debugOut } from "../sstate.debug";
-import { globalState, popHistory, pushHistory } from "../sstate.history";
+import { getGlobalState, popHistory, pushHistory } from "../sstate.history";
 import { construct, serialize } from "../sstate.serialization";
 import "./App.css";
 
@@ -23,11 +23,11 @@ import "./App.css";
  */
 
 export class Track extends s.Struct<Track> {
-  readonly clips = s.array([Clip]);
   readonly name = s.string();
+  readonly clips = s.arrayOf([Clip]);
 
   addClip(name: string) {
-    const clip = s.create(Clip, { name, duration: 3 });
+    const clip = s.create(Clip, { name, duration: 3, notes: [] });
     this.clips.push(clip);
   }
 
@@ -36,20 +36,30 @@ export class Track extends s.Struct<Track> {
   }
 }
 
+type Note = readonly [s: number, e: number];
+
 export class Clip extends s.Struct<Clip> {
   readonly name = s.string();
   public start: number = 0;
   public duration: number;
+  public notes = s.array<Note>([
+    [1, 1],
+    [1, 2],
+  ]);
 
   constructor(props: s.StructProps<Clip, { duration: number }>) {
     super(props);
     this.duration = props.duration;
   }
+
+  addNote(note: Note) {
+    this.notes.push(note);
+  }
 }
 
 const track = s.create(Track, {
   name: "untitled track",
-  clips: [s.create(Clip, { name: "hello", duration: 3 })],
+  clips: [s.create(Clip, { name: "hello", duration: 3, notes: [] })],
 });
 
 function App() {
@@ -145,7 +155,7 @@ const ClipA = React.memo(function TrackAImpl({
   }
 
   return (
-    <div>
+    <div style={{ border: "1px solid black" }}>
       <input
         type="text"
         value={edit}
@@ -178,13 +188,39 @@ const ClipA = React.memo(function TrackAImpl({
       >
         +
       </button>
+      <Notes notes={clip.notes} />
     </div>
   );
 });
 
+function Notes(props: { notes: LinkedArray<Note> }) {
+  const [notes] = useLinkedArray(props.notes);
+
+  return (
+    <div>
+      {notes.map((note, i) => {
+        return (
+          <div key={i}>
+            {note}
+            <button
+              onClick={() => {
+                pushHistory(() => {
+                  notes.remove(note);
+                });
+              }}
+            >
+              x
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function ProjectDebug() {
   useContainer(track, true);
-  const [history] = useLinkedArray(globalState.history);
+  const [history] = useLinkedArray(getGlobalState().history);
 
   return (
     <div>
@@ -200,7 +236,7 @@ function ProjectDebug() {
         return (
           <details key={i}>
             <summary>
-              {i}, modified {entry.prevObjects.size} objects
+              {entry.id} modified {entry.prevObjects.size} objects
             </summary>
             <pre style={{ textAlign: "left" }}>
               {Array.from(entry.prevObjects.entries()).map(([id, value]) => {

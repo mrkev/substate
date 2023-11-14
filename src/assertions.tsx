@@ -1,4 +1,4 @@
-import { SArray, Struct } from "./sstate";
+import { SArray, SSchemaArray, Struct } from "./sstate";
 import { SPrimitive } from "./lib/state/LinkedState";
 
 export function assertSPrimitive<T>(
@@ -9,9 +9,19 @@ export function assertSPrimitive<T>(
   }
 }
 
-export function assertSArray<T>(value: unknown): asserts value is SArray<any> {
+export function assertSSimpleArray<T>(
+  value: unknown
+): asserts value is SArray<any> {
   if (!(value instanceof SArray)) {
     throw new Error("not an sarray"); // assertion error
+  }
+}
+
+export function assertSSchemaArray<T>(
+  value: unknown
+): asserts value is SSchemaArray<any> {
+  if (!(value instanceof SSchemaArray)) {
+    throw new Error("not an sschemaarray"); // assertion error
   }
 }
 

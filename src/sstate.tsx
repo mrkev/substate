@@ -1,7 +1,6 @@
 //////// Schema ////////
 
 import { nanoid } from "nanoid";
-import { globalState } from "./sstate.history";
 import { LinkedArray } from "./lib/state/LinkedArray";
 import type {
   Contained,
@@ -14,7 +13,7 @@ import {
   SubbableContainer,
 } from "./lib/state/MutationHashable";
 import { Subbable, notify } from "./lib/state/Subbable";
-import { serialize } from "./sstate.serialization";
+import { getGlobalState, saveForHistory } from "./sstate.history";
 
 // todo? create -> of
 class SString extends SPrimitive<string> {
@@ -39,7 +38,8 @@ class SNil extends SPrimitive<null> {
 }
 
 class UNINITIALIZED_PRIMITIVE {}
-class UNINITIALIZED_ARRAY<S extends (SState<unknown> | typeof Struct)[]> {
+class UNINITIALIZED_ARRAY {}
+class UNINITIALIZED_TYPED_ARRAY<S extends (SState<unknown> | typeof Struct)[]> {
   schema: S;
   constructor(schema: S) {
     this.schema = schema;
@@ -128,6 +128,7 @@ export class Struct<Child extends Struct<any>>
         child._container = this;
       }
     }
+    const globalState = getGlobalState();
     globalState.knownObjects.set(this._id, this);
   }
 
@@ -149,13 +150,21 @@ export class Struct<Child extends Struct<any>>
       }
 
       if (child instanceof UNINITIALIZED_ARRAY) {
-        self[key] = new SArray(child.schema, args[key], nanoid(5));
+        self[key] = new SArray(args[key], nanoid(5));
+      }
+
+      if (child instanceof UNINITIALIZED_TYPED_ARRAY) {
+        self[key] = new SSchemaArray(args[key], nanoid(5), child.schema);
       }
 
       // Act on initialized keys
       child = self[key];
 
       if (child instanceof SArray) {
+        child._container = this;
+      }
+
+      if (child instanceof SSchemaArray) {
         child._container = this;
         // todo ARG FOR ARRAY
       }
@@ -164,6 +173,7 @@ export class Struct<Child extends Struct<any>>
         child._container = this;
       }
     }
+    const globalState = getGlobalState();
     globalState.knownObjects.set(this._id, this);
   }
 
@@ -232,15 +242,7 @@ export class Struct<Child extends Struct<any>>
   }
 
   mutate(action: () => void) {
-    if (
-      globalState.HISTORY_RECORDING != false &&
-      // save orignal only. We might make multiple operations on this data structure
-      globalState.HISTORY_RECORDING.get(this._id) == null
-    ) {
-      const serialized = serialize(this);
-      // console.log("SAVING", this._id, "with value", serialized);
-      globalState.HISTORY_RECORDING.set(this._id, serialized);
-    }
+    saveForHistory(this);
 
     action();
 
@@ -282,6 +284,7 @@ type SecondConstructorParam<T> = T extends {
 //   name = string();
 //   hello: number;
 //   foo = 3;
+//   notes = array();
 
 //   constructor(props: StructProps<Foo, { hello: number }>) {
 //     super(props);
@@ -289,12 +292,12 @@ type SecondConstructorParam<T> = T extends {
 //   }
 // }
 
-// class Bar extends Struct<Foo> {
+// class Bar extends Struct<Bar> {
 //   name = string();
 //   foo = 3;
 // }
 
-// const foo = create(Foo, { name: "hello", hello: 3 });
+// const foo = create(Foo, { name: "hello", hello: 3, notes: [] });
 // const bar = create(Bar, { name: "hello" });
 
 export type StructProps<
@@ -305,6 +308,8 @@ export type StructProps<
 type ConstructorArguments<T extends AnyClass> = T extends OneArgClass
   ? ConstructorParameters<T>
   : [PropsForStruct<InstanceType<T>>];
+
+// type A = PropsForStruct<Foo>;
 
 export function create<S extends AnyClass>(
   klass: S,
@@ -344,47 +349,29 @@ export function create<S extends AnyClass>(
 
 export interface SState<T> {}
 
-/** Describes an array */
-export class SArray<
+/** Describes an array of subbable objects */
+export class SSchemaArray<
   T extends SState<unknown> | Struct<any>
 > extends LinkedArray<T> {
   _schema: (SState<unknown> | typeof Struct)[];
-  // private readonly schema: NWArray<NWInLax<SubOutLax<T>>>;
-  // private container: SubContainer | null = null;
 
   constructor(
-    schema: (SState<unknown> | typeof Struct)[],
     val: T[],
-    id: string
+    id: string,
+    schema: (SState<unknown> | typeof Struct)[]
   ) {
     super(val, id);
-    // this.schema = schema;
+    getGlobalState().knownObjects.set(this._id, this);
     this._schema = schema;
-    globalState.knownObjects.set(this._id, this);
-    // for (const sub of subs) {
-    //   if ("container" in sub) {
-    //     sub.container = this;
-    //   }
-    // }
-
-    // subscribe(this, () => {
-    //   if (this.container !== null) {
-    //     notify(this.container, null as any);
-    //   }
-    // });
   }
+}
 
-  // peek(): SubOut<T>[] {
-  //   // TODO: when we make this a mutation hashable we wont have .subs and ._array any more
-  //   // const res = this.subs.map((sub) => sub.peek());
-  //   const res = this._getRaw().map((sub) => sub.peek());
-  //   return res as any;
-  // }
-
-  // Implemented in SubArray
-  // at(key: number): T | null {
-  //   return this.subs[key] ?? null;
-  // }
+/** Describes an array */
+export class SArray<T> extends LinkedArray<T> {
+  constructor(val: T[], id: string) {
+    super(val, id);
+    getGlobalState().knownObjects.set(this._id, this);
+  }
 }
 
 // class LinkedRecordDefinition<T extends Record<string, LS<unknown>>>
@@ -452,15 +439,30 @@ export type Instantiate<T> = T extends Constructor ? InstanceType<T> : T;
 
 // type X = Instantiate<typeof Foo | SNumber>;
 
-function array<T extends SState<unknown> | typeof Struct>(
+function arrayOf<T extends SState<unknown> | typeof Struct>(
   schema: T[],
   val?: Instantiate<T>[]
   // schema: NWArray<NWInLax<SubOutLax<T>>>
 ): SArray<Instantiate<T>> {
   return val == null
-    ? (new UNINITIALIZED_ARRAY(schema) as any)
-    : new SArray(schema, val, nanoid(5));
+    ? (new UNINITIALIZED_TYPED_ARRAY(schema) as any)
+    : new SSchemaArray(val, nanoid(5), schema);
 }
+
+function array<T extends JSONValue>(val?: T[]): SArray<T> {
+  return val == null
+    ? (new UNINITIALIZED_ARRAY() as any)
+    : new SArray(val, nanoid(5));
+}
+
+type JSONValue =
+  | string
+  | number
+  | boolean
+  | { [x: string]: JSONValue }
+  | Array<JSONValue>
+  | ReadonlyArray<JSONValue>;
+
 // function record<T extends Record<string, LS<any>>>(
 //   schema: T
 // ): LinkedRecordDefinition<T> {
@@ -493,6 +495,7 @@ export {
   SNumber,
   SString,
   array,
+  arrayOf,
   boolean,
   nil,
   number,

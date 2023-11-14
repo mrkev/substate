@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 export class BusLine extends s.Struct<BusLine> {
   readonly distance = s.number();
   readonly stops = s.number();
-  readonly buses = s.array([Bus]);
+  readonly buses = s.arrayOf([Bus]);
 
   addBus(name: string) {
     const lion = s.create(Bus, { name });

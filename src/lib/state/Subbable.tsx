@@ -1,4 +1,4 @@
-import { globalState } from "../..";
+import { getGlobalState } from "../..";
 import { StateChangeHandler } from "./LinkedState";
 
 // Subbables are things one can subscribe to
@@ -30,6 +30,7 @@ export function notify(
   target: Subbable,
   priority: "task" | "microtask" | "immediate" = "immediate"
 ) {
+  const globalState = getGlobalState();
   if (subbable !== globalState.history) {
     // console.log(
     //   "SENDING NOTIF TO",

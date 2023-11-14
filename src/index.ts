@@ -1,25 +1,29 @@
 export {
+  SArray,
+  SSchemaArray,
   SBoolean,
   SNil,
   SNumber,
   SString,
-  SArray,
   Struct,
   array,
+  arrayOf,
   boolean,
+  create,
   nil,
   number,
   string,
-  create,
 } from "./sstate";
-
-export type { StructProps } from "./sstate";
-
-export { debugOut } from "./sstate.debug";
-export { globalState, popHistory as undo, pushHistory } from "./sstate.history";
 export {
-  useStructure,
+  getGlobalState,
+  pushHistory,
+  popHistory as undo,
+} from "./sstate.history";
+export type { StructProps } from "./sstate";
+export { debugOut } from "./sstate.debug";
+export {
   useContainer,
   useSPrimitive as usePrimitive,
+  useStructure,
 } from "./sstate.react";
 export { construct, serialize } from "./sstate.serialization";

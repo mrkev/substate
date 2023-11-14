@@ -2,7 +2,7 @@ import { nanoid } from "nanoid";
 import { useCallback, useEffect, useState } from "react";
 import { MutationHashable, SubbableContainer } from "./MutationHashable";
 import { Subbable, notify, subscribe } from "./Subbable";
-import { globalState } from "../../sstate.history";
+import { getGlobalState } from "../../sstate.history";
 import { serialize } from "../../sstate.serialization";
 
 export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
@@ -29,6 +29,7 @@ export class SPrimitive<S> implements LS<S> {
   constructor(initialValue: S, id: string) {
     this._value = initialValue;
     this._id = id;
+    const globalState = getGlobalState();
     globalState.knownObjects.set(this._id, this);
   }
 
@@ -37,6 +38,7 @@ export class SPrimitive<S> implements LS<S> {
   }
 
   set(value: Readonly<S>): void {
+    const globalState = getGlobalState();
     if (
       globalState.HISTORY_RECORDING != false &&
       // save orignal only. We might make multiple operations on this data structure
