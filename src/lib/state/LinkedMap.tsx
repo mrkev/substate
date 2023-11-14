@@ -139,17 +139,18 @@ export function useLinkedMap<K, V>(
 
 export function useSubscribeToSubbableMutationHashable<
   T extends MutationHashable & Subbable
->(obj: T, cb?: () => void): T {
+>(obj: T, cb?: () => void, recursiveChanges = false): T {
   const [, setHash] = useState(() => MutationHashable.getMutationHash(obj));
 
   useEffect(() => {
     return subscribe(obj, (target) => {
-      if (obj === target) {
+      // console.log("got notif", obj, "target is", target);
+      if (obj === target || recursiveChanges) {
         setHash((prev) => (prev + 1) % Number.MAX_SAFE_INTEGER);
         cb?.();
       }
     });
-  }, [cb, obj]);
+  }, [cb, obj, recursiveChanges]);
 
   return obj;
 }

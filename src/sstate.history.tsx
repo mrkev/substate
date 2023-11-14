@@ -74,5 +74,9 @@ export function popHistory() {
     if (object instanceof SArray) {
       replace(serialized, object);
     }
+
+    if (object instanceof Struct) {
+      replace(serialized, object);
+    }
   }
 }

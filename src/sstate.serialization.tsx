@@ -15,17 +15,15 @@ type Serialized =
   | Readonly<{
       $$: "arr";
       _id: string;
-      _value: Serialized[];
+      _value: (Serialized | unknown)[];
     }>
   | Readonly<{
       $$: "struct";
       _id: string;
       _value: {
-        [key: string]: Serialized;
+        [key: string]: Serialized | unknown;
       };
     }>;
-
-type SimplifiedData = Serialized | string | boolean | number | null;
 
 export function simplifyPrimitive(obj: SPrimitive<any>): Serialized {
   return {
@@ -43,25 +41,17 @@ export function simplifyArray(obj: s.SArray<any>): Serialized {
   };
 }
 
-const STRUCT_IGNORE_KEYS = new Set([
-  "_hash",
-  "_subscriptors",
-  "_container",
-  "stateKeys",
-  "_unsub",
-]);
-
 export function simplifyStruct(obj: Struct<any>): Serialized {
   // const result: Record<any, any> = { _kind: this._kind };
-  const result: Record<string, any> = {};
+  const result: Record<string, unknown> = {};
   const keys = Object.keys(obj);
 
   for (const key of keys) {
-    if (STRUCT_IGNORE_KEYS.has(key)) {
+    if (Struct.IGNORE_KEYS.has(key)) {
       continue;
     }
 
-    const val = (obj as any)[key];
+    const val = (obj as any)[key] as unknown;
     if (
       typeof val === "string" ||
       typeof val === "number" ||
@@ -71,8 +61,14 @@ export function simplifyStruct(obj: Struct<any>): Serialized {
       result[key] = (obj as any)[key];
     } else if (typeof val === "function") {
       continue;
+    } else if (
+      val instanceof Struct ||
+      val instanceof s.SArray ||
+      val instanceof SPrimitive
+    ) {
+      result[key] = simplify(val);
     } else {
-      result[key] = simplify((obj as any)[key]);
+      result[key] = JSON.stringify(val);
     }
   }
 
@@ -111,8 +107,13 @@ export function construct(
     | typeof Struct // Struct
     | (s.SState<unknown> | typeof Struct)[] // SArray
 ) {
-  const json = JSON.parse(str);
-  return initialize(json, [spec]);
+  try {
+    const json = JSON.parse(str);
+    return initialize(json, [spec]);
+  } catch (e) {
+    console.log("issue with", JSON.parse(str));
+    throw e;
+  }
 }
 
 function initializePrimitive(json: Serialized) {
@@ -147,16 +148,32 @@ function initializeStruct(
 
   let record = { _id };
 
-  const instance = new (spec[0] as any)() as any;
+  const instance = new (spec[0] as any)(rest) as any;
 
   for (const key of Object.keys(rest)) {
-    const value = initialize((rest as any)[key], [instance[key]?.schema]);
-    (record as any)[key] = value;
+    const value = (rest as any)[key];
+    if (isSeralized(value)) {
+      (record as any)[key] = initialize((rest as any)[key], [
+        instance[key]?.schema,
+      ]);
+    } else {
+      (record as any)[key] = value;
+    }
   }
 
   instance._initConstructed(record);
 
   return instance;
+}
+
+function isSeralized(json: unknown) {
+  // TODO: more validation?
+  return (
+    typeof json === "object" &&
+    json != null &&
+    !Array.isArray(json) &&
+    "$$" in json
+  );
 }
 
 function initialize(
@@ -169,6 +186,7 @@ function initialize(
   >
 ): SPrimitive<any> | s.SArray<any> | Struct<any> {
   if (typeof json !== "object" || json == null || Array.isArray(json)) {
+    console.log(json);
     throw new Error("invalid serialization is not a non-null object");
   }
 
@@ -195,32 +213,32 @@ function initialize(
 ///////////////////////////////////////
 
 export function replace(str: string, obj: KnowableObject) {
-  const json = JSON.parse(str);
+  try {
+    const json = JSON.parse(str);
 
-  if (typeof json !== "object" || json == null || Array.isArray(json)) {
-    throw new Error("invalid serialization is not a non-null object");
-  }
+    if (!isSeralized(json)) {
+      throw new Error("invalid serialization is not a non-null object");
+    }
 
-  // TODO: more validation?
-  if (!("$$" in json)) {
-    throw new Error("invalid serialization has no type");
-  }
-
-  switch (json.$$) {
-    case "prim": {
-      assertSPrimitive(obj);
-      return replacePrimitive(json, obj);
+    switch (json.$$) {
+      case "prim": {
+        assertSPrimitive(obj);
+        return replacePrimitive(json, obj);
+      }
+      case "arr": {
+        assertSArray(obj);
+        return replaceArray(json, obj);
+      }
+      case "struct": {
+        assertStruct(obj);
+        return replaceStruct(json, obj);
+      }
+      default:
+        throw new Error("invalid $$ type");
     }
-    case "arr": {
-      assertSArray(obj);
-      return replaceArray(json, obj);
-    }
-    case "struct": {
-      assertStruct(obj);
-      return replaceStruct(json, obj);
-    }
-    default:
-      throw new Error("invalid $$ type");
+  } catch (e) {
+    console.log("error with replace", JSON.parse(str));
+    throw e;
   }
 }
 
@@ -249,5 +267,12 @@ function replaceStruct(
   json: Extract<Serialized, { $$: "struct" }>,
   obj: Struct<any>
 ) {
-  throw new Error("structs can't be put in history?");
+  for (const key in json._value) {
+    if (key === "$$" || isSeralized(json._value[key])) {
+      // Serialized state gets replaced separately in histor (?)
+      continue;
+    }
+    (obj as any)[key] = json._value[key];
+  }
+  obj._notifyReplaced();
 }

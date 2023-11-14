@@ -14,11 +14,29 @@ import {
   SubbableContainer,
 } from "./lib/state/MutationHashable";
 import { Subbable, notify } from "./lib/state/Subbable";
+import { serialize } from "./sstate.serialization";
 
-class SString extends SPrimitive<string> {}
-class SNumber extends SPrimitive<number> {}
-class SBoolean extends SPrimitive<boolean> {}
-class SNil extends SPrimitive<null> {}
+// todo? create -> of
+class SString extends SPrimitive<string> {
+  static create(val: string) {
+    return SPrimitive.of(val);
+  }
+}
+class SNumber extends SPrimitive<number> {
+  static create(val: number) {
+    return SPrimitive.of(val);
+  }
+}
+class SBoolean extends SPrimitive<boolean> {
+  static create(val: boolean) {
+    return SPrimitive.of(val);
+  }
+}
+class SNil extends SPrimitive<null> {
+  static create(val: null) {
+    return SPrimitive.of(val);
+  }
+}
 
 class UNINITIALIZED_PRIMITIVE {}
 class UNINITIALIZED_ARRAY<S extends (SState<unknown> | typeof Struct)[]> {
@@ -47,13 +65,26 @@ type IsEmptyObjType<T extends Record<PropertyKey, any>> = keyof T extends never
   ? true
   : false;
 
-export type SPrimitiveFieldsToSOut<T extends Record<string, any>> = {
+type SPrimitiveFieldsToSOut<T extends Record<string, any>> = {
   [key in keyof T as T[key] extends SPrimitive<any> | SArray<any>
     ? key
     : never]: SOut<T[key]>;
 };
 
-export type PropsForStruct<Child extends Struct<any>> = IsEmptyObjType<
+type IntrinsicFields<T extends Record<string, any>> = Omit<
+  {
+    [key in keyof T as T[key] extends SPrimitive<any> | SArray<any>
+      ? never
+      : key]: T[key];
+  },
+  keyof Struct<any>
+>;
+
+type NeverIfEmpty<T> = {} extends T ? never : T;
+
+type StateProps<T extends Record<string, any>> = SPrimitiveFieldsToSOut<T>;
+
+type PropsForStruct<Child extends Struct<any>> = IsEmptyObjType<
   SPrimitiveFieldsToSOut<Child>
 > extends true
   ? null
@@ -73,9 +104,9 @@ export class Struct<Child extends Struct<any>>
     return this.constructor.name;
   }
 
-  private readonly stateKeys: Map<keyof Child, null> = new Map();
+  // private readonly _stateKeys: Map<keyof Child, null> = new Map();
 
-  _initConstructed(args: Record<string, any> | null) {
+  private _initConstructed(args: Record<string, any> | null) {
     if (args == null) {
       return;
     }
@@ -87,13 +118,13 @@ export class Struct<Child extends Struct<any>>
       const child = self[key];
 
       if (child instanceof SArray) {
-        (this.stateKeys as Map<string, any>).set(key, null);
+        // (this._stateKeys as Map<string, any>).set(key, null);
         child._container = this;
         // todo ARG FOR ARRAY
       }
 
       if (child instanceof SPrimitive) {
-        (this.stateKeys as Map<string, any>).set(key, null);
+        // (this._stateKeys as Map<string, any>).set(key, null);
         child._container = this;
       }
     }
@@ -125,13 +156,11 @@ export class Struct<Child extends Struct<any>>
       child = self[key];
 
       if (child instanceof SArray) {
-        (this.stateKeys as Map<string, any>).set(key, null);
         child._container = this;
         // todo ARG FOR ARRAY
       }
 
       if (child instanceof SPrimitive) {
-        (this.stateKeys as Map<string, any>).set(key, null);
         child._container = this;
       }
     }
@@ -166,21 +195,22 @@ export class Struct<Child extends Struct<any>>
     return JSON.stringify(this, null, 2);
   }
 
-  toJSON() {
-    const IGNORE = new Set([
-      "_hash",
-      "_subscriptors",
-      "_container",
-      "stateKeys",
-      "_unsub",
-    ]);
-    // const result: Record<any, any> = { _kind: this._kind };
-    const result: Record<any, any> = {};
+  static readonly IGNORE_KEYS = new Set<string>([
+    "_hash",
+    "_subscriptors",
+    "_container",
+    "_stateKeys",
+    "_unsub",
+    "_id",
+  ]);
 
+  toJSON() {
+    // const result: Record<any, any> = { _kind: this._kind };
+    const result: Record<string, unknown> = {};
     const keys = Object.keys(this);
 
     for (const key of keys) {
-      if (IGNORE.has(key)) {
+      if (Struct.IGNORE_KEYS.has(key)) {
         continue;
       }
 
@@ -200,14 +230,88 @@ export class Struct<Child extends Struct<any>>
     }
     return result;
   }
+
+  mutate(action: () => void) {
+    if (
+      globalState.HISTORY_RECORDING != false &&
+      // save orignal only. We might make multiple operations on this data structure
+      globalState.HISTORY_RECORDING.get(this._id) == null
+    ) {
+      const serialized = serialize(this);
+      // console.log("SAVING", this._id, "with value", serialized);
+      globalState.HISTORY_RECORDING.set(this._id, serialized);
+    }
+
+    action();
+
+    MutationHashable.mutated(this);
+    notify(this, this);
+    if (this._container != null) {
+      this._container._childChanged(this);
+    }
+  }
+
+  _notifyReplaced() {
+    MutationHashable.mutated(this);
+    notify(this, this);
+    if (this._container != null) {
+      this._container._childChanged(this);
+    }
+  }
 }
 
-export function create<S extends { new (...args: any[]): Struct<any> }>(
+type AnyClass = {
+  new (...args: any[]): Struct<any>;
+};
+
+type OneArgClass = {
+  new (arg1: any): Struct<any>;
+};
+
+type TwoArgClass = {
+  new (arg1: any, arg2: any): Struct<any>;
+};
+
+type SecondConstructorParam<T> = T extends {
+  new (arg1: any, arg2: infer U): Struct<any>;
+}
+  ? U
+  : null;
+
+// class Foo extends Struct<Foo> {
+//   name = string();
+//   hello: number;
+//   foo = 3;
+
+//   constructor(props: StructProps<Foo, { hello: number }>) {
+//     super(props);
+//     this.hello = props.hello;
+//   }
+// }
+
+// class Bar extends Struct<Foo> {
+//   name = string();
+//   foo = 3;
+// }
+
+// const foo = create(Foo, { name: "hello", hello: 3 });
+// const bar = create(Bar, { name: "hello" });
+
+export type StructProps<
+  T extends Struct<any>,
+  U extends Record<string, any>
+> = SPrimitiveFieldsToSOut<T> & U;
+
+type ConstructorArguments<T extends AnyClass> = T extends OneArgClass
+  ? ConstructorParameters<T>
+  : [PropsForStruct<InstanceType<T>>];
+
+export function create<S extends AnyClass>(
   klass: S,
-  arg: PropsForStruct<InstanceType<S>>
+  ...args: ConstructorArguments<S>
 ): InstanceType<S> {
-  const res = new klass() as any;
-  res._init(arg);
+  const res = new klass(...args) as any;
+  res._init(...args);
   return res;
 }
 
@@ -343,13 +447,10 @@ function nil(value: null) {
   return SPrimitive.of(value);
 }
 
-class Foo extends Struct<Foo> {}
-
 type Constructor = new (...args: any[]) => any;
-
 export type Instantiate<T> = T extends Constructor ? InstanceType<T> : T;
 
-type X = Instantiate<typeof Foo | SNumber>;
+// type X = Instantiate<typeof Foo | SNumber>;
 
 function array<T extends SState<unknown> | typeof Struct>(
   schema: T[],

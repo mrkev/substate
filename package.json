@@ -1,15 +1,15 @@
 {
-  "name": "simple-state",
+  "name": "structured-state",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "main": "./dist/simple-state.umd.cjs",
-  "module": "./dist/simple-state.js",
+  "main": "./dist/structured-state.umd.cjs",
+  "module": "./dist/structured-state.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/simple-state.js",
-      "require": "./dist/simple-state.umd.cjs"
+      "import": "./dist/structured-state.js",
+      "require": "./dist/structured-state.umd.cjs"
     }
   },
   "files": [

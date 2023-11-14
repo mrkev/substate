@@ -1,3 +1,4 @@
+import { globalState } from "../..";
 import { StateChangeHandler } from "./LinkedState";
 
 // Subbables are things one can subscribe to
@@ -29,7 +30,14 @@ export function notify(
   target: Subbable,
   priority: "task" | "microtask" | "immediate" = "immediate"
 ) {
-  // console.log("SENDING NOTIF:", subbable._subscriptors.size, subbable);
+  if (subbable !== globalState.history) {
+    // console.log(
+    //   "SENDING NOTIF TO",
+    //   subbable._subscriptors.size,
+    //   "CHANGED:",
+    //   subbable
+    // );
+  }
   switch (priority) {
     case "immediate":
       subbable._subscriptors.forEach((cb) => {

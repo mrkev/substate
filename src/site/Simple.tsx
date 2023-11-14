@@ -1,78 +1,64 @@
 import React, { useEffect, useState } from "react";
-import * as s from "../index";
-import { useContainer, usePrimitive, useStructure } from "../index";
-import { useLinkedArray } from "../lib/state/LinkedArray";
+import "./App.css";
+import * as s from "../sstate";
 import { debugOut } from "../sstate.debug";
 import { globalState, popHistory, pushHistory } from "../sstate.history";
+import { useStructure, useSPrimitive, useContainer } from "../sstate.react";
 import { construct, serialize } from "../sstate.serialization";
-import "./App.css";
+import { useLinkedArray } from "../lib/state/LinkedArray";
 
-/**
- * TODO:
- * - Redo
- * - Multiple types in array
- * - Smarter array history
- * - useHistory
- *    - returns [history, push, pop] ?
- * - history for strcuts means recording when a prop changes
- * - I can use it with clips, for exmaple
- * - Clips can be structs, super.updated() trigers update?
- *
- * TODO EVENTUALLY
- * - Test non-state primitives
- */
+export class BusLine extends s.Struct<BusLine> {
+  readonly distance = s.number();
+  readonly stops = s.number();
+  readonly buses = s.array([Bus]);
 
-export class Track extends s.Struct<Track> {
-  readonly clips = s.array([Clip]);
-  readonly name = s.string();
-
-  addClip(name: string) {
-    const clip = s.create(Clip, { name, duration: 3 });
-    this.clips.push(clip);
+  addBus(name: string) {
+    const lion = s.create(Bus, { name });
+    this.buses.push(lion);
   }
 
   clear() {
-    while (this.clips.pop()) {}
+    pushHistory(() => {
+      while (this.buses.pop()) {}
+    });
   }
 }
 
-export class Clip extends s.Struct<Clip> {
+export class Bus extends s.Struct<Bus> {
   readonly name = s.string();
-  public start: number = 0;
-  public duration: number;
-
-  constructor(props: s.StructProps<Clip, { duration: number }>) {
-    super(props);
-    this.duration = props.duration;
-  }
 }
 
-const track = s.create(Track, {
-  name: "untitled track",
-  clips: [s.create(Clip, { name: "hello", duration: 3 })],
+const busLine = s.create(BusLine, {
+  distance: 0,
+  stops: 0,
+  buses: [s.create(Bus, { name: "hello" })],
 });
 
-function App() {
+export function App() {
   return (
     <>
       <div>
         <button onClick={() => popHistory()}>undo</button>
+        <button onClick={() => popHistory()}>redo</button>
+        <br></br>
+        <CountButton name="distance" num={busLine.distance} />
+        <CountButton name="stops" num={busLine.stops} />
         <br></br>
         <button
           onClick={() =>
             pushHistory(() => {
-              track.addClip("hello world");
+              busLine.addBus("hello world");
             })
           }
         >
-          Add clip
+          Add bus
         </button>
         <button
           onClick={() => {
             performance.mark("1");
             pushHistory(() => {
               for (let i = 0; i < 10000; i++) {
-                track.addClip("hello world");
+                busLine.addBus("hello world");
               }
             });
             performance.mark("2");
@@ -84,18 +70,16 @@ function App() {
         </button>
         <button
           onClick={() => {
-            pushHistory(() => {
-              track.clear();
-            });
+            busLine.clear();
           }}
         >
           remove all
         </button>
         <button
           onClick={() => {
-            const serialized = serialize(track);
+            const serialized = serialize(busLine);
             console.log("serialized", serialized);
-            console.log("constructed", construct(serialized, Track));
+            console.log("constructed", construct(serialized, BusLine));
           }}
         >
           construct test
@@ -103,34 +87,47 @@ function App() {
       </div>
       <div style={{ display: "flex", flexDirection: "row" }}>
         <ProjectDebug />
-        <TrackClips />
+        <BusList />
       </div>
     </>
   );
 }
 
-function TrackClips() {
-  const [tracks] = useStructure(track.clips);
+function BusList() {
+  const [tracks] = useStructure(busLine.buses);
   return (
     <div>
       {tracks.map((track) => {
-        return <ClipA tracks={tracks} key={track._id} clip={track} />;
+        return <BusEditor tracks={tracks} key={track._id} track={track} />;
       })}
     </div>
   );
 }
 
-const ClipA = React.memo(function TrackAImpl({
-  clip,
+function CountButton({ num, name }: { num: s.SNumber; name: string }) {
+  const [count, setCount] = useSPrimitive(num);
+  return (
+    <button
+      onClick={() => {
+        pushHistory(() => {
+          setCount((prev) => prev + 1);
+        });
+      }}
+    >
+      {name} is {count}
+    </button>
+  );
+}
+
+const BusEditor = React.memo(function TrackAImpl({
+  track,
   tracks,
 }: {
-  clip: Clip;
-  tracks: s.SArray<Clip>;
+  track: Bus;
+  tracks: s.SArray<Bus>;
 }) {
-  const [name, setName] = usePrimitive(clip.name);
+  const [name, setName] = useSPrimitive(track.name);
   const [edit, setEdit] = useState(name);
-
-  useContainer(clip);
 
   useEffect(() => {
     setEdit(name);
@@ -157,38 +154,26 @@ const ClipA = React.memo(function TrackAImpl({
           }
         }}
       ></input>
-      {clip.duration}
       <button
         onClick={() =>
           pushHistory(() => {
-            tracks.remove(clip);
+            tracks.remove(track);
           })
         }
       >
         x
-      </button>
-      <button
-        onClick={() =>
-          pushHistory(() => {
-            clip.mutate(() => {
-              clip.duration += 1;
-            });
-          })
-        }
-      >
-        +
       </button>
     </div>
   );
 });
 
 function ProjectDebug() {
-  useContainer(track, true);
+  useContainer(busLine);
   const [history] = useLinkedArray(globalState.history);
 
   return (
     <div>
-      <pre style={{ textAlign: "left", width: 300 }}>{debugOut(track)}</pre>
+      <pre style={{ textAlign: "left", width: 300 }}>{debugOut(busLine)}</pre>
       {/* <button
         onClick={() => {
           setState({});
@@ -214,6 +199,4 @@ function ProjectDebug() {
   );
 }
 
-export default App;
-
-(window as any).project = track;
+(window as any).project = busLine;

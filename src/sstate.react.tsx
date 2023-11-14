@@ -38,7 +38,7 @@ export function useSPrimitive<S>(
   return [state, setter];
 }
 
-export function useContainer<S extends SState<unknown> | Struct<any>>(
+export function useStructure<S extends SState<unknown> | Struct<any>>(
   linkedArray: SArray<S>
 ): [SArray<S>, StateDispath<Array<S>>] {
   useSubscribeToSubbableMutationHashable(linkedArray);
@@ -57,14 +57,10 @@ export function useContainer<S extends SState<unknown> | Struct<any>>(
   return [linkedArray, setter];
 }
 
-export function useSubToStruct<S extends Struct<any>>(obj: S) {
-  const [, setHash] = useState(() => MutationHashable.getMutationHash(obj));
-
-  useEffect(() => {
-    return subscribe(obj, () => {
-      setHash((prev) => (prev + 1) % Number.MAX_SAFE_INTEGER);
-    });
-  }, [obj]);
-
+export function useContainer<S extends Struct<any>>(
+  obj: S,
+  allChanges: boolean = false
+) {
+  useSubscribeToSubbableMutationHashable(obj, undefined, allChanges);
   return obj;
 }
