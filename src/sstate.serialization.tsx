@@ -1,11 +1,13 @@
 import {
+  assertArray,
+  assertNotArray,
   assertSPrimitive,
   assertSSchemaArray,
   assertSSimpleArray,
   assertStruct,
+  exhaustive,
 } from "./assertions";
-import { SPrimitive } from "./lib/state/LinkedState";
-import { exhaustive } from "./lib/state/Subbable";
+import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
 import * as s from "./sstate";
 import { SArray, SSchemaArray, Struct } from "./sstate";
 import { KnowableObject } from "./sstate.history";
@@ -34,7 +36,7 @@ type Serialized =
       };
     }>;
 
-export function simplifyPrimitive(obj: SPrimitive<any>): Serialized {
+export function simplifyPrimitive(obj: LinkedPrimitive<any>): Serialized {
   return {
     $$: "prim",
     _value: obj.get(),
@@ -87,16 +89,17 @@ export function simplifyStruct(obj: Struct<any>): Serialized {
     } else if (
       val instanceof Struct ||
       val instanceof SArray ||
-      val instanceof SPrimitive
+      val instanceof SSchemaArray ||
+      val instanceof LinkedPrimitive
     ) {
       result[key] = simplify(val);
     } else {
+      console.log(val);
       result[key] = JSON.stringify(val);
     }
   }
 
   return {
-    // TODO: collisions
     $$: "struct",
     _id: obj._id, // reduntant for typescript
     _value: result,
@@ -104,7 +107,7 @@ export function simplifyStruct(obj: Struct<any>): Serialized {
 }
 
 function simplify(state: KnowableObject) {
-  if (state instanceof SPrimitive) {
+  if (state instanceof LinkedPrimitive) {
     return simplifyPrimitive(state);
   } else if (state instanceof SArray) {
     return simplifySimpleArray(state);
@@ -123,40 +126,41 @@ export function serialize(state: KnowableObject) {
 
 ///////////////////////////////
 
+export type Schema =
+  | s.SState<unknown> // primitives in theory
+  | typeof Struct // Struct
+  | (s.SState<unknown> | typeof Struct)[]; // SArray
+
 export function construct(
   str: string,
   spec:
-    | s.SState<unknown> // primitives in theory
+    | s.SState<unknown>
     | typeof Struct // Struct
-    | (s.SState<unknown> | typeof Struct)[] // SArray
+    | (typeof Struct)[] // SArray
 ) {
   try {
     const json = JSON.parse(str);
-    return initialize(json, [spec]);
+    return initialize(json, spec as any);
   } catch (e) {
     console.log("issue with", JSON.parse(str));
     throw e;
   }
 }
 
-function initializePrimitive(json: Serialized) {
-  return new SPrimitive((json as any)._value, (json as any)._id);
+function initializePrimitive(json: Extract<Serialized, { $$: "prim" }>) {
+  return new LinkedPrimitive(json._value, json._id);
 }
 
 function initializeSchemaArray(
   json: Extract<Serialized, { $$: "arr-schema" }>,
-  spec: Array<
-    | s.SState<unknown> // primitives in theory
-    | typeof Struct // Struct
-    | (s.SState<unknown> | typeof Struct)[] // SArray
-  >
+  spec: (typeof Struct)[]
 ) {
   const initialized = json._value.map((x: any) => {
     // TODO: find right spec
-    return initialize(x, spec[0] as any);
+    return initialize(x, spec);
   });
 
-  return new s.SSchemaArray(initialized, json._id, spec as any);
+  return new s.SSchemaArray(initialized, json._id, spec);
 }
 
 function initializeSimpleArray(
@@ -167,17 +171,13 @@ function initializeSimpleArray(
 
 function initializeStruct(
   json: Extract<Serialized, { $$: "struct" }>,
-  spec: Array<
-    | s.SState<unknown> // primitives in theory
-    | typeof Struct // Struct
-    | (s.SState<unknown> | typeof Struct)[] // SArray
-  >
+  spec: typeof Struct
 ) {
   const { $$: _, _id, _value: rest } = json;
 
   let record = { _id };
 
-  const instance = new (spec[0] as any)(rest) as any;
+  const instance = new spec(rest as any) as any;
 
   for (const key of Object.keys(rest)) {
     const value = (rest as any)[key];
@@ -198,12 +198,10 @@ function initializeStruct(
 function initialize(
   json: unknown,
   // A union of of the specs this json could follow
-  spec: Array<
-    | s.SState<unknown> // primitives in theory
+  spec:
     | typeof Struct // Struct
-    | (s.SState<unknown> | typeof Struct)[] // SArray
-  >
-): SPrimitive<any> | SArray<any> | Struct<any> {
+    | (typeof Struct)[] // SArray
+): LinkedPrimitive<any> | SArray<any> | Struct<any> {
   if (!isSeralized(json)) {
     console.log("not serialized", json);
     throw new Error("invalid serialization is not a non-null object");
@@ -214,12 +212,14 @@ function initialize(
       return initializePrimitive(json);
     }
     case "arr-schema": {
+      assertArray(spec);
       return initializeSchemaArray(json, spec);
     }
     case "arr-simple": {
       return initializeSimpleArray(json);
     }
     case "struct": {
+      assertNotArray(spec);
       return initializeStruct(json, spec);
     }
     default:
@@ -265,7 +265,7 @@ export function replace(str: string, obj: KnowableObject) {
 
 function replacePrimitive(
   json: Extract<Serialized, { $$: "prim" }>,
-  obj: SPrimitive<any>
+  obj: LinkedPrimitive<any>
 ) {
   obj.replace(json._value as any);
 }
@@ -278,7 +278,7 @@ function replaceSchemaArray(
   const initialized = json._value.map((x) => {
     if (isSeralized(x)) {
       // TODO: spec?
-      return initialize(x, arr._schema);
+      return initialize(x, arr._schema[0] as any);
     } else {
       return x;
     }
@@ -309,7 +309,7 @@ function replaceStruct(
     }
     (obj as any)[key] = json._value[key];
   }
-  obj._notifyReplaced();
+  obj._notifyChange();
 }
 
 function isSeralized(json: unknown): json is Serialized {
@@ -324,6 +324,8 @@ function isSeralized(json: unknown): json is Serialized {
 
 function isKnowable(val: unknown) {
   return (
-    val instanceof Struct || val instanceof SArray || val instanceof SPrimitive
+    val instanceof Struct ||
+    val instanceof SArray ||
+    val instanceof LinkedPrimitive
   );
 }

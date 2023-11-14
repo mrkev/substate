@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { StateChangeHandler, StateDispath } from "./LinkedState";
+import { StateChangeHandler, StateDispath } from "./LinkedPrimitive";
 import { Subbable, notify, subscribe } from "./Subbable";
 
 export class LinkedSet<S> implements Set<S>, Subbable {

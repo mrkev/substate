@@ -3,26 +3,25 @@ import { WeakRefMap } from "./WeakRefMap";
 import { SArray, SSchemaArray, Struct } from "./sstate";
 import { replace, serialize } from "./sstate.serialization";
 import { LinkedArray } from "./lib/state/LinkedArray";
-import { SPrimitive } from "./lib/state/LinkedState";
-import { exhaustive } from "./lib/state/Subbable";
+import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
+import { exhaustive } from "./assertions";
 
 export type KnowableObject =
   | Struct<any>
-  | SPrimitive<any>
+  | LinkedPrimitive<any>
   | SArray<any>
   | SSchemaArray<any>;
+
+export type HistoryEntry = {
+  id: string;
+  objects: Map<string, string>;
+};
 
 class GlobalState {
   HISTORY_RECORDING: Map<string, string> | false = false;
   readonly knownObjects = new WeakRefMap<KnowableObject>(10_000);
-  readonly history = LinkedArray.create<{
-    id: string;
-    prevObjects: Map<string, string>;
-  }>();
-
-  readonly redoStack = LinkedArray.create<{
-    prevObjects: Map<string, string>;
-  }>(); // TODO
+  readonly history = LinkedArray.create<HistoryEntry>();
+  readonly redoStack = LinkedArray.create<HistoryEntry>(); // TODO
 
   constructor() {
     (window as any).globalState = this;
@@ -65,8 +64,32 @@ export async function pushHistory(action: () => void | Promise<void>) {
 
   // Make sure it's after we stop recording! We don't want to record this history change!!
   if (recorded.size > 0) {
-    globalState.history.push({ prevObjects: recorded, id: `h-${nanoid(4)}` });
+    globalState.history.push({ objects: recorded, id: `h-${nanoid(4)}` });
   }
+
+  if (globalState.redoStack.length > 0) {
+    globalState.redoStack.splice(0, globalState.redoStack.length);
+  }
+}
+
+function saveContraryRedo(undo: HistoryEntry) {
+  const globalState = getGlobalState();
+  const redo = {
+    id: `h-${nanoid(4)}`,
+    objects: new Map<string, string>(),
+  };
+
+  for (const [id] of undo.objects) {
+    const object = globalState.knownObjects.get(id);
+
+    if (object == null) {
+      throw new Error(`no known object with ${id} found`);
+    }
+
+    redo.objects.set(id, serialize(object));
+  }
+
+  globalState.redoStack.push(redo);
 }
 
 export function popHistory() {
@@ -77,14 +100,16 @@ export function popHistory() {
     return;
   }
 
-  for (const [id, serialized] of prev.prevObjects) {
+  saveContraryRedo(prev);
+
+  for (const [id, serialized] of prev.objects) {
     const object = knownObjects.get(id);
 
     if (object == null) {
       throw new Error(`no known object with ${id} found`);
     }
 
-    if (object instanceof SPrimitive) {
+    if (object instanceof LinkedPrimitive) {
       replace(serialized, object);
     } else if (object instanceof SArray) {
       replace(serialized, object);

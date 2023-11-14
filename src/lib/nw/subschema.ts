@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { LinkedArray } from "../state/LinkedArray";
-import { StateChangeHandler, StateDispath } from "../state/LinkedState";
+import { StateChangeHandler, StateDispath } from "../state/LinkedPrimitive";
 import { MutationHashable } from "../state/MutationHashable";
-import { Subbable, exhaustive, notify, subscribe } from "../state/Subbable";
+import { Subbable, notify, subscribe } from "../state/Subbable";
+import { exhaustive } from "../../assertions";
 import * as nw from "./nwschema";
 import {
   NWArray,

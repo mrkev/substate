@@ -2,24 +2,22 @@ import React, { useEffect, useState } from "react";
 import * as s from "../index";
 import { useContainer, usePrimitive, useStructure } from "../index";
 import { LinkedArray, useLinkedArray } from "../lib/state/LinkedArray";
-import { debugOut } from "../sstate.debug";
-import { getGlobalState, popHistory, pushHistory } from "../sstate.history";
-import { construct, serialize } from "../sstate.serialization";
+import {
+  HistoryEntry,
+  getGlobalState,
+  popHistory,
+  pushHistory,
+} from "../sstate.history";
+import { construct, serialize, debugOut } from "../index";
 import "./App.css";
 
 /**
  * TODO:
  * - Redo
  * - Multiple types in array
- * - Smarter array history
+ * - Smarter array history?
  * - useHistory
  *    - returns [history, push, pop] ?
- * - history for strcuts means recording when a prop changes
- * - I can use it with clips, for exmaple
- * - Clips can be structs, super.updated() trigers update?
- *
- * TODO EVENTUALLY
- * - Test non-state primitives
  */
 
 export class Track extends s.Struct<Track> {
@@ -111,9 +109,10 @@ function App() {
           construct test
         </button>
       </div>
-      <div style={{ display: "flex", flexDirection: "row" }}>
+      <div style={{ display: "flex", flexDirection: "row", flexGrow: 1 }}>
         <ProjectDebug />
         <TrackClips />
+        <HistoryStacks />
       </div>
     </>
   );
@@ -220,33 +219,44 @@ function Notes(props: { notes: LinkedArray<Note> }) {
 
 function ProjectDebug() {
   useContainer(track, true);
+  return (
+    <div style={{ overflow: "scroll" }}>
+      <pre style={{ textAlign: "left", width: 300, fontSize: 12 }}>
+        {debugOut(track)}
+      </pre>
+    </div>
+  );
+}
+
+function HistoryStacks() {
   const [history] = useLinkedArray(getGlobalState().history);
+  const [redoStack] = useLinkedArray(getGlobalState().redoStack);
 
   return (
-    <div>
-      <pre style={{ textAlign: "left", width: 300 }}>{debugOut(track)}</pre>
-      {/* <button
-        onClick={() => {
-          setState({});
-        }}
-      >
-        refresh {globalState.history.length}
-      </button> */}
+    <div style={{ display: "flex", flexDirection: "column" }}>
       {history.map((entry, i) => {
-        return (
-          <details key={i}>
-            <summary>
-              {entry.id} modified {entry.prevObjects.size} objects
-            </summary>
-            <pre style={{ textAlign: "left" }}>
-              {Array.from(entry.prevObjects.entries()).map(([id, value]) => {
-                return `${id}: ${JSON.stringify(JSON.parse(value), null, 2)}`;
-              })}
-            </pre>
-          </details>
-        );
+        return <HistoryItem entry={entry} key={i} />;
+      })}
+      <div>^ undo / v redo</div>
+      {redoStack.map((entry, i) => {
+        return <HistoryItem entry={entry} key={i} />;
       })}
     </div>
+  );
+}
+
+function HistoryItem({ entry }: { entry: HistoryEntry }) {
+  return (
+    <details>
+      <summary>
+        {entry.id} modified {entry.objects.size} objects
+      </summary>
+      <pre style={{ textAlign: "left" }}>
+        {Array.from(entry.objects.entries()).map(([id, value]) => {
+          return `${id}: ${JSON.stringify(JSON.parse(value), null, 2)}`;
+        })}
+      </pre>
+    </details>
   );
 }
 

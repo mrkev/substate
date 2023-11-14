@@ -185,10 +185,10 @@ function ProjectDebug() {
         return (
           <details key={i}>
             <summary>
-              {i}, modified {entry.prevObjects.size} objects
+              {i}, modified {entry.objects.size} objects
             </summary>
             <pre style={{ textAlign: "left" }}>
-              {Array.from(entry.prevObjects.entries()).map(([id, value]) => {
+              {Array.from(entry.objects.entries()).map(([id, value]) => {
                 return `${id}: ${JSON.stringify(JSON.parse(value), null, 2)}`;
               })}
             </pre>

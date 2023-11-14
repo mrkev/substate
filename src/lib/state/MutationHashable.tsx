@@ -1,7 +1,7 @@
 import { Subbable, SubbableCallback } from "./Subbable";
 
 export class MutationHashable implements Subbable {
-  _subscriptors: Set<SubbableCallback> = new Set();
+  readonly _subscriptors: Set<SubbableCallback> = new Set();
   _hash: number = 0;
 
   static getMutationHash(mh: MutationHashable) {
@@ -14,7 +14,7 @@ export class MutationHashable implements Subbable {
 }
 
 export abstract class SubbableContainer implements MutationHashable {
-  _subscriptors: Set<SubbableCallback> = new Set();
+  readonly _subscriptors: Set<SubbableCallback> = new Set();
   _hash: number = 0;
 
   abstract _childChanged(child: Subbable): void;

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { StateChangeHandler, StateDispath } from "./LinkedState";
+import { StateChangeHandler, StateDispath } from "./LinkedPrimitive";
 import { MutationHashable } from "./MutationHashable";
 import { Subbable, notify, subscribe } from "./Subbable";
 

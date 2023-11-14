@@ -1,6 +1,6 @@
+import { MutationHashable } from "./lib/state/MutationHashable";
+import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
 import { SArray, SSchemaArray, Struct } from "./sstate";
-import { SPrimitive } from "./lib/state/LinkedState";
-import { LinkedArray } from "./lib/state/LinkedArray";
 
 export function debugOut(val: unknown, pad = 0) {
   if (
@@ -9,19 +9,19 @@ export function debugOut(val: unknown, pad = 0) {
     typeof val === "boolean" ||
     val == null
   ) {
-    return `${JSON.stringify(val)}`;
+    return JSON.stringify(val);
   } else if (typeof val === "function") {
     return "(function)";
   } else if (val instanceof SArray) {
-    return `${debugOutArray(val, pad)}`;
+    return debugOutArray(val, pad);
   } else if (val instanceof SSchemaArray) {
-    return `${debugOutArray(val, pad)}`;
-  } else if (val instanceof SPrimitive) {
-    return `${debugOutPrimitive(val)}`;
+    return debugOutArray(val, pad);
+  } else if (val instanceof LinkedPrimitive) {
+    return debugOutPrimitive(val);
   } else if (val instanceof Struct) {
     return debugOutStruct(val, pad);
   } else if (Array.isArray(val)) {
-    return `${JSON.stringify(val)}`;
+    return JSON.stringify(val);
   } else {
     return `(unknown: ${JSON.stringify(val, null, 2)})`;
   }
@@ -45,7 +45,8 @@ export function debugOutStruct(struct: Struct<any>, pad = 0): string {
       .join("\n")
       .trim()},`;
   }
-  return `${struct._kind} (${struct._id}.${struct._hash}) {${result}\n}`;
+  const hash = MutationHashable.getMutationHash(struct);
+  return `${struct._kind} (${struct._id}.${hash}) {${result}\n}`;
 }
 
 export function debugOutArray(arr: SArray<any> | SSchemaArray<any>, pad = 0) {
@@ -64,11 +65,11 @@ export function debugOutArray(arr: SArray<any> | SSchemaArray<any>, pad = 0) {
     result = result + "\n";
   }
 
-  return ` (${arr._id}.${arr._hash}) [${result}] (${
-    arr instanceof SArray ? "arr" : "schema-arr"
-  })`;
+  const hash = MutationHashable.getMutationHash(arr);
+  const kind = arr instanceof SArray ? "arr" : "schema-arr";
+  return ` (${arr._id}.${hash}) [${result}] (${kind})`;
 }
 
-export function debugOutPrimitive(obj: SPrimitive<any>) {
+export function debugOutPrimitive(obj: LinkedPrimitive<any>) {
   return `${obj.get()} (${obj._id})`;
 }

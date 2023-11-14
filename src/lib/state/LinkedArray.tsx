@@ -1,12 +1,11 @@
 import { nanoid } from "nanoid";
 import { useCallback, useEffect, useState } from "react";
-import { getGlobalState, saveForHistory } from "../../sstate.history";
+import { isContainable } from "../../assertions";
+import { saveForHistory } from "../../sstate.history";
 import { useSubscribeToSubbableMutationHashable } from "./LinkedMap";
-import { StateChangeHandler, StateDispath } from "./LinkedState";
+import { StateChangeHandler, StateDispath } from "./LinkedPrimitive";
 import { MutationHashable, SubbableContainer } from "./MutationHashable";
 import { Subbable, notify, subscribe } from "./Subbable";
-// import { serialize } from "../sstate.serialization";
-// import { globalState } from "../sstate.history";
 
 // .sort, .reverse, .fill, .copyWithin operate in place and return the array. SubbableArray
 // is not quite an array so the return types don't match.
@@ -33,19 +32,14 @@ export class LinkedArray<S>
 {
   readonly _id: string;
   private _array: Array<S>;
-  _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
+  readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
   _hash: number = 0;
   _container: SubbableContainer | null = null;
 
   constructor(initialValue: Array<S>, id: string) {
     this._array = initialValue;
     this._id = id;
-    for (const elem of this._array) {
-      if (typeof elem === "object" && elem != null && "_container" in elem) {
-        elem._container = this;
-        // console.log("CONTAINER OF", elem, "<=", this);
-      }
-    }
+    this.contain(this._array);
   }
 
   _childChanged(child: Subbable) {
@@ -66,6 +60,15 @@ export class LinkedArray<S>
       this._container._childChanged(this);
     }
     return result;
+  }
+
+  private contain(items: Array<S>) {
+    for (const elem of items) {
+      if (isContainable(elem)) {
+        elem._container = this;
+        // console.log("CONTAINER OF", elem, "<=", this);
+      }
+    }
   }
 
   _getRaw(): ReadonlyArray<S> {
@@ -136,11 +139,7 @@ export class LinkedArray<S>
 
   _replace(arr: LinkedArray<S>) {
     this._array = arr._array;
-    for (const elem of this._array) {
-      if (typeof elem === "object" && elem != null && "_container" in elem) {
-        elem._container = this;
-      }
-    }
+    this.contain(this._array);
 
     MutationHashable.mutated(this);
     notify(this, this);
@@ -154,13 +153,7 @@ export class LinkedArray<S>
     if (items.length < 1) {
       return this.length;
     }
-    // TODO: generalize this to all methods that edit
-    for (const x of items) {
-      if (typeof x === "object" && x != null && "_container" in x) {
-        x._container = this;
-        // console.log("CONTAINER OF", x, "<=", this);
-      }
-    }
+    this.contain(items);
 
     return this.mutate((clone) => {
       return clone.push(...items);
@@ -172,6 +165,7 @@ export class LinkedArray<S>
     if (items.length < 1) {
       return this.length;
     }
+    this.contain(items);
 
     return this.mutate((clone) => {
       return clone.unshift(...items);
@@ -198,8 +192,9 @@ export class LinkedArray<S>
   splice(start: number, deleteCount?: number): S[];
   splice(start: number, deleteCount: number, ...items: S[]): S[];
   splice(start: any, deleteCount?: any, ...items: any[]): S[] {
-    return this.mutate((clone) => {
-      const deleted = clone.splice(start, deleteCount, ...items);
+    this.contain(items);
+    return this.mutate((_array) => {
+      const deleted = _array.splice(start, deleteCount, ...items);
       for (const elem of deleted) {
         // TODO: safety
         if ("_destroy" in (elem as any)) {
@@ -212,16 +207,17 @@ export class LinkedArray<S>
 
   // Array<S> interface, mutates
   fill(value: S, start?: number, end?: number): this {
-    return this.mutate((clone) => {
-      clone.fill(value, start, end);
+    this.contain([value]);
+    return this.mutate((_array) => {
+      _array.fill(value, start, end);
       return this;
     });
   }
 
   // Array<S> interface, mutates
   copyWithin(target: number, start: number, end?: number): this {
-    return this.mutate((clone) => {
-      clone.copyWithin(target, start, end);
+    return this.mutate((_array) => {
+      _array.copyWithin(target, start, end);
       return this;
     });
   }

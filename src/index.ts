@@ -14,6 +14,7 @@ export {
   number,
   string,
 } from "./sstate";
+
 export {
   getGlobalState,
   pushHistory,
