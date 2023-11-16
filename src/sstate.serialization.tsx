@@ -11,6 +11,7 @@ import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
 import * as s from "./sstate";
 import { SArray, SSchemaArray, Struct } from "./sstate";
 import { KnowableObject } from "./sstate.history";
+import { JSONValue } from "./types";
 
 type Serialized =
   | Readonly<{
@@ -47,7 +48,7 @@ export function simplifyPrimitive(obj: LinkedPrimitive<any>): Serialized {
 export function simplifySimpleArray(obj: SArray<any>): Serialized {
   return {
     $$: "arr-simple",
-    _value: obj._getRaw(),
+    _value: obj._getRaw().map((x) => simplify(x)),
     _id: obj._id,
   };
 }
@@ -67,6 +68,15 @@ export function simplifySchemaArray(obj: SArray<any>): Serialized {
 }
 
 export function simplifyStruct(obj: Struct<any>): Serialized {
+  // offer a way to override simplification
+  if ("_simplify" in obj && typeof obj._simplify === "function") {
+    return {
+      $$: "struct",
+      _id: obj._id,
+      _value: obj._simplify(),
+    };
+  }
+
   // const result: Record<any, any> = { _kind: this._kind };
   const result: Record<string, unknown> = {};
   const keys = Object.keys(obj);
@@ -77,26 +87,7 @@ export function simplifyStruct(obj: Struct<any>): Serialized {
     }
 
     const val = (obj as any)[key] as unknown;
-    if (
-      typeof val === "string" ||
-      typeof val === "number" ||
-      typeof val === "boolean" ||
-      val == null
-    ) {
-      result[key] = (obj as any)[key];
-    } else if (typeof val === "function") {
-      continue;
-    } else if (
-      val instanceof Struct ||
-      val instanceof SArray ||
-      val instanceof SSchemaArray ||
-      val instanceof LinkedPrimitive
-    ) {
-      result[key] = simplify(val);
-    } else {
-      console.log(val);
-      result[key] = JSON.stringify(val);
-    }
+    result[key] = simplify(val as any);
   }
 
   return {
@@ -106,8 +97,17 @@ export function simplifyStruct(obj: Struct<any>): Serialized {
   };
 }
 
-function simplify(state: KnowableObject) {
-  if (state instanceof LinkedPrimitive) {
+function simplify(state: KnowableObject | JSONValue) {
+  if (
+    typeof state === "string" ||
+    typeof state === "number" ||
+    typeof state === "boolean" ||
+    state == null
+  ) {
+    return state;
+  } else if (typeof state === "function") {
+    throw new Error("cant simplify function");
+  } else if (state instanceof LinkedPrimitive) {
     return simplifyPrimitive(state);
   } else if (state instanceof SArray) {
     return simplifySimpleArray(state);
@@ -115,6 +115,11 @@ function simplify(state: KnowableObject) {
     return simplifySchemaArray(state);
   } else if (state instanceof Struct) {
     return simplifyStruct(state);
+  } else if (typeof state === "object") {
+    if (state.constructor !== Object) {
+      throw new Error("cant simplify non-literal object");
+    }
+    return state;
   } else {
     exhaustive(state);
   }
@@ -173,6 +178,11 @@ function initializeStruct(
   json: Extract<Serialized, { $$: "struct" }>,
   spec: typeof Struct
 ) {
+  // offer a way to override initialization
+  if ("_construct" in spec && typeof spec._construct === "function") {
+    return spec._construct({ json });
+  }
+
   const { $$: _, _id, _value: rest } = json;
 
   let record = { _id };
@@ -284,24 +294,27 @@ function replaceSchemaArray(
     }
   });
 
-  // TODO: don't initialize whole new array
-  const copy = new SArray(initialized, "foobar");
-  arr._replace(copy);
+  arr._replace(initialized);
 }
 
 function replaceSimpleArray(
   json: Extract<Serialized, { $$: "arr-simple" }>,
   arr: SArray<any>
 ) {
-  // TODO: don't initialize whole new SArray
-  const copy = new SArray(json._value as any, "foobar");
-  arr._replace(copy);
+  arr._replace(json._value as any);
 }
 
 function replaceStruct(
   json: Extract<Serialized, { $$: "struct" }>,
   obj: Struct<any>
-) {
+): void {
+  // offer a way to override replacement
+  if ("_replace" in obj && typeof obj._replace === "function") {
+    obj._replace(json._value);
+    obj._notifyChange();
+    return;
+  }
+
   for (const key in json._value) {
     if (key === "$$" || isSeralized(json._value[key])) {
       // Serialized state gets replaced separately in history (?)

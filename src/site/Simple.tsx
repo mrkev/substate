@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import * as s from "../sstate";
 import { debugOut } from "../sstate.debug";
-import { getGlobalState, popHistory, pushHistory } from "../sstate.history";
+import { getGlobalState, popHistory, recordHistory } from "../sstate.history";
 import { useStructure, useSPrimitive, useContainer } from "../sstate.react";
 import { construct, serialize } from "../sstate.serialization";
 import { useLinkedArray } from "../lib/state/LinkedArray";
@@ -18,7 +18,7 @@ export class BusLine extends s.Struct<BusLine> {
   }
 
   clear() {
-    pushHistory(() => {
+    recordHistory(() => {
       while (this.buses.pop()) {}
     });
   }
@@ -46,7 +46,7 @@ export function App() {
         <br></br>
         <button
           onClick={() =>
-            pushHistory(() => {
+            recordHistory(() => {
               busLine.addBus("hello world");
             })
           }
@@ -56,7 +56,7 @@ export function App() {
         <button
           onClick={() => {
             performance.mark("1");
-            pushHistory(() => {
+            recordHistory(() => {
               for (let i = 0; i < 10000; i++) {
                 busLine.addBus("hello world");
               }
@@ -109,7 +109,7 @@ function CountButton({ num, name }: { num: s.SNumber; name: string }) {
   return (
     <button
       onClick={() => {
-        pushHistory(() => {
+        recordHistory(() => {
           setCount((prev) => prev + 1);
         });
       }}
@@ -135,7 +135,7 @@ const BusEditor = React.memo(function TrackAImpl({
 
   function commitEdit() {
     if (edit !== name) {
-      pushHistory(() => {
+      recordHistory(() => {
         setName(edit);
       });
     }
@@ -156,7 +156,7 @@ const BusEditor = React.memo(function TrackAImpl({
       ></input>
       <button
         onClick={() =>
-          pushHistory(() => {
+          recordHistory(() => {
             tracks.remove(track);
           })
         }

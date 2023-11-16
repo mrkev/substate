@@ -189,7 +189,7 @@ export class Struct<Child extends Struct<any>>
     // We don't actually do anything here. create() initializes structs
   }
 
-  mutate(action: () => void) {
+  featuredMutation(action: () => void) {
     saveForHistory(this);
     action();
     this._notifyChange();

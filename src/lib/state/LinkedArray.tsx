@@ -137,8 +137,8 @@ export class LinkedArray<S>
     });
   }
 
-  _replace(arr: LinkedArray<S>) {
-    this._array = arr._array;
+  _replace(arr: Array<S>) {
+    this._array = arr; // todo, call ._destroy on child elements?
     this.contain(this._array);
 
     MutationHashable.mutated(this);
@@ -312,13 +312,13 @@ export class LinkedArray<S>
     thisArg?: any
   ): S | undefined;
   find(predicate: any, thisArg?: any): S | S | undefined {
-    throw new Error("Method not implemented.");
+    return this._array.find(predicate, thisArg);
   }
   findIndex(
     predicate: (value: S, index: number, obj: S[]) => unknown,
     thisArg?: any
   ): number {
-    throw new Error("Method not implemented.");
+    return this._array.findIndex(predicate as any, thisArg);
   }
 
   findLast<S>(

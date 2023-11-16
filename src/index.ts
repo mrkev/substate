@@ -15,16 +15,13 @@ export {
   string,
 } from "./sstate";
 
-export {
-  getGlobalState,
-  pushHistory,
-  popHistory as undo,
-} from "./sstate.history";
+export { getGlobalState, history } from "./sstate.history";
 export type { StructProps } from "./sstate";
+export { LinkedPrimitive as SPrimitive } from "./lib/state/LinkedPrimitive";
 export { debugOut } from "./sstate.debug";
 export {
   useContainer,
   useSPrimitive as usePrimitive,
-  useStructure,
+  useStructure as useContainerWithSetter,
 } from "./sstate.react";
 export { construct, serialize } from "./sstate.serialization";

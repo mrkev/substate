@@ -1,10 +1,10 @@
 import { nanoid } from "nanoid";
 import { WeakRefMap } from "./WeakRefMap";
-import { SArray, SSchemaArray, Struct } from "./sstate";
-import { replace, serialize } from "./sstate.serialization";
+import { exhaustive } from "./assertions";
 import { LinkedArray } from "./lib/state/LinkedArray";
 import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
-import { exhaustive } from "./assertions";
+import { SArray, SSchemaArray, Struct } from "./sstate";
+import { replace, serialize } from "./sstate.serialization";
 
 export type KnowableObject =
   | Struct<any>
@@ -13,8 +13,9 @@ export type KnowableObject =
   | SSchemaArray<any>;
 
 export type HistoryEntry = {
-  id: string;
-  objects: Map<string, string>;
+  id: string; // history entry id
+  objects: Map<string, string>; // id => serialized obj
+  constructors: Map<string, any>; // id => struct constructors
 };
 
 class GlobalState {
@@ -22,7 +23,6 @@ class GlobalState {
   readonly knownObjects = new WeakRefMap<KnowableObject>(10_000);
   readonly history = LinkedArray.create<HistoryEntry>();
   readonly redoStack = LinkedArray.create<HistoryEntry>(); // TODO
-
   constructor() {
     (window as any).globalState = this;
   }
@@ -51,25 +51,71 @@ export function saveForHistory(obj: KnowableObject) {
   globalState.HISTORY_RECORDING.set(obj._id, serialized);
 }
 
-export async function pushHistory(action: () => void | Promise<void>) {
+function actAfter(cb: () => void | Promise<void>, after: () => void) {
+  const maybePromise = cb();
+  if (maybePromise == null) {
+    return after();
+  } else {
+    return maybePromise.then(() => after());
+  }
+}
+
+export function pushHistory(objs: KnowableObject[]) {
+  if (objs.length < 1) {
+    console.warn(".pushHistory called with empty array");
+    return;
+  }
+
   const globalState = getGlobalState();
+  // if already recording, just run and return
   if (globalState.HISTORY_RECORDING) {
-    return await action();
+    // todo; good failsafe to have?
+    throw new Error("Won't pushHistory when history is being recorded");
   }
 
-  globalState.HISTORY_RECORDING = new Map();
-  await action();
-  const recorded = globalState.HISTORY_RECORDING;
-  globalState.HISTORY_RECORDING = false;
-
-  // Make sure it's after we stop recording! We don't want to record this history change!!
-  if (recorded.size > 0) {
-    globalState.history.push({ objects: recorded, id: `h-${nanoid(4)}` });
+  const entries = new Map();
+  for (const obj of objs) {
+    const serialized = serialize(obj);
+    entries.set(obj._id, serialized);
   }
+
+  const id = `h-${nanoid(4)}`;
+  globalState.history.push({ objects: entries, id });
 
   if (globalState.redoStack.length > 0) {
     globalState.redoStack.splice(0, globalState.redoStack.length);
   }
+}
+
+export function recordHistory(action: () => void): void;
+export function recordHistory(action: () => Promise<void>): Promise<void>;
+export function recordHistory(
+  action: () => void | Promise<void>
+): void | Promise<void> {
+  const globalState = getGlobalState();
+  // if already recording, just run and return
+  if (globalState.HISTORY_RECORDING) {
+    return action();
+  }
+
+  globalState.HISTORY_RECORDING = new Map();
+  return actAfter(action, function pushHistoryEnd() {
+    const recorded = globalState.HISTORY_RECORDING;
+    globalState.HISTORY_RECORDING = false;
+
+    if (recorded === false) {
+      throw new Error("recorded === false, shouldn't happen");
+    }
+
+    // Make sure it's after we stop recording! We don't want to record this history change!!
+    if (recorded.size > 0) {
+      globalState.history.push({ objects: recorded, id: `h-${nanoid(4)}` });
+    }
+
+    if (globalState.redoStack.length > 0) {
+      globalState.redoStack.splice(0, globalState.redoStack.length);
+    }
+  });
 }
 
 function saveContraryRedo(undo: HistoryEntry) {
@@ -122,3 +168,9 @@ export function popHistory() {
     }
   }
 }
+
+export const history = {
+  push: pushHistory,
+  pop: popHistory,
+  record: recordHistory,
+};

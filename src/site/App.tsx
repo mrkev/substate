@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import * as s from "../index";
-import { useContainer, usePrimitive, useStructure } from "../index";
+import { useContainer, usePrimitive, useContainerWithSetter } from "../index";
 import { LinkedArray, useLinkedArray } from "../lib/state/LinkedArray";
 import {
   HistoryEntry,
   getGlobalState,
   popHistory,
-  pushHistory,
+  recordHistory,
 } from "../sstate.history";
 import { construct, serialize, debugOut } from "../index";
 import "./App.css";
@@ -18,14 +18,16 @@ import "./App.css";
  * - Smarter array history?
  * - useHistory
  *    - returns [history, push, pop] ?
+ * - put all history in global state in one object (history.undo/pop/redo/push, etc)
+ * - built-in clone for structs. In theory easy, since I already serialize/decerialize and that captures all the props I care about
  */
 
 export class Track extends s.Struct<Track> {
   readonly name = s.string();
-  readonly clips = s.arrayOf([Clip]);
+  readonly clips = s.arrayOf([MidiClip]);
 
   addClip(name: string) {
-    const clip = s.create(Clip, { name, duration: 3, notes: [] });
+    const clip = s.create(MidiClip, { name, duration: 3 });
     this.clips.push(clip);
   }
 
@@ -40,15 +42,18 @@ export class Clip extends s.Struct<Clip> {
   readonly name = s.string();
   public start: number = 0;
   public duration: number;
-  public notes = s.array<Note>([
-    [1, 1],
-    [1, 2],
-  ]);
 
   constructor(props: s.StructProps<Clip, { duration: number }>) {
     super(props);
     this.duration = props.duration;
   }
+}
+
+class MidiClip extends Clip {
+  public notes = s.array<Note>([
+    [1, 1],
+    [1, 2],
+  ]);
 
   addNote(note: Note) {
     this.notes.push(note);
@@ -57,7 +62,7 @@ export class Clip extends s.Struct<Clip> {
 
 const track = s.create(Track, {
   name: "untitled track",
-  clips: [s.create(Clip, { name: "hello", duration: 3, notes: [] })],
+  clips: [s.create(MidiClip, { duration: 3, name: "foo" })],
 });
 
 function App() {
@@ -68,7 +73,7 @@ function App() {
         <br></br>
         <button
           onClick={() =>
-            pushHistory(() => {
+            recordHistory(() => {
               track.addClip("hello world");
             })
           }
@@ -78,7 +83,7 @@ function App() {
         <button
           onClick={() => {
             performance.mark("1");
-            pushHistory(() => {
+            recordHistory(() => {
               for (let i = 0; i < 10000; i++) {
                 track.addClip("hello world");
               }
@@ -92,7 +97,7 @@ function App() {
         </button>
         <button
           onClick={() => {
-            pushHistory(() => {
+            recordHistory(() => {
               track.clear();
             });
           }}
@@ -119,7 +124,7 @@ function App() {
 }
 
 function TrackClips() {
-  const [tracks] = useStructure(track.clips);
+  const [tracks] = useContainerWithSetter(track.clips);
   return (
     <div>
       {tracks.map((track) => {
@@ -133,8 +138,8 @@ const ClipA = React.memo(function TrackAImpl({
   clip,
   tracks,
 }: {
-  clip: Clip;
-  tracks: s.SArray<Clip>;
+  clip: MidiClip;
+  tracks: s.SArray<MidiClip>;
 }) {
   const [name, setName] = usePrimitive(clip.name);
   const [edit, setEdit] = useState(name);
@@ -147,7 +152,7 @@ const ClipA = React.memo(function TrackAImpl({
 
   function commitEdit() {
     if (edit !== name) {
-      pushHistory(() => {
+      recordHistory(() => {
         setName(edit);
       });
     }
@@ -169,7 +174,7 @@ const ClipA = React.memo(function TrackAImpl({
       {clip.duration}
       <button
         onClick={() =>
-          pushHistory(() => {
+          recordHistory(() => {
             tracks.remove(clip);
           })
         }
@@ -178,8 +183,8 @@ const ClipA = React.memo(function TrackAImpl({
       </button>
       <button
         onClick={() =>
-          pushHistory(() => {
-            clip.mutate(() => {
+          recordHistory(() => {
+            clip.featuredMutation(() => {
               clip.duration += 1;
             });
           })
@@ -203,7 +208,7 @@ function Notes(props: { notes: LinkedArray<Note> }) {
             {note}
             <button
               onClick={() => {
-                pushHistory(() => {
+                recordHistory(() => {
                   notes.remove(note);
                 });
               }}
