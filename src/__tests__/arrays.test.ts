@@ -10,7 +10,7 @@ class Arrays extends s.Struct<Arrays> {
 }
 
 class Foo extends s.Struct<Foo> {
-  readonly name = s.string();
+  readonly name = s.string("hello");
 }
 
 const arrs = s.create(Arrays, {

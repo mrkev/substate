@@ -4,18 +4,13 @@ import { describe, expect, it } from "vitest";
 import * as s from "../sstate";
 
 class Primitives extends s.Struct<Primitives> {
-  readonly num = s.number();
-  readonly str = s.string();
-  readonly bool = s.boolean();
+  readonly num = s.number(0);
+  readonly str = s.string("hello world");
+  readonly bool = s.boolean(false);
   readonly nil = s.nil();
 }
 
-const prim = s.create(Primitives, {
-  num: 0,
-  str: "hello world",
-  bool: false,
-  nil: null,
-});
+const prim = s.create(Primitives, {});
 
 describe("sstate", () => {
   it("string", () => {

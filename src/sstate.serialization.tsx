@@ -116,8 +116,8 @@ function simplify(state: KnowableObject | JSONValue) {
   } else if (state instanceof Struct) {
     return simplifyStruct(state);
   } else if (typeof state === "object") {
-    if (state.constructor !== Object) {
-      throw new Error("cant simplify non-literal object");
+    if (state.constructor !== Object && !Array.isArray(state)) {
+      throw new Error("cant simplify non-literal object or array");
     }
     return state;
   } else {
@@ -165,7 +165,7 @@ function initializeSchemaArray(
     return initialize(x, spec);
   });
 
-  return new s.SSchemaArray(initialized, json._id, spec);
+  return new s.SSchemaArray(initialized as any, json._id, spec);
 }
 
 function initializeSimpleArray(
@@ -178,29 +178,40 @@ function initializeStruct(
   json: Extract<Serialized, { $$: "struct" }>,
   spec: typeof Struct
 ) {
+  const { _id, _value } = json;
+
   // offer a way to override initialization
   if ("_construct" in spec && typeof spec._construct === "function") {
-    return spec._construct({ json });
+    const instance = spec._construct(_value);
+    instance._id = _id;
+    // console.log("_constructed", instance, "from", _value);
+    instance._initConstructed(Object.keys(_value));
+    return instance;
   }
 
-  const { $$: _, _id, _value: rest } = json;
-
-  let record = { _id };
-
-  const instance = new spec(rest as any) as any;
-
-  for (const key of Object.keys(rest)) {
-    const value = (rest as any)[key];
+  const initialized: Record<any, any> = {};
+  for (const key of Object.keys(_value)) {
+    const value = _value[key];
     if (isSeralized(value)) {
-      (record as any)[key] = initialize((rest as any)[key], [
-        instance[key]?.schema,
-      ]);
+      initialized[key] = initialize(_value[key], [initialized[key]?.schema]);
     } else {
-      (record as any)[key] = value;
+      initialized[key] = value;
     }
   }
 
-  instance._initConstructed(record);
+  const instance = new (spec as any)(_value) as any;
+  instance._id = _id;
+
+  for (const key of Object.keys(_value)) {
+    const value = _value[key];
+    if (isSeralized(value)) {
+      instance[key] = initialize(_value[key], [instance[key]?.schema]);
+    } else {
+      instance[key] = value;
+    }
+  }
+
+  instance._initConstructed(Object.keys(_value));
 
   return instance;
 }

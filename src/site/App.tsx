@@ -25,6 +25,7 @@ import "./App.css";
 export class Track extends s.Struct<Track> {
   readonly name = s.string();
   readonly clips = s.arrayOf([MidiClip]);
+  readonly effects = s.array<Effect>();
 
   addClip(name: string) {
     const clip = s.create(MidiClip, { name, duration: 3 });
@@ -37,6 +38,7 @@ export class Track extends s.Struct<Track> {
 }
 
 type Note = readonly [s: number, e: number];
+type Effect = readonly [name: string, value: number];
 
 export class Clip extends s.Struct<Clip> {
   readonly name = s.string();

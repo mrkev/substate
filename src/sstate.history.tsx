@@ -15,7 +15,7 @@ export type KnowableObject =
 export type HistoryEntry = {
   id: string; // history entry id
   objects: Map<string, string>; // id => serialized obj
-  constructors: Map<string, any>; // id => struct constructors
+  // constructors: Map<string, any>; // id => struct constructors
 };
 
 class GlobalState {

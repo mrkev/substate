@@ -14,7 +14,7 @@ import {
 } from "./lib/state/MutationHashable";
 import { Subbable, notify } from "./lib/state/Subbable";
 import { getGlobalState, saveForHistory } from "./sstate.history";
-import { Instantiate, JSONValue } from "./types";
+import { JSONValue } from "./types";
 
 // todo? create -> of
 class SString extends LinkedPrimitive<string> {
@@ -112,15 +112,18 @@ export class Struct<Child extends Struct<any>>
     return this.constructor.name;
   }
 
-  _initConstructed(args: Record<string, any> | null) {
-    if (args == null) {
-      return;
-    }
+  // TODO: a way to force constructor to be private in children, so that they don't
+  // create objects with `new XXX` and instead use `create()`? built-in create as a static prop
+  // might be good too.
+  constructor(_props: StructProps<Child, any>) {
+    this._id = nanoid(5);
+    // We don't actually do anything here. create() initializes structs
+  }
 
+  _initConstructed(props: string[]) {
     const self = this as any;
 
-    for (const key in args) {
-      self[key] = args[key];
+    for (const key of props) {
       const child = self[key];
       if (isContainable(child)) {
         child._container = this;
@@ -141,7 +144,10 @@ export class Struct<Child extends Struct<any>>
 
     const self = this as any;
 
-    for (const key in args) {
+    // todo, make htis more efficient than iterating throuhg all my props?
+    // maybe with a close trick to see what gets initializded between Struct.super() and _init?
+    // or something along those lines?
+    for (const key in this) {
       let child = self[key];
       if (child instanceof UNINITIALIZED_PRIMITIVE) {
         self[key] = LinkedPrimitive.of(args[key]);
@@ -178,15 +184,6 @@ export class Struct<Child extends Struct<any>>
   _destroy() {
     this._container = null;
     console.log("DESTROY", this);
-  }
-
-  constructor(
-    _props: IsEmptyObjType<SPrimitiveFieldsToSOut<Child>> extends true
-      ? null
-      : SPrimitiveFieldsToSOut<Child>
-  ) {
-    this._id = nanoid(5);
-    // We don't actually do anything here. create() initializes structs
   }
 
   featuredMutation(action: () => void) {
@@ -233,16 +230,10 @@ export function create<S extends AnyClass>(
 export interface SState<T> {}
 
 /** Describes an array of subbable objects */
-export class SSchemaArray<
-  T extends SState<unknown> | Struct<any>
-> extends LinkedArray<T> {
-  _schema: (SState<unknown> | typeof Struct)[];
+export class SSchemaArray<T extends Struct<any>> extends LinkedArray<T> {
+  _schema: (typeof Struct)[];
 
-  constructor(
-    val: T[],
-    id: string,
-    schema: (SState<unknown> | typeof Struct)[]
-  ) {
+  constructor(val: T[], id: string, schema: (typeof Struct)[]) {
     super(val, id);
     getGlobalState().knownObjects.set(this._id, this);
     this._schema = schema;
@@ -279,11 +270,11 @@ export function nil() {
   return SNil.of(null);
 }
 
-export function arrayOf<T extends SState<unknown> | typeof Struct>(
+export function arrayOf<T extends typeof Struct>(
   schema: T[],
-  val?: Instantiate<T>[]
+  val?: InstanceType<T>[]
   // schema: NWArray<NWInLax<SubOutLax<T>>>
-): SArray<Instantiate<T>> {
+): SSchemaArray<InstanceType<T>> {
   return val == null
     ? (new UNINITIALIZED_TYPED_ARRAY(schema) as any)
     : new SSchemaArray(val, nanoid(5), schema);
