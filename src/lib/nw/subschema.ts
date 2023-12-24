@@ -110,8 +110,7 @@ class SubString implements SubSchema<string>, SubbableState<string> {
     notify(this, this);
     if (this._container != null) {
       // NOTE: is notify the right way to do it? is isn't changing the hash.
-      MutationHashable.mutated(this._container);
-      notify(this._container, this);
+      MutationHashable.mutated(this._container, this);
     }
   }
 
@@ -152,8 +151,7 @@ class SubNumber implements SubSchema<number>, SubbableState<number> {
     this.val = val;
     notify(this, this);
     if (this._container != null) {
-      MutationHashable.mutated(this._container);
-      notify(this._container, this);
+      MutationHashable.mutated(this._container, this);
     }
   }
 

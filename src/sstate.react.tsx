@@ -7,6 +7,7 @@ import type {
 } from "./lib/state/LinkedPrimitive";
 import { MutationHashable } from "./lib/state/MutationHashable";
 import { subscribe } from "./lib/state/Subbable";
+import { Struct2 } from "./Struct2";
 
 export function useSPrimitive<S>(
   linkedState: LinkedPrimitive<S>
@@ -61,7 +62,7 @@ export function useStructure<S>(
 }
 
 export function useContainer<
-  S extends Struct<any> | SArray<any> | SSchemaArray<any>
+  S extends Struct<any> | SArray<any> | SSchemaArray<any> | Struct2<any>
 >(obj: S, allChanges: boolean = false) {
   useSubscribeToSubbableMutationHashable(obj, undefined, allChanges);
   return obj;

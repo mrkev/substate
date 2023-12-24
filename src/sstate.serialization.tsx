@@ -1,10 +1,14 @@
+import { Struct2 } from "./Struct2";
 import {
   assertArray,
+  assertConstructableStruct,
+  assertConstructableStruct2,
   assertNotArray,
   assertSPrimitive,
   assertSSchemaArray,
   assertSSimpleArray,
   assertStruct,
+  assertStruct2,
   exhaustive,
 } from "./assertions";
 import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
@@ -35,6 +39,11 @@ type Serialized =
       _value: {
         [key: string]: Serialized | unknown;
       };
+    }>
+  | Readonly<{
+      $$: "struct2";
+      _id: string;
+      _value: readonly unknown[];
     }>;
 
 export function simplifyPrimitive(obj: LinkedPrimitive<any>): Serialized {
@@ -97,6 +106,16 @@ export function simplifyStruct(obj: Struct<any>): Serialized {
   };
 }
 
+export function simplifyStruct2(obj: Struct2<any>): Serialized {
+  const returned = obj.serialize();
+
+  return {
+    $$: "struct2",
+    _id: obj._id,
+    _value: obj.serialize(),
+  };
+}
+
 function simplify(state: KnowableObject | JSONValue) {
   if (
     typeof state === "string" ||
@@ -115,6 +134,8 @@ function simplify(state: KnowableObject | JSONValue) {
     return simplifySchemaArray(state);
   } else if (state instanceof Struct) {
     return simplifyStruct(state);
+  } else if (state instanceof Struct2) {
+    return simplifyStruct2(state);
   } else if (typeof state === "object") {
     if (state.constructor !== Object && !Array.isArray(state)) {
       throw new Error("cant simplify non-literal object or array");
@@ -158,7 +179,7 @@ function initializePrimitive(json: Extract<Serialized, { $$: "prim" }>) {
 
 function initializeSchemaArray(
   json: Extract<Serialized, { $$: "arr-schema" }>,
-  spec: (typeof Struct)[]
+  spec: (typeof Struct | typeof Struct2)[]
 ) {
   const initialized = json._value.map((x: any) => {
     // TODO: find right spec
@@ -216,12 +237,24 @@ function initializeStruct(
   return instance;
 }
 
+function initializeStruct2(
+  json: Extract<Serialized, { $$: "struct2" }>,
+  spec: typeof Struct2
+) {
+  const { _id, _value } = json;
+  const instance = new (spec as any)(..._value);
+  instance._id = _id;
+  instance._initConstructed(Object.keys(_value));
+  return instance;
+}
+
 function initialize(
   json: unknown,
   // A union of of the specs this json could follow
   spec:
     | typeof Struct // Struct
-    | (typeof Struct)[] // SArray
+    | typeof Struct2 // Struct
+    | (typeof Struct | typeof Struct2)[] // SArray
 ): LinkedPrimitive<any> | SArray<any> | Struct<any> {
   if (!isSeralized(json)) {
     console.log("not serialized", json);
@@ -241,10 +274,16 @@ function initialize(
     }
     case "struct": {
       assertNotArray(spec);
+      assertConstructableStruct(spec);
       return initializeStruct(json, spec);
     }
+    case "struct2": {
+      assertNotArray(spec);
+      assertConstructableStruct2(spec);
+      return initializeStruct2(json, spec);
+    }
     default:
-      throw new Error("invalid $$ type");
+      exhaustive(json, "invalid $$ type");
   }
 }
 
@@ -275,8 +314,12 @@ export function replace(str: string, obj: KnowableObject) {
         assertStruct(obj);
         return replaceStruct(json, obj);
       }
+      case "struct2": {
+        assertStruct2(obj);
+        return replaceStruct2(json, obj);
+      }
       default:
-        throw new Error("invalid $$ type");
+        exhaustive(json, "invalid $$ type");
     }
   } catch (e) {
     console.log("error with replace", JSON.parse(str));
@@ -318,6 +361,27 @@ function replaceSimpleArray(
 function replaceStruct(
   json: Extract<Serialized, { $$: "struct" }>,
   obj: Struct<any>
+): void {
+  // offer a way to override replacement
+  if ("_replace" in obj && typeof obj._replace === "function") {
+    obj._replace(json._value);
+    obj._notifyChange();
+    return;
+  }
+
+  for (const key in json._value) {
+    if (key === "$$" || isSeralized(json._value[key])) {
+      // Serialized state gets replaced separately in history (?)
+      continue;
+    }
+    (obj as any)[key] = json._value[key];
+  }
+  obj._notifyChange();
+}
+
+function replaceStruct2(
+  json: Extract<Serialized, { $$: "struct2" }>,
+  obj: Struct2<any>
 ): void {
   // offer a way to override replacement
   if ("_replace" in obj && typeof obj._replace === "function") {

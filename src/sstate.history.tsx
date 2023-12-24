@@ -5,9 +5,11 @@ import { LinkedArray } from "./lib/state/LinkedArray";
 import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
 import { SArray, SSchemaArray, Struct } from "./sstate";
 import { replace, serialize } from "./sstate.serialization";
+import { Struct2 } from "./Struct2";
 
 export type KnowableObject =
   | Struct<any>
+  | Struct2<any>
   | LinkedPrimitive<any>
   | SArray<any>
   | SSchemaArray<any>;
@@ -162,6 +164,8 @@ export function popHistory() {
     } else if (object instanceof SSchemaArray) {
       replace(serialized, object);
     } else if (object instanceof Struct) {
+      replace(serialized, object);
+    } else if (object instanceof Struct2) {
       replace(serialized, object);
     } else {
       exhaustive(object);

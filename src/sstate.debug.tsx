@@ -1,8 +1,10 @@
 import { MutationHashable } from "./lib/state/MutationHashable";
 import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
 import { SArray, SSchemaArray, Struct } from "./sstate";
+import { Struct2 } from "./Struct2";
+import stringify from "json-stringify-deterministic";
 
-export function debugOut(val: unknown, pad = 0) {
+export function debugOut(val: unknown, pad = 0, showUnknowns = true) {
   if (
     typeof val === "string" ||
     typeof val === "number" ||
@@ -13,21 +15,34 @@ export function debugOut(val: unknown, pad = 0) {
   } else if (typeof val === "function") {
     return "(function)";
   } else if (val instanceof SArray) {
-    return debugOutArray(val, pad);
+    return debugOutArray(val, pad, showUnknowns);
   } else if (val instanceof SSchemaArray) {
-    return debugOutArray(val, pad);
+    return debugOutArray(val, pad, showUnknowns);
   } else if (val instanceof LinkedPrimitive) {
     return debugOutPrimitive(val);
   } else if (val instanceof Struct) {
-    return debugOutStruct(val, pad);
+    return debugOutStruct(val, pad, showUnknowns);
+  } else if (val instanceof Struct2) {
+    return debugOutStruct(val, pad, showUnknowns);
   } else if (Array.isArray(val)) {
     return JSON.stringify(val);
   } else {
-    return `(unknown: ${JSON.stringify(val, null, 2)})`;
+    if (showUnknowns) {
+      return `(unknown: ${stringify(val, {
+        space: " ",
+        cycles: true,
+      })})`;
+    } else {
+      return `(unknown: ${val.constructor.name})`;
+    }
   }
 }
 
-export function debugOutStruct(struct: Struct<any>, pad = 0): string {
+export function debugOutStruct(
+  struct: Struct<any> | Struct2<any>,
+  pad = 0,
+  showUnknowns: boolean
+): string {
   // const result: Record<any, any> = { _kind: struct._kind };
   let result = "";
 
@@ -39,7 +54,7 @@ export function debugOutStruct(struct: Struct<any>, pad = 0): string {
     }
 
     const val = (struct as any)[key];
-    result += `\n  ${key}: ${debugOut(val)
+    result += `\n  ${key}: ${debugOut(val, pad, showUnknowns)
       .split("\n")
       .map((s) => `  ${s}`)
       .join("\n")
@@ -49,11 +64,15 @@ export function debugOutStruct(struct: Struct<any>, pad = 0): string {
   return `${struct._kind} (${struct._id}.${hash}) {${result}\n}`;
 }
 
-export function debugOutArray(arr: SArray<any> | SSchemaArray<any>, pad = 0) {
+export function debugOutArray(
+  arr: SArray<any> | SSchemaArray<any>,
+  pad = 0,
+  showUnknowns: boolean
+) {
   let result = "";
 
   for (const elem of arr) {
-    result += `\n${debugOut(elem, pad)
+    result += `\n${debugOut(elem, pad, showUnknowns)
       .split("\n")
       .map((s) => `  ${s}`)
       .join("\n")},`;

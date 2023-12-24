@@ -13,8 +13,7 @@ export class LinkedMap<K, V> implements Map<K, V>, Subbable, MutationHashable {
 
   _setRaw(map: ReadonlyMap<K, V>) {
     this._map = new Map(map);
-    MutationHashable.mutated(this);
-    notify(this, this);
+    MutationHashable.mutated(this, this);
   }
 
   _getRaw(): ReadonlyMap<K, V> {
@@ -43,15 +42,13 @@ export class LinkedMap<K, V> implements Map<K, V>, Subbable, MutationHashable {
   // Map<K, V> interface, mutates
   clear(): void {
     this._map.clear();
-    MutationHashable.mutated(this);
-    notify(this, this);
+    MutationHashable.mutated(this, this);
   }
 
   // Map<K, V> interface, mutates
   delete(key: K): boolean {
     const result = this._map.delete(key);
-    MutationHashable.mutated(this);
-    notify(this, this);
+    MutationHashable.mutated(this, this);
     return result;
   }
 
@@ -76,8 +73,7 @@ export class LinkedMap<K, V> implements Map<K, V>, Subbable, MutationHashable {
   // Map<K, V> interface, mutates
   set(key: K, value: V): this {
     this._map.set(key, value);
-    MutationHashable.mutated(this);
-    notify(this, this);
+    MutationHashable.mutated(this, this);
     return this;
   }
 

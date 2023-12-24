@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
+import { Struct2, create2 } from "../Struct2";
 import * as s from "../index";
-import { useContainer, usePrimitive, useContainerWithSetter } from "../index";
+import {
+  construct,
+  debugOut,
+  serialize,
+  useContainer,
+  useContainerWithSetter,
+  usePrimitive,
+} from "../index";
 import { LinkedArray, useLinkedArray } from "../lib/state/LinkedArray";
 import {
   HistoryEntry,
@@ -8,8 +16,8 @@ import {
   popHistory,
   recordHistory,
 } from "../sstate.history";
-import { construct, serialize, debugOut } from "../index";
 import "./App.css";
+import { Constructable } from "vitest";
 
 /**
  * TODO:
@@ -22,13 +30,24 @@ import "./App.css";
  * - built-in clone for structs. In theory easy, since I already serialize/decerialize and that captures all the props I care about
  */
 
-export class Track extends s.Struct<Track> {
-  readonly name = s.string();
-  readonly clips = s.arrayOf([MidiClip]);
-  readonly effects = s.array<Effect>();
+class Track extends Struct2<typeof Track> {
+  readonly name: s.SString;
+  readonly clips: s.SSchemaArray<MidiClip>;
+  readonly effects: s.SArray<Effect>;
+
+  constructor(props: { name: string; clips?: MidiClip[] }) {
+    super();
+    this.name = s.string(props.name);
+    this.clips = s.arrayOf([MidiClip], props.clips);
+    this.effects = s.array<Effect>();
+  }
+
+  override serialize(): readonly [props: { name: string; clips?: MidiClip[] }] {
+    return [{ name: this.name.get() }] as const;
+  }
 
   addClip(name: string) {
-    const clip = s.create(MidiClip, { name, duration: 3 });
+    const clip = s.create(MidiClip, { duration: 3 });
     this.clips.push(clip);
   }
 
@@ -41,7 +60,6 @@ type Note = readonly [s: number, e: number];
 type Effect = readonly [name: string, value: number];
 
 export class Clip extends s.Struct<Clip> {
-  readonly name = s.string();
   public start: number = 0;
   public duration: number;
 
@@ -52,6 +70,7 @@ export class Clip extends s.Struct<Clip> {
 }
 
 class MidiClip extends Clip {
+  readonly name = s.string();
   public notes = s.array<Note>([
     [1, 1],
     [1, 2],
@@ -62,9 +81,9 @@ class MidiClip extends Clip {
   }
 }
 
-const track = s.create(Track, {
+const track = create2(Track, {
   name: "untitled track",
-  clips: [s.create(MidiClip, { duration: 3, name: "foo" })],
+  clips: [s.create(MidiClip, { duration: 3 })],
 });
 
 function App() {

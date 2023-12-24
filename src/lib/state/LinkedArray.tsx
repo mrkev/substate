@@ -43,8 +43,7 @@ export class LinkedArray<S>
   }
 
   _childChanged(child: Subbable) {
-    MutationHashable.mutated(this);
-    notify(this, child);
+    MutationHashable.mutated(this, child);
     if (this._container != null) {
       this._container._childChanged(this);
     }
@@ -53,8 +52,7 @@ export class LinkedArray<S>
   private mutate<V>(mutator: (clone: Array<S>) => V): V {
     saveForHistory(this as any);
     const result = mutator(this._array);
-    MutationHashable.mutated(this);
-    notify(this, this);
+    MutationHashable.mutated(this, this);
 
     if (this._container != null) {
       this._container._childChanged(this);
@@ -141,8 +139,7 @@ export class LinkedArray<S>
     this._array = arr; // todo, call ._destroy on child elements?
     this.contain(this._array);
 
-    MutationHashable.mutated(this);
-    notify(this, this);
+    MutationHashable.mutated(this, this);
     if (this._container != null) {
       this._container._childChanged(this);
     }

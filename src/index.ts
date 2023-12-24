@@ -15,6 +15,8 @@ export {
   string,
 } from "./sstate";
 
+export { Struct2, create2 } from "./Struct2";
+
 export { getGlobalState, history } from "./sstate.history";
 export type { StructProps } from "./sstate";
 export { LinkedPrimitive as SPrimitive } from "./lib/state/LinkedPrimitive";

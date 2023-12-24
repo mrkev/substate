@@ -1,6 +1,7 @@
 //////// Schema ////////
 
 import { nanoid } from "nanoid";
+import { Struct2 } from "./Struct2";
 import { isContainable } from "./assertions";
 import { LinkedArray } from "./lib/state/LinkedArray";
 import type {
@@ -38,9 +39,11 @@ class SNil extends LinkedPrimitive<null> {
   }
 }
 
-class UNINITIALIZED_PRIMITIVE {}
-class UNINITIALIZED_ARRAY {}
-class UNINITIALIZED_TYPED_ARRAY<S extends (SState<unknown> | typeof Struct)[]> {
+export class UNINITIALIZED_PRIMITIVE {}
+export class UNINITIALIZED_ARRAY {}
+export class UNINITIALIZED_TYPED_ARRAY<
+  S extends (SState<unknown> | typeof Struct)[]
+> {
   schema: S;
   constructor(schema: S) {
     this.schema = schema;
@@ -91,7 +94,7 @@ type PropsForStruct<Child extends Struct<any>> = IsEmptyObjType<
   ? null
   : SPrimitiveFieldsToSOut<Child>;
 
-export class Struct<Child extends Struct<any>>
+export abstract class Struct<Child extends Struct<any>>
   implements SubbableContainer, Subbable, Contained
 {
   readonly _id: string;
@@ -173,8 +176,7 @@ export class Struct<Child extends Struct<any>>
   }
 
   _childChanged(child: Subbable) {
-    MutationHashable.mutated(this);
-    notify(this, child);
+    MutationHashable.mutated(this, child);
     if (this._container != null) {
       this._container._childChanged(this);
     }
@@ -183,7 +185,7 @@ export class Struct<Child extends Struct<any>>
   // unnecesary?
   _destroy() {
     this._container = null;
-    console.log("DESTROY", this);
+    // console.log("DESTROY", this);
   }
 
   featuredMutation(action: () => void) {
@@ -193,15 +195,14 @@ export class Struct<Child extends Struct<any>>
   }
 
   _notifyChange() {
-    MutationHashable.mutated(this);
-    notify(this, this);
+    MutationHashable.mutated(this, this);
     if (this._container != null) {
       this._container._childChanged(this);
     }
   }
 }
 
-type AnyClass = {
+export type AnyClass = {
   new (...args: any[]): Struct<any>;
 };
 
@@ -214,7 +215,7 @@ export type StructProps<
   U extends Record<string, any>
 > = SPrimitiveFieldsToSOut<T> & U;
 
-type ConstructorArguments<T extends AnyClass> = T extends OneArgClass
+export type ConstructorArguments<T extends AnyClass> = T extends OneArgClass
   ? ConstructorParameters<T>
   : [PropsForStruct<InstanceType<T>>];
 
@@ -231,9 +232,13 @@ export interface SState<T> {}
 
 /** Describes an array of subbable objects */
 export class SSchemaArray<T extends Struct<any>> extends LinkedArray<T> {
-  _schema: (typeof Struct)[];
+  _schema: (typeof Struct | typeof Struct2)[];
 
-  constructor(val: T[], id: string, schema: (typeof Struct)[]) {
+  constructor(
+    val: T[],
+    id: string,
+    schema: (typeof Struct | typeof Struct2)[]
+  ) {
     super(val, id);
     getGlobalState().knownObjects.set(this._id, this);
     this._schema = schema;
