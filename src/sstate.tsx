@@ -16,6 +16,7 @@ import {
 import { Subbable, notify } from "./lib/state/Subbable";
 import { getGlobalState, saveForHistory } from "./sstate.history";
 import { JSONValue } from "./types";
+import { Structured } from ".";
 
 // todo? create -> of
 class SString extends LinkedPrimitive<string> {
@@ -231,13 +232,15 @@ export function create<S extends AnyClass>(
 export interface SState<T> {}
 
 /** Describes an array of subbable objects */
-export class SSchemaArray<T extends Struct<any>> extends LinkedArray<T> {
-  _schema: (typeof Struct | typeof Struct2)[];
+export class SSchemaArray<
+  T extends Struct<any> | Struct2<any> | Structured<any, any>
+> extends LinkedArray<T> {
+  _schema: (typeof Struct | typeof Struct2 | typeof Structured)[];
 
   constructor(
     val: T[],
     id: string,
-    schema: (typeof Struct | typeof Struct2)[]
+    schema: (typeof Struct | typeof Struct2 | typeof Structured)[]
   ) {
     super(val, id);
     getGlobalState().knownObjects.set(this._id, this);

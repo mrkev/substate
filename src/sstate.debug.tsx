@@ -1,8 +1,21 @@
-import { MutationHashable } from "./lib/state/MutationHashable";
-import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
-import { SArray, SSchemaArray, Struct } from "./sstate";
-import { Struct2 } from "./Struct2";
 import stringify from "json-stringify-deterministic";
+import { SString, Structured } from ".";
+import { Struct2 } from "./Struct2";
+import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
+import { MutationHashable } from "./lib/state/MutationHashable";
+import { SArray, SSchemaArray, Struct } from "./sstate";
+
+function stringifyUnknown(val: unknown) {
+  const res = stringify(val, {
+    space: " ",
+    cycles: true,
+  });
+  if (res === "{\n}") {
+    return "{}";
+  } else {
+    return res;
+  }
+}
 
 export function debugOut(val: unknown, pad = 0, showUnknowns = true) {
   if (
@@ -24,14 +37,13 @@ export function debugOut(val: unknown, pad = 0, showUnknowns = true) {
     return debugOutStruct(val, pad, showUnknowns);
   } else if (val instanceof Struct2) {
     return debugOutStruct(val, pad, showUnknowns);
+  } else if (val instanceof Structured) {
+    return debugOutStruct(val, pad, showUnknowns);
   } else if (Array.isArray(val)) {
     return JSON.stringify(val);
   } else {
     if (showUnknowns) {
-      return `(unknown: ${stringify(val, {
-        space: " ",
-        cycles: true,
-      })})`;
+      return `(unknown: ${stringifyUnknown(val)})`;
     } else {
       return `(unknown: ${val.constructor.name})`;
     }
@@ -39,7 +51,7 @@ export function debugOut(val: unknown, pad = 0, showUnknowns = true) {
 }
 
 export function debugOutStruct(
-  struct: Struct<any> | Struct2<any>,
+  struct: Struct<any> | Struct2<any> | Structured<any, any>,
   pad = 0,
   showUnknowns: boolean
 ): string {
@@ -90,5 +102,9 @@ export function debugOutArray(
 }
 
 export function debugOutPrimitive(obj: LinkedPrimitive<any>) {
+  if (obj instanceof SString) {
+    return `'${obj.get()}' (${obj._id})`;
+  }
+
   return `${obj.get()} (${obj._id})`;
 }

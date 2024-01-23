@@ -1,23 +1,27 @@
 import { Struct2 } from "./Struct2";
+import { Structured, initStructured } from "./Structured";
 import {
   assertArray,
+  assertConstructableObj,
   assertConstructableStruct,
   assertConstructableStruct2,
+  assertConstructableStructured,
   assertNotArray,
   assertSPrimitive,
   assertSSchemaArray,
   assertSSimpleArray,
   assertStruct,
   assertStruct2,
+  assertStructured,
   exhaustive,
 } from "./assertions";
 import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
 import * as s from "./sstate";
 import { SArray, SSchemaArray, Struct } from "./sstate";
-import { KnowableObject } from "./sstate.history";
+import { KnowableObject, isKnowable } from "./sstate.history";
 import { JSONValue } from "./types";
 
-type Serialized =
+export type Serialized =
   | Readonly<{
       $$: "prim";
       _id: string;
@@ -44,7 +48,61 @@ type Serialized =
       $$: "struct2";
       _id: string;
       _value: readonly unknown[];
+    }>
+  | Readonly<{
+      $$: "structured";
+      _id: string;
+      _value: unknown;
     }>;
+
+export type ApplySerialization<T extends KnowableObject> =
+  T extends LinkedPrimitive<any>
+    ? Extract<Serialized, { $$: "prim" }>
+    : T extends Struct<any>
+    ? Extract<Serialized, { $$: "struct" }>
+    : T extends Struct2<any>
+    ? Extract<Serialized, { $$: "struct2" }>
+    : T extends Structured<any, any>
+    ? Extract<Serialized, { $$: "structured" }>
+    : T extends SArray<any>
+    ? Extract<Serialized, { $$: "sarray" }>
+    : T extends SSchemaArray<any>
+    ? Extract<Serialized, { $$: "arr-schema" }>
+    : never;
+
+export type ApplyDeserialization<
+  S extends Serialized,
+  T extends Struct<any> | Struct2<any> | Structured<any, any> = any
+> = S extends Extract<Serialized, { $$: "prim" }>
+  ? LinkedPrimitive<any>
+  : S extends Extract<Serialized, { $$: "struct" }>
+  ? Struct<any>
+  : S extends Extract<Serialized, { $$: "struct2" }>
+  ? Struct2<any>
+  : S extends Extract<Serialized, { $$: "structured" }>
+  ? Structured<any, any>
+  : S extends Extract<Serialized, { $$: "sarray" }>
+  ? SArray<any>
+  : S extends Extract<Serialized, { $$: "arr-schema" }>
+  ? SSchemaArray<T>
+  : never;
+
+export type ObjectDeserialization<
+  S extends Serialized,
+  T extends Struct<any> | Struct2<any> | Structured<any, any> = any
+> = S extends Extract<Serialized, { $$: "prim" }>
+  ? LinkedPrimitive<any>
+  : S extends Extract<Serialized, { $$: "struct" }>
+  ? Struct<any>
+  : S extends Extract<Serialized, { $$: "struct2" }>
+  ? Struct2<any>
+  : S extends Extract<Serialized, { $$: "structured" }>
+  ? Structured<any, any>
+  : S extends Extract<Serialized, { $$: "sarray" }>
+  ? T[]
+  : S extends Extract<Serialized, { $$: "arr-schema" }>
+  ? T[]
+  : never;
 
 export function simplifyPrimitive(obj: LinkedPrimitive<any>): Serialized {
   return {
@@ -107,10 +165,16 @@ export function simplifyStruct(obj: Struct<any>): Serialized {
 }
 
 export function simplifyStruct2(obj: Struct2<any>): Serialized {
-  const returned = obj.serialize();
-
   return {
     $$: "struct2",
+    _id: obj._id,
+    _value: obj.serialize(),
+  };
+}
+
+export function simplifyStructured(obj: Structured<any, any>): Serialized {
+  return {
+    $$: "structured",
     _id: obj._id,
     _value: obj.serialize(),
   };
@@ -136,6 +200,8 @@ function simplify(state: KnowableObject | JSONValue) {
     return simplifyStruct(state);
   } else if (state instanceof Struct2) {
     return simplifyStruct2(state);
+  } else if (state instanceof Structured) {
+    return simplifyStructured(state);
   } else if (typeof state === "object") {
     if (state.constructor !== Object && !Array.isArray(state)) {
       throw new Error("cant simplify non-literal object or array");
@@ -152,10 +218,28 @@ export function serialize(state: KnowableObject) {
 
 ///////////////////////////////
 
+/** some initializations require a Schema */
 export type Schema =
-  | s.SState<unknown> // primitives in theory
   | typeof Struct // Struct
-  | (s.SState<unknown> | typeof Struct)[]; // SArray
+  | typeof Struct2 // Struct
+  | typeof Structured // Struct
+  | (typeof Struct | typeof Struct2 | typeof Structured)[]; // SSchemaArray
+
+export type StructSchema =
+  | typeof Struct // Struct
+  | typeof Struct2 // Struct
+  | typeof Structured; // Struct
+
+export type NeedsSchema =
+  | Extract<Serialized, { $$: "struct" }>
+  | Extract<Serialized, { $$: "struct2" }>
+  | Extract<Serialized, { $$: "structured" }>
+  | Extract<Serialized, { $$: "arr-schema" }>;
+
+export type NeedsSchemaStruct =
+  | Extract<Serialized, { $$: "struct" }>
+  | Extract<Serialized, { $$: "struct2" }>
+  | Extract<Serialized, { $$: "structured" }>;
 
 export function construct(
   str: string,
@@ -179,7 +263,7 @@ function initializePrimitive(json: Extract<Serialized, { $$: "prim" }>) {
 
 function initializeSchemaArray(
   json: Extract<Serialized, { $$: "arr-schema" }>,
-  spec: (typeof Struct | typeof Struct2)[]
+  spec: StructSchema[]
 ) {
   const initialized = json._value.map((x: any) => {
     // TODO: find right spec
@@ -195,6 +279,44 @@ function initializeSimpleArray(
   return new SArray(json._value as any, json._id);
 }
 
+// helpers for structured
+
+export function deserializeWithSchema<S extends NeedsSchema>(
+  json: NeedsSchema,
+  spec: StructSchema
+): ObjectDeserialization<S> | ObjectDeserialization<S>[] {
+  switch (json.$$) {
+    case "struct": {
+      assertNotArray(spec);
+      assertConstructableStruct(spec);
+      return initializeStruct(json, spec);
+    }
+    case "struct2": {
+      assertNotArray(spec);
+      assertConstructableStruct2(spec);
+      return initializeStruct2(json, spec);
+    }
+    case "structured": {
+      assertNotArray(spec);
+      assertConstructableStructured(spec);
+      return initializeStructured(json, spec) as any;
+    }
+    case "arr-schema": {
+      assertConstructableObj(spec);
+      const initialized = json._value.map((x: any) => {
+        return initialize(x, spec);
+      });
+
+      return initialized as ObjectDeserialization<S>[]; // todo
+    }
+
+    default:
+      exhaustive(json);
+  }
+}
+
+export function serializeWithSchema(spec: StructSchema) {}
+
 function initializeStruct(
   json: Extract<Serialized, { $$: "struct" }>,
   spec: typeof Struct
@@ -203,7 +325,7 @@ function initializeStruct(
 
   // offer a way to override initialization
   if ("_construct" in spec && typeof spec._construct === "function") {
-    const instance = spec._construct(_value);
+    const instance = spec._construct(_value, deserializeWithSchema);
     instance._id = _id;
     // console.log("_constructed", instance, "from", _value);
     instance._initConstructed(Object.keys(_value));
@@ -248,13 +370,24 @@ function initializeStruct2(
   return instance;
 }
 
+function initializeStructured(
+  json: Extract<Serialized, { $$: "structured" }>,
+  spec: typeof Structured
+) {
+  const { _id, _value } = json;
+  const instance = (spec as any).construct(
+    _value,
+    deserializeWithSchema
+  ) as Structured<any, any>;
+  (instance as any)._id = _id;
+  initStructured(instance);
+  return instance;
+}
+
 function initialize(
   json: unknown,
   // A union of of the specs this json could follow
-  spec:
-    | typeof Struct // Struct
-    | typeof Struct2 // Struct
-    | (typeof Struct | typeof Struct2)[] // SArray
+  spec: Schema
 ): LinkedPrimitive<any> | SArray<any> | Struct<any> {
   if (!isSeralized(json)) {
     console.log("not serialized", json);
@@ -282,11 +415,16 @@ function initialize(
       assertConstructableStruct2(spec);
       return initializeStruct2(json, spec);
     }
+    case "structured": {
+      assertNotArray(spec);
+      assertConstructableStructured(spec);
+      return initializeStructured(json, spec) as any;
+    }
     default:
       exhaustive(json, "invalid $$ type");
   }
 }
-
+s;
 ///////////////////////////////////////
 
 export function replace(str: string, obj: KnowableObject) {
@@ -317,6 +455,10 @@ export function replace(str: string, obj: KnowableObject) {
       case "struct2": {
         assertStruct2(obj);
         return replaceStruct2(json, obj);
+      }
+      case "structured": {
+        assertStructured(obj);
+        throw replaceStructured(json, obj);
       }
       default:
         exhaustive(json, "invalid $$ type");
@@ -371,7 +513,7 @@ function replaceStruct(
 
   for (const key in json._value) {
     if (key === "$$" || isSeralized(json._value[key])) {
-      // Serialized state gets replaced separately in history (?)
+      // TODO: Serialized state gets replaced separately in history (?)
       continue;
     }
     (obj as any)[key] = json._value[key];
@@ -400,6 +542,13 @@ function replaceStruct2(
   obj._notifyChange();
 }
 
+function replaceStructured(
+  json: Extract<Serialized, { $$: "structured" }>,
+  obj: Structured<any, any>
+) {
+  throw new Error("Unimplemented");
+}
+
 function isSeralized(json: unknown): json is Serialized {
   // TODO: more validation?
   return (
@@ -407,13 +556,5 @@ function isSeralized(json: unknown): json is Serialized {
     json != null &&
     !Array.isArray(json) &&
     "$$" in json
-  );
-}
-
-function isKnowable(val: unknown) {
-  return (
-    val instanceof Struct ||
-    val instanceof SArray ||
-    val instanceof LinkedPrimitive
   );
 }

@@ -2,6 +2,7 @@ import { SArray, SSchemaArray, Struct } from "./sstate";
 import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
 import { LinkedArray } from "./lib/state/LinkedArray";
 import { Struct2 } from "./Struct2";
+import { Structured } from "./Structured";
 
 export function assertSPrimitive<T>(
   value: unknown
@@ -41,6 +42,14 @@ export function assertStruct2<T>(
   }
 }
 
+export function assertStructured<T>(
+  value: unknown
+): asserts value is Structured<any, any> {
+  if (!(value instanceof Structured)) {
+    throw new Error("not a Structured"); // assertion error
+  }
+}
+
 export function exhaustive(x: never, msg?: string): never {
   throw new Error(msg ?? `Exhaustive violation, unexpected value ${x}`);
 }
@@ -74,18 +83,38 @@ export function assertNotArray<T>(val: Array<T> | T): asserts val is T {
   }
 }
 
-export function assertConstructableStruct<T>(
-  spec: typeof Struct | typeof Struct2
+export function assertConstructableStruct(
+  spec: typeof Struct | typeof Struct2 | typeof Structured
 ): asserts spec is typeof Struct {
   if (spec instanceof Struct) {
     throw new Error(`is not a Struct`);
   }
 }
 
-export function assertConstructableStruct2<T>(
-  spec: typeof Struct | typeof Struct2
+export function assertConstructableStruct2(
+  spec: typeof Struct | typeof Struct2 | typeof Structured
 ): asserts spec is typeof Struct2 {
   if ((spec as any).__proto__.name !== "Struct2") {
     throw new Error(`is not a Struct2`);
+  }
+}
+
+export function assertConstructableStructured(
+  spec: typeof Struct | typeof Struct2 | typeof Structured
+): asserts spec is typeof Structured {
+  if ((spec as any).__proto__.name !== "Structured") {
+    throw new Error(`is not a Structured`);
+  }
+}
+
+export function assertConstructableObj(
+  spec: typeof Struct | typeof Struct2 | typeof Structured
+): asserts spec is typeof Structured | typeof Struct | typeof Struct2 {
+  if (
+    (spec as any).__proto__.name === "Structured" ||
+    (spec as any).__proto__.name === "Struct2" ||
+    (spec as any).__proto__.name === "Struct"
+  ) {
+    throw new Error(`is not a constructable object`);
   }
 }

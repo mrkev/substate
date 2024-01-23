@@ -1,6 +1,8 @@
+import hljs from "highlight.js";
 import React, { useEffect, useState } from "react";
-import { Struct2, create2 } from "../Struct2";
+import { DeserializeFunc, Structured } from "../Structured";
 import * as s from "../index";
+
 import {
   construct,
   debugOut,
@@ -16,8 +18,13 @@ import {
   popHistory,
   recordHistory,
 } from "../sstate.history";
+import {
+  ApplyDeserialization,
+  NeedsSchema,
+  Serialized,
+  StructSchema,
+} from "../sstate.serialization";
 import "./App.css";
-import { Constructable } from "vitest";
 
 /**
  * TODO:
@@ -30,20 +37,45 @@ import { Constructable } from "vitest";
  * - built-in clone for structs. In theory easy, since I already serialize/decerialize and that captures all the props I care about
  */
 
-class Track extends Struct2<typeof Track> {
+type SerializedTrack = Readonly<{
+  name: string;
+  clips?: Extract<Serialized, { $$: "arr-schema" }>; // todo this is not working for some reason:
+  // clips?: ApplySerialization<s.SSchemaArray<MidiClip>>;
+}>;
+
+class Track extends Structured<SerializedTrack, typeof Track> {
   readonly name: s.SString;
   readonly clips: s.SSchemaArray<MidiClip>;
   readonly effects: s.SArray<Effect>;
 
-  constructor(props: { name: string; clips?: MidiClip[] }) {
+  constructor(name: string, clips?: MidiClip[]) {
     super();
-    this.name = s.string(props.name);
-    this.clips = s.arrayOf([MidiClip], props.clips);
+    this.name = s.string(name);
+    this.clips = s.arrayOf([MidiClip], clips);
     this.effects = s.array<Effect>();
   }
 
-  override serialize(): readonly [props: { name: string; clips?: MidiClip[] }] {
-    return [{ name: this.name.get() }] as const;
+  override serialize() {
+    // TODO: HOW TO SERIALIZE CLIPS
+    return { name: this.name.get() } as const;
+  }
+
+  override replace(json: SerializedTrack): void {
+    this.name.set(json.name);
+    // TODO: I should make replae only care about non-knowables. All knowables get auto-set.
+    // this.clips._setRaw(json.clips)
+  }
+
+  static construct(
+    json: SerializedTrack,
+    deserializeWithSchema: DeserializeFunc
+  ) {
+    // TODO: asnync constructs
+    const clips =
+      json.clips != null
+        ? deserializeWithSchema(json.clips ?? [], MidiClip)._getRaw()
+        : undefined;
+    return new Track(json.name, clips);
   }
 
   addClip(name: string) {
@@ -81,10 +113,9 @@ class MidiClip extends Clip {
   }
 }
 
-const track = create2(Track, {
-  name: "untitled track",
-  clips: [s.create(MidiClip, { duration: 3 })],
-});
+const track = Structured.create(Track, "untitled track", [
+  s.create(MidiClip, { duration: 3 }),
+]);
 
 function App() {
   return (
@@ -245,10 +276,17 @@ function Notes(props: { notes: LinkedArray<Note> }) {
 
 function ProjectDebug() {
   useContainer(track, true);
+
+  const value = hljs.highlight(debugOut(track), {
+    language: "javascript",
+  }).value;
   return (
     <div style={{ overflow: "scroll" }}>
-      <pre style={{ textAlign: "left", width: 300, fontSize: 12 }}>
-        {debugOut(track)}
+      <pre
+        style={{ textAlign: "left", width: 300, fontSize: 12 }}
+        dangerouslySetInnerHTML={{ __html: value }}
+      >
+        {/* {debugOut(track)} */}
       </pre>
     </div>
   );

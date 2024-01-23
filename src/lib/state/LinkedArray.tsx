@@ -69,7 +69,7 @@ export class LinkedArray<S>
     }
   }
 
-  _getRaw(): ReadonlyArray<S> {
+  _getRaw(): Array<S> {
     return this._array;
   }
 

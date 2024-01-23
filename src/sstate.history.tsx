@@ -4,15 +4,33 @@ import { exhaustive } from "./assertions";
 import { LinkedArray } from "./lib/state/LinkedArray";
 import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
 import { SArray, SSchemaArray, Struct } from "./sstate";
-import { replace, serialize } from "./sstate.serialization";
+import {
+  NeedsSchema,
+  Serialized,
+  replace,
+  serialize,
+} from "./sstate.serialization";
 import { Struct2 } from "./Struct2";
+import { Structured } from "./Structured";
 
 export type KnowableObject =
+  | LinkedPrimitive<any>
   | Struct<any>
   | Struct2<any>
-  | LinkedPrimitive<any>
+  | Structured<any, any>
   | SArray<any>
   | SSchemaArray<any>;
+
+export function isKnowable(val: unknown) {
+  return (
+    val instanceof LinkedPrimitive ||
+    val instanceof Struct ||
+    val instanceof Struct2 ||
+    val instanceof Structured ||
+    val instanceof SArray ||
+    val instanceof SSchemaArray
+  );
+}
 
 export type HistoryEntry = {
   id: string; // history entry id
@@ -166,6 +184,8 @@ export function popHistory() {
     } else if (object instanceof Struct) {
       replace(serialized, object);
     } else if (object instanceof Struct2) {
+      replace(serialized, object);
+    } else if (object instanceof Structured) {
       replace(serialized, object);
     } else {
       exhaustive(object);
