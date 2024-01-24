@@ -1,17 +1,12 @@
 import { nanoid } from "nanoid";
+import { Struct2 } from "./Struct2";
+import { Structured } from "./Structured";
 import { WeakRefMap } from "./WeakRefMap";
 import { exhaustive } from "./assertions";
 import { LinkedArray } from "./lib/state/LinkedArray";
 import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
 import { SArray, SSchemaArray, Struct } from "./sstate";
-import {
-  NeedsSchema,
-  Serialized,
-  replace,
-  serialize,
-} from "./sstate.serialization";
-import { Struct2 } from "./Struct2";
-import { Structured } from "./Structured";
+import { replace, serialize } from "./sstate.serialization";
 
 export type KnowableObject =
   | LinkedPrimitive<any>

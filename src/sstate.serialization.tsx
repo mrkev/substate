@@ -458,7 +458,7 @@ export function replace(str: string, obj: KnowableObject) {
       }
       case "structured": {
         assertStructured(obj);
-        throw replaceStructured(json, obj);
+        return replaceStructured(json, obj);
       }
       default:
         exhaustive(json, "invalid $$ type");
@@ -546,7 +546,9 @@ function replaceStructured(
   json: Extract<Serialized, { $$: "structured" }>,
   obj: Structured<any, any>
 ) {
-  throw new Error("Unimplemented");
+  obj.replace(json._value);
+  obj._notifyChange();
+  return;
 }
 
 function isSeralized(json: unknown): json is Serialized {
