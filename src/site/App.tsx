@@ -18,12 +18,7 @@ import {
   popHistory,
   recordHistory,
 } from "../sstate.history";
-import {
-  ApplyDeserialization,
-  NeedsSchema,
-  Serialized,
-  StructSchema,
-} from "../sstate.serialization";
+import { Serialized } from "../sstate.serialization";
 import "./App.css";
 
 /**

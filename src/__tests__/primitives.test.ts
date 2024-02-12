@@ -2,15 +2,16 @@
 
 import { describe, expect, it } from "vitest";
 import * as s from "../sstate";
+import * as Struct from "../Struct";
 
-class Primitives extends s.Struct<Primitives> {
+class Primitives extends Struct.Struct<Primitives> {
   readonly num = s.number(0);
   readonly str = s.string("hello world");
   readonly bool = s.boolean(false);
   readonly nil = s.nil();
 }
 
-const prim = s.create(Primitives, {});
+const prim = Struct.create(Primitives, {});
 
 describe("sstate", () => {
   it("string", () => {

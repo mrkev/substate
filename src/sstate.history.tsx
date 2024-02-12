@@ -1,11 +1,12 @@
 import { nanoid } from "nanoid";
+import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
 import { WeakRefMap } from "./WeakRefMap";
 import { exhaustive } from "./assertions";
 import { LinkedArray } from "./lib/state/LinkedArray";
 import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
-import { SArray, SSchemaArray, Struct } from "./sstate";
+import { SArray, SSchemaArray } from "./sstate";
 import { replace, serialize } from "./sstate.serialization";
 
 export type KnowableObject =
@@ -163,27 +164,34 @@ export function popHistory() {
 
   saveContraryRedo(prev);
 
-  for (const [id, serialized] of prev.objects) {
+  // In reverse, to go back in time
+  for (const [id, serialized] of [...prev.objects.entries()].reverse()) {
     const object = knownObjects.get(id);
 
     if (object == null) {
       throw new Error(`no known object with ${id} found`);
     }
 
-    if (object instanceof LinkedPrimitive) {
-      replace(serialized, object);
-    } else if (object instanceof SArray) {
-      replace(serialized, object);
-    } else if (object instanceof SSchemaArray) {
-      replace(serialized, object);
-    } else if (object instanceof Struct) {
-      replace(serialized, object);
-    } else if (object instanceof Struct2) {
-      replace(serialized, object);
-    } else if (object instanceof Structured) {
-      replace(serialized, object);
-    } else {
-      exhaustive(object);
+    try {
+      const json = JSON.parse(serialized);
+      if (object instanceof LinkedPrimitive) {
+        replace(json, object);
+      } else if (object instanceof SArray) {
+        replace(json, object);
+      } else if (object instanceof SSchemaArray) {
+        replace(json, object);
+      } else if (object instanceof Struct) {
+        replace(json, object);
+      } else if (object instanceof Struct2) {
+        replace(json, object);
+      } else if (object instanceof Structured) {
+        replace(json, object);
+      } else {
+        exhaustive(object);
+      }
+    } catch (e) {
+      console.log("error with replace (probably parsing):", serialized);
+      throw e;
     }
   }
 }

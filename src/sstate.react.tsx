@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { SArray, SSchemaArray, SState, Struct } from "./sstate";
+import { SArray, SSchemaArray, SState } from "./sstate";
+import { Struct } from "./Struct";
 import { useSubscribeToSubbableMutationHashable } from "./lib/state/LinkedMap";
 import type {
   LinkedPrimitive,

@@ -1,4 +1,5 @@
-import { SArray, SSchemaArray, Struct } from "./sstate";
+import { SArray, SSchemaArray } from "./sstate";
+import { Struct } from "./Struct";
 import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
 import { LinkedArray } from "./lib/state/LinkedArray";
 import { Struct2 } from "./Struct2";
@@ -60,12 +61,14 @@ export function isContainable(
   | LinkedPrimitive<unknown>
   | LinkedArray<unknown>
   | Struct<any>
-  | Struct2<any> {
+  | Struct2<any>
+  | Structured<any, any> {
   return (
     val instanceof LinkedPrimitive ||
     val instanceof LinkedArray ||
     val instanceof Struct ||
-    val instanceof Struct2
+    val instanceof Struct2 ||
+    val instanceof Structured
   );
 }
 

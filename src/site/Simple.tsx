@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
 import * as s from "../sstate";
+import * as Struct from "../Struct";
 import { debugOut } from "../sstate.debug";
 import { getGlobalState, popHistory, recordHistory } from "../sstate.history";
 import { useStructure, useSPrimitive, useContainer } from "../sstate.react";
 import { construct, serialize } from "../sstate.serialization";
 import { useLinkedArray } from "../lib/state/LinkedArray";
 
-export class BusLine extends s.Struct<BusLine> {
+export class BusLine extends Struct.Struct<BusLine> {
   readonly distance = s.number();
   readonly stops = s.number();
   readonly buses = s.arrayOf([Bus]);
 
   addBus(name: string) {
-    const lion = s.create(Bus, { name });
+    const lion = Struct.create(Bus, { name });
     this.buses.push(lion);
   }
 
@@ -24,14 +25,14 @@ export class BusLine extends s.Struct<BusLine> {
   }
 }
 
-export class Bus extends s.Struct<Bus> {
+export class Bus extends Struct.Struct<Bus> {
   readonly name = s.string();
 }
 
-const busLine = s.create(BusLine, {
+const busLine = Struct.create(BusLine, {
   distance: 0,
   stops: 0,
-  buses: [s.create(Bus, { name: "hello" })],
+  buses: [Struct.create(Bus, { name: "hello" })],
 });
 
 export function App() {

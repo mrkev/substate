@@ -3,7 +3,8 @@ import { SString, Structured } from ".";
 import { Struct2 } from "./Struct2";
 import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
 import { MutationHashable } from "./lib/state/MutationHashable";
-import { SArray, SSchemaArray, Struct } from "./sstate";
+import { SArray, SSchemaArray } from "./sstate";
+import { Struct } from "./Struct";
 
 function stringifyUnknown(val: unknown) {
   const res = stringify(val, {
@@ -102,9 +103,10 @@ export function debugOutArray(
 }
 
 export function debugOutPrimitive(obj: LinkedPrimitive<any>) {
-  if (obj instanceof SString) {
-    return `'${obj.get()}' (${obj._id})`;
+  const val = obj.get();
+  if (typeof val === "string") {
+    return `'${val}' (${obj._id})`;
   }
 
-  return `${obj.get()} (${obj._id})`;
+  return `${val} (${obj._id})`;
 }

@@ -3,9 +3,10 @@ import { useCallback, useEffect, useState } from "react";
 import { isContainable } from "../../assertions";
 import { saveForHistory } from "../../sstate.history";
 import { useSubscribeToSubbableMutationHashable } from "./LinkedMap";
-import { StateChangeHandler, StateDispath } from "./LinkedPrimitive";
+import { Contained, StateChangeHandler, StateDispath } from "./LinkedPrimitive";
 import { MutationHashable, SubbableContainer } from "./MutationHashable";
 import { Subbable, notify, subscribe } from "./Subbable";
+import { WeakRefMap } from "../../WeakRefMap";
 
 // .sort, .reverse, .fill, .copyWithin operate in place and return the array. SubbableArray
 // is not quite an array so the return types don't match.
@@ -28,18 +29,50 @@ export type ArrayWithoutIndexer<T> = Omit<
 >;
 
 export class LinkedArray<S>
-  implements ArrayWithoutIndexer<S>, Subbable, SubbableContainer
+  implements ArrayWithoutIndexer<S>, Subbable, SubbableContainer, Contained
 {
   readonly _id: string;
-  private _array: Array<S>;
+  protected _array: Array<S>;
   readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
   _hash: number = 0;
   _container: SubbableContainer | null = null;
 
+  /** See usage in SSchemaArray */
+  protected _containedIds: WeakRefMap<any> | null = null;
+
+  protected _contain(items: Array<S>) {
+    console.log("in LinkedArray");
+    for (const elem of items) {
+      if (isContainable(elem)) {
+        elem._container = this;
+      }
+    }
+  }
+
+  protected _uncontain(item: S) {
+    if (isContainable(item)) {
+      item._container = null;
+      // TODO: safety
+      if ("_destroy" in item) {
+        item._destroy();
+      }
+    }
+  }
+
+  _replace(arr: Array<S>) {
+    this._array = arr; // todo, call ._destroy on child elements?
+    this._contain(this._array);
+
+    MutationHashable.mutated(this, this);
+    if (this._container != null) {
+      this._container._childChanged(this);
+    }
+  }
+
   constructor(initialValue: Array<S>, id: string) {
     this._array = initialValue;
     this._id = id;
-    this.contain(this._array);
+    this._contain(this._array);
   }
 
   _childChanged(child: Subbable) {
@@ -49,7 +82,7 @@ export class LinkedArray<S>
     }
   }
 
-  private mutate<V>(mutator: (clone: Array<S>) => V): V {
+  private mutate<V>(mutator: (rep: Array<S>) => V): V {
     saveForHistory(this as any);
     const result = mutator(this._array);
     MutationHashable.mutated(this, this);
@@ -58,15 +91,6 @@ export class LinkedArray<S>
       this._container._childChanged(this);
     }
     return result;
-  }
-
-  private contain(items: Array<S>) {
-    for (const elem of items) {
-      if (isContainable(elem)) {
-        elem._container = this;
-        // console.log("CONTAINER OF", elem, "<=", this);
-      }
-    }
   }
 
   _getRaw(): Array<S> {
@@ -119,8 +143,10 @@ export class LinkedArray<S>
       return;
     }
 
-    return this.mutate((clone) => {
-      return clone.pop();
+    return this.mutate((rep) => {
+      const res = rep.pop();
+      res != null && this._uncontain(res);
+      return res;
     });
   }
 
@@ -131,18 +157,10 @@ export class LinkedArray<S>
     }
 
     return this.mutate((clone) => {
-      return clone.shift();
+      const res = clone.shift();
+      res != null && this._uncontain(res);
+      return res;
     });
-  }
-
-  _replace(arr: Array<S>) {
-    this._array = arr; // todo, call ._destroy on child elements?
-    this.contain(this._array);
-
-    MutationHashable.mutated(this, this);
-    if (this._container != null) {
-      this._container._childChanged(this);
-    }
   }
 
   // Array<S> interface, mutates
@@ -150,7 +168,7 @@ export class LinkedArray<S>
     if (items.length < 1) {
       return this.length;
     }
-    this.contain(items);
+    this._contain(items);
 
     return this.mutate((clone) => {
       return clone.push(...items);
@@ -162,7 +180,7 @@ export class LinkedArray<S>
     if (items.length < 1) {
       return this.length;
     }
-    this.contain(items);
+    this._contain(items);
 
     return this.mutate((clone) => {
       return clone.unshift(...items);
@@ -189,14 +207,11 @@ export class LinkedArray<S>
   splice(start: number, deleteCount?: number): S[];
   splice(start: number, deleteCount: number, ...items: S[]): S[];
   splice(start: any, deleteCount?: any, ...items: any[]): S[] {
-    this.contain(items);
+    this._contain(items);
     return this.mutate((_array) => {
       const deleted = _array.splice(start, deleteCount, ...items);
       for (const elem of deleted) {
-        // TODO: safety
-        if ("_destroy" in (elem as any)) {
-          (elem as any)._destroy();
-        }
+        this._uncontain(elem);
       }
       return deleted;
     });
@@ -204,7 +219,8 @@ export class LinkedArray<S>
 
   // Array<S> interface, mutates
   fill(value: S, start?: number, end?: number): this {
-    this.contain([value]);
+    this._contain([value]);
+    // TODO: BREAKING: containment
     return this.mutate((_array) => {
       _array.fill(value, start, end);
       return this;
@@ -214,6 +230,7 @@ export class LinkedArray<S>
   // Array<S> interface, mutates
   copyWithin(target: number, start: number, end?: number): this {
     return this.mutate((_array) => {
+      // TODO: BREAKING: containment
       _array.copyWithin(target, start, end);
       return this;
     });
@@ -239,6 +256,8 @@ export class LinkedArray<S>
     if (index === -1) {
       return null;
     }
+
+    // containment handled by splice
     return this.splice(index, 1)[0];
   }
 

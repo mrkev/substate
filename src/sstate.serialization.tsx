@@ -17,7 +17,8 @@ import {
 } from "./assertions";
 import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
 import * as s from "./sstate";
-import { SArray, SSchemaArray, Struct } from "./sstate";
+import { SArray, SSchemaArray } from "./sstate";
+import { Struct } from "./Struct";
 import { KnowableObject, isKnowable } from "./sstate.history";
 import { JSONValue } from "./types";
 
@@ -120,7 +121,7 @@ export function simplifySimpleArray(obj: SArray<any>): Serialized {
   };
 }
 
-export function simplifySchemaArray(obj: SArray<any>): Serialized {
+export function simplifySchemaArray(obj: SSchemaArray<any>): Serialized {
   return {
     $$: "arr-schema",
     _value: obj._getRaw().map((x) => {
@@ -388,7 +389,7 @@ function initialize(
   json: unknown,
   // A union of of the specs this json could follow
   spec: Schema
-): LinkedPrimitive<any> | SArray<any> | Struct<any> {
+): LinkedPrimitive<any> | SArray<any> | SSchemaArray<any> | Struct<any> {
   if (!isSeralized(json)) {
     console.log("not serialized", json);
     throw new Error("invalid serialization is not a non-null object");
@@ -427,10 +428,8 @@ function initialize(
 s;
 ///////////////////////////////////////
 
-export function replace(str: string, obj: KnowableObject) {
+export function replace(json: any, obj: KnowableObject) {
   try {
-    const json = JSON.parse(str);
-
     if (!isSeralized(json)) {
       throw new Error("invalid serialization is not a non-null object");
     }
@@ -464,7 +463,7 @@ export function replace(str: string, obj: KnowableObject) {
         exhaustive(json, "invalid $$ type");
     }
   } catch (e) {
-    console.log("error with replace", JSON.parse(str));
+    console.log("error with replace", json);
     throw e;
   }
 }
@@ -482,7 +481,14 @@ function replaceSchemaArray(
 ) {
   // TODO: HOW DO I MERGE?
   const initialized = json._value.map((x) => {
+    // TODO: find if item exists in array
     if (isSeralized(x)) {
+      // const elem = arr._containedIds.get(x._id) as KnowableObject | null;
+      // if (elem != null) {
+      //   replace(x, elem);
+      //   return;
+      // }
+
       // TODO: spec?
       return initialize(x, arr._schema[0] as any);
     } else {
