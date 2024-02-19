@@ -78,7 +78,7 @@ export class SSchemaArray<
   protected override _containedIds: WeakRefMap<T>;
 
   protected override _contain(items: Array<T>) {
-    console.log("in SSchemaArray", this);
+    // console.log("in SSchemaArray", this);
     for (const elem of items) {
       elem._container = this;
       // When initializng, we contain all values passed to super(), before we create this._containedIds, so it will be null
