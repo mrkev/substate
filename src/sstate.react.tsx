@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { SArray, SSchemaArray, SState } from "./sstate";
 import { Struct } from "./Struct";
-import { useSubscribeToSubbableMutationHashable } from "./lib/state/LinkedMap";
 import type {
   LinkedPrimitive,
   StateDispath,
 } from "./lib/state/LinkedPrimitive";
-import { MutationHashable } from "./lib/state/MutationHashable";
+import {
+  MutationHashable,
+  useSubscribeToSubbableMutationHashable,
+} from "./lib/state/MutationHashable";
 import { subscribe } from "./lib/state/Subbable";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
@@ -70,7 +72,13 @@ export function useContainer<
     | SSchemaArray<any>
     | Struct2<any>
     | Structured<any, any>
->(obj: S, allChanges: boolean = false) {
+>(obj: S, allChanges: boolean = false): S {
   useSubscribeToSubbableMutationHashable(obj, undefined, allChanges);
   return obj;
+}
+
+export function useIsDirty<S extends Structured<any, any>>(obj: S): boolean {
+  useSubscribeToSubbableMutationHashable(obj, undefined, true);
+  console.log("isClean?", obj._isClean());
+  return !obj._isClean();
 }

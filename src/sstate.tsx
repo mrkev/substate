@@ -4,30 +4,32 @@ import { nanoid } from "nanoid";
 import { Structured } from ".";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
+import { WeakRefMap } from "./WeakRefMap";
+import { isContainable } from "./assertions";
 import { LinkedArray } from "./lib/state/LinkedArray";
 import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
 import { getGlobalState } from "./sstate.history";
 import { JSONValue } from "./types";
-import { WeakRefMap } from "./WeakRefMap";
-import { isContainable } from "./assertions";
+import { LinkedMap } from "./lib/state/LinkedMap";
+import { LinkedSet } from "./lib/state/LinkedSet";
 
 // todo? create -> of
-class SString extends LinkedPrimitive<string> {
+export class SString extends LinkedPrimitive<string> {
   static create(val: string) {
     return LinkedPrimitive.of(val);
   }
 }
-class SNumber extends LinkedPrimitive<number> {
+export class SNumber extends LinkedPrimitive<number> {
   static create(val: number) {
     return LinkedPrimitive.of(val);
   }
 }
-class SBoolean extends LinkedPrimitive<boolean> {
+export class SBoolean extends LinkedPrimitive<boolean> {
   static create(val: boolean) {
     return LinkedPrimitive.of(val);
   }
 }
-class SNil extends LinkedPrimitive<null> {
+export class SNil extends LinkedPrimitive<null> {
   static create(val: null) {
     return LinkedPrimitive.of(val);
   }
@@ -78,7 +80,6 @@ export class SSchemaArray<
   protected override _containedIds: WeakRefMap<T>;
 
   protected override _contain(items: Array<T>) {
-    // console.log("in SSchemaArray", this);
     for (const elem of items) {
       elem._container = this;
       // When initializng, we contain all values passed to super(), before we create this._containedIds, so it will be null
@@ -127,19 +128,19 @@ export function string(value?: string): SString {
     : SString.of(value);
 }
 
-export function number(value?: number): LinkedPrimitive<number> {
+export function number(value?: number): SNumber {
   return value == null
     ? (new UNINITIALIZED_PRIMITIVE() as any)
     : SNumber.of(value);
 }
 
-export function boolean(value?: boolean) {
+export function boolean(value?: boolean): SBoolean {
   return value == null
     ? (new UNINITIALIZED_PRIMITIVE() as any)
     : SBoolean.of(value);
 }
 
-export function nil() {
+export function nil(): SNil {
   return SNil.of(null);
 }
 
@@ -159,4 +160,10 @@ export function array<T extends JSONValue>(val?: T[]): SArray<T> {
     : new SArray(val, nanoid(5));
 }
 
-export { SBoolean, SNil, SNumber, SString };
+export function map<K, V>(initialValue?: Map<K, V>) {
+  return LinkedMap.create(initialValue);
+}
+
+export function set<T>(initialValue?: Set<T>) {
+  return LinkedSet.create(initialValue);
+}

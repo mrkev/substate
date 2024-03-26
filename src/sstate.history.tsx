@@ -196,8 +196,52 @@ export function popHistory() {
   }
 }
 
+export function forwardHistory() {
+  const globalState = getGlobalState();
+  const { history, knownObjects, redoStack } = globalState;
+  const next = redoStack.pop();
+  if (next == null) {
+    return;
+  }
+
+  // saveContraryUndo(prev);
+
+  // // In reverse, to go back in time
+  // for (const [id, serialized] of [...prev.objects.entries()].reverse()) {
+  //   const object = knownObjects.get(id);
+
+  //   if (object == null) {
+  //     throw new Error(`no known object with ${id} found`);
+  //   }
+
+  //   try {
+  //     const json = JSON.parse(serialized);
+  //     if (object instanceof LinkedPrimitive) {
+  //       replace(json, object);
+  //     } else if (object instanceof SArray) {
+  //       replace(json, object);
+  //     } else if (object instanceof SSchemaArray) {
+  //       replace(json, object);
+  //     } else if (object instanceof Struct) {
+  //       replace(json, object);
+  //     } else if (object instanceof Struct2) {
+  //       replace(json, object);
+  //     } else if (object instanceof Structured) {
+  //       replace(json, object);
+  //     } else {
+  //       exhaustive(object);
+  //     }
+  //   } catch (e) {
+  //     console.log("error with replace (probably parsing):", serialized);
+  //     throw e;
+  //   }
+  // }
+}
+
 export const history = {
   push: pushHistory,
-  pop: popHistory,
   record: recordHistory,
+  //
+  pop: popHistory,
+  redo: forwardHistory,
 };

@@ -1,9 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
-import { StateChangeHandler, StateDispath } from "./LinkedPrimitive";
-import { Subbable, notify, subscribe } from "./Subbable";
+import { StateChangeHandler } from "./LinkedPrimitive";
+import { MutationHashable } from "./MutationHashable";
+import { Subbable } from "./Subbable";
 
-export class LinkedSet<S> implements Set<S>, Subbable {
+// TODO: SubbableContainer, Contained
+export class LinkedSet<S> implements Set<S>, Subbable, MutationHashable {
   private _set: ReadonlySet<S>;
+
+  _subscriptors = new Set<StateChangeHandler<Subbable>>();
+  _hash: number = 0;
+
   private constructor(initialValue: Set<S>) {
     this._set = initialValue;
   }
@@ -14,19 +19,16 @@ export class LinkedSet<S> implements Set<S>, Subbable {
 
   _setRaw(set: ReadonlySet<S>) {
     this._set = set;
-    notify(this, this);
+    MutationHashable.mutated(this, this);
   }
 
-  _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
   public static create<T>(initialValue?: Set<T>) {
     return new this<T>(initialValue ?? new Set());
   }
 
   private mutate<V>(mutator: (clone: Set<S>) => V): V {
-    const clone = new Set(this._set);
-    const result = mutator(clone);
-    this._set = clone;
-    notify(this, this);
+    const result = mutator(this);
+    MutationHashable.mutated(this, this);
     return result;
   }
 
@@ -47,7 +49,7 @@ export class LinkedSet<S> implements Set<S>, Subbable {
   // Set<S> interface, mutates
   clear(): void {
     this._set = new Set();
-    notify(this, this);
+    MutationHashable.mutated(this, this);
   }
 
   // Set<S> interface, mutates
@@ -103,39 +105,4 @@ export class LinkedSet<S> implements Set<S>, Subbable {
   get [Symbol.toStringTag]() {
     return this.constructor.name;
   }
-}
-
-// TODO: currently I clone in the link set to see if anything changed
-// I can also not clone and just have a state counter here or something.
-export function useLinkedSet<S>(
-  linkedSet: LinkedSet<S>
-): [LinkedSet<S>, StateDispath<ReadonlySet<S>>] {
-  const [, setState] = useState(() => linkedSet._getRaw());
-
-  useEffect(() => {
-    return subscribe(linkedSet, (target) => {
-      if (target === linkedSet) {
-        setState(() => linkedSet._getRaw());
-      }
-    });
-  }, [linkedSet]);
-
-  const setter: StateDispath<ReadonlySet<S>> = useCallback(
-    function (newVal) {
-      if (newVal instanceof Function) {
-        linkedSet._setRaw(newVal(linkedSet._getRaw()));
-      } else {
-        linkedSet._setRaw(newVal);
-      }
-    },
-    [linkedSet]
-  );
-
-  return [linkedSet, setter];
-}
-
-export function useNewLinkedSet<S>(): LinkedSet<S> {
-  const [set] = useState<LinkedSet<S>>(() => LinkedSet.create<S>());
-  const _ = useLinkedSet<S>(set);
-  return set;
 }

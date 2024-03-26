@@ -1,10 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
-import { StateChangeHandler, StateDispath } from "./LinkedPrimitive";
+import { StateChangeHandler } from "./LinkedPrimitive";
 import { MutationHashable } from "./MutationHashable";
-import { Subbable, notify, subscribe } from "./Subbable";
+import { Subbable } from "./Subbable";
 
-// NOTE: what happens when has is MAX_INT?
-// TODO: handle overflow gracefully
+// TODO: SubbableContainer, Contained
 export class LinkedMap<K, V> implements Map<K, V>, Subbable, MutationHashable {
   private _map = new Map<K, V>();
 
@@ -106,47 +104,4 @@ export class LinkedMap<K, V> implements Map<K, V>, Subbable, MutationHashable {
   get [Symbol.toStringTag](): string {
     return this.constructor.name;
   }
-}
-
-export function useNewLinkedMap<K, V>(): LinkedMap<K, V> {
-  const [map] = useLinkedMap(LinkedMap.create<K, V>());
-  useSubscribeToSubbableMutationHashable(map);
-  return map;
-}
-
-export function useLinkedMap<K, V>(
-  linkedMap: LinkedMap<K, V>
-): [LinkedMap<K, V>, StateDispath<ReadonlyMap<K, V>>] {
-  useSubscribeToSubbableMutationHashable(linkedMap);
-
-  const setter: StateDispath<ReadonlyMap<K, V>> = useCallback(
-    function (newVal) {
-      if (newVal instanceof Function) {
-        linkedMap._setRaw(newVal(linkedMap._getRaw()));
-      } else {
-        linkedMap._setRaw(newVal);
-      }
-    },
-    [linkedMap]
-  );
-
-  return [linkedMap, setter];
-}
-
-export function useSubscribeToSubbableMutationHashable<
-  T extends MutationHashable & Subbable
->(obj: T, cb?: () => void, recursiveChanges = false): T {
-  const [, setHash] = useState(() => MutationHashable.getMutationHash(obj));
-
-  useEffect(() => {
-    return subscribe(obj, (target) => {
-      // console.log("got notif", obj, "target is", target);
-      if (obj === target || recursiveChanges) {
-        setHash((prev) => (prev + 1) % Number.MAX_SAFE_INTEGER);
-        cb?.();
-      }
-    });
-  }, [cb, obj, recursiveChanges]);
-
-  return obj;
 }

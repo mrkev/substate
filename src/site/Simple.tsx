@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import "./App.css";
-import * as s from "../sstate";
 import * as Struct from "../Struct";
+import * as s from "../sstate";
 import { debugOut } from "../sstate.debug";
 import { getGlobalState, popHistory, recordHistory } from "../sstate.history";
-import { useStructure, useSPrimitive, useContainer } from "../sstate.react";
+import { useContainer, useSPrimitive, useStructure } from "../sstate.react";
 import { construct, serialize } from "../sstate.serialization";
-import { useLinkedArray } from "../lib/state/LinkedArray";
+import "./App.css";
 
 export class BusLine extends Struct.Struct<BusLine> {
   readonly distance = s.number();
@@ -170,7 +169,7 @@ const BusEditor = React.memo(function TrackAImpl({
 
 function ProjectDebug() {
   useContainer(busLine);
-  const [history] = useLinkedArray(getGlobalState().history);
+  const history = useContainer(getGlobalState().history);
 
   return (
     <div>

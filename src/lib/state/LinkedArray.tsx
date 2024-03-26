@@ -1,12 +1,9 @@
 import { nanoid } from "nanoid";
-import { useCallback, useEffect, useState } from "react";
-import { isContainable } from "../../assertions";
-import { saveForHistory } from "../../sstate.history";
-import { useSubscribeToSubbableMutationHashable } from "./LinkedMap";
-import { Contained, StateChangeHandler, StateDispath } from "./LinkedPrimitive";
-import { MutationHashable, SubbableContainer } from "./MutationHashable";
-import { Subbable, notify, subscribe } from "./Subbable";
 import { WeakRefMap } from "../../WeakRefMap";
+import { saveForHistory } from "../../sstate.history";
+import { Contained, StateChangeHandler } from "./LinkedPrimitive";
+import { MutationHashable, SubbableContainer } from "./MutationHashable";
+import { Subbable, notify } from "./Subbable";
 
 // .sort, .reverse, .fill, .copyWithin operate in place and return the array. SubbableArray
 // is not quite an array so the return types don't match.
@@ -40,23 +37,14 @@ export class LinkedArray<S>
   /** See usage in SSchemaArray */
   protected _containedIds: WeakRefMap<any> | null = null;
 
+  // NOTE: we want this here because we overwite it in SSchemaArray
   protected _contain(items: Array<S>) {
-    console.log("in LinkedArray");
-    for (const elem of items) {
-      if (isContainable(elem)) {
-        elem._container = this;
-      }
-    }
+    SubbableContainer._contain(this, items);
   }
 
+  // NOTE: we want this here because we overwite it in SSchemaArray
   protected _uncontain(item: S) {
-    if (isContainable(item)) {
-      item._container = null;
-      // TODO: safety
-      if ("_destroy" in item) {
-        item._destroy();
-      }
-    }
+    SubbableContainer._uncontain(item);
   }
 
   _replace(arr: Array<S>) {
@@ -382,59 +370,4 @@ export class LinkedArray<S>
   flat<A, D extends number = 1>(this: A, depth?: D): FlatArray<A, D>[] {
     throw new Error("Method not implemented.");
   }
-}
-
-export function useLinkedArray<S>(
-  linkedArray: LinkedArray<S>
-): [LinkedArray<S>, StateDispath<Array<S>>] {
-  useSubscribeToSubbableMutationHashable(linkedArray);
-
-  const setter: StateDispath<Array<S>> = useCallback(
-    function (newVal) {
-      if (newVal instanceof Function) {
-        linkedArray._setRaw(newVal(linkedArray._getRaw() as any));
-      } else {
-        linkedArray._setRaw(newVal);
-      }
-    },
-    [linkedArray]
-  );
-
-  return [linkedArray, setter];
-}
-
-export function useObserveLinkedArray<S>(
-  linkedArray: LinkedArray<S>
-): LinkedArray<S> {
-  const [_, setState] = useState(() => linkedArray._getRaw());
-
-  useEffect(() => {
-    return subscribe(linkedArray, (target) => {
-      if (target === linkedArray) {
-        setState(() => linkedArray._getRaw());
-      }
-    });
-  }, [linkedArray]);
-
-  return linkedArray;
-}
-
-export function useLinkedArrayMaybe<S>(
-  linkedArray: LinkedArray<S> | null
-): readonly S[] | null {
-  const [state, setState] = useState(() => linkedArray?._getRaw() ?? null);
-
-  useEffect(() => {
-    if (linkedArray == null) {
-      return;
-    }
-    setState(linkedArray._getRaw());
-    return subscribe(linkedArray, (target) => {
-      if (target === linkedArray) {
-        setState(() => linkedArray._getRaw());
-      }
-    });
-  }, [linkedArray]);
-
-  return state;
 }

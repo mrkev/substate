@@ -44,6 +44,7 @@ export const STRUCTURED_IGNORE_KEYS = new Set<string>([
   "_hash",
   "_subscriptors",
   "_container",
+  "_cleanHash",
 ]);
 
 export abstract class Structured<S, Sub extends ConstructableStructure<S>>
@@ -96,6 +97,17 @@ export abstract class Structured<S, Sub extends ConstructableStructure<S>>
     const res = new Klass(...args) as any;
     initStructured(res);
     return res;
+  }
+
+  // Dirty
+  private _cleanHash: number = 0;
+  _markClean() {
+    // Anticipate the hash change from notificaiton
+    this._cleanHash = (this._hash + 1) % Number.MAX_SAFE_INTEGER;
+    this._notifyChange();
+  }
+  _isClean() {
+    return this._cleanHash === this._hash;
   }
 }
 

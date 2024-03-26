@@ -2,7 +2,6 @@ import hljs from "highlight.js";
 import React, { useEffect, useState } from "react";
 import { DeserializeFunc, Structured } from "../Structured";
 import * as s from "../index";
-
 import {
   construct,
   debugOut,
@@ -11,34 +10,37 @@ import {
   useContainerWithSetter,
   usePrimitive,
 } from "../index";
-import { LinkedArray, useLinkedArray } from "../lib/state/LinkedArray";
+import { LinkedArray } from "../lib/state/LinkedArray";
 import {
   HistoryEntry,
   getGlobalState,
   popHistory,
   recordHistory,
 } from "../sstate.history";
+import { useIsDirty } from "../sstate.react";
 import { Serialized } from "../sstate.serialization";
 import "./App.css";
 
 /**
  * TODO:
  * - Redo
- * - Multiple types in array
+ * x Dirty marker
+ * - Multiple types in array?
  * - Smarter array history?
  * - useHistory
  *    - returns [history, push, pop] ?
- * - put all history in global state in one object (history.undo/pop/redo/push, etc)
+ * x put all history in global state in one object (history.undo/pop/redo/push, etc)
  * - built-in clone for structs. In theory easy, since I already serialize/decerialize and that captures all the props I care about
+ * - Make isDirty work better with undo (undo to save state makes isDirty = false)
  */
 
-type SerializedTrack = Readonly<{
+type SerializedProject = Readonly<{
   name: string;
-  clips?: Extract<Serialized, { $$: "arr-schema" }>; // todo this is not working for some reason:
+  tracks?: Extract<Serialized, { $$: "arr-schema" }>; // todo this is not working for some reason:
   // clips?: ApplySerialization<s.SSchemaArray<MidiClip>>;
 }>;
 
-class Track extends Structured<SerializedTrack, typeof Track> {
+class Project extends Structured<SerializedProject, typeof Project> {
   readonly name: s.SString;
   readonly clips: s.SSchemaArray<MidiClip>;
   readonly effects: s.SArray<Effect>;
@@ -55,22 +57,22 @@ class Track extends Structured<SerializedTrack, typeof Track> {
     return { name: this.name.get() } as const;
   }
 
-  override replace(json: SerializedTrack): void {
+  override replace(json: SerializedProject): void {
     this.name.set(json.name);
     // TODO: I should make replae only care about non-knowables. All knowables get auto-set.
     // this.clips._setRaw(json.clips)
   }
 
   static construct(
-    json: SerializedTrack,
+    json: SerializedProject,
     deserializeWithSchema: DeserializeFunc
   ) {
     // TODO: asnync constructs
     const clips =
-      json.clips != null
-        ? deserializeWithSchema(json.clips ?? [], MidiClip)._getRaw()
+      json.tracks != null
+        ? deserializeWithSchema(json.tracks ?? [], MidiClip)._getRaw()
         : undefined;
-    return new Track(json.name, clips);
+    return new Project(json.name, clips);
   }
 
   addClip(name: string) {
@@ -86,17 +88,17 @@ class Track extends Structured<SerializedTrack, typeof Track> {
 type Note = readonly [s: number, e: number];
 type Effect = readonly [name: string, value: number];
 
-export class Clip extends s.Struct<Clip> {
-  public start: number = 0;
+export class Track extends s.Struct<Track> {
+  // public name: string = "untitled track";
   public duration: number;
 
-  constructor(props: s.StructProps<Clip, { duration: number }>) {
+  constructor(props: s.StructProps<Track, { duration: number }>) {
     super(props);
     this.duration = props.duration;
   }
 }
 
-class MidiClip extends Clip {
+class MidiClip extends Track {
   readonly name = s.string();
   public notes = s.array<Note>([
     [1, 1],
@@ -108,15 +110,26 @@ class MidiClip extends Clip {
   }
 }
 
-const track = Structured.create(Track, "untitled track", [
+const track = Structured.create(Project, "untitled track", [
   s.create(MidiClip, { duration: 3 }),
 ]);
 
 function App() {
+  const dirty = useIsDirty(track);
+
   return (
     <>
       <div>
+        useIsDirty: {JSON.stringify(dirty)}{" "}
+        <button
+          onClick={() => {
+            track._markClean();
+          }}
+        >
+          save
+        </button>
         <button onClick={() => popHistory()}>undo</button>
+        <button onClick={() => s.history.redo()}>redo</button>
         <br></br>
         <button
           onClick={() =>
@@ -155,7 +168,7 @@ function App() {
           onClick={() => {
             const serialized = serialize(track);
             console.log("serialized", serialized);
-            console.log("constructed", construct(serialized, Track));
+            console.log("constructed", construct(serialized, Project));
           }}
         >
           construct test
@@ -163,7 +176,17 @@ function App() {
       </div>
       <div style={{ display: "flex", flexDirection: "row", flexGrow: 1 }}>
         <ProjectDebug />
-        <TrackClips />
+
+        <fieldset
+          style={{
+            border: "none",
+            background: "#181818",
+            alignSelf: "flex-start",
+          }}
+        >
+          <legend>Track</legend>
+          <TrackClips />
+        </fieldset>
         <HistoryStacks />
       </div>
     </>
@@ -173,7 +196,13 @@ function App() {
 function TrackClips() {
   const [tracks] = useContainerWithSetter(track.clips);
   return (
-    <div>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+      }}
+    >
       {tracks.map((track) => {
         return <ClipA tracks={tracks} key={track._id} clip={track} />;
       })}
@@ -206,29 +235,38 @@ const ClipA = React.memo(function TrackAImpl({
   }
 
   return (
-    <div style={{ border: "1px solid black" }}>
-      <input
-        type="text"
-        value={edit}
-        onChange={(e) => setEdit(e.target.value)}
-        onBlur={() => commitEdit()}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            commitEdit();
+    <fieldset>
+      <legend>
+        {clip.constructor.name}{" "}
+        <input
+          type="text"
+          value={edit ?? ""}
+          placeholder="name"
+          onChange={(e) => setEdit(e.target.value)}
+          onBlur={() => commitEdit()}
+          style={{ width: "10ch" }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              commitEdit();
+            }
+          }}
+        />{" "}
+        <input
+          type="button"
+          value={"x"}
+          onClick={() =>
+            recordHistory(() => {
+              tracks.remove(clip);
+            })
           }
-        }}
-      ></input>
+        ></input>
+      </legend>
+
       {clip.duration}
-      <button
-        onClick={() =>
-          recordHistory(() => {
-            tracks.remove(clip);
-          })
-        }
-      >
-        x
-      </button>
-      <button
+
+      <input
+        type="button"
+        value={"+"}
         onClick={() =>
           recordHistory(() => {
             clip.featuredMutation(() => {
@@ -236,36 +274,34 @@ const ClipA = React.memo(function TrackAImpl({
             });
           })
         }
-      >
-        +
-      </button>
+      ></input>
       <Notes notes={clip.notes} />
-    </div>
+    </fieldset>
   );
 });
 
 function Notes(props: { notes: LinkedArray<Note> }) {
-  const [notes] = useLinkedArray(props.notes);
+  const notes = useContainer(props.notes);
 
   return (
-    <div>
+    <ul style={{ textAlign: "left" }}>
       {notes.map((note, i) => {
         return (
-          <div key={i}>
-            {note}
-            <button
+          <li key={i}>
+            {JSON.stringify(note)}
+            <input
+              type="button"
+              value={"x"}
               onClick={() => {
                 recordHistory(() => {
                   notes.remove(note);
                 });
               }}
-            >
-              x
-            </button>
-          </div>
+            ></input>
+          </li>
         );
       })}
-    </div>
+    </ul>
   );
 }
 
@@ -288,8 +324,8 @@ function ProjectDebug() {
 }
 
 function HistoryStacks() {
-  const [history] = useLinkedArray(getGlobalState().history);
-  const [redoStack] = useLinkedArray(getGlobalState().redoStack);
+  const history = useContainer(getGlobalState().history);
+  const redoStack = useContainer(getGlobalState().redoStack);
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
