@@ -8,14 +8,10 @@ import { LinkedArray } from "./lib/state/LinkedArray";
 import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
 import { SArray, SSchemaArray } from "./sstate";
 import { replace, serialize } from "./sstate.serialization";
+import { StructuredKinds } from "./StructuredKinds";
+import { SSet } from ".";
 
-export type KnowableObject =
-  | LinkedPrimitive<any>
-  | Struct<any>
-  | Struct2<any>
-  | Structured<any, any>
-  | SArray<any>
-  | SSchemaArray<any>;
+export type KnowableObject = StructuredKinds;
 
 export function isKnowable(val: unknown) {
   return (
@@ -186,6 +182,8 @@ export function popHistory() {
         replace(json, object);
       } else if (object instanceof Structured) {
         replace(json, object);
+      } else if (object instanceof SSet) {
+        throw new Error("REPLACE SET NOT IMPLEMENTED");
       } else {
         exhaustive(object);
       }

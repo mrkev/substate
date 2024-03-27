@@ -42,14 +42,18 @@ type SerializedProject = Readonly<{
 
 class Project extends Structured<SerializedProject, typeof Project> {
   readonly name: s.SString;
-  readonly clips: s.SSchemaArray<MidiClip>;
+  readonly clips: s.SSchemaArray<MidiTrack>;
   readonly effects: s.SArray<Effect>;
+  readonly randomNumbers: s.SSet<number>;
 
-  constructor(name: string, clips?: MidiClip[]) {
+  constructor(name: string, clips?: MidiTrack[]) {
     super();
     this.name = s.string(name);
-    this.clips = s.arrayOf([MidiClip], clips);
+    this.clips = s.arrayOf([MidiTrack], clips);
     this.effects = s.array<Effect>();
+    // [["foo", 3]] // why does this print as unknown when empty?
+    // TODO: it's bc it's unintialized
+    this.randomNumbers = s.set();
   }
 
   override serialize() {
@@ -70,13 +74,13 @@ class Project extends Structured<SerializedProject, typeof Project> {
     // TODO: asnync constructs
     const clips =
       json.tracks != null
-        ? deserializeWithSchema(json.tracks ?? [], MidiClip)._getRaw()
+        ? deserializeWithSchema(json.tracks ?? [], MidiTrack)._getRaw()
         : undefined;
     return new Project(json.name, clips);
   }
 
-  addClip(name: string) {
-    const clip = s.create(MidiClip, { duration: 3 });
+  addTrack(name: string) {
+    const clip = s.create(MidiTrack, { counter: 3 });
     this.clips.push(clip);
   }
 
@@ -90,15 +94,15 @@ type Effect = readonly [name: string, value: number];
 
 export class Track extends s.Struct<Track> {
   // public name: string = "untitled track";
-  public duration: number;
+  public counter: number;
 
-  constructor(props: s.StructProps<Track, { duration: number }>) {
+  constructor(props: s.StructProps<Track, { counter: number }>) {
     super(props);
-    this.duration = props.duration;
+    this.counter = props.counter;
   }
 }
 
-class MidiClip extends Track {
+class MidiTrack extends Track {
   readonly name = s.string();
   public notes = s.array<Note>([
     [1, 1],
@@ -110,12 +114,16 @@ class MidiClip extends Track {
   }
 }
 
-const track = Structured.create(Project, "untitled track", [
-  s.create(MidiClip, { duration: 3 }),
-]);
-
 function App() {
-  const dirty = useIsDirty(track);
+  const [project, setProject] = useState(() => {
+    const result = Structured.create(Project, "untitled track", [
+      s.create(MidiTrack, { counter: 3 }),
+    ]);
+    (window as any).project = result;
+    return result;
+  });
+
+  const dirty = useIsDirty(project);
 
   return (
     <>
@@ -123,7 +131,7 @@ function App() {
         useIsDirty: {JSON.stringify(dirty)}{" "}
         <button
           onClick={() => {
-            track._markClean();
+            project._markClean();
           }}
         >
           save
@@ -134,23 +142,23 @@ function App() {
         <button
           onClick={() =>
             recordHistory(() => {
-              track.addClip("hello world");
+              project.addTrack("hello world");
             })
           }
         >
-          Add clip
+          Add Track
         </button>
         <button
           onClick={() => {
             performance.mark("1");
             recordHistory(() => {
-              for (let i = 0; i < 10000; i++) {
-                track.addClip("hello world");
+              for (let i = 0; i < 1000; i++) {
+                project.addTrack("hello world");
               }
             });
             performance.mark("2");
-            performance.measure("Add 10000 items", "1", "2");
-            console.log("Added 10000");
+            performance.measure("Add 1000 items", "1", "2");
+            console.log("Added 1000");
           }}
         >
           Add 100
@@ -158,7 +166,7 @@ function App() {
         <button
           onClick={() => {
             recordHistory(() => {
-              track.clear();
+              project.clear();
             });
           }}
         >
@@ -166,16 +174,27 @@ function App() {
         </button>
         <button
           onClick={() => {
-            const serialized = serialize(track);
+            recordHistory(() => {
+              project.randomNumbers.add(Math.random());
+            });
+          }}
+        >
+          add random num
+        </button>
+        <button
+          onClick={() => {
+            const serialized = serialize(project);
             console.log("serialized", serialized);
-            console.log("constructed", construct(serialized, Project));
+            const constructed = construct(serialized, Project);
+            console.log("constructed", constructed);
+            // setProject(constructed as any);
           }}
         >
           construct test
         </button>
       </div>
       <div style={{ display: "flex", flexDirection: "row", flexGrow: 1 }}>
-        <ProjectDebug />
+        <ProjectDebug project={project} />
 
         <fieldset
           style={{
@@ -184,8 +203,8 @@ function App() {
             alignSelf: "flex-start",
           }}
         >
-          <legend>Track</legend>
-          <TrackClips />
+          <legend>Project</legend>
+          <TrackClips project={project} />
         </fieldset>
         <HistoryStacks />
       </div>
@@ -193,8 +212,8 @@ function App() {
   );
 }
 
-function TrackClips() {
-  const [tracks] = useContainerWithSetter(track.clips);
+function TrackClips({ project }: { project: Project }) {
+  const [clips] = useContainerWithSetter(project.clips);
   return (
     <div
       style={{
@@ -203,8 +222,8 @@ function TrackClips() {
         gap: 8,
       }}
     >
-      {tracks.map((track) => {
-        return <ClipA tracks={tracks} key={track._id} clip={track} />;
+      {clips.map((track) => {
+        return <ClipA tracks={clips} key={track._id} clip={track} />;
       })}
     </div>
   );
@@ -214,8 +233,8 @@ const ClipA = React.memo(function TrackAImpl({
   clip,
   tracks,
 }: {
-  clip: MidiClip;
-  tracks: s.SArray<MidiClip>;
+  clip: MidiTrack;
+  tracks: s.SArray<MidiTrack>;
 }) {
   const [name, setName] = usePrimitive(clip.name);
   const [edit, setEdit] = useState(name);
@@ -262,7 +281,7 @@ const ClipA = React.memo(function TrackAImpl({
         ></input>
       </legend>
 
-      {clip.duration}
+      {clip.counter}
 
       <input
         type="button"
@@ -270,7 +289,7 @@ const ClipA = React.memo(function TrackAImpl({
         onClick={() =>
           recordHistory(() => {
             clip.featuredMutation(() => {
-              clip.duration += 1;
+              clip.counter += 1;
             });
           })
         }
@@ -305,10 +324,10 @@ function Notes(props: { notes: LinkedArray<Note> }) {
   );
 }
 
-function ProjectDebug() {
-  useContainer(track, true);
+function ProjectDebug({ project }: { project: Project }) {
+  useContainer(project, true);
 
-  const value = hljs.highlight(debugOut(track), {
+  const value = hljs.highlight(debugOut(project), {
     language: "javascript",
   }).value;
   return (
@@ -356,5 +375,3 @@ function HistoryItem({ entry }: { entry: HistoryEntry }) {
 }
 
 export default App;
-
-(window as any).project = track;

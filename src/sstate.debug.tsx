@@ -1,11 +1,13 @@
 import stringify from "json-stringify-deterministic";
-import { SString, Structured } from ".";
+import { SSet, SString, Structured } from ".";
 import { Struct2 } from "./Struct2";
 import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
 import { MutationHashable } from "./lib/state/MutationHashable";
 import { SArray, SSchemaArray } from "./sstate";
 import { Struct } from "./Struct";
 import { STRUCTURED_IGNORE_KEYS } from "./Structured";
+import { exhaustive } from "./assertions";
+import { StructuredKinds } from "./StructuredKinds";
 
 function stringifyUnknown(val: unknown) {
   const res = stringify(val, {
@@ -33,6 +35,8 @@ export function debugOut(val: unknown, pad = 0, showUnknowns = true) {
     return debugOutArray(val, pad, showUnknowns);
   } else if (val instanceof SSchemaArray) {
     return debugOutArray(val, pad, showUnknowns);
+  } else if (val instanceof SSet) {
+    return debugOutSet(val, pad, showUnknowns);
   } else if (val instanceof LinkedPrimitive) {
     return debugOutPrimitive(val);
   } else if (val instanceof Struct) {
@@ -78,8 +82,7 @@ export function debugOutStruct(
       .join("\n")
       .trim()},`;
   }
-  const hash = MutationHashable.getMutationHash(struct);
-  return `${struct._kind} (${struct._id}.${hash}) {${result}\n}`;
+  return `${struct.constructor.name} ${header(struct)} {${result}\n}`;
 }
 
 export function debugOutArray(
@@ -102,16 +105,64 @@ export function debugOutArray(
     result = result + "\n";
   }
 
-  const hash = MutationHashable.getMutationHash(arr);
-  const kind = arr instanceof SArray ? "arr" : "schema-arr";
-  return ` (${arr._id}.${hash}) [${result}] (${kind})`;
+  return `${header(arr)} [${result}]`;
+}
+
+export function debugOutSet(set: SSet<any>, pad = 0, showUnknowns: boolean) {
+  let result = "";
+
+  for (const elem of set) {
+    result += `\n${debugOut(elem, pad, showUnknowns)
+      .split("\n")
+      .map((s) => `  ${s}`)
+      .join("\n")},`;
+  }
+
+  if (result.trim().length === 0) {
+    result = "";
+  } else {
+    result = result + "\n";
+  }
+
+  return `${header(set)} (${result})`;
+}
+
+export function header(elem: StructuredKinds, showContainerId = false) {
+  const kind = (() => {
+    if (elem instanceof SArray) {
+      return "arr";
+    } else if (elem instanceof SSchemaArray) {
+      return "s_arr";
+    } else if (elem instanceof SSet) {
+      return "set";
+    } else if (elem instanceof LinkedPrimitive) {
+      return "prm";
+    } else if (elem instanceof Struct) {
+      return "Sct";
+    } else if (elem instanceof Struct2) {
+      return "Sct2";
+    } else if (elem instanceof Structured) {
+      return "Strd";
+    } else {
+      exhaustive(elem);
+    }
+  })();
+
+  const hash =
+    elem instanceof LinkedPrimitive
+      ? ""
+      : `.${MutationHashable.getMutationHash(elem)}`;
+
+  const container = showContainerId ? ` -^ ${elem._container?._id}` : "";
+
+  return `(${kind}: ${elem._id}${hash}${container})`;
 }
 
 export function debugOutPrimitive(obj: LinkedPrimitive<any>) {
   const val = obj.get();
   if (typeof val === "string") {
-    return `'${val}' (${obj._id})`;
+    return `${header(obj)} '${val}'`;
+  } else {
+    return `${header(obj)} ${val}`;
   }
-
-  return `${val} (${obj._id})`;
 }

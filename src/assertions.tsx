@@ -4,6 +4,7 @@ import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
 import { LinkedArray } from "./lib/state/LinkedArray";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
+import { LinkedSet } from "./lib/state/LinkedSet";
 
 export function assertSPrimitive<T>(
   value: unknown
@@ -55,6 +56,13 @@ export function exhaustive(x: never, msg?: string): never {
   throw new Error(msg ?? `Exhaustive violation, unexpected value ${x}`);
 }
 
+export type Containable =
+  | LinkedPrimitive<unknown>
+  | LinkedArray<unknown>
+  | Struct<any>
+  | Struct2<any>
+  | Structured<any, any>;
+
 export function isContainable(
   val: unknown
 ): val is
@@ -62,13 +70,15 @@ export function isContainable(
   | LinkedArray<unknown>
   | Struct<any>
   | Struct2<any>
-  | Structured<any, any> {
+  | Structured<any, any>
+  | LinkedSet<unknown> {
   return (
     val instanceof LinkedPrimitive ||
     val instanceof LinkedArray ||
     val instanceof Struct ||
     val instanceof Struct2 ||
-    val instanceof Structured
+    val instanceof Structured ||
+    val instanceof LinkedSet
   );
 }
 

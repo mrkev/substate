@@ -1,16 +1,22 @@
-import { StateChangeHandler } from "./LinkedPrimitive";
-import { MutationHashable } from "./MutationHashable";
+import { nanoid } from "nanoid";
+import { MutationHashable, SubbableContainer } from "./MutationHashable";
 import { Subbable } from "./Subbable";
 
-// TODO: SubbableContainer, Contained
-export class LinkedSet<S> implements Set<S>, Subbable, MutationHashable {
+// TODO: missing: history
+export class LinkedSet<S> extends SubbableContainer implements Set<S> {
   private _set: ReadonlySet<S>;
 
-  _subscriptors = new Set<StateChangeHandler<Subbable>>();
-  _hash: number = 0;
-
-  private constructor(initialValue: Set<S>) {
+  private constructor(initialValue: Set<S>, id: string) {
+    super(id);
     this._set = initialValue;
+    SubbableContainer._contain(this, this._set);
+  }
+
+  _childChanged(child: Subbable) {
+    MutationHashable.mutated(this, child);
+    if (this._container != null) {
+      this._container._childChanged(this);
+    }
   }
 
   _getRaw(): ReadonlySet<S> {
@@ -23,12 +29,15 @@ export class LinkedSet<S> implements Set<S>, Subbable, MutationHashable {
   }
 
   public static create<T>(initialValue?: Set<T>) {
-    return new this<T>(initialValue ?? new Set());
+    return new this<T>(initialValue ?? new Set(), nanoid(5));
   }
 
-  private mutate<V>(mutator: (clone: Set<S>) => V): V {
-    const result = mutator(this);
+  private mutate<V>(mutator: (raw: Set<S>) => V): V {
+    const result = mutator(this._set as any);
     MutationHashable.mutated(this, this);
+    if (this._container != null) {
+      this._container._childChanged(this);
+    }
     return result;
   }
 
@@ -41,6 +50,7 @@ export class LinkedSet<S> implements Set<S>, Subbable, MutationHashable {
       return this;
     }
     return this.mutate((clone) => {
+      SubbableContainer._contain(this, [value]);
       clone.add(value);
       return this;
     });
@@ -48,8 +58,12 @@ export class LinkedSet<S> implements Set<S>, Subbable, MutationHashable {
 
   // Set<S> interface, mutates
   clear(): void {
+    for (const elem of this._set) {
+      SubbableContainer._uncontain(elem);
+    }
+    // To trigger everything that should be triggered
+    this.mutate(() => {});
     this._set = new Set();
-    MutationHashable.mutated(this, this);
   }
 
   // Set<S> interface, mutates
@@ -58,8 +72,10 @@ export class LinkedSet<S> implements Set<S>, Subbable, MutationHashable {
       return false;
     }
 
-    return this.mutate((clone) => {
-      return clone.delete(value);
+    return this.mutate((raw) => {
+      // NOTE: We have confirmed above the set has this value
+      SubbableContainer._uncontain(value);
+      return raw.delete(value);
     });
   }
 

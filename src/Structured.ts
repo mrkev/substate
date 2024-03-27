@@ -55,10 +55,6 @@ export abstract class Structured<S, Sub extends ConstructableStructure<S>>
   readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
   public _container: SubbableContainer | null = null;
 
-  get _kind() {
-    return this.constructor.name;
-  }
-
   abstract serialize(): S;
   abstract replace(json: S): void;
 

@@ -22,6 +22,8 @@ import { Struct } from "./Struct";
 import { KnowableObject, isKnowable } from "./sstate.history";
 import { JSONValue } from "./types";
 
+// TODO: set
+
 export type Serialized =
   | Readonly<{
       $$: "prim";

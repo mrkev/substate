@@ -57,13 +57,13 @@ export function App() {
           onClick={() => {
             performance.mark("1");
             recordHistory(() => {
-              for (let i = 0; i < 10000; i++) {
+              for (let i = 0; i < 1000; i++) {
                 busLine.addBus("hello world");
               }
             });
             performance.mark("2");
-            performance.measure("Add 10000 items", "1", "2");
-            console.log("Added 10000");
+            performance.measure("Add 1000 items", "1", "2");
+            console.log("Added 1000");
           }}
         >
           Add 100

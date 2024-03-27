@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Subbable, SubbableCallback, notify, subscribe } from "./Subbable";
 import { isContainable } from "../../assertions";
+import { Subbable, SubbableCallback, notify, subscribe } from "./Subbable";
 import { Contained } from "./LinkedPrimitive";
 
-export class MutationHashable implements Subbable {
+export abstract class MutationHashable implements Subbable {
   readonly _subscriptors: Set<SubbableCallback> = new Set();
   _hash: number = 0;
 
@@ -17,13 +17,25 @@ export class MutationHashable implements Subbable {
   }
 }
 
-export abstract class SubbableContainer implements MutationHashable {
+export abstract class SubbableContainer
+  // all containers can be contained
+  implements MutationHashable, Subbable, Contained
+{
+  readonly _id: string;
+  public _container: SubbableContainer | null = null;
   readonly _subscriptors: Set<SubbableCallback> = new Set();
   public _hash: number = 0;
 
+  constructor(id: string) {
+    this._id = id;
+  }
+
   abstract _childChanged(child: Subbable): void;
 
-  static _contain(container: SubbableContainer, items: Array<unknown>) {
+  static _contain(
+    container: SubbableContainer,
+    items: Array<unknown> | ReadonlySet<unknown>
+  ) {
     for (const elem of items) {
       if (isContainable(elem)) {
         elem._container = container;

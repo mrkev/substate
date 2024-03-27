@@ -12,6 +12,7 @@ import { getGlobalState } from "./sstate.history";
 import { JSONValue } from "./types";
 import { LinkedMap } from "./lib/state/LinkedMap";
 import { LinkedSet } from "./lib/state/LinkedSet";
+import { SubbableContainer } from "./lib/state/MutationHashable";
 
 // todo? create -> of
 export class SString extends LinkedPrimitive<string> {
@@ -77,28 +78,30 @@ export class SSchemaArray<
 > extends LinkedArray<T> {
   _schema: (typeof Struct | typeof Struct2 | typeof Structured)[];
 
-  protected override _containedIds: WeakRefMap<T>;
+  // // TODO: do I need this? I think I was planning on using this in history, but since
+  // // we just recreate the whole thing instead we don't need it anymore.
+  // protected override _containedIds: WeakRefMap<T>;
 
-  protected override _contain(items: Array<T>) {
-    for (const elem of items) {
-      elem._container = this;
-      // When initializng, we contain all values passed to super(), before we create this._containedIds, so it will be null
-      // TODO, we can remove this by removing the initail contain out to SSchemaArray and SArray. We stop containing twice on init too.
-      this._containedIds?.set(elem._id, elem);
-    }
-  }
+  // protected override _contain(items: Array<T>) {
+  //   for (const elem of items) {
+  //     elem._container = this;
+  //     // When initializng, we contain all values passed to super(), before we create this._containedIds, so it will be null
+  //     // TODO, we can remove this by removing the initail contain out to SSchemaArray and SArray. We stop containing twice on init too.
+  //     this._containedIds?.set(elem._id, elem);
+  //   }
+  // }
 
-  protected override _uncontain(item: T) {
-    if (isContainable(item)) {
-      item._container = null;
-      this._containedIds.delete(item._id);
+  // protected override _uncontain(item: T) {
+  //   if (isContainable(item)) {
+  //     item._container = null;
+  //     this._containedIds.delete(item._id);
 
-      // TODO: safety
-      if ("_destroy" in item) {
-        item._destroy();
-      }
-    }
-  }
+  //     // TODO: safety
+  //     if ("_destroy" in item) {
+  //       item._destroy();
+  //     }
+  //   }
+  // }
 
   constructor(
     val: T[],
@@ -116,9 +119,11 @@ export class SSchemaArray<
      * - TODO: figure out what to do if elemnet is not containable. Or split definition here,
      *   between arrays of containables and arrays of non-containables, and just always override
      *   the underlying array when we're dealing with an array of non-containables
+     *
+     * TODO: we acutally never use this, so commenting it out for now
      */
-    this._containedIds = new WeakRefMap<T>(10_000, "SSchemaArray");
-    this._contain(this._array);
+    // this._containedIds = new WeakRefMap<T>(10_000, "SSchemaArray");
+    SubbableContainer._contain(this, this._array);
   }
 }
 

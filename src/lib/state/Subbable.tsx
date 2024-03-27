@@ -31,7 +31,7 @@ export function notify(
     //   "SENDING NOTIF TO",
     //   subbable._subscriptors.size,
     //   "CHANGED:",
-    //   subbable
+    //   subbable.constructor.name
     // );
   }
   subbable._subscriptors.forEach((cb) => {

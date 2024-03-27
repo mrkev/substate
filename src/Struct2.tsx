@@ -34,10 +34,6 @@ export abstract class Struct2<Sub extends Constructable>
     "_container",
   ]);
 
-  get _kind() {
-    return this.constructor.name;
-  }
-
   abstract serialize(): Struct2Serialized<Sub>;
 
   // TODO: a way to force constructor to be private in children, so that they don't
