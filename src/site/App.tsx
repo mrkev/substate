@@ -18,7 +18,7 @@ import {
   recordHistory,
 } from "../sstate.history";
 import { useIsDirty } from "../sstate.react";
-import { Serialized } from "../sstate.serialization";
+import { Serialized } from "../serialization";
 import "./App.css";
 
 /**

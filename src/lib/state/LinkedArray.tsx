@@ -48,6 +48,7 @@ export class LinkedArray<S>
   // }
 
   _replace(arr: Array<S>) {
+    SubbableContainer._uncontainAll(this._array);
     this._array = arr; // todo, call ._destroy on child elements?
     SubbableContainer._contain(this, this._array);
     MutationHashable.mutated(this, this);

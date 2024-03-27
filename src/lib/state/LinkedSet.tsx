@@ -24,12 +24,19 @@ export class LinkedSet<S> extends SubbableContainer implements Set<S> {
   }
 
   _setRaw(set: ReadonlySet<S>) {
+    SubbableContainer._uncontainAll(this._set);
     this._set = set;
+    SubbableContainer._contain(this, set);
     MutationHashable.mutated(this, this);
+    if (this._container != null) {
+      this._container._childChanged(this);
+    }
   }
 
-  public static create<T>(initialValue?: Set<T>) {
-    return new this<T>(initialValue ?? new Set(), nanoid(5));
+  // TODO: method to initialize with id to make it unexposed to caller?
+  // or should I just use the constructor and the existence of `s.set()` make having `SSet.create` redundant.
+  public static create<T>(initialValue?: Set<T>, id?: string) {
+    return new this<T>(initialValue ?? new Set(), id ?? nanoid(5));
   }
 
   private mutate<V>(mutator: (raw: Set<S>) => V): V {

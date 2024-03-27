@@ -4,7 +4,7 @@ import * as s from "../sstate";
 import { debugOut } from "../sstate.debug";
 import { getGlobalState, popHistory, recordHistory } from "../sstate.history";
 import { useContainer, useSPrimitive, useStructure } from "../sstate.react";
-import { construct, serialize } from "../sstate.serialization";
+import { construct, serialize } from "../serialization";
 import "./App.css";
 
 export class BusLine extends Struct.Struct<BusLine> {

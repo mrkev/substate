@@ -5,6 +5,7 @@ import { LinkedArray } from "./lib/state/LinkedArray";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
 import { LinkedSet } from "./lib/state/LinkedSet";
+import { SSet } from ".";
 
 export function assertSPrimitive<T>(
   value: unknown
@@ -49,6 +50,12 @@ export function assertStructured<T>(
 ): asserts value is Structured<any, any> {
   if (!(value instanceof Structured)) {
     throw new Error("not a Structured"); // assertion error
+  }
+}
+
+export function assertSSet<T>(value: unknown): asserts value is SSet<T> {
+  if (!(value instanceof SSet)) {
+    throw new Error("not a SSet"); // assertion error
   }
 }
 

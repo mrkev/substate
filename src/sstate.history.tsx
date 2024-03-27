@@ -7,7 +7,7 @@ import { exhaustive } from "./assertions";
 import { LinkedArray } from "./lib/state/LinkedArray";
 import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
 import { SArray, SSchemaArray } from "./sstate";
-import { replace, serialize } from "./sstate.serialization";
+import { replace, serialize } from "./serialization";
 import { StructuredKinds } from "./StructuredKinds";
 import { SSet } from ".";
 

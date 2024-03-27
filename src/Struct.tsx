@@ -10,15 +10,15 @@ import {
   SubbableContainer,
 } from "./lib/state/MutationHashable";
 import { Subbable } from "./lib/state/Subbable";
-import { getGlobalState, saveForHistory } from "./sstate.history";
 import {
   SArray,
   SOut,
-  UNINITIALIZED_PRIMITIVE,
-  UNINITIALIZED_ARRAY,
-  UNINITIALIZED_TYPED_ARRAY,
   SSchemaArray,
+  UNINITIALIZED_ARRAY,
+  UNINITIALIZED_PRIMITIVE,
+  UNINITIALIZED_TYPED_ARRAY,
 } from "./sstate";
+import { getGlobalState, saveForHistory } from "./sstate.history";
 
 type IsEmptyObjType<T extends Record<PropertyKey, any>> = keyof T extends never
   ? true

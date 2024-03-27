@@ -18,17 +18,19 @@ export abstract class MutationHashable implements Subbable {
 }
 
 export abstract class SubbableContainer
-  // all containers can be contained
   implements MutationHashable, Subbable, Contained
 {
   readonly _id: string;
-  public _container: SubbableContainer | null = null;
   readonly _subscriptors: Set<SubbableCallback> = new Set();
   public _hash: number = 0;
+  // all containers can be contained
+  public _container: SubbableContainer | null = null;
 
   constructor(id: string) {
     this._id = id;
   }
+
+  // abstract _replace(val: T): void;
 
   abstract _childChanged(child: Subbable): void;
 
@@ -50,6 +52,12 @@ export abstract class SubbableContainer
       if ("_destroy" in item) {
         item._destroy();
       }
+    }
+  }
+
+  static _uncontainAll(items: Array<unknown> | ReadonlySet<unknown>) {
+    for (const item of items) {
+      SubbableContainer._uncontain(item);
     }
   }
 }

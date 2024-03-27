@@ -10,11 +10,7 @@ import {
 } from "./lib/state/MutationHashable";
 import { Subbable } from "./lib/state/Subbable";
 import { getGlobalState, saveForHistory } from "./sstate.history";
-import {
-  ApplyDeserialization,
-  NeedsSchema,
-  Schema,
-} from "./sstate.serialization";
+import { ApplyDeserialization, NeedsSchema, Schema } from "./serialization";
 
 // export type AnyClass = {
 //   new (...args: any[]): Struct<any>;

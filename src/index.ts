@@ -34,4 +34,4 @@ export {
   useStructure as useContainerWithSetter,
   useSPrimitive as usePrimitive,
 } from "./sstate.react";
-export { construct, serialize } from "./sstate.serialization";
+export { construct, serialize } from "./serialization";
