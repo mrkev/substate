@@ -42,13 +42,13 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
     "highlight.js": "^11.10.0",
-    "jsdom": "^24.0.0",
-    "mobx": "^6.12.1",
-    "mobx-react-lite": "^4.0.6",
-    "mobx-state-tree": "^5.4.1",
+    "jsdom": "^24.1.1",
+    "mobx": "^6.13.1",
+    "mobx-react-lite": "^4.0.7",
+    "mobx-state-tree": "^6.0.1",
     "typescript": "^5.5.4",
     "vite": "^5.4.2",
-    "vite-plugin-dts": "^3.7.3",
+    "vite-plugin-dts": "^4.0.3",
     "vitest": "^2.0.5"
   }
 }
