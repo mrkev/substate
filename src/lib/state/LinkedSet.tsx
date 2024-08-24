@@ -120,6 +120,41 @@ export class LinkedSet<S> extends SubbableContainer implements Set<S> {
   }
 
   // Set<S> interface
+  union<U>(other: ReadonlySetLike<U>): Set<S | U> {
+    return this._set.union(other);
+  }
+
+  // Set<S> interface
+  intersection<U>(other: ReadonlySetLike<U>): Set<S & U> {
+    return this._set.intersection<U>(other);
+  }
+
+  // Set<S> interface
+  difference<U>(other: ReadonlySetLike<U>): Set<S> {
+    return this._set.difference<U>(other);
+  }
+
+  // Set<S> interface
+  symmetricDifference<U>(other: ReadonlySetLike<U>): Set<S | U> {
+    return this._set.symmetricDifference<U>(other);
+  }
+
+  // Set<S> interface
+  isSubsetOf(other: ReadonlySetLike<unknown>): boolean {
+    return this._set.isSubsetOf(other);
+  }
+
+  // Set<S> interface
+  isSupersetOf(other: ReadonlySetLike<unknown>): boolean {
+    return this._set.isSupersetOf(other);
+  }
+
+  // Set<S> interface
+  isDisjointFrom(other: ReadonlySetLike<unknown>): boolean {
+    return this._set.isDisjointFrom(other);
+  }
+
+  // Set<S> interface
   [Symbol.iterator](): IterableIterator<S> {
     return this._set[Symbol.iterator]();
   }
