@@ -356,7 +356,7 @@ class SubObject<TSub extends Record<string, SubSchema<unknown>>>
   peek(): { [Key in keyof TSub]: SubOut<TSub[Key]> } {
     const record: any = {};
 
-    for (let key in this.sub) {
+    for (const key in this.sub) {
       const value = this.sub[key].peek();
 
       record[key] = value as any;
@@ -384,7 +384,7 @@ class SubMap<T extends SubSchema<unknown>>
 
   peek(): Record<string, SubOut<T>> {
     const record: Record<string, SubOut<T>> = {};
-    for (let key in this.subs) {
+    for (const key in this.subs) {
       const value = this.subs[key].peek();
       record[key] = value as any;
     }

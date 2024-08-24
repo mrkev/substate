@@ -40,7 +40,7 @@ class GlobalState {
   }
 }
 
-let _global = { state: null as any };
+const _global = { state: null as any };
 export function getGlobalState(): GlobalState {
   if (_global.state == null) {
     _global.state = new GlobalState();

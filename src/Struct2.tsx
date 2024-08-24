@@ -64,7 +64,7 @@ export abstract class Struct2<Sub extends Constructable>
     // maybe with a close trick to see what gets initializded between Struct.super() and _init?
     // or something along those lines?
     for (const key in this) {
-      let child = self[key];
+      const child = self[key];
 
       if (isContainable(self[key])) {
         child._container = this;

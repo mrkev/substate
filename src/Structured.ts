@@ -109,7 +109,7 @@ export function initStructured(structured: Structured<any, any>) {
   // maybe with a close trick to see what gets initializded between Struct.super() and _init?
   // or something along those lines?
   for (const key in structured) {
-    let child = self[key];
+    const child = self[key];
 
     if (isContainable(self[key])) {
       child._container = structured;
