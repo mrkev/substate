@@ -60,6 +60,7 @@ export type SOut<T> = T extends SNumber
     //   }
     never;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface SState<T> {}
 
 /** Describes an array */

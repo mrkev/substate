@@ -36,6 +36,7 @@ type IntrinsicFields<T extends Record<string, any>> = Omit<
   },
   keyof Struct<any>
 >;
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type NeverIfEmpty<T> = {} extends T ? never : T;
 type StateProps<T extends Record<string, any>> = SPrimitiveFieldsToSOut<T>;
 type PropsForStruct<Child extends Struct<any>> = IsEmptyObjType<
