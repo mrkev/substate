@@ -1,17 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
-import { SArray, SSchemaArray, SState } from "./sstate";
-import { Struct } from "./Struct";
+import { Structured } from "./Structured";
 import type {
   LinkedPrimitive,
   StateDispath,
 } from "./lib/state/LinkedPrimitive";
 import {
-  MutationHashable,
+  SubbableContainer,
   useSubscribeToSubbableMutationHashable,
 } from "./lib/state/MutationHashable";
 import { subscribe } from "./lib/state/Subbable";
-import { Struct2 } from "./Struct2";
-import { Structured } from "./Structured";
+import { SArray } from "./sstate";
 
 export function useSPrimitive<S>(
   linkedState: LinkedPrimitive<S>
@@ -65,14 +63,10 @@ export function useStructure<S>(
   return [linkedArray, setter];
 }
 
-export function useContainer<
-  S extends
-    | Struct<any>
-    | SArray<any>
-    | SSchemaArray<any>
-    | Struct2<any>
-    | Structured<any, any>
->(obj: S, allChanges: boolean = false): S {
+export function useContainer<S extends SubbableContainer>(
+  obj: S,
+  allChanges: boolean = false
+): S {
   useSubscribeToSubbableMutationHashable(obj, undefined, allChanges);
   return obj;
 }

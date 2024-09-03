@@ -1,15 +1,15 @@
 import { nanoid } from "nanoid";
+import { SSet } from ".";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
+import { StructuredKinds } from "./StructuredKinds";
 import { WeakRefMap } from "./WeakRefMap";
 import { exhaustive } from "./assertions";
 import { LinkedArray } from "./lib/state/LinkedArray";
 import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
-import { SArray, SSchemaArray } from "./sstate";
 import { replace, serialize } from "./serialization";
-import { StructuredKinds } from "./StructuredKinds";
-import { SSet } from ".";
+import { SArray, SSchemaArray } from "./sstate";
 
 export type KnowableObject = StructuredKinds;
 
@@ -98,6 +98,14 @@ export function pushHistory(objs: KnowableObject[]) {
     globalState.redoStack.splice(0, globalState.redoStack.length);
   }
 }
+
+/**
+ * TO MAKE ASYNC:
+ * - save/push/record history add to task queue:
+ * - record history pushes to task queue:
+ *   - task is serialization, action
+ * - funcs can be awaited to promise of task completion
+ */
 
 export function recordHistory(action: () => void): void;
 export function recordHistory(action: () => Promise<void>): Promise<void>;
