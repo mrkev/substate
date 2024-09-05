@@ -50,7 +50,10 @@ export default tseslint.config(
       sourceType: "module",
 
       parserOptions: {
-        project: ["./tsconfig.json", "./tsconfig.node.json"],
+        project: [
+          "./packages/structured-state/tsconfig.json",
+          "./packages/structured-state/tsconfig.node.json",
+        ],
       },
     },
 
