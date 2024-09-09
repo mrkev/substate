@@ -8,7 +8,7 @@ import { LinkedArray } from "../state/LinkedArray";
 import { LinkedMap } from "../state/LinkedMap";
 import { LinkedPrimitive } from "../state/LinkedPrimitive";
 import { LinkedSet } from "../state/LinkedSet";
-import { SubbableContainer } from "../state/MutationHashable";
+import { SubbableContainer } from "../state/SubbableContainer";
 import { getGlobalState } from "./sstate.history";
 import { JSONValue } from "./types";
 

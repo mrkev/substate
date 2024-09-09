@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 
-import { SubbableContainer } from "./MutationHashable";
+import { SubbableContainer } from "./SubbableContainer";
 import { Subbable, notify } from "./Subbable";
 import { getGlobalState, saveForHistory } from "../src/sstate.history";
 

@@ -1,6 +1,7 @@
 import { nanoid } from "nanoid";
 import { Contained, StateChangeHandler } from "./LinkedPrimitive";
-import { MutationHashable, SubbableContainer } from "./MutationHashable";
+import { MutationHashable } from "./MutationHashable";
+import { SubbableContainer } from "./SubbableContainer";
 import { Subbable, notify } from "./Subbable";
 import { saveForHistory } from "../src/sstate.history";
 
