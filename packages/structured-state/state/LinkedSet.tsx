@@ -3,7 +3,6 @@ import { MutationHashable } from "./MutationHashable";
 import { SubbableContainer } from "./SubbableContainer";
 import { Subbable } from "./Subbable";
 
-// throw new Error("HERE");
 // TODO: missing: history
 export class LinkedSet<S> extends SubbableContainer implements Set<S> {
   private _set: ReadonlySet<S>;
