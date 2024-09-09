@@ -3,7 +3,6 @@ import { LinkedArray } from "../state/LinkedArray";
 import { StateChangeHandler, StateDispath } from "../state/LinkedPrimitive";
 import { MutationHashable } from "../state/MutationHashable";
 import { Subbable, notify, subscribe } from "../state/Subbable";
-import { exhaustive } from "../../assertions";
 import * as nw from "./nwschema";
 import {
   NWArray,
@@ -17,6 +16,7 @@ import {
 import { NWInLax, NWInUnion, NWOut } from "./nwschema.types";
 import { SubInLax, SubInLaxUnion, SubOut, SubOutLax } from "./subschema.types";
 import { nanoid } from "nanoid";
+import { exhaustive } from "../src/assertions";
 
 //////// Schema ////////
 

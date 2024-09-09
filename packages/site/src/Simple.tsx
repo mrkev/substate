@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from "react";
-import * as Struct from "../Struct";
-import * as s from "../sstate";
-import { debugOut } from "../sstate.debug";
-import { getGlobalState, popHistory, recordHistory } from "../sstate.history";
-import { useContainer, useSPrimitive, useStructure } from "../sstate.react";
-import { construct, serialize } from "../serialization";
+import * as Struct from "../../structured-state/src/Struct";
+import * as s from "../../structured-state/src/sstate";
+import { debugOut } from "../../structured-state/src/sstate.debug";
+import {
+  getGlobalState,
+  popHistory,
+  recordHistory,
+} from "../../structured-state/src/sstate.history";
+import {
+  useContainer,
+  useSPrimitive,
+  useStructure,
+} from "../../structured-state/src/sstate.react";
+import { construct, serialize } from "../../structured-state/src/serialization";
 import "./App.css";
 
 export class BusLine extends Struct.Struct<BusLine> {

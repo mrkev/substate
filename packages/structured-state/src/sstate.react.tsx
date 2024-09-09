@@ -1,14 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { Structured } from "./Structured";
-import type {
-  LinkedPrimitive,
-  StateDispath,
-} from "./lib/state/LinkedPrimitive";
+import type { LinkedPrimitive, StateDispath } from "../state/LinkedPrimitive";
 import {
   SubbableContainer,
   useSubscribeToSubbableMutationHashable,
-} from "./lib/state/MutationHashable";
-import { subscribe } from "./lib/state/Subbable";
+} from "../state/MutationHashable";
+import { subscribe } from "../state/Subbable";
 import { SArray } from "./sstate";
 
 export function useSPrimitive<S>(

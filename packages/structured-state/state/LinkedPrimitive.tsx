@@ -1,7 +1,8 @@
 import { nanoid } from "nanoid";
-import { getGlobalState, saveForHistory } from "../../sstate.history";
+
 import { SubbableContainer } from "./MutationHashable";
 import { Subbable, notify } from "./Subbable";
+import { getGlobalState, saveForHistory } from "../src/sstate.history";
 
 export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
 export type StateChangeHandler<S> = (value: S) => void;

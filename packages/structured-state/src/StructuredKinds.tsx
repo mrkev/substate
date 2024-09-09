@@ -1,6 +1,6 @@
 import { SSet, Structured } from ".";
 import { Struct2 } from "./Struct2";
-import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
+import { LinkedPrimitive } from "../state/LinkedPrimitive";
 import { SArray, SSchemaArray } from "./sstate";
 import { Struct } from "./Struct";
 

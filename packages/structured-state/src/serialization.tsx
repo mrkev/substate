@@ -12,7 +12,7 @@ import {
   assertStructured,
   exhaustive,
 } from "./assertions";
-import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
+import { LinkedPrimitive } from "../state/LinkedPrimitive";
 import { initialize } from "./serialization.initialize";
 import { simplify } from "./serialization.simplify";
 import * as s from "./sstate";

@@ -1,14 +1,8 @@
 import { nanoid } from "nanoid";
 import { isContainable } from "./assertions";
-import type {
-  Contained,
-  StateChangeHandler,
-} from "./lib/state/LinkedPrimitive";
-import {
-  MutationHashable,
-  SubbableContainer,
-} from "./lib/state/MutationHashable";
-import { Subbable } from "./lib/state/Subbable";
+import type { Contained, StateChangeHandler } from "../state/LinkedPrimitive";
+import { MutationHashable, SubbableContainer } from "../state/MutationHashable";
+import { Subbable } from "../state/Subbable";
 import { getGlobalState, saveForHistory } from "./sstate.history";
 import { ApplyDeserialization, NeedsSchema, Schema } from "./serialization";
 

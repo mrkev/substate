@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { isContainable } from "../../assertions";
 import { Subbable, SubbableCallback, notify, subscribe } from "./Subbable";
 import { Contained } from "./LinkedPrimitive";
+import { isContainable } from "../src/assertions";
 
 export abstract class MutationHashable implements Subbable {
   readonly _subscriptors: Set<SubbableCallback> = new Set();

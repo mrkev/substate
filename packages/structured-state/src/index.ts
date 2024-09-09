@@ -21,11 +21,11 @@ export { Structured } from "./Structured";
 export type { DeserializeFunc } from "./Structured";
 export type { StructProps } from "./Struct";
 
-export { LinkedMap as SMap } from "./lib/state/LinkedMap";
-export { LinkedSet as SSet } from "./lib/state/LinkedSet";
-export { LinkedPrimitive as SPrimitive } from "./lib/state/LinkedPrimitive";
+export { LinkedMap as SMap } from "../state/LinkedMap";
+export { LinkedSet as SSet } from "../state/LinkedSet";
+export { LinkedPrimitive as SPrimitive } from "../state/LinkedPrimitive";
 
-export { useNewLinkedMap, useNewLinkedSet } from "./lib/state/useNew";
+export { useNewLinkedMap, useNewLinkedSet } from "../state/useNew";
 
 export { debugOut } from "./sstate.debug";
 export { getGlobalState, history } from "./sstate.history";

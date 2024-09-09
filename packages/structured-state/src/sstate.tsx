@@ -4,11 +4,11 @@ import { nanoid } from "nanoid";
 import { Structured } from ".";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
-import { LinkedArray } from "./lib/state/LinkedArray";
-import { LinkedMap } from "./lib/state/LinkedMap";
-import { LinkedPrimitive } from "./lib/state/LinkedPrimitive";
-import { LinkedSet } from "./lib/state/LinkedSet";
-import { SubbableContainer } from "./lib/state/MutationHashable";
+import { LinkedArray } from "../state/LinkedArray";
+import { LinkedMap } from "../state/LinkedMap";
+import { LinkedPrimitive } from "../state/LinkedPrimitive";
+import { LinkedSet } from "../state/LinkedSet";
+import { SubbableContainer } from "../state/MutationHashable";
 import { getGlobalState } from "./sstate.history";
 import { JSONValue } from "./types";
 

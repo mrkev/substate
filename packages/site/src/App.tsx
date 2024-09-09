@@ -1,7 +1,7 @@
 import hljs from "highlight.js";
 import React, { useEffect, useState } from "react";
-import { DeserializeFunc, Structured } from "../Structured";
-import * as s from "../index";
+import { DeserializeFunc, Structured } from "../../structured-state/src/index";
+import * as s from "../../structured-state/src/index";
 import {
   construct,
   debugOut,
@@ -9,16 +9,16 @@ import {
   useContainer,
   useContainerWithSetter,
   usePrimitive,
-} from "../index";
-import { LinkedArray } from "../lib/state/LinkedArray";
+} from "../../structured-state/src/index";
+import { LinkedArray } from "../../structured-state/state/LinkedArray";
 import {
   HistoryEntry,
   getGlobalState,
   popHistory,
   recordHistory,
-} from "../sstate.history";
-import { useIsDirty } from "../sstate.react";
-import { Serialized } from "../serialization";
+} from "../../structured-state/src/sstate.history";
+import { useIsDirty } from "../../structured-state/src/sstate.react";
+import { Serialized } from "../../structured-state/src/serialization";
 import "./App.css";
 
 /**
