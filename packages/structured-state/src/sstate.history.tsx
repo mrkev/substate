@@ -6,8 +6,8 @@ import { Structured } from "./Structured";
 import { StructuredKinds } from "./StructuredKinds";
 import { WeakRefMap } from "./WeakRefMap";
 import { exhaustive } from "./assertions";
-import { LinkedArray } from "../state/LinkedArray";
-import { LinkedPrimitive } from "../state/LinkedPrimitive";
+import { LinkedArray } from "./state/LinkedArray";
+import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { replace, serialize } from "./serialization";
 import { SArray, SSchemaArray } from "./sstate";
 

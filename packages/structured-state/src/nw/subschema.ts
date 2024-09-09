@@ -16,7 +16,7 @@ import {
 import { NWInLax, NWInUnion, NWOut } from "./nwschema.types";
 import { SubInLax, SubInLaxUnion, SubOut, SubOutLax } from "./subschema.types";
 import { nanoid } from "nanoid";
-import { exhaustive } from "../src/assertions";
+import { exhaustive } from "../assertions";
 
 //////// Schema ////////
 

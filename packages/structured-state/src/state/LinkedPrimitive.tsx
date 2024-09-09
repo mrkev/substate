@@ -2,7 +2,7 @@ import { nanoid } from "nanoid";
 
 import { SubbableContainer } from "./SubbableContainer";
 import { Subbable, notify } from "./Subbable";
-import { getGlobalState, saveForHistory } from "../src/sstate.history";
+import { getGlobalState, saveForHistory } from "../sstate.history";
 
 export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
 export type StateChangeHandler<S> = (value: S) => void;

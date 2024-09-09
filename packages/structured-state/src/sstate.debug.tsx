@@ -1,8 +1,8 @@
 import stringify from "json-stringify-deterministic";
 import { SSet, SString, Structured } from ".";
 import { Struct2 } from "./Struct2";
-import { LinkedPrimitive } from "../state/LinkedPrimitive";
-import { MutationHashable } from "../state/MutationHashable";
+import { LinkedPrimitive } from "./state/LinkedPrimitive";
+import { MutationHashable } from "./state/MutationHashable";
 import { SArray, SSchemaArray } from "./sstate";
 import { Struct } from "./Struct";
 import { STRUCTURED_IGNORE_KEYS } from "./Structured";

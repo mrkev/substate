@@ -1,10 +1,10 @@
 import { SArray, SSchemaArray } from "./sstate";
 import { Struct } from "./Struct";
-import { LinkedPrimitive } from "../state/LinkedPrimitive";
-import { LinkedArray } from "../state/LinkedArray";
+import { LinkedPrimitive } from "./state/LinkedPrimitive";
+import { LinkedArray } from "./state/LinkedArray";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
-import { LinkedSet } from "../state/LinkedSet";
+import { LinkedSet } from "./state/LinkedSet";
 import { SSet } from ".";
 
 export function assertSPrimitive<T>(

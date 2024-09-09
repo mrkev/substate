@@ -10,7 +10,7 @@ import {
   assertNotArray,
   exhaustive,
 } from "./assertions";
-import { LinkedPrimitive } from "../state/LinkedPrimitive";
+import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import * as s from "./sstate";
 import { SArray, SSchemaArray } from "./sstate";
 import {

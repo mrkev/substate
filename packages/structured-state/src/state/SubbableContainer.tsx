@@ -1,4 +1,4 @@
-import { isContainable } from "../src/assertions";
+import { isContainable } from "../assertions";
 import { Contained } from "./LinkedPrimitive";
 import { MutationHashable } from "./MutationHashable";
 import { Subbable, SubbableCallback } from "./Subbable";

@@ -1,10 +1,10 @@
 import { nanoid } from "nanoid";
 import { isContainable } from "./assertions";
-import type { Contained, StateChangeHandler } from "../state/LinkedPrimitive";
-import { LinkedPrimitive } from "../state/LinkedPrimitive";
-import { MutationHashable } from "../state/MutationHashable";
-import { SubbableContainer } from "../state/SubbableContainer";
-import { Subbable } from "../state/Subbable";
+import type { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
+import { LinkedPrimitive } from "./state/LinkedPrimitive";
+import { MutationHashable } from "./state/MutationHashable";
+import { SubbableContainer } from "./state/SubbableContainer";
+import { Subbable } from "./state/Subbable";
 import {
   SArray,
   SOut,

@@ -3,7 +3,7 @@ import { Contained, StateChangeHandler } from "./LinkedPrimitive";
 import { MutationHashable } from "./MutationHashable";
 import { SubbableContainer } from "./SubbableContainer";
 import { Subbable, notify } from "./Subbable";
-import { saveForHistory } from "../src/sstate.history";
+import { saveForHistory } from "../sstate.history";
 
 // .sort, .reverse, .fill, .copyWithin operate in place and return the array. SubbableArray
 // is not quite an array so the return types don't match.

@@ -1,4 +1,4 @@
-import { getGlobalState } from "../src/sstate.history";
+import { getGlobalState } from "../sstate.history";
 import { StateChangeHandler } from "./LinkedPrimitive";
 
 /* Subbables are objects one can subscribe to */

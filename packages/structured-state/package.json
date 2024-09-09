@@ -5,7 +5,7 @@
   "type": "module",
   "main": "./dist/structured-state.umd.cjs",
   "module": "./dist/structured-state.js",
-  "types": "./dist/src/index.d.ts",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/structured-state.js",

@@ -3,7 +3,7 @@ import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
 import { exhaustive } from "./assertions";
-import { LinkedPrimitive } from "../state/LinkedPrimitive";
+import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SArray, SSchemaArray } from "./sstate";
 import { KnowableObject, isKnowable } from "./sstate.history";
 import { JSONValue } from "./types";
