@@ -1,11 +1,11 @@
 import { useContainer } from "../../structured-state/src/index";
-import * as nw from "../../structured-state/nw/nwschema";
+import * as nw from "../../structured-state/src/nw/nwschema";
 import {
   Concretized,
   SubNumber,
   useSubToObjectCached,
   useSubbable,
-} from "../../structured-state/nw/subschema";
+} from "../../structured-state/src/nw/subschema";
 
 export type Track = Concretized<typeof Track>;
 export const Track = nw.object({

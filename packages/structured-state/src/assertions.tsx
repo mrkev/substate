@@ -4,7 +4,6 @@ import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { LinkedArray } from "./state/LinkedArray";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
-import { LinkedSet } from "./state/LinkedSet";
 import { SSet } from ".";
 
 export function assertSPrimitive<T>(
@@ -78,14 +77,14 @@ export function isContainable(
   | Struct<any>
   | Struct2<any>
   | Structured<any, any>
-  | LinkedSet<unknown> {
+  | SSet<unknown> {
   return (
     val instanceof LinkedPrimitive ||
     val instanceof LinkedArray ||
     val instanceof Struct ||
     val instanceof Struct2 ||
     val instanceof Structured ||
-    val instanceof LinkedSet
+    val instanceof SSet
   );
 }
 

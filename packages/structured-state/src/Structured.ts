@@ -1,11 +1,11 @@
 import { nanoid } from "nanoid";
 import { isContainable } from "./assertions";
+import { ApplyDeserialization, NeedsSchema, Schema } from "./serialization";
+import { getGlobalState, saveForHistory } from "./sstate.history";
 import type { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
 import { MutationHashable } from "./state/MutationHashable";
-import { SubbableContainer } from "./state/SubbableContainer";
 import { Subbable } from "./state/Subbable";
-import { getGlobalState, saveForHistory } from "./sstate.history";
-import { ApplyDeserialization, NeedsSchema, Schema } from "./serialization";
+import { SubbableContainer } from "./state/SubbableContainer";
 
 // export type AnyClass = {
 //   new (...args: any[]): Struct<any>;
@@ -57,26 +57,6 @@ export abstract class Structured<S, Sub extends ConstructableStructure<S>>
     // We don't actually do anything here. create() initializes structs
   }
 
-  public _childChanged(child: Subbable) {
-    MutationHashable.mutated(this, child);
-    if (this._container != null) {
-      this._container._childChanged(this);
-    }
-  }
-
-  featuredMutation(action: () => void) {
-    saveForHistory(this);
-    action();
-    this._notifyChange();
-  }
-
-  _notifyChange() {
-    MutationHashable.mutated(this, this);
-    if (this._container != null) {
-      this._container._childChanged(this);
-    }
-  }
-
   static create<S, T extends ConstructableStructure<S>>(
     Klass: T,
     ...args: ConstructorParameters<T>
@@ -86,21 +66,23 @@ export abstract class Structured<S, Sub extends ConstructableStructure<S>>
     return res;
   }
 
-  // Dirty
-  private _cleanHash: number = 0;
-  _markClean() {
-    // Anticipate the hash change from notificaiton
-    this._cleanHash = (this._hash + 1) % Number.MAX_SAFE_INTEGER;
-    this._notifyChange();
+  public _childChanged(child: Subbable) {
+    MutationHashable.mutated(this, child);
+    if (this._container != null) {
+      this._container._childChanged(this);
+    }
   }
-  _isClean() {
-    return this._cleanHash === this._hash;
+
+  public featuredMutation(action: () => void) {
+    saveForHistory(this);
+    action();
+    SubbableContainer._notifyChange(this, this);
   }
 }
 
 export function initStructured(structured: Structured<any, any>) {
   const self = structured as any;
-  // todo, make htis more efficient than iterating throuhg all my props?
+  // todo, make this more efficient than iterating throuhg all my props?
   // maybe with a close trick to see what gets initializded between Struct.super() and _init?
   // or something along those lines?
   for (const key in structured) {

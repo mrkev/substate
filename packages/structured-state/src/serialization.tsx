@@ -18,6 +18,7 @@ import { simplify } from "./serialization.simplify";
 import * as s from "./sstate";
 import { SArray, SSchemaArray } from "./sstate";
 import { KnowableObject } from "./sstate.history";
+import { SubbableContainer } from "./state/SubbableContainer";
 
 // TODO: set, map
 
@@ -253,7 +254,7 @@ function replaceStruct(
   // offer a way to override replacement
   if ("_replace" in obj && typeof obj._replace === "function") {
     obj._replace(json._value);
-    obj._notifyChange();
+    SubbableContainer._notifyChange(obj, obj);
     return;
   }
 
@@ -264,7 +265,7 @@ function replaceStruct(
     }
     (obj as any)[key] = json._value[key];
   }
-  obj._notifyChange();
+  SubbableContainer._notifyChange(obj, obj);
 }
 
 function replaceStruct2(
@@ -274,7 +275,7 @@ function replaceStruct2(
   // offer a way to override replacement
   if ("_replace" in obj && typeof obj._replace === "function") {
     obj._replace(json._value);
-    obj._notifyChange();
+    SubbableContainer._notifyChange(obj, obj);
     return;
   }
 
@@ -285,7 +286,7 @@ function replaceStruct2(
     }
     (obj as any)[key] = json._value[key];
   }
-  obj._notifyChange();
+  SubbableContainer._notifyChange(obj, obj);
 }
 
 function replaceStructured(
@@ -293,7 +294,7 @@ function replaceStructured(
   obj: Structured<any, any>
 ) {
   obj.replace(json._value);
-  obj._notifyChange();
+  SubbableContainer._notifyChange(obj, obj);
   return;
 }
 

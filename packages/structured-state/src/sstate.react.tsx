@@ -65,9 +65,3 @@ export function useContainer<S extends SubbableContainer>(
   useSubscribeToSubbableMutationHashable(obj, undefined, allChanges);
   return obj;
 }
-
-export function useIsDirty<S extends Structured<any, any>>(obj: S): boolean {
-  useSubscribeToSubbableMutationHashable(obj, undefined, true);
-  console.log("isClean?", obj._isClean());
-  return !obj._isClean();
-}

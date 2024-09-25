@@ -86,14 +86,7 @@ export abstract class Struct2<Sub extends Constructable>
   featuredMutation(action: () => void) {
     saveForHistory(this);
     action();
-    this._notifyChange();
-  }
-
-  _notifyChange() {
-    MutationHashable.mutated(this, this);
-    if (this._container != null) {
-      this._container._childChanged(this);
-    }
+    SubbableContainer._notifyChange(this, this);
   }
 }
 

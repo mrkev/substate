@@ -1,6 +1,10 @@
 import hljs from "highlight.js";
 import React, { useEffect, useState } from "react";
-import { DeserializeFunc, Structured } from "../../structured-state/src/index";
+import {
+  DeserializeFunc,
+  Structured,
+  useDirtyTracker,
+} from "../../structured-state/src/index";
 import * as s from "../../structured-state/src/index";
 import {
   construct,
@@ -10,14 +14,13 @@ import {
   useContainerWithSetter,
   usePrimitive,
 } from "../../structured-state/src/index";
-import { LinkedArray } from "../../structured-state/state/LinkedArray";
+import { LinkedArray } from "../../structured-state/src/state/LinkedArray";
 import {
   HistoryEntry,
   getGlobalState,
   popHistory,
   recordHistory,
 } from "../../structured-state/src/sstate.history";
-import { useIsDirty } from "../../structured-state/src/sstate.react";
 import { Serialized } from "../../structured-state/src/serialization";
 import "./App.css";
 
@@ -123,15 +126,15 @@ function App() {
     return result;
   });
 
-  const dirty = useIsDirty(project);
+  const [projectDirtyState, markProjectClean] = useDirtyTracker(project);
 
   return (
     <>
       <div>
-        useIsDirty: {JSON.stringify(dirty)}{" "}
+        useIsDirty: {JSON.stringify(projectDirtyState)}{" "}
         <button
           onClick={() => {
-            project._markClean();
+            markProjectClean();
           }}
         >
           save

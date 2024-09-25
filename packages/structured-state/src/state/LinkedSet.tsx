@@ -4,7 +4,7 @@ import { SubbableContainer } from "./SubbableContainer";
 import { Subbable } from "./Subbable";
 
 // TODO: missing: history
-export class LinkedSet<S> extends SubbableContainer implements Set<S> {
+export class SSet<S> extends SubbableContainer implements Set<S> {
   private _set: ReadonlySet<S>;
 
   private constructor(initialValue: Set<S>, id: string) {

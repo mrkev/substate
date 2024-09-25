@@ -22,7 +22,7 @@ export type { DeserializeFunc } from "./Structured";
 export type { StructProps } from "./Struct";
 
 export { LinkedMap as SMap } from "./state/LinkedMap";
-export { LinkedSet as SSet } from "./state/LinkedSet";
+export { SSet } from "./state/LinkedSet";
 export { LinkedPrimitive as SPrimitive } from "./state/LinkedPrimitive";
 
 export { useNewLinkedMap, useNewLinkedSet } from "./state/useNew";
@@ -35,3 +35,9 @@ export {
   useSPrimitive as usePrimitive,
 } from "./sstate.react";
 export { construct, serialize } from "./serialization";
+
+export { useDirtyTracker, DirtyObserver } from "./DirtyObserver";
+export type { DirtyState } from "./DirtyObserver";
+
+// TODO: eventually remove
+export { useSubscribeToSubbableMutationHashable } from "./state/MutationHashable";

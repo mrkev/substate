@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { LinkedMap } from "./LinkedMap";
-import { LinkedSet } from "./LinkedSet";
+import { SSet } from "./LinkedSet";
 import { useSubscribeToSubbableMutationHashable } from "./MutationHashable";
 
-export function useNewLinkedSet<S>(): LinkedSet<S> {
-  const [set] = useState<LinkedSet<S>>(() => LinkedSet.create<S>());
+export function useNewLinkedSet<S>(): SSet<S> {
+  const [set] = useState<SSet<S>>(() => SSet.create<S>());
   useSubscribeToSubbableMutationHashable(set);
   return set;
 }

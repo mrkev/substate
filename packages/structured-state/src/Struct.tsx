@@ -1,10 +1,5 @@
 import { nanoid } from "nanoid";
 import { isContainable } from "./assertions";
-import type { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
-import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { MutationHashable } from "./state/MutationHashable";
-import { SubbableContainer } from "./state/SubbableContainer";
-import { Subbable } from "./state/Subbable";
 import {
   SArray,
   SOut,
@@ -14,6 +9,11 @@ import {
   UNINITIALIZED_TYPED_ARRAY,
 } from "./sstate";
 import { getGlobalState, saveForHistory } from "./sstate.history";
+import type { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
+import { LinkedPrimitive } from "./state/LinkedPrimitive";
+import { MutationHashable } from "./state/MutationHashable";
+import { Subbable } from "./state/Subbable";
+import { SubbableContainer } from "./state/SubbableContainer";
 
 type IsEmptyObjType<T extends Record<PropertyKey, any>> = keyof T extends never
   ? true
@@ -136,14 +136,7 @@ export abstract class Struct<Child extends Struct<any>>
   featuredMutation(action: () => void) {
     saveForHistory(this);
     action();
-    this._notifyChange();
-  }
-
-  _notifyChange() {
-    MutationHashable.mutated(this, this);
-    if (this._container != null) {
-      this._container._childChanged(this);
-    }
+    SubbableContainer._notifyChange(this, this);
   }
 }
 

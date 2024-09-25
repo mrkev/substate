@@ -7,7 +7,7 @@ import { Struct2 } from "./Struct2";
 import { LinkedArray } from "./state/LinkedArray";
 import { LinkedMap } from "./state/LinkedMap";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { LinkedSet } from "./state/LinkedSet";
+import { SSet } from "./state/LinkedSet";
 import { SubbableContainer } from "./state/SubbableContainer";
 import { getGlobalState } from "./sstate.history";
 import { JSONValue } from "./types";
@@ -169,5 +169,5 @@ export function map<K, V>(initialValue?: Map<K, V>) {
 }
 
 export function set<T>(initialValue?: Set<T>) {
-  return LinkedSet.create(initialValue);
+  return SSet.create(initialValue);
 }

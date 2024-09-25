@@ -45,4 +45,14 @@ export abstract class SubbableContainer
       SubbableContainer._uncontain(item);
     }
   }
+
+  /**
+   * Creates a change notification to be propagated, starting at this object, and about change of a certain target
+   */
+  static _notifyChange(struct: SubbableContainer, target: SubbableContainer) {
+    MutationHashable.mutated(struct, target);
+    if (struct._container != null) {
+      struct._container._childChanged(target);
+    }
+  }
 }

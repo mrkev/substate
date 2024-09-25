@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Subbable, SubbableCallback, notify, subscribe } from "./Subbable";
 
-export abstract class MutationHashable implements Subbable {
+export abstract class MutationHashable {
   readonly _subscriptors: Set<SubbableCallback> = new Set();
-  _hash: number = 0;
+  public _hash: number = 0;
 
   static getMutationHash(mh: MutationHashable) {
     return mh._hash;
@@ -29,6 +29,5 @@ export function useSubscribeToSubbableMutationHashable<
       }
     });
   }, [cb, obj, recursiveChanges]);
-
   return obj;
 }
