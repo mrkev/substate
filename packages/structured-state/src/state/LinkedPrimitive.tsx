@@ -38,8 +38,9 @@ export class LinkedPrimitive<S> implements Contained, Subbable {
     this._value = value;
     // TODO: when merging Subbable and Contained, put this in `notify`
     notify(this, this);
+    // TODO: add hash to subbable to just do SubbableContainer._notifyChange(this, this);??
     if (this._container != null) {
-      this._container._childChanged(this);
+      SubbableContainer._childChanged(this._container, this);
     }
   }
 

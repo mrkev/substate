@@ -120,13 +120,6 @@ export abstract class Struct<Child extends Struct<any>>
     globalState.knownObjects.set(this._id, this);
   }
 
-  _childChanged(child: Subbable) {
-    MutationHashable.mutated(this, child);
-    if (this._container != null) {
-      this._container._childChanged(this);
-    }
-  }
-
   // unnecesary?
   _destroy() {
     this._container = null;

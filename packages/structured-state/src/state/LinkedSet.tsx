@@ -13,13 +13,6 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
     SubbableContainer._contain(this, this._set);
   }
 
-  _childChanged(child: Subbable) {
-    MutationHashable.mutated(this, child);
-    if (this._container != null) {
-      this._container._childChanged(this);
-    }
-  }
-
   _getRaw(): ReadonlySet<S> {
     return this._set;
   }
@@ -28,10 +21,7 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
     SubbableContainer._uncontainAll(this._set);
     this._set = set;
     SubbableContainer._contain(this, set);
-    MutationHashable.mutated(this, this);
-    if (this._container != null) {
-      this._container._childChanged(this);
-    }
+    SubbableContainer._notifyChange(this, this);
   }
 
   // TODO: method to initialize with id to make it unexposed to caller?
@@ -42,10 +32,7 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
 
   private mutate<V>(mutator: (raw: Set<S>) => V): V {
     const result = mutator(this._set as any);
-    MutationHashable.mutated(this, this);
-    if (this._container != null) {
-      this._container._childChanged(this);
-    }
+    SubbableContainer._notifyChange(this, this);
     return result;
   }
 

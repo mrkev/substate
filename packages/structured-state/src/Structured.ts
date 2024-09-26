@@ -66,13 +66,6 @@ export abstract class Structured<S, Sub extends ConstructableStructure<S>>
     return res;
   }
 
-  public _childChanged(child: Subbable) {
-    MutationHashable.mutated(this, child);
-    if (this._container != null) {
-      this._container._childChanged(this);
-    }
-  }
-
   public featuredMutation(action: () => void) {
     saveForHistory(this);
     action();

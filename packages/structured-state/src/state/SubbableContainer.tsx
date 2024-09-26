@@ -11,13 +11,14 @@ export abstract class SubbableContainer
   public _hash: number = 0;
   // all containers can be contained
   public _container: SubbableContainer | null = null;
+  // public _propagatedNotifs = new WeakSet();
 
   constructor(id: string) {
     this._id = id;
   }
 
   // abstract _replace(val: T): void;
-  abstract _childChanged(child: Subbable): void;
+  // abstract _childChanged(child: Subbable): void;
 
   static _contain(
     container: SubbableContainer,
@@ -50,9 +51,20 @@ export abstract class SubbableContainer
    * Creates a change notification to be propagated, starting at this object, and about change of a certain target
    */
   static _notifyChange(struct: SubbableContainer, target: SubbableContainer) {
+    const token = {};
+    // struct._propagatedNotifs.add(token);
+
     MutationHashable.mutated(struct, target);
     if (struct._container != null) {
-      struct._container._childChanged(target);
+      // struct._container._childChanged(target);
+      SubbableContainer._childChanged(struct._container, target);
+    }
+  }
+
+  static _childChanged(parent: SubbableContainer, target: Subbable) {
+    MutationHashable.mutated(parent, target);
+    if (parent._container != null) {
+      SubbableContainer._childChanged(parent._container, target);
     }
   }
 }

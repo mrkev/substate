@@ -51,10 +51,7 @@ export class LinkedArray<S>
     SubbableContainer._uncontainAll(this._array);
     this._array = arr; // todo, call ._destroy on child elements?
     SubbableContainer._contain(this, this._array);
-    MutationHashable.mutated(this, this);
-    if (this._container != null) {
-      this._container._childChanged(this);
-    }
+    SubbableContainer._notifyChange(this, this);
   }
 
   constructor(initialValue: Array<S>, id: string) {
@@ -63,21 +60,10 @@ export class LinkedArray<S>
     SubbableContainer._contain(this, this._array);
   }
 
-  _childChanged(child: Subbable) {
-    MutationHashable.mutated(this, child);
-    if (this._container != null) {
-      this._container._childChanged(this);
-    }
-  }
-
   private mutate<V>(mutator: (rep: Array<S>) => V): V {
     saveForHistory(this as any);
     const result = mutator(this._array);
-    MutationHashable.mutated(this, this);
-
-    if (this._container != null) {
-      this._container._childChanged(this);
-    }
+    SubbableContainer._notifyChange(this, this);
     return result;
   }
 
