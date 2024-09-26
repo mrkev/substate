@@ -10,7 +10,7 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
   private constructor(initialValue: Set<S>, id: string) {
     super(id);
     this._set = initialValue;
-    SubbableContainer._contain(this, this._set);
+    SubbableContainer._containAll(this, this._set);
   }
 
   _getRaw(): ReadonlySet<S> {
@@ -18,9 +18,9 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
   }
 
   _setRaw(set: ReadonlySet<S>) {
-    SubbableContainer._uncontainAll(this._set);
+    SubbableContainer._uncontainAll(this, this._set);
     this._set = set;
-    SubbableContainer._contain(this, set);
+    SubbableContainer._containAll(this, set);
     SubbableContainer._notifyChange(this, this);
   }
 
@@ -45,7 +45,7 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
       return this;
     }
     return this.mutate((clone) => {
-      SubbableContainer._contain(this, [value]);
+      SubbableContainer._containAll(this, [value]);
       clone.add(value);
       return this;
     });
@@ -54,7 +54,7 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
   // Set<S> interface, mutates
   clear(): void {
     for (const elem of this._set) {
-      SubbableContainer._uncontain(elem);
+      SubbableContainer._uncontain(this, elem);
     }
     // To trigger everything that should be triggered
     this.mutate(() => {});
@@ -69,7 +69,7 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
 
     return this.mutate((raw) => {
       // NOTE: We have confirmed above the set has this value
-      SubbableContainer._uncontain(value);
+      SubbableContainer._uncontain(this, value);
       return raw.delete(value);
     });
   }

@@ -36,7 +36,7 @@ export abstract class Structured<S, Sub extends ConstructableStructure<S>>
   readonly _id: string;
   public _hash: number = 0;
   readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
-  public _container: SubbableContainer | null = null;
+  public _container = new Set<SubbableContainer>();
   public _propagatedTokens = new WeakSet();
 
   abstract serialize(): S;
@@ -74,9 +74,7 @@ export function initStructured(structured: Structured<any, any>) {
   for (const key in structured) {
     const child = self[key];
 
-    if (isContainable(self[key])) {
-      child._container = structured;
-    }
+    SubbableContainer._contain(structured, child);
   }
   const globalState = getGlobalState();
   globalState.knownObjects.set(structured._id, structured);

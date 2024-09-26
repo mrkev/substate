@@ -20,7 +20,7 @@ export abstract class Struct2<Sub extends Constructable>
   readonly _id: string;
   public _hash: number = 0;
   readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
-  public _container: SubbableContainer | null = null;
+  public _container = new Set<SubbableContainer>();
   public _propagatedTokens = new WeakSet();
 
   static readonly IGNORE_KEYS = new Set<string>([
@@ -46,9 +46,7 @@ export abstract class Struct2<Sub extends Constructable>
 
     for (const key of props) {
       const child = self[key];
-      if (isContainable(child)) {
-        child._container = this;
-      }
+      SubbableContainer._contain(this, child);
     }
     const globalState = getGlobalState();
     globalState.knownObjects.set(this._id, this);
@@ -74,7 +72,7 @@ export abstract class Struct2<Sub extends Constructable>
 
   // unnecesary?
   _destroy() {
-    this._container = null;
+    this._container.clear();
     // console.log("DESTROY", this);
   }
 

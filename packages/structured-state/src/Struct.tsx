@@ -45,7 +45,7 @@ export abstract class Struct<Child extends Struct<any>>
   readonly _id: string;
   _hash: number = 0;
   _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
-  _container: SubbableContainer | null = null;
+  public _container = new Set<SubbableContainer>();
   _propagatedTokens = new WeakSet();
 
   get _kind() {
@@ -63,12 +63,13 @@ export abstract class Struct<Child extends Struct<any>>
   _initConstructed(props: string[]) {
     const self = this as any;
 
+    const toContain = [];
     for (const key of props) {
       const child = self[key];
-      if (isContainable(child)) {
-        child._container = this;
-      }
+      toContain.push(child);
     }
+    SubbableContainer._containAll(this, toContain);
+
     const globalState = getGlobalState();
     globalState.knownObjects.set(this._id, this);
   }
@@ -103,9 +104,7 @@ export abstract class Struct<Child extends Struct<any>>
       // Act on initialized keys
       child = self[key];
 
-      if (isContainable(child)) {
-        child._container = this;
-      }
+      SubbableContainer._contain(this, child);
     }
     const globalState = getGlobalState();
     globalState.knownObjects.set(this._id, this);
@@ -113,7 +112,7 @@ export abstract class Struct<Child extends Struct<any>>
 
   // unnecesary?
   _destroy() {
-    this._container = null;
+    this._container.clear();
     // console.log("DESTROY", this);
   }
 

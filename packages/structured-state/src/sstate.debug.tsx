@@ -153,7 +153,9 @@ export function header(elem: StructuredKinds, showContainerId = false) {
       ? ""
       : `.${MutationHashable.getMutationHash(elem)}`;
 
-  const container = showContainerId ? ` -^ ${elem._container?._id}` : "";
+  const container = showContainerId
+    ? ` -^ ${[...elem._container.values()].map((v) => v._id).join(",")}`
+    : "";
 
   return `(${kind}: ${elem._id}${hash}${container})`;
 }

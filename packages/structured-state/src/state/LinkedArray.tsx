@@ -32,7 +32,7 @@ export class LinkedArray<S>
   protected _array: Array<S>;
   readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
   _hash: number = 0;
-  _container: SubbableContainer | null = null;
+  public _container = new Set<SubbableContainer>();
   _propagatedTokens = new WeakSet();
 
   /** See usage in SSchemaArray */
@@ -49,16 +49,16 @@ export class LinkedArray<S>
   // }
 
   _replace(arr: Array<S>) {
-    SubbableContainer._uncontainAll(this._array);
+    SubbableContainer._uncontainAll(this, this._array);
     this._array = arr; // todo, call ._destroy on child elements?
-    SubbableContainer._contain(this, this._array);
+    SubbableContainer._containAll(this, this._array);
     SubbableContainer._notifyChange(this, this);
   }
 
   constructor(initialValue: Array<S>, id: string) {
     this._id = id;
     this._array = initialValue;
-    SubbableContainer._contain(this, this._array);
+    SubbableContainer._containAll(this, this._array);
   }
 
   private mutate<V>(mutator: (rep: Array<S>) => V): V {
@@ -120,7 +120,7 @@ export class LinkedArray<S>
 
     return this.mutate((rep) => {
       const res = rep.pop();
-      res != null && SubbableContainer._uncontain(res);
+      res != null && SubbableContainer._uncontain(this, res);
       return res;
     });
   }
@@ -133,7 +133,7 @@ export class LinkedArray<S>
 
     return this.mutate((clone) => {
       const res = clone.shift();
-      res != null && SubbableContainer._uncontain(res);
+      res != null && SubbableContainer._uncontain(this, res);
       return res;
     });
   }
@@ -143,7 +143,7 @@ export class LinkedArray<S>
     if (items.length < 1) {
       return this.length;
     }
-    SubbableContainer._contain(this, items);
+    SubbableContainer._containAll(this, items);
 
     return this.mutate((clone) => {
       return clone.push(...items);
@@ -155,7 +155,7 @@ export class LinkedArray<S>
     if (items.length < 1) {
       return this.length;
     }
-    SubbableContainer._contain(this, items);
+    SubbableContainer._containAll(this, items);
 
     return this.mutate((clone) => {
       return clone.unshift(...items);
@@ -182,11 +182,11 @@ export class LinkedArray<S>
   splice(start: number, deleteCount?: number): S[];
   splice(start: number, deleteCount: number, ...items: S[]): S[];
   splice(start: any, deleteCount?: any, ...items: any[]): S[] {
-    SubbableContainer._contain(this, items);
+    SubbableContainer._containAll(this, items);
     return this.mutate((_array) => {
       const deleted = _array.splice(start, deleteCount, ...items);
       for (const elem of deleted) {
-        SubbableContainer._uncontain(elem);
+        SubbableContainer._uncontain(this, elem);
       }
       return deleted;
     });
@@ -194,7 +194,7 @@ export class LinkedArray<S>
 
   // Array<S> interface, mutates
   fill(value: S, start?: number, end?: number): this {
-    SubbableContainer._contain(this, [value]);
+    SubbableContainer._containAll(this, [value]);
     // TODO: BREAKING: containment
     return this.mutate((_array) => {
       _array.fill(value, start, end);

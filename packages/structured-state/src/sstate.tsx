@@ -122,7 +122,7 @@ export class SSchemaArray<
      * TODO: we acutally never use this, so commenting it out for now
      */
     // this._containedIds = new WeakRefMap<T>(10_000, "SSchemaArray");
-    SubbableContainer._contain(this, this._array);
+    SubbableContainer._containAll(this, this._array);
   }
 }
 

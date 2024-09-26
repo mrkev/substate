@@ -8,9 +8,8 @@ export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
 export type StateChangeHandler<S> = (value: S) => void;
 
 export interface Contained {
-  // todo: weak ref to avoid leaks
   // todo: readonly?
-  _container: Subbable | null;
+  _container: Set<Subbable>;
 }
 
 /**
@@ -20,7 +19,7 @@ export class LinkedPrimitive<S> implements Contained, Subbable {
   readonly _id: string;
   private _value: Readonly<S>;
   _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
-  _container: SubbableContainer | null = null;
+  public _container = new Set<SubbableContainer>();
 
   constructor(initialValue: S, id: string) {
     this._value = initialValue;
@@ -39,10 +38,10 @@ export class LinkedPrimitive<S> implements Contained, Subbable {
     // TODO: when merging Subbable and Contained, put this in `notify`
     notify(this, this);
     // TODO: add hash to subbable to just do SubbableContainer._notifyChange(this, this);??
-    if (this._container != null) {
-      // we don't need to save the token, since primitvies, being leaves, will never be notified when a child changes
-      const token = new UpdateToken(this);
-      SubbableContainer._childChanged(this._container, token);
+    // we don't need to save the token, since primitvies, being leaves, will never be notified when a child changes
+    const token = new UpdateToken(this);
+    for (const container of this._container) {
+      SubbableContainer._childChanged(container, token);
     }
   }
 
