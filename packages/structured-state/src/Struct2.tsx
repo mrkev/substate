@@ -21,12 +21,14 @@ export abstract class Struct2<Sub extends Constructable>
   public _hash: number = 0;
   readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
   public _container: SubbableContainer | null = null;
+  public _propagatedTokens = new WeakSet();
 
   static readonly IGNORE_KEYS = new Set<string>([
     "_id",
     "_hash",
     "_subscriptors",
     "_container",
+    "_propagatedTokens",
   ]);
 
   abstract serialize(): Struct2Serialized<Sub>;

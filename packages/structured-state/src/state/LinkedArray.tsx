@@ -33,6 +33,7 @@ export class LinkedArray<S>
   readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
   _hash: number = 0;
   _container: SubbableContainer | null = null;
+  _propagatedTokens = new WeakSet();
 
   /** See usage in SSchemaArray */
   // protected _containedIds: WeakRefMap<any> | null = null;

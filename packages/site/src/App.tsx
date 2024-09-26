@@ -24,6 +24,8 @@ import {
 import { Serialized } from "../../structured-state/src/serialization";
 import "./App.css";
 
+(window as any).s = s;
+
 /**
  * TODO:
  * - Redo

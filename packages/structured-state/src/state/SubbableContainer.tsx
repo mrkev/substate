@@ -3,6 +3,24 @@ import { Contained } from "./LinkedPrimitive";
 import { MutationHashable } from "./MutationHashable";
 import { Subbable, SubbableCallback } from "./Subbable";
 
+/** Keys to ignore from SubbableContainer when serializing */
+export const CONTAINER_IGNORE_KEYS = new Set<string>([
+  "_id",
+  "_hash",
+  "_subscriptors",
+  "_container",
+  "_propagatedTokens",
+]);
+
+/**
+ * A token is unique to an update (a call to _notifyChange). It serves two purposes:
+ * - it helps us prevent loops by ensuring an event isn't processed twice
+ * - it holds the target of the update, acting like an "event" in that sense: a record of the update
+ */
+export class UpdateToken {
+  constructor(public target: Subbable) {}
+}
+
 export abstract class SubbableContainer
   implements MutationHashable, Subbable, Contained
 {
@@ -11,7 +29,7 @@ export abstract class SubbableContainer
   public _hash: number = 0;
   // all containers can be contained
   public _container: SubbableContainer | null = null;
-  // public _propagatedNotifs = new WeakSet();
+  public _propagatedTokens: WeakSet<UpdateToken> = new WeakSet();
 
   constructor(id: string) {
     this._id = id;
@@ -51,20 +69,27 @@ export abstract class SubbableContainer
    * Creates a change notification to be propagated, starting at this object, and about change of a certain target
    */
   static _notifyChange(struct: SubbableContainer, target: SubbableContainer) {
-    const token = {};
-    // struct._propagatedNotifs.add(token);
+    const token = new UpdateToken(target);
+    struct._propagatedTokens.add(token);
 
     MutationHashable.mutated(struct, target);
     if (struct._container != null) {
       // struct._container._childChanged(target);
-      SubbableContainer._childChanged(struct._container, target);
+      SubbableContainer._childChanged(struct._container, token);
     }
   }
 
-  static _childChanged(parent: SubbableContainer, target: Subbable) {
-    MutationHashable.mutated(parent, target);
-    if (parent._container != null) {
-      SubbableContainer._childChanged(parent._container, target);
+  static _childChanged(node: SubbableContainer, token: UpdateToken) {
+    if (node._propagatedTokens.has(token)) {
+      // we already processed this event. stop here to prevent loops
+      return;
+    }
+
+    node._propagatedTokens.add(token);
+
+    MutationHashable.mutated(node, token.target);
+    if (node._container != null) {
+      SubbableContainer._childChanged(node._container, token);
     }
   }
 }

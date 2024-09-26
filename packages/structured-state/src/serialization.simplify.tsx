@@ -8,6 +8,7 @@ import { SArray, SSchemaArray } from "./sstate";
 import { KnowableObject, isKnowable } from "./sstate.history";
 import { JSONValue } from "./types";
 import { Serialized } from "./serialization";
+import { CONTAINER_IGNORE_KEYS } from "./state/SubbableContainer";
 
 function simplifyPrimitive(obj: LinkedPrimitive<any>): Serialized {
   return {
@@ -54,7 +55,7 @@ function simplifyStruct(obj: Struct<any>): Serialized {
   const keys = Object.keys(obj);
 
   for (const key of keys) {
-    if (Struct.IGNORE_KEYS.has(key)) {
+    if (CONTAINER_IGNORE_KEYS.has(key)) {
       continue;
     }
 

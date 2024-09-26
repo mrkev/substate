@@ -11,7 +11,6 @@ import {
 import { getGlobalState, saveForHistory } from "./sstate.history";
 import type { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { MutationHashable } from "./state/MutationHashable";
 import { Subbable } from "./state/Subbable";
 import { SubbableContainer } from "./state/SubbableContainer";
 
@@ -47,15 +46,7 @@ export abstract class Struct<Child extends Struct<any>>
   _hash: number = 0;
   _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
   _container: SubbableContainer | null = null;
-
-  static readonly IGNORE_KEYS = new Set<string>([
-    "_hash",
-    "_subscriptors",
-    "_container",
-    "_stateKeys",
-    "_unsub",
-    "_id",
-  ]);
+  _propagatedTokens = new WeakSet();
 
   get _kind() {
     return this.constructor.name;

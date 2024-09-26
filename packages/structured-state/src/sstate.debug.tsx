@@ -5,9 +5,9 @@ import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { MutationHashable } from "./state/MutationHashable";
 import { SArray, SSchemaArray } from "./sstate";
 import { Struct } from "./Struct";
-import { STRUCTURED_IGNORE_KEYS } from "./Structured";
 import { exhaustive } from "./assertions";
 import { StructuredKinds } from "./StructuredKinds";
+import { CONTAINER_IGNORE_KEYS } from "./state/SubbableContainer";
 
 function stringifyUnknown(val: unknown) {
   const res = stringify(val, {
@@ -67,11 +67,11 @@ export function debugOutStruct(
   const keys = Object.keys(struct);
 
   for (const key of keys) {
-    if (struct instanceof Structured && STRUCTURED_IGNORE_KEYS.has(key)) {
+    if (struct instanceof Structured && CONTAINER_IGNORE_KEYS.has(key)) {
       continue;
     }
 
-    if (Struct.IGNORE_KEYS.has(key)) {
+    if (CONTAINER_IGNORE_KEYS.has(key)) {
       continue;
     }
 

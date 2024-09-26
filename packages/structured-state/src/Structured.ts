@@ -30,14 +30,6 @@ interface ConstructableStructure<S> {
   ): Structured<S, any>;
 }
 
-export const STRUCTURED_IGNORE_KEYS = new Set<string>([
-  "_id",
-  "_hash",
-  "_subscriptors",
-  "_container",
-  "_cleanHash",
-]);
-
 export abstract class Structured<S, Sub extends ConstructableStructure<S>>
   implements SubbableContainer, Subbable, Contained
 {
@@ -45,6 +37,7 @@ export abstract class Structured<S, Sub extends ConstructableStructure<S>>
   public _hash: number = 0;
   readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
   public _container: SubbableContainer | null = null;
+  public _propagatedTokens = new WeakSet();
 
   abstract serialize(): S;
   abstract replace(json: S): void;
