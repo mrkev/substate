@@ -1,7 +1,5 @@
 import { nanoid } from "nanoid";
-import { MutationHashable } from "./MutationHashable";
 import { SubbableContainer } from "./SubbableContainer";
-import { Subbable } from "./Subbable";
 
 // TODO: missing: history
 export class SSet<S> extends SubbableContainer implements Set<S> {

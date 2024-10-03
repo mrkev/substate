@@ -3,23 +3,33 @@
 import { describe, expect, it } from "vitest";
 import * as s from "../index";
 
-class Foo extends s.Structured<null, typeof Foo> {
+type SFoo = {
+  // todo: can use serialized type for SSet?
+  numset: number[];
+};
+
+class AudioContext {}
+
+class Foo extends s.Structured<SFoo, typeof Foo> {
   readonly numset = s.set<number>();
 
   // All this is just boilerplate ugh
-  override replace(json: null): void {}
-  override serialize(): null {
-    return null;
+  override replace(json: SFoo): void {
+    this.numset._setRaw(new Set(json.numset));
   }
-  static construct(): Foo {
-    return new Foo();
+  override serialize(): SFoo {
+    return { numset: Array.from(this.numset) };
   }
-  constructor() {
+
+  static construct(external: AudioContext): Foo {
+    return new Foo(external);
+  }
+  constructor(external: AudioContext) {
     super();
   }
 }
 
-const sets = s.Structured.create(Foo);
+const sets = s.Structured.create(Foo, new AudioContext());
 
 describe("sets", () => {
   it("add, hashes up", () => {

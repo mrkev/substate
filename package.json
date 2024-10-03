@@ -22,5 +22,9 @@
     "eslint-plugin-react-refresh": "^0.4.11",
     "globals": "^15.9.0",
     "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "@types/scheduler": "^0.23.0",
+    "scheduler": "^0.23.2"
   }
 }

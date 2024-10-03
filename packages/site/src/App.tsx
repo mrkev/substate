@@ -23,6 +23,7 @@ import {
 } from "../../structured-state/src/sstate.history";
 import { Serialized } from "../../structured-state/src/serialization";
 import "./App.css";
+import { SchedulerTest } from "./SchedulerTest";
 
 (window as any).s = s;
 
@@ -133,6 +134,7 @@ function App() {
   return (
     <>
       <div>
+        <SchedulerTest />
         useIsDirty: {JSON.stringify(projectDirtyState)}{" "}
         <button
           onClick={() => {

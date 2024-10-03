@@ -1,3 +1,10 @@
+- state is not a tree. how are we auto-serializing:
+  - loops
+  - multiple parents referencing an object
+
+
+
+
 
 SubSchema
 ----------------------------------------------

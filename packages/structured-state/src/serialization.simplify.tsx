@@ -11,6 +11,9 @@ import { Serialized } from "./serialization";
 import { CONTAINER_IGNORE_KEYS } from "./state/SubbableContainer";
 
 function simplifyPrimitive(obj: LinkedPrimitive<any>): Serialized {
+  if (obj._container.size > 1) {
+    console.warn("multiple containers reference", obj);
+  }
   return {
     $$: "prim",
     _value: obj.get(),
@@ -19,6 +22,9 @@ function simplifyPrimitive(obj: LinkedPrimitive<any>): Serialized {
 }
 
 function simplifySimpleArray(obj: SArray<any>): Serialized {
+  if (obj._container.size > 1) {
+    console.warn("multiple containers reference", obj);
+  }
   return {
     $$: "arr-simple",
     _value: obj._getRaw().map((x) => simplify(x)),
@@ -27,6 +33,9 @@ function simplifySimpleArray(obj: SArray<any>): Serialized {
 }
 
 function simplifySchemaArray(obj: SSchemaArray<any>): Serialized {
+  if (obj._container.size > 1) {
+    console.warn("multiple containers reference", obj);
+  }
   return {
     $$: "arr-schema",
     _value: obj._getRaw().map((x) => {
@@ -41,6 +50,9 @@ function simplifySchemaArray(obj: SSchemaArray<any>): Serialized {
 }
 
 function simplifyStruct(obj: Struct<any>): Serialized {
+  if (obj._container.size > 1) {
+    console.warn("multiple containers reference", obj);
+  }
   // offer a way to override simplification
   if ("_simplify" in obj && typeof obj._simplify === "function") {
     return {
@@ -71,6 +83,9 @@ function simplifyStruct(obj: Struct<any>): Serialized {
 }
 
 function simplifyStruct2(obj: Struct2<any>): Serialized {
+  if (obj._container.size > 1) {
+    console.warn("multiple containers reference", obj);
+  }
   return {
     $$: "struct2",
     _id: obj._id,
@@ -79,6 +94,9 @@ function simplifyStruct2(obj: Struct2<any>): Serialized {
 }
 
 function simplifyStructured(obj: Structured<any, any>): Serialized {
+  if (obj._container.size > 1) {
+    console.warn("multiple containers reference", obj);
+  }
   return {
     $$: "structured",
     _id: obj._id,
@@ -87,6 +105,9 @@ function simplifyStructured(obj: Structured<any, any>): Serialized {
 }
 
 function simplifySet(obj: SSet<any>): Serialized {
+  if (obj._container.size > 1) {
+    console.warn("multiple containers reference", obj);
+  }
   return {
     $$: "set",
     _value: Array.from(obj._getRaw()).map((x) => {

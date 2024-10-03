@@ -30,7 +30,9 @@ interface ConstructableStructure<S> {
   ): Structured<S, any>;
 }
 
-export abstract class Structured<S, Sub extends ConstructableStructure<S>>
+// ConstructableStructure<any> instead of ConstructableStructure<S> because we acutally want it to take any params in the constructor, to allow for external arguments
+// we use external arguments to pass in for example the liveAudioContext, which is not available just from the serialized json
+export abstract class Structured<S, Sub extends ConstructableStructure<any>>
   implements SubbableContainer, Subbable, Contained
 {
   readonly _id: string;
@@ -42,10 +44,17 @@ export abstract class Structured<S, Sub extends ConstructableStructure<S>>
   abstract serialize(): S;
   abstract replace(json: S): void;
 
+  static IN_CREATE = false; // for debugging
+
   // TODO: a way to force constructor to be private in children, so that they don't
   // create objects with `new XXX` and instead use `create()`? built-in create as a static prop
   // might be good too.
   protected constructor() {
+    if (!Structured.IN_CREATE) {
+      throw new Error(
+        `Attempted to initialize a Structured object without using Structured.create`
+      );
+    }
     this._id = nanoid(5);
     // We don't actually do anything here. create() initializes structs
   }
@@ -54,14 +63,20 @@ export abstract class Structured<S, Sub extends ConstructableStructure<S>>
     Klass: T,
     ...args: ConstructorParameters<T>
   ): InstanceType<T> {
+    Structured.IN_CREATE = true;
     const res = new Klass(...args) as any;
     initStructured(res);
+    Structured.IN_CREATE = false;
     return res;
   }
 
   public featuredMutation(action: () => void) {
     saveForHistory(this);
     action();
+    SubbableContainer._notifyChange(this, this);
+  }
+
+  public notifyChange() {
     SubbableContainer._notifyChange(this, this);
   }
 }

@@ -34,7 +34,8 @@ export function notify(
     //   subbable.constructor.name
     // );
   }
-  subbable._subscriptors.forEach((cb) => {
+
+  for (const cb of subbable._subscriptors) {
     cb(target, subbable);
-  });
+  }
 }
