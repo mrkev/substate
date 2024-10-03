@@ -1,11 +1,21 @@
+import { nanoid } from "nanoid";
 import { StateChangeHandler } from "./LinkedPrimitive";
 import { MutationHashable } from "./MutationHashable";
 import { Subbable } from "./Subbable";
+import { SubbableContainer, UpdateToken } from "./SubbableContainer";
 
-// TODO: SubbableContainer, Contained
-export class LinkedMap<K, V> implements Map<K, V>, Subbable, MutationHashable {
-  private _map = new Map<K, V>();
+// todo: history
+export class LinkedMap<K, V>
+  implements Map<K, V>, Subbable, MutationHashable, SubbableContainer
+{
+  private _map: Map<K, V>;
 
+  // SubbableContainer
+  _id: string;
+  public readonly _container = new Set<SubbableContainer>();
+  public readonly _propagatedTokens: WeakSet<UpdateToken> = new WeakSet();
+
+  // MutationHashable
   _subscriptors = new Set<StateChangeHandler<Subbable>>();
   _hash: number = 0;
 
@@ -18,12 +28,15 @@ export class LinkedMap<K, V> implements Map<K, V>, Subbable, MutationHashable {
     return this._map;
   }
 
-  private constructor(initialValue: Map<K, V>) {
+  private constructor(initialValue: Map<K, V>, id: string) {
+    this._id = id;
     this._map = initialValue;
+    SubbableContainer._containAll(this, this._map.keys());
+    SubbableContainer._containAll(this, this._map.values());
   }
 
   public static create<K, V>(initialValue?: Map<K, V>) {
-    return new this<K, V>(initialValue ?? new Map());
+    return new this<K, V>(initialValue ?? new Map(), nanoid(5));
   }
 
   map<T>(callbackfn: (value: V, key: K, map: Map<K, V>) => T): T[] {
@@ -39,12 +52,19 @@ export class LinkedMap<K, V> implements Map<K, V>, Subbable, MutationHashable {
 
   // Map<K, V> interface, mutates
   clear(): void {
+    SubbableContainer._uncontain(this, this._map.keys());
+    SubbableContainer._uncontain(this, this._map.values());
     this._map.clear();
     MutationHashable.mutated(this, this);
   }
 
   // Map<K, V> interface, mutates
   delete(key: K): boolean {
+    if (!this._map.has(key)) {
+      return false;
+    }
+    SubbableContainer._uncontain(this, key);
+    SubbableContainer._uncontain(this, this._map.get(key));
     const result = this._map.delete(key);
     MutationHashable.mutated(this, this);
     return result;
@@ -70,6 +90,9 @@ export class LinkedMap<K, V> implements Map<K, V>, Subbable, MutationHashable {
 
   // Map<K, V> interface, mutates
   set(key: K, value: V): this {
+    SubbableContainer._contain(this, key);
+    SubbableContainer._contain(this, value);
+
     this._map.set(key, value);
     MutationHashable.mutated(this, this);
     return this;

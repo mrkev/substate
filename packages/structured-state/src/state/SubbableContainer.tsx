@@ -28,8 +28,8 @@ export abstract class SubbableContainer
   readonly _subscriptors: Set<SubbableCallback> = new Set();
   public _hash: number = 0;
   // all containers can be contained
-  public _container = new Set<SubbableContainer>();
-  public _propagatedTokens: WeakSet<UpdateToken> = new WeakSet();
+  public readonly _container = new Set<SubbableContainer>();
+  public readonly _propagatedTokens = new WeakSet<UpdateToken>();
 
   constructor(id: string) {
     this._id = id;
@@ -46,7 +46,7 @@ export abstract class SubbableContainer
 
   static _containAll(
     container: SubbableContainer,
-    items: Array<unknown> | ReadonlySet<unknown>
+    items: Array<unknown> | ReadonlySet<unknown> | IterableIterator<unknown>
   ) {
     for (const elem of items) {
       if (isContainable(elem)) {
