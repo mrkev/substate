@@ -113,7 +113,7 @@ export function assertConstructableStruct(
 export function assertConstructableStruct2(
   spec: typeof Struct | typeof Struct2 | typeof Structured
 ): asserts spec is typeof Struct2 {
-  if ((spec as any).__proto__.name !== "Struct2") {
+  if ((spec as any).__proto__ !== Struct2) {
     throw new Error(`is not a Struct2`);
   }
 }
@@ -121,7 +121,7 @@ export function assertConstructableStruct2(
 export function assertConstructableStructured(
   spec: typeof Struct | typeof Struct2 | typeof Structured
 ): asserts spec is typeof Structured {
-  if ((spec as any).__proto__.name !== "Structured") {
+  if ((spec as any).__proto__ !== Structured) {
     throw new Error(`is not a Structured`);
   }
 }
@@ -130,9 +130,9 @@ export function assertConstructableObj(
   spec: typeof Struct | typeof Struct2 | typeof Structured
 ): asserts spec is typeof Structured | typeof Struct | typeof Struct2 {
   if (
-    (spec as any).__proto__.name === "Structured" ||
-    (spec as any).__proto__.name === "Struct2" ||
-    (spec as any).__proto__.name === "Struct"
+    (spec as any).__proto__ === Structured ||
+    (spec as any).__proto__ === Struct2 ||
+    (spec as any).__proto__ === Struct
   ) {
     throw new Error(`is not a constructable object`);
   }

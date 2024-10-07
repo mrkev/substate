@@ -26,6 +26,7 @@ export function isKnowable(val: unknown) {
 
 export type HistoryEntry = {
   id: string; // history entry id
+  name: string;
   objects: Map<string, string>; // id => serialized obj
   // constructors: Map<string, any>; // id => struct constructors
 };
@@ -72,7 +73,7 @@ function actAfter(cb: () => void | Promise<void>, after: () => void) {
   }
 }
 
-export function pushHistory(objs: KnowableObject[]) {
+export function pushHistory(name: string, objs: KnowableObject[]) {
   if (objs.length < 1) {
     console.warn(".pushHistory called with empty array");
     return;
@@ -92,7 +93,7 @@ export function pushHistory(objs: KnowableObject[]) {
   }
 
   const id = `h-${nanoid(4)}`;
-  globalState.history.push({ objects: entries, id });
+  globalState.history.push({ objects: entries, id, name });
 
   if (globalState.redoStack.length > 0) {
     globalState.redoStack.splice(0, globalState.redoStack.length);
@@ -107,9 +108,13 @@ export function pushHistory(objs: KnowableObject[]) {
  * - funcs can be awaited to promise of task completion
  */
 
-export function recordHistory(action: () => void): void;
-export function recordHistory(action: () => Promise<void>): Promise<void>;
+export function recordHistory(name: string, action: () => void): void;
 export function recordHistory(
+  name: string,
+  action: () => Promise<void>
+): Promise<void>;
+export function recordHistory(
+  name: string,
   action: () => void | Promise<void>
 ): void | Promise<void> {
   const globalState = getGlobalState();
@@ -129,7 +134,11 @@ export function recordHistory(
 
     // Make sure it's after we stop recording! We don't want to record this history change!!
     if (recorded.size > 0) {
-      globalState.history.push({ objects: recorded, id: `h-${nanoid(4)}` });
+      globalState.history.push({
+        objects: recorded,
+        id: `h-${nanoid(4)}`,
+        name,
+      });
     }
 
     if (globalState.redoStack.length > 0) {
@@ -143,6 +152,7 @@ function saveContraryRedo(undo: HistoryEntry) {
   const redo = {
     id: `h-${nanoid(4)}`,
     objects: new Map<string, string>(),
+    name: undo.name,
   };
 
   for (const [id] of undo.objects) {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import * as Struct from "../../structured-state/src/Struct";
+import { construct, serialize } from "../../structured-state/src/serialization";
 import * as s from "../../structured-state/src/sstate";
 import { debugOut } from "../../structured-state/src/sstate.debug";
 import {
@@ -12,7 +13,6 @@ import {
   useSPrimitive,
   useStructure,
 } from "../../structured-state/src/sstate.react";
-import { construct, serialize } from "../../structured-state/src/serialization";
 import "./App.css";
 
 export class BusLine extends Struct.Struct<BusLine> {
@@ -26,7 +26,7 @@ export class BusLine extends Struct.Struct<BusLine> {
   }
 
   clear() {
-    recordHistory(() => {
+    recordHistory("remove all buses", () => {
       while (this.buses.pop()) {}
     });
   }
@@ -54,7 +54,7 @@ export function App() {
         <br></br>
         <button
           onClick={() =>
-            recordHistory(() => {
+            recordHistory("add bus", () => {
               busLine.addBus("hello world");
             })
           }
@@ -64,7 +64,7 @@ export function App() {
         <button
           onClick={() => {
             performance.mark("1");
-            recordHistory(() => {
+            recordHistory("add 1000 buses", () => {
               for (let i = 0; i < 1000; i++) {
                 busLine.addBus("hello world");
               }
@@ -117,7 +117,7 @@ function CountButton({ num, name }: { num: s.SNumber; name: string }) {
   return (
     <button
       onClick={() => {
-        recordHistory(() => {
+        recordHistory("increase count", () => {
           setCount((prev) => prev + 1);
         });
       }}
@@ -143,7 +143,7 @@ const BusEditor = React.memo(function TrackAImpl({
 
   function commitEdit() {
     if (edit !== name) {
-      recordHistory(() => {
+      recordHistory("set name", () => {
         setName(edit);
       });
     }
@@ -164,7 +164,7 @@ const BusEditor = React.memo(function TrackAImpl({
       ></input>
       <button
         onClick={() =>
-          recordHistory(() => {
+          recordHistory("remove track", () => {
             tracks.remove(track);
           })
         }

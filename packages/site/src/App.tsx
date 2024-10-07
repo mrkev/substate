@@ -1,27 +1,25 @@
 import hljs from "highlight.js";
 import React, { useEffect, useState } from "react";
+import * as s from "../../structured-state/src/index";
 import {
   DeserializeFunc,
   Structured,
-  useDirtyTracker,
-} from "../../structured-state/src/index";
-import * as s from "../../structured-state/src/index";
-import {
   construct,
   debugOut,
   serialize,
   useContainer,
   useContainerWithSetter,
+  useDirtyTracker,
   usePrimitive,
 } from "../../structured-state/src/index";
-import { LinkedArray } from "../../structured-state/src/state/LinkedArray";
+import { Serialized } from "../../structured-state/src/serialization";
 import {
   HistoryEntry,
   getGlobalState,
   popHistory,
   recordHistory,
 } from "../../structured-state/src/sstate.history";
-import { Serialized } from "../../structured-state/src/serialization";
+import { LinkedArray } from "../../structured-state/src/state/LinkedArray";
 import "./App.css";
 import { SchedulerTest } from "./SchedulerTest";
 
@@ -148,7 +146,7 @@ function App() {
         <br></br>
         <button
           onClick={() =>
-            recordHistory(() => {
+            recordHistory("add track", () => {
               project.addTrack("hello world");
             })
           }
@@ -157,9 +155,10 @@ function App() {
         </button>
         <button
           onClick={() => {
+            const NUM = 1000;
             performance.mark("1");
-            recordHistory(() => {
-              for (let i = 0; i < 1000; i++) {
+            recordHistory(`add ${NUM} tracks`, () => {
+              for (let i = 0; i < NUM; i++) {
                 project.addTrack("hello world");
               }
             });
@@ -172,7 +171,7 @@ function App() {
         </button>
         <button
           onClick={() => {
-            recordHistory(() => {
+            recordHistory("clear", () => {
               project.clear();
             });
           }}
@@ -181,7 +180,7 @@ function App() {
         </button>
         <button
           onClick={() => {
-            recordHistory(() => {
+            recordHistory("add random num", () => {
               project.randomNumbers.add(Math.random());
             });
           }}
@@ -254,7 +253,7 @@ const ClipA = React.memo(function TrackAImpl({
 
   function commitEdit() {
     if (edit !== name) {
-      recordHistory(() => {
+      recordHistory("set name", () => {
         setName(edit);
       });
     }
@@ -281,7 +280,7 @@ const ClipA = React.memo(function TrackAImpl({
           type="button"
           value={"x"}
           onClick={() =>
-            recordHistory(() => {
+            recordHistory("remove clip", () => {
               tracks.remove(clip);
             })
           }
@@ -294,7 +293,7 @@ const ClipA = React.memo(function TrackAImpl({
         type="button"
         value={"+"}
         onClick={() =>
-          recordHistory(() => {
+          recordHistory("increase counter", () => {
             clip.featuredMutation(() => {
               clip.counter += 1;
             });
@@ -319,7 +318,7 @@ function Notes(props: { notes: LinkedArray<Note> }) {
               type="button"
               value={"x"}
               onClick={() => {
-                recordHistory(() => {
+                recordHistory("remove note", () => {
                   notes.remove(note);
                 });
               }}
@@ -370,7 +369,7 @@ function HistoryItem({ entry }: { entry: HistoryEntry }) {
   return (
     <details>
       <summary>
-        {entry.id} modified {entry.objects.size} objects
+        {entry.name} ({entry.objects.size} objects)
       </summary>
       <pre style={{ textAlign: "left" }}>
         {Array.from(entry.objects.entries()).map(([id, value]) => {
