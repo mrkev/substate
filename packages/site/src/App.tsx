@@ -19,12 +19,11 @@ import {
 import { LinkedArray } from "../../structured-state/src/state/LinkedArray";
 import "./App.css";
 import { SchedulerTest } from "./SchedulerTest";
+import { AudioClip } from "./structs/AudioClip";
 import { AudioTrack } from "./structs/AudioTrack";
 import { Note } from "./structs/MidiTrack";
 import { Project } from "./structs/Project";
-import { TrackM } from "./ui/TrackM";
 import { TrackA } from "./ui/TrackA";
-import { AudioClip } from "./structs/AudioClip";
 import { nullthrows } from "./util";
 
 (window as any).s = s;
@@ -45,9 +44,7 @@ import { nullthrows } from "./util";
 export function App() {
   const [project] = useState(() => {
     const result = Structured.create(Project, "untitled track", [
-      Structured.create(AudioTrack, "track 1", [
-        Structured.create(AudioClip, 0, 4),
-      ]),
+      Structured.create(AudioTrack, "track 1", [AudioClip.of(0, 4)]),
       Structured.create(AudioTrack, "track 2", []),
     ]);
     (window as any).project = result;

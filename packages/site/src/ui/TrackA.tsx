@@ -1,4 +1,3 @@
-import * as React from "react";
 import { useEffect, useState } from "react";
 import { useContainer, usePrimitive } from "../../../structured-state/src";
 import { recordHistory } from "../../../structured-state/src/sstate.history";

@@ -23,6 +23,11 @@ import { StructuredKind } from "./StructuredKinds";
 
 // TODO: set, map
 
+export type SerializedDescriptor = Record<
+  string,
+  Serialized | string | number | boolean | null
+>;
+
 export type Serialized =
   | Readonly<{
       $$: "prim";
@@ -55,7 +60,7 @@ export type Serialized =
       $$: "structured";
       _id: string;
       _value: unknown;
-      _autoValue: Serialized;
+      _autoValue: SerializedDescriptor | null;
     }>
   | Readonly<{
       $$: "set";

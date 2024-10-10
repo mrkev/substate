@@ -135,18 +135,26 @@ function initializeStruct2(
   return instance;
 }
 
-function initializeStructured(
+export function initializeStructured(
   json: Extract<Serialized, { $$: "structured" }>,
   spec: typeof Structured
 ) {
-  const { _id, _value } = json;
-  const instance = (spec as any).construct(
-    _value,
-    deserializeWithSchema
-  ) as Structured<any, any>;
-  (instance as any)._id = _id;
-  initStructured(instance);
-  return instance;
+  if (json._autoValue != null && "autoConstruct" in spec) {
+    const { _id, _autoValue } = json;
+    const instance = (spec as any).autoConstruct(_autoValue);
+    (instance as any)._id = _id;
+    initStructured(instance);
+    return instance;
+  } else {
+    const { _id, _value } = json;
+    const instance = (spec as any).construct(
+      _value,
+      deserializeWithSchema
+    ) as Structured<any, any>;
+    (instance as any)._id = _id;
+    initStructured(instance);
+    return instance;
+  }
 }
 
 function initializeSet(

@@ -47,10 +47,7 @@ export abstract class Structured<S, Sub extends ConstructableStructure<any>>
 
   static IN_CREATE = false; // for debugging
 
-  public autoSimplify<T extends Record<keyof InstanceType<Sub>, any>>(): Record<
-    string,
-    StructuredKind | PrimitiveKind
-  > {
+  public autoSimplify(): Record<string, StructuredKind | PrimitiveKind> {
     // not implemented
     return {};
   }

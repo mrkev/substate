@@ -8,7 +8,7 @@ import {
   StructuredKind,
 } from "./StructuredKinds";
 import { exhaustive } from "./assertions";
-import { Serialized } from "./serialization";
+import { Serialized, SerializedDescriptor } from "./serialization";
 import { SArray, SSchemaArray } from "./sstate";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { CONTAINER_IGNORE_KEYS } from "./state/SubbableContainer";
@@ -99,7 +99,7 @@ function simplifyStruct2(obj: Struct2<any>): Serialized {
 
 function autoSimplify(
   descriptor: Record<string, StructuredKind | PrimitiveKind>
-): Serialized {
+): SerializedDescriptor | null {
   const serializable = {} as any;
   for (const [key, value] of Object.entries(descriptor)) {
     if (
@@ -130,6 +130,11 @@ function autoSimplify(
       exhaustive(value);
     }
   }
+
+  if (Object.keys(serializable).length === 0) {
+    return null;
+  }
+
   return serializable;
 }
 
