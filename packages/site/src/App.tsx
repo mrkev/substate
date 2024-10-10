@@ -2,7 +2,6 @@ import hljs from "highlight.js";
 import { useState } from "react";
 import * as s from "../../structured-state/src/index";
 import {
-  DeserializeFunc,
   Structured,
   construct,
   debugOut,
@@ -11,7 +10,6 @@ import {
   useContainerWithSetter,
   useDirtyTracker,
 } from "../../structured-state/src/index";
-import { Serialized } from "../../structured-state/src/serialization";
 import {
   HistoryEntry,
   getGlobalState,
@@ -21,7 +19,13 @@ import {
 import { LinkedArray } from "../../structured-state/src/state/LinkedArray";
 import "./App.css";
 import { SchedulerTest } from "./SchedulerTest";
-import { Effect, MidiTrack, Note, TrackM } from "./structs/MidiTrack";
+import { AudioTrack } from "./structs/AudioTrack";
+import { Note } from "./structs/MidiTrack";
+import { Project } from "./structs/Project";
+import { TrackM } from "./ui/TrackM";
+import { TrackA } from "./ui/TrackA";
+import { AudioClip } from "./structs/AudioClip";
+import { nullthrows } from "./util";
 
 (window as any).s = s;
 
@@ -38,73 +42,13 @@ import { Effect, MidiTrack, Note, TrackM } from "./structs/MidiTrack";
  * - Make isDirty work better with undo (undo to save state makes isDirty = false)
  */
 
-type SerializedProject = Readonly<{
-  name: string;
-  tracks?: Extract<Serialized, { $$: "arr-schema" }>; // todo this is not working for some reason:
-  // clips?: ApplySerialization<s.SSchemaArray<MidiClip>>;
-}>;
-
-export class Project extends Structured<SerializedProject, typeof Project> {
-  readonly name: s.SString;
-  readonly tracks: s.SSchemaArray<MidiTrack>;
-  readonly effects: s.SArray<Effect>;
-  readonly randomNumbers: s.SSet<number>;
-
-  constructor(name: string, clips?: MidiTrack[]) {
-    super();
-    this.name = s.string(name);
-    this.tracks = s.arrayOf([MidiTrack], clips);
-    this.effects = s.array<Effect>();
-    // [["foo", 3]] // why does this print as unknown when empty?
-    // TODO: it's bc it's unintialized
-    this.randomNumbers = s.set();
-  }
-
-  override autoSimplify() {
-    return {
-      name: this.name,
-      tracks: this.tracks,
-      randomNumbers: this.randomNumbers,
-    };
-  }
-
-  override serialize() {
-    // TODO: HOW TO SERIALIZE CLIPS
-    return { name: this.name.get() } as const;
-  }
-
-  override replace(json: SerializedProject): void {
-    this.name.set(json.name);
-    // TODO: I should make replae only care about non-knowables. All knowables get auto-set.
-    // this.clips._setRaw(json.clips)
-  }
-
-  static construct(
-    json: SerializedProject,
-    deserializeWithSchema: DeserializeFunc
-  ) {
-    // TODO: asnync constructs
-    const clips =
-      json.tracks != null
-        ? deserializeWithSchema(json.tracks ?? [], MidiTrack)._getRaw()
-        : undefined;
-    return Structured.create(Project, json.name, clips);
-  }
-
-  addTrack(name: string) {
-    const clip = s.create(MidiTrack, { counter: 3 });
-    this.tracks.push(clip);
-  }
-
-  clear() {
-    while (this.tracks.pop()) {}
-  }
-}
-
-function App() {
-  const [project, setProject] = useState(() => {
+export function App() {
+  const [project] = useState(() => {
     const result = Structured.create(Project, "untitled track", [
-      s.create(MidiTrack, { counter: 3 }),
+      Structured.create(AudioTrack, "track 1", [
+        Structured.create(AudioClip, 0, 4),
+      ]),
+      Structured.create(AudioTrack, "track 2", []),
     ]);
     (window as any).project = result;
     return result;
@@ -193,6 +137,26 @@ function App() {
           }}
         >
           <legend>Project</legend>
+          <button
+            onClick={() => {
+              s.history.record("move clip", () => {
+                const track0 = nullthrows(project.tracks.at(0));
+                const track1 = nullthrows(project.tracks.at(1));
+                const clip = nullthrows(track0.clips.at(0));
+
+                clip.timelineStart.set(4);
+                track0.clips.remove(clip);
+                track1.clips.push(clip);
+
+                // works if:
+                // track0.clips.remove(clip);
+                // clip.timelineStart.set(4);
+                // track1.clips.push(clip);
+              });
+            }}
+          >
+            move clip and change time
+          </button>
           <UProject project={project} />
         </fieldset>
         <HistoryStacks />
@@ -212,7 +176,7 @@ function UProject({ project }: { project: Project }) {
       }}
     >
       {tracks.map((track) => {
-        return <TrackM project={project} key={track._id} track={track} />;
+        return <TrackA project={project} key={track._id} track={track} />;
       })}
     </div>
   );
@@ -292,5 +256,3 @@ function HistoryItem({ entry }: { entry: HistoryEntry }) {
     </details>
   );
 }
-
-export default App;

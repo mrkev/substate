@@ -1,26 +1,32 @@
 import {
   arrayOf,
   SSchemaArray,
+  SString,
+  string,
   Structured,
 } from "../../../structured-state/src";
 import { AudioClip, SClip } from "./AudioClip";
 
 export type SAudioTrack = {
   kind: "AudioTrack";
+  name: string;
   clips: Array<SClip>;
 };
 
-class AudioTrack extends Structured<SAudioTrack, typeof AudioTrack> {
+export class AudioTrack extends Structured<SAudioTrack, typeof AudioTrack> {
+  public readonly name: SString;
   public readonly clips: SSchemaArray<AudioClip>;
 
-  constructor(clips: AudioClip[]) {
+  constructor(name: string, clips: AudioClip[]) {
     super();
+    this.name = string(name);
     this.clips = arrayOf([AudioClip as any], clips);
   }
 
   override serialize(): SAudioTrack {
     return {
       kind: "AudioTrack",
+      name: this.name.get(),
       clips: this.clips._getRaw().map((clip) => clip.serialize()),
     };
   }
@@ -29,8 +35,8 @@ class AudioTrack extends Structured<SAudioTrack, typeof AudioTrack> {
   }
 
   static construct(json: SAudioTrack): AudioTrack {
-    const { clips: sClips } = json;
+    const { name, clips: sClips } = json;
     const clips = sClips.map((clip) => AudioClip.construct(clip));
-    return Structured.create(AudioTrack, clips);
+    return Structured.create(AudioTrack, name, clips);
   }
 }
