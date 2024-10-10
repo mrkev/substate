@@ -1,5 +1,5 @@
 import hljs from "highlight.js";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import * as s from "../../structured-state/src/index";
 import {
   DeserializeFunc,
@@ -10,7 +10,6 @@ import {
   useContainer,
   useContainerWithSetter,
   useDirtyTracker,
-  usePrimitive,
 } from "../../structured-state/src/index";
 import { Serialized } from "../../structured-state/src/serialization";
 import {
@@ -22,6 +21,7 @@ import {
 import { LinkedArray } from "../../structured-state/src/state/LinkedArray";
 import "./App.css";
 import { SchedulerTest } from "./SchedulerTest";
+import { Effect, MidiTrack, Note, TrackM } from "./structs/MidiTrack";
 
 (window as any).s = s;
 
@@ -44,20 +44,28 @@ type SerializedProject = Readonly<{
   // clips?: ApplySerialization<s.SSchemaArray<MidiClip>>;
 }>;
 
-class Project extends Structured<SerializedProject, typeof Project> {
+export class Project extends Structured<SerializedProject, typeof Project> {
   readonly name: s.SString;
-  readonly clips: s.SSchemaArray<MidiTrack>;
+  readonly tracks: s.SSchemaArray<MidiTrack>;
   readonly effects: s.SArray<Effect>;
   readonly randomNumbers: s.SSet<number>;
 
   constructor(name: string, clips?: MidiTrack[]) {
     super();
     this.name = s.string(name);
-    this.clips = s.arrayOf([MidiTrack], clips);
+    this.tracks = s.arrayOf([MidiTrack], clips);
     this.effects = s.array<Effect>();
     // [["foo", 3]] // why does this print as unknown when empty?
     // TODO: it's bc it's unintialized
     this.randomNumbers = s.set();
+  }
+
+  override autoSimplify() {
+    return {
+      name: this.name,
+      tracks: this.tracks,
+      randomNumbers: this.randomNumbers,
+    };
   }
 
   override serialize() {
@@ -80,41 +88,16 @@ class Project extends Structured<SerializedProject, typeof Project> {
       json.tracks != null
         ? deserializeWithSchema(json.tracks ?? [], MidiTrack)._getRaw()
         : undefined;
-    return new Project(json.name, clips);
+    return Structured.create(Project, json.name, clips);
   }
 
   addTrack(name: string) {
     const clip = s.create(MidiTrack, { counter: 3 });
-    this.clips.push(clip);
+    this.tracks.push(clip);
   }
 
   clear() {
-    while (this.clips.pop()) {}
-  }
-}
-
-type Note = readonly [s: number, e: number];
-type Effect = readonly [name: string, value: number];
-
-export class Track extends s.Struct<Track> {
-  // public name: string = "untitled track";
-  public counter: number;
-
-  constructor(props: s.StructProps<Track, { counter: number }>) {
-    super(props);
-    this.counter = props.counter;
-  }
-}
-
-class MidiTrack extends Track {
-  readonly name = s.string();
-  public notes = s.array<Note>([
-    [1, 1],
-    [1, 2],
-  ]);
-
-  addNote(note: Note) {
-    this.notes.push(note);
+    while (this.tracks.pop()) {}
   }
 }
 
@@ -210,7 +193,7 @@ function App() {
           }}
         >
           <legend>Project</legend>
-          <TrackClips project={project} />
+          <UProject project={project} />
         </fieldset>
         <HistoryStacks />
       </div>
@@ -218,8 +201,8 @@ function App() {
   );
 }
 
-function TrackClips({ project }: { project: Project }) {
-  const [clips] = useContainerWithSetter(project.clips);
+function UProject({ project }: { project: Project }) {
+  const [tracks] = useContainerWithSetter(project.tracks);
   return (
     <div
       style={{
@@ -228,84 +211,14 @@ function TrackClips({ project }: { project: Project }) {
         gap: 8,
       }}
     >
-      {clips.map((track) => {
-        return <ClipA tracks={clips} key={track._id} clip={track} />;
+      {tracks.map((track) => {
+        return <TrackM project={project} key={track._id} track={track} />;
       })}
     </div>
   );
 }
 
-const ClipA = React.memo(function TrackAImpl({
-  clip,
-  tracks,
-}: {
-  clip: MidiTrack;
-  tracks: s.SArray<MidiTrack>;
-}) {
-  const [name, setName] = usePrimitive(clip.name);
-  const [edit, setEdit] = useState(name);
-
-  useContainer(clip);
-
-  useEffect(() => {
-    setEdit(name);
-  }, [name]);
-
-  function commitEdit() {
-    if (edit !== name) {
-      recordHistory("set name", () => {
-        setName(edit);
-      });
-    }
-  }
-
-  return (
-    <fieldset>
-      <legend>
-        {clip.constructor.name}{" "}
-        <input
-          type="text"
-          value={edit ?? ""}
-          placeholder="name"
-          onChange={(e) => setEdit(e.target.value)}
-          onBlur={() => commitEdit()}
-          style={{ width: "10ch" }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              commitEdit();
-            }
-          }}
-        />{" "}
-        <input
-          type="button"
-          value={"x"}
-          onClick={() =>
-            recordHistory("remove clip", () => {
-              tracks.remove(clip);
-            })
-          }
-        ></input>
-      </legend>
-
-      {clip.counter}
-
-      <input
-        type="button"
-        value={"+"}
-        onClick={() =>
-          recordHistory("increase counter", () => {
-            clip.featuredMutation(() => {
-              clip.counter += 1;
-            });
-          })
-        }
-      ></input>
-      <Notes notes={clip.notes} />
-    </fieldset>
-  );
-});
-
-function Notes(props: { notes: LinkedArray<Note> }) {
+export function Notes(props: { notes: LinkedArray<Note> }) {
   const notes = useContainer(props.notes);
 
   return (

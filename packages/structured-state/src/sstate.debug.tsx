@@ -6,7 +6,7 @@ import { MutationHashable } from "./state/MutationHashable";
 import { SArray, SSchemaArray } from "./sstate";
 import { Struct } from "./Struct";
 import { exhaustive } from "./assertions";
-import { StructuredKinds } from "./StructuredKinds";
+import { StructuredKind } from "./StructuredKinds";
 import { CONTAINER_IGNORE_KEYS } from "./state/SubbableContainer";
 
 function stringifyUnknown(val: unknown) {
@@ -127,7 +127,7 @@ export function debugOutSet(set: SSet<any>, pad = 0, showUnknowns: boolean) {
   return `${header(set)} (${result})`;
 }
 
-export function header(elem: StructuredKinds, showContainerId = false) {
+export function header(elem: StructuredKind, showContainerId = false) {
   const kind = (() => {
     if (elem instanceof SArray) {
       return "arr";

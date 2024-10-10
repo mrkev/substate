@@ -1,14 +1,18 @@
-import { SSet } from ".";
+import { SPrimitive, SSet } from ".";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
+import {
+  isStructuredKind,
+  PrimitiveKind,
+  StructuredKind,
+} from "./StructuredKinds";
 import { exhaustive } from "./assertions";
-import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { SArray, SSchemaArray } from "./sstate";
-import { KnowableObject, isKnowable } from "./sstate.history";
-import { JSONValue } from "./types";
 import { Serialized } from "./serialization";
+import { SArray, SSchemaArray } from "./sstate";
+import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { CONTAINER_IGNORE_KEYS } from "./state/SubbableContainer";
+import { JSONValue } from "./types";
 
 function simplifyPrimitive(obj: LinkedPrimitive<any>): Serialized {
   if (obj._container.size > 1) {
@@ -39,7 +43,7 @@ function simplifySchemaArray(obj: SSchemaArray<any>): Serialized {
   return {
     $$: "arr-schema",
     _value: obj._getRaw().map((x) => {
-      if (!isKnowable(x)) {
+      if (!isStructuredKind(x)) {
         throw new Error("un-knowable found in schema array");
       } else {
         return simplify(x);
@@ -93,7 +97,44 @@ function simplifyStruct2(obj: Struct2<any>): Serialized {
   };
 }
 
+function autoSimplify(
+  descriptor: Record<string, StructuredKind | PrimitiveKind>
+): Serialized {
+  const serializable = {} as any;
+  for (const [key, value] of Object.entries(descriptor)) {
+    if (
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean" ||
+      value == null
+    ) {
+      serializable[key] = value;
+    } else if (typeof value === "function") {
+      throw new Error("cant simplify function");
+    } else if (value instanceof LinkedPrimitive) {
+      serializable[key] = simplifyPrimitive(value);
+    } else if (value instanceof SArray) {
+      serializable[key] = simplifySimpleArray(value);
+    } else if (value instanceof SSchemaArray) {
+      serializable[key] = simplifySchemaArray(value);
+    } else if (value instanceof Struct) {
+      serializable[key] = simplifyStruct(value);
+    } else if (value instanceof Struct2) {
+      serializable[key] = simplifyStruct2(value);
+    } else if (value instanceof Structured) {
+      serializable[key] = simplifyStructured(value);
+    } else if (value instanceof SSet) {
+      serializable[key] = simplifySet(value);
+    } else {
+      console.log(value);
+      exhaustive(value);
+    }
+  }
+  return serializable;
+}
+
 function simplifyStructured(obj: Structured<any, any>): Serialized {
+  console.log("simplifyStructured", autoSimplify(obj.autoSimplify()));
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
@@ -101,6 +142,7 @@ function simplifyStructured(obj: Structured<any, any>): Serialized {
     $$: "structured",
     _id: obj._id,
     _value: obj.serialize(),
+    _autoValue: autoSimplify(obj.autoSimplify()),
   };
 }
 
@@ -117,7 +159,7 @@ function simplifySet(obj: SSet<any>): Serialized {
   };
 }
 
-export function simplify(state: KnowableObject | JSONValue) {
+export function simplify(state: StructuredKind | JSONValue) {
   if (
     typeof state === "string" ||
     typeof state === "number" ||

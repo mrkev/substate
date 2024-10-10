@@ -1,31 +1,18 @@
 import { nanoid } from "nanoid";
 import { SSet } from ".";
+import { exhaustive } from "./assertions";
+import { replace, serialize } from "./serialization";
+import { SArray, SSchemaArray } from "./sstate";
+import { LinkedArray } from "./state/LinkedArray";
+import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
-import { StructuredKinds } from "./StructuredKinds";
+import { StructuredKind } from "./StructuredKinds";
 import { WeakRefMap } from "./WeakRefMap";
-import { exhaustive } from "./assertions";
-import { LinkedArray } from "./state/LinkedArray";
-import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { replace, serialize } from "./serialization";
-import { SArray, SSchemaArray } from "./sstate";
-
-export type KnowableObject = StructuredKinds;
-
-export function isKnowable(val: unknown) {
-  return (
-    val instanceof LinkedPrimitive ||
-    val instanceof Struct ||
-    val instanceof Struct2 ||
-    val instanceof Structured ||
-    val instanceof SArray ||
-    val instanceof SSchemaArray
-  );
-}
 
 export type HistoryEntry = {
-  id: string; // history entry id
+  id: string;
   name: string;
   objects: Map<string, string>; // id => serialized obj
   // constructors: Map<string, any>; // id => struct constructors
@@ -33,9 +20,9 @@ export type HistoryEntry = {
 
 class GlobalState {
   HISTORY_RECORDING: Map<string, string> | false = false;
-  readonly knownObjects = new WeakRefMap<KnowableObject>(10_000);
+  readonly knownObjects = new WeakRefMap<StructuredKind>(10_000);
   readonly history = LinkedArray.create<HistoryEntry>();
-  readonly redoStack = LinkedArray.create<HistoryEntry>(); // TODO
+  readonly redoStack = LinkedArray.create<HistoryEntry>();
   constructor() {
     (window as any).globalState = this;
   }
@@ -49,7 +36,11 @@ export function getGlobalState(): GlobalState {
   return _global.state;
 }
 
-export function saveForHistory(obj: KnowableObject) {
+/**
+ * 1. saves the state of this object to history
+ * 2. only saves the state of the first time it was called, per "history record session"
+ */
+export function saveForHistory(obj: StructuredKind) {
   const globalState = getGlobalState();
   if (
     globalState.HISTORY_RECORDING == false ||
@@ -64,7 +55,11 @@ export function saveForHistory(obj: KnowableObject) {
   globalState.HISTORY_RECORDING.set(obj._id, serialized);
 }
 
-function actAfter(cb: () => void | Promise<void>, after: () => void) {
+/** runs cb(), runs after() after cb() */
+function actAfter(
+  cb: () => void | Promise<void>,
+  after: () => void
+): void | Promise<void> {
   const maybePromise = cb();
   if (maybePromise == null) {
     return after();
@@ -73,7 +68,7 @@ function actAfter(cb: () => void | Promise<void>, after: () => void) {
   }
 }
 
-export function pushHistory(name: string, objs: KnowableObject[]) {
+export function pushHistory(name: string, objs: StructuredKind[]) {
   if (objs.length < 1) {
     console.warn(".pushHistory called with empty array");
     return;
@@ -118,12 +113,14 @@ export function recordHistory(
   action: () => void | Promise<void>
 ): void | Promise<void> {
   const globalState = getGlobalState();
+
   // if already recording, just run and return
   if (globalState.HISTORY_RECORDING) {
     return action();
   }
 
   globalState.HISTORY_RECORDING = new Map();
+
   return actAfter(action, function pushHistoryEnd() {
     const recorded = globalState.HISTORY_RECORDING;
     globalState.HISTORY_RECORDING = false;
@@ -188,6 +185,7 @@ export function popHistory() {
 
     try {
       const json = JSON.parse(serialized);
+      console.log("replacing", object, "with", json);
       if (object instanceof LinkedPrimitive) {
         replace(json, object);
       } else if (object instanceof SArray) {

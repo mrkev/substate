@@ -1,7 +1,4 @@
 import { SSet } from ".";
-import { Struct } from "./Struct";
-import { Struct2 } from "./Struct2";
-import { Structured } from "./Structured";
 import {
   assertSPrimitive,
   assertSSchemaArray,
@@ -12,13 +9,17 @@ import {
   assertStructured,
   exhaustive,
 } from "./assertions";
-import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { initialize } from "./serialization.initialize";
 import { simplify } from "./serialization.simplify";
 import * as s from "./sstate";
 import { SArray, SSchemaArray } from "./sstate";
-import { KnowableObject } from "./sstate.history";
+import { _directPush, _directRemove } from "./state/LinkedArray";
+import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SubbableContainer } from "./state/SubbableContainer";
+import { Struct } from "./Struct";
+import { Struct2 } from "./Struct2";
+import { Structured } from "./Structured";
+import { StructuredKind } from "./StructuredKinds";
 
 // TODO: set, map
 
@@ -54,6 +55,7 @@ export type Serialized =
       $$: "structured";
       _id: string;
       _value: unknown;
+      _autoValue: Serialized;
     }>
   | Readonly<{
       $$: "set";
@@ -61,7 +63,7 @@ export type Serialized =
       _value: readonly (Serialized | unknown)[];
     }>;
 
-export type ApplySerialization<T extends KnowableObject> =
+export type ApplySerialization<T extends StructuredKind> =
   T extends LinkedPrimitive<any>
     ? Extract<Serialized, { $$: "prim" }>
     : T extends Struct<any>
@@ -118,7 +120,7 @@ export type ObjectDeserialization<
 
 ///////////////////////////////
 
-export function serialize(state: KnowableObject) {
+export function serialize(state: StructuredKind) {
   return JSON.stringify(simplify(state));
 }
 
@@ -165,7 +167,7 @@ export function construct(
 
 ///////////////////////////////////////
 
-export function replace(json: any, obj: KnowableObject) {
+export function replace(json: any, obj: StructuredKind) {
   try {
     if (!isSeralized(json)) {
       throw new Error("invalid serialization is not a non-null object");
@@ -216,28 +218,86 @@ function replacePrimitive(
   obj.replace(json._value as any);
 }
 
-function replaceSchemaArray(
-  json: Extract<Serialized, { $$: "arr-schema" }>,
-  arr: SSchemaArray<any>
-) {
-  // TODO: HOW DO I MERGE?
-  const initialized = json._value.map((x) => {
-    // TODO: find if item exists in array
-    if (isSeralized(x)) {
-      // const elem = arr._containedIds.get(x._id) as KnowableObject | null;
-      // if (elem != null) {
-      //   replace(x, elem);
-      //   return;
-      // }
-
-      // TODO: spec?
-      return initialize(x, arr._schema[0] as any);
-    } else {
-      return x;
+function replaceSchemaArray<
+  T extends Struct<any> | Struct2<any> | Structured<any, any>
+>(json: Extract<Serialized, { $$: "arr-schema" }>, arr: SSchemaArray<T>) {
+  arr._replace((raw) => {
+    const jsonSet = new Map<string, Serialized>();
+    const jsonOrder: string[] = [];
+    for (const elem of json._value) {
+      if (!isSeralized(elem)) {
+        console.warn(
+          "non structured object found in SSchemaArray. skipping replace."
+        );
+        continue;
+      }
+      jsonSet.set(elem._id, elem);
+      jsonOrder.push(elem._id);
     }
-  });
 
-  arr._replace(initialized);
+    // 1. delete all elements not present in serialized version
+    for (const struct of raw) {
+      if (!jsonSet.has(struct._id)) {
+        _directRemove(raw, struct);
+      }
+    }
+
+    // now make the arrSet
+    const arrSet = new Map<string, T>();
+    for (const struct of raw) {
+      arrSet.set(struct._id, struct);
+    }
+
+    // 2. replace all the elements present in arr and json
+    for (const [_, elem] of jsonSet) {
+      const struct = arrSet.get(elem._id);
+      if (struct == null) {
+        continue;
+      } else if (struct instanceof Struct || struct instanceof Struct2) {
+        // TODO: Struct has no replace?
+        console.warn("TODO: can't replace on Struct/Struct2");
+        continue;
+      } else {
+        struct.replace(elem._value);
+      }
+    }
+
+    // 3. add all new elements from json
+    // TODO: child elements have new id, not JSON id
+    // could be solved by serializng only in Structured format, and forcing deserialization to be recursive.
+    // thus, on deserialization we would always have the id of the object being deserialized/constructed
+    for (const [id, elem] of jsonSet) {
+      if (arrSet.has(id)) {
+        continue;
+      }
+      const initialized = initialize(elem, arr._schema[0] as any);
+      console.log("INITIALIZED", initialized);
+
+      _directPush(raw, initialized as any); // todo: as any
+    }
+
+    // 4. ensure order is same as in serialized version
+    // note: sort runs the
+    raw.sort((a, b) => {
+      const aIndex = jsonOrder.indexOf(a._id);
+      if (aIndex < 0) {
+        console.warn(
+          "replace: arr has an element not in json, this should never happen"
+        );
+      }
+      const bIndex = jsonOrder.indexOf(b._id);
+      if (bIndex < 0) {
+        console.warn(
+          "replace: arr has an element not in json, this should never happen"
+        );
+      }
+
+      return aIndex - bIndex;
+    });
+
+    console.log("raw", raw);
+    return raw;
+  });
 }
 
 function replaceSimpleArray(
@@ -304,7 +364,7 @@ function replaceSSet(json: Extract<Serialized, { $$: "set" }>, obj: SSet<any>) {
   const initialized = json._value.map((x) => {
     // TODO: find if item exists in array
     // if (isSeralized(x)) {
-    //   // const elem = arr._containedIds.get(x._id) as KnowableObject | null;
+    //   // const elem = arr._containedIds.get(x._id) as StructuredKind | null;
     //   // if (elem != null) {
     //   //   replace(x, elem);
     //   //   return;

@@ -48,9 +48,9 @@ export class LinkedArray<S>
   //   SubbableContainer._uncontain(item);
   // }
 
-  _replace(arr: Array<S>) {
+  _replace(cb: (arr: Array<S>) => Array<S>) {
     SubbableContainer._uncontainAll(this, this._array);
-    this._array = arr; // todo, call ._destroy on child elements?
+    this._array = cb(this._array); // todo, call ._destroy on child elements?
     SubbableContainer._containAll(this, this._array);
     SubbableContainer._notifyChange(this, this);
   }
@@ -62,7 +62,7 @@ export class LinkedArray<S>
   }
 
   private mutate<V>(mutator: (rep: Array<S>) => V): V {
-    saveForHistory(this as any);
+    saveForHistory(this);
     const result = mutator(this._array);
     SubbableContainer._notifyChange(this, this);
     return result;
@@ -164,8 +164,8 @@ export class LinkedArray<S>
 
   // Array<S> interface, mutates
   sort(compareFn?: (a: S, b: S) => number): this {
-    return this.mutate((clone) => {
-      clone.sort(compareFn);
+    return this.mutate((raw) => {
+      raw.sort(compareFn);
       return this;
     });
   }
@@ -357,4 +357,18 @@ export class LinkedArray<S>
   flat<A, D extends number = 1>(this: A, depth?: D): FlatArray<A, D>[] {
     throw new Error("Method not implemented.");
   }
+}
+
+export function _directRemove<S>(arr: Array<S>, searchElement: S): S | null {
+  const index = arr.indexOf(searchElement);
+  if (index === -1) {
+    return null;
+  }
+
+  // containment handled by splice
+  return arr.splice(index, 1)[0];
+}
+
+export function _directPush<S>(arr: Array<S>, ...items: S[]) {
+  return arr.push(...items);
 }

@@ -10,6 +10,7 @@ export function assertSPrimitive<T>(
   value: unknown
 ): asserts value is LinkedPrimitive<any> {
   if (!(value instanceof LinkedPrimitive)) {
+    console.log("ERR:", value, "to be primitive");
     throw new Error("not an sprimitive"); // assertion error
   }
 }
@@ -18,6 +19,7 @@ export function assertSSimpleArray<T>(
   value: unknown
 ): asserts value is SArray<any> {
   if (!(value instanceof SArray)) {
+    console.log("ERR:", value, "to be sarray");
     throw new Error("not an sarray"); // assertion error
   }
 }
@@ -26,12 +28,14 @@ export function assertSSchemaArray<T>(
   value: unknown
 ): asserts value is SSchemaArray<any> {
   if (!(value instanceof SSchemaArray)) {
+    console.log("ERR:", value, "to be sschemaarray");
     throw new Error("not an sschemaarray"); // assertion error
   }
 }
 
 export function assertStruct<T>(value: unknown): asserts value is Struct<any> {
   if (!(value instanceof Struct)) {
+    console.log("ERR:", value, "to be struct");
     throw new Error("not a struct"); // assertion error
   }
 }
@@ -40,6 +44,7 @@ export function assertStruct2<T>(
   value: unknown
 ): asserts value is Struct2<any> {
   if (!(value instanceof Struct2)) {
+    console.log("ERR:", value, "to be struct2");
     throw new Error("not a struct2"); // assertion error
   }
 }
@@ -48,12 +53,14 @@ export function assertStructured<T>(
   value: unknown
 ): asserts value is Structured<any, any> {
   if (!(value instanceof Structured)) {
+    console.log("ERR:", value, "to be structured");
     throw new Error("not a Structured"); // assertion error
   }
 }
 
 export function assertSSet<T>(value: unknown): asserts value is SSet<T> {
   if (!(value instanceof SSet)) {
+    console.log("ERR:", value, "to be sset");
     throw new Error("not a SSet"); // assertion error
   }
 }

@@ -41,3 +41,5 @@ export type { DirtyState } from "./DirtyObserver";
 
 // TODO: eventually remove
 export { useSubscribeToSubbableMutationHashable } from "./state/MutationHashable";
+
+export type { StructuredKind, PrimitiveKind } from "./StructuredKinds";

@@ -6,6 +6,7 @@ import type { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
 import { MutationHashable } from "./state/MutationHashable";
 import { Subbable } from "./state/Subbable";
 import { SubbableContainer } from "./state/SubbableContainer";
+import { PrimitiveKind, StructuredKind } from "./StructuredKinds";
 
 // export type AnyClass = {
 //   new (...args: any[]): Struct<any>;
@@ -45,6 +46,14 @@ export abstract class Structured<S, Sub extends ConstructableStructure<any>>
   abstract replace(json: S): void;
 
   static IN_CREATE = false; // for debugging
+
+  public autoSimplify<T extends Record<keyof InstanceType<Sub>, any>>(): Record<
+    string,
+    StructuredKind | PrimitiveKind
+  > {
+    // not implemented
+    return {};
+  }
 
   // TODO: a way to force constructor to be private in children, so that they don't
   // create objects with `new XXX` and instead use `create()`? built-in create as a static prop
@@ -88,7 +97,6 @@ export function initStructured(structured: Structured<any, any>) {
   // or something along those lines?
   for (const key in structured) {
     const child = self[key];
-
     SubbableContainer._contain(structured, child);
   }
   const globalState = getGlobalState();

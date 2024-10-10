@@ -81,6 +81,7 @@ export function deserializeWithSchema<S extends NeedsSchema>(
 }
 
 export function serializeWithSchema(spec: StructSchema) {}
+
 function initializeStruct(
   json: Extract<Serialized, { $$: "struct" }>,
   spec: typeof Struct
