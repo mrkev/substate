@@ -1,9 +1,7 @@
 import { nanoid } from "nanoid";
-import { isContainable } from "./assertions";
 import { ApplyDeserialization, NeedsSchema, Schema } from "./serialization";
 import { getGlobalState, saveForHistory } from "./sstate.history";
 import type { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
-import { MutationHashable } from "./state/MutationHashable";
 import { Subbable } from "./state/Subbable";
 import { SubbableContainer } from "./state/SubbableContainer";
 import { PrimitiveKind, StructuredKind } from "./StructuredKinds";
@@ -44,13 +42,9 @@ export abstract class Structured<S, Sub extends ConstructableStructure<any>>
 
   abstract serialize(): S;
   abstract replace(json: S): void;
+  abstract autoSimplify(): Record<string, StructuredKind | PrimitiveKind>;
 
   static IN_CREATE = false; // for debugging
-
-  public autoSimplify(): Record<string, StructuredKind | PrimitiveKind> {
-    // not implemented
-    return {};
-  }
 
   // TODO: a way to force constructor to be private in children, so that they don't
   // create objects with `new XXX` and instead use `create()`? built-in create as a static prop

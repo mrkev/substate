@@ -11,6 +11,12 @@ type SFoo = {
 class AudioContext {}
 
 class Foo extends s.Structured<SFoo, typeof Foo> {
+  override autoSimplify(): Record<string, s.StructuredKind | s.PrimitiveKind> {
+    return {
+      numset: this.numset,
+    };
+  }
+
   readonly numset = s.set<number>();
 
   // All this is just boilerplate ugh
