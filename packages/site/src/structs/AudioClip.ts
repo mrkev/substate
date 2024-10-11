@@ -1,6 +1,4 @@
-import { Structured } from "../../../structured-state/src";
-import { Serialized } from "../../../structured-state/src/serialization";
-import { initializeStructured } from "../../../structured-state/src/serialization.initialize";
+import { init, S, Structured } from "../../../structured-state/src";
 import { time, TimelineT } from "./TimelineT";
 
 export type SClip = {
@@ -14,8 +12,8 @@ type AutoAudioClip = {
 };
 
 type AudioClipRaw = {
-  timelineStart: Extract<Serialized, { $$: "structured" }>;
-  timelineLength: Extract<Serialized, { $$: "structured" }>;
+  timelineStart: S["structured"];
+  timelineLength: S["structured"];
 };
 
 export class AudioClip extends Structured<SClip, typeof AudioClip> {
@@ -29,8 +27,8 @@ export class AudioClip extends Structured<SClip, typeof AudioClip> {
   static of(timelineStart: number, timelineLength: number) {
     return Structured.create(
       AudioClip,
-      time(timelineStart, "pulses"),
-      time(timelineLength, "pulses")
+      time(timelineStart, "seconds"),
+      time(timelineLength, "seconds")
     );
   }
 
@@ -52,14 +50,14 @@ export class AudioClip extends Structured<SClip, typeof AudioClip> {
   static autoConstruct(auto: AudioClipRaw): AudioClip {
     return Structured.create(
       AudioClip,
-      initializeStructured(auto.timelineStart, TimelineT as any),
-      initializeStructured(auto.timelineLength, TimelineT as any)
+      init.structured(auto.timelineStart, TimelineT as any),
+      init.structured(auto.timelineLength, TimelineT as any)
     );
   }
 
   override replace(json: SClip): void {
-    this.timelineStart.set(json.timelineStart, "pulses");
-    this.timelineLength.set(json.timelineLength, "pulses");
+    this.timelineStart.set(json.timelineStart, "seconds");
+    this.timelineLength.set(json.timelineLength, "seconds");
   }
 
   static construct(json: SClip): AudioClip {

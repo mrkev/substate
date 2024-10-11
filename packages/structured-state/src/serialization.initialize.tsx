@@ -1,3 +1,4 @@
+import { SSet } from ".";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
 import { Structured, initStructured } from "./Structured";
@@ -10,18 +11,18 @@ import {
   assertNotArray,
   exhaustive,
 } from "./assertions";
-import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import * as s from "./sstate";
-import { SArray, SSchemaArray } from "./sstate";
 import {
-  Serialized,
-  StructSchema,
   NeedsSchema,
   ObjectDeserialization,
-  isSeralized,
   Schema,
+  Serialized,
+  SerializedTypePrimitive,
+  StructSchema,
+  isSeralized,
 } from "./serialization";
-import { SSet } from ".";
+import * as s from "./sstate";
+import { SArray, SSchemaArray } from "./sstate";
+import { LinkedPrimitive } from "./state/LinkedPrimitive";
 
 function initializePrimitive(json: Extract<Serialized, { $$: "prim" }>) {
   return new LinkedPrimitive(json._value, json._id);
@@ -135,9 +136,9 @@ function initializeStruct2(
   return instance;
 }
 
-export function initializeStructured(
+function initializeStructured<S extends typeof Structured<any, any>>(
   json: Extract<Serialized, { $$: "structured" }>,
-  spec: typeof Structured
+  spec: S
 ) {
   if (json._autoValue != null && "autoConstruct" in spec) {
     const { _id, _autoValue } = json;
@@ -214,3 +215,21 @@ export function initialize(
       exhaustive(json, "invalid $$ type");
   }
 }
+
+function initializeTypedPrimitive<T>(json: SerializedTypePrimitive<T>) {
+  return new LinkedPrimitive(json._value, json._id);
+}
+
+export const init = {
+  string: initializeTypedPrimitive<string>,
+  number: initializeTypedPrimitive<number>,
+  boolean: initializeTypedPrimitive<boolean>,
+  null: initializeTypedPrimitive<null>,
+  primitive: initializeTypedPrimitive<unknown>,
+  schemaArray: initializeSchemaArray,
+  array: initializeSimpleArray,
+  struct: initializeStruct,
+  struct2: initializeStruct2,
+  structured: initializeStructured,
+  set: initializeSet,
+} as const;

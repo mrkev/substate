@@ -1,4 +1,4 @@
-import { SPrimitive, SSet } from ".";
+import { SSet } from ".";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";

@@ -35,6 +35,7 @@ export {
   useSPrimitive as usePrimitive,
 } from "./sstate.react";
 export { construct, serialize } from "./serialization";
+export type { S } from "./serialization";
 
 export { useDirtyTracker, DirtyObserver } from "./DirtyObserver";
 export type { DirtyState } from "./DirtyObserver";
@@ -43,3 +44,4 @@ export type { DirtyState } from "./DirtyObserver";
 export { useSubscribeToSubbableMutationHashable } from "./state/MutationHashable";
 
 export type { StructuredKind, PrimitiveKind } from "./StructuredKinds";
+export { init } from "./serialization.initialize";

@@ -28,6 +28,12 @@ export type SerializedDescriptor = Record<
   Serialized | string | number | boolean | null
 >;
 
+export type SerializedTypePrimitive<T> = Readonly<{
+  $$: "prim";
+  _id: string;
+  _value: T;
+}>;
+
 export type Serialized =
   | Readonly<{
       $$: "prim";
@@ -67,6 +73,20 @@ export type Serialized =
       _id: string;
       _value: readonly (Serialized | unknown)[];
     }>;
+
+export type S = {
+  string: SerializedTypePrimitive<string>;
+  number: SerializedTypePrimitive<number>;
+  boolean: SerializedTypePrimitive<boolean>;
+  null: SerializedTypePrimitive<null>;
+  primitive: Extract<Serialized, { $$: "prim" }>;
+  arrSchema: Extract<Serialized, { $$: "arr-schema" }>;
+  arr: Extract<Serialized, { $$: "arr-simple" }>;
+  struct: Extract<Serialized, { $$: "struct" }>;
+  struct2: Extract<Serialized, { $$: "struct2" }>;
+  structured: Extract<Serialized, { $$: "structured" }>;
+  set: Extract<Serialized, { $$: "set" }>;
+};
 
 export type ApplySerialization<T extends StructuredKind> =
   T extends LinkedPrimitive<any>
