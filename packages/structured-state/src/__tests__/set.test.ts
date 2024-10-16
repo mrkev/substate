@@ -2,6 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 import * as s from "../index";
+import { Structured } from "../index";
 
 type SFoo = {
   // todo: can use serialized type for SSet?
@@ -10,32 +11,40 @@ type SFoo = {
 
 class AudioContext {}
 
+/** Foo includes external value in constructor */
 class Foo extends s.Structured<SFoo, typeof Foo> {
-  override autoSimplify(): Record<string, s.StructuredKind | s.PrimitiveKind> {
-    return {
-      numset: this.numset,
-    };
+  constructor(
+    //
+    readonly numset: s.SSet<number>,
+    readonly external: AudioContext
+  ) {
+    super();
   }
 
-  readonly numset = s.set<number>();
+  static of(external: AudioContext) {
+    return Structured.create(Foo, s.set<number>(), external);
+  }
+
+  override autoSimplify() {
+    return { numset: this.numset };
+  }
 
   // All this is just boilerplate ugh
   override replace(json: SFoo): void {
     this.numset._setRaw(new Set(json.numset));
   }
+
   override serialize(): SFoo {
     return { numset: Array.from(this.numset) };
   }
 
+  // TODO: this is wrong actually
   static construct(external: AudioContext): Foo {
-    return new Foo(external);
-  }
-  constructor(external: AudioContext) {
-    super();
+    return new Foo(s.set<number>(), external);
   }
 }
 
-const sets = s.Structured.create(Foo, new AudioContext());
+const sets = Foo.of(new AudioContext());
 
 describe("sets", () => {
   it("add, hashes up", () => {

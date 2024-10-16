@@ -1,9 +1,11 @@
 import {
   arrayOf,
+  PrimitiveKind,
   SSchemaArray,
   SString,
   string,
   Structured,
+  StructuredKind,
 } from "../../../structured-state/src";
 import { AudioClip, SClip } from "./AudioClip";
 
@@ -30,13 +32,24 @@ export class AudioTrack extends Structured<SAudioTrack, typeof AudioTrack> {
       clips: this.clips._getRaw().map((clip) => clip.serialize()),
     };
   }
+
+  override autoSimplify(): Record<string, StructuredKind | PrimitiveKind> {
+    return {
+      name: this.name,
+      clips: this.clips,
+    };
+  }
+
   override replace(json: SAudioTrack): void {
     throw new Error("Method not implemented.");
   }
 
   static construct(json: SAudioTrack): AudioTrack {
-    const { name, clips: sClips } = json;
-    const clips = sClips.map((clip) => AudioClip.construct(clip));
-    return Structured.create(AudioTrack, name, clips);
+    const { name, clips } = json;
+    return Structured.create(
+      AudioTrack,
+      name,
+      clips.map((clip) => AudioClip.construct(clip))
+    );
   }
 }

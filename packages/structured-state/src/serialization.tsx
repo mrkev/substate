@@ -66,7 +66,7 @@ export type Serialized =
       $$: "structured";
       _id: string;
       _value: unknown;
-      _autoValue: SerializedDescriptor | null;
+      _autoValue: SerializedDescriptor;
     }>
   | Readonly<{
       $$: "set";

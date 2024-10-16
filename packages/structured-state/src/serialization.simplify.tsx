@@ -99,7 +99,7 @@ function simplifyStruct2(obj: Struct2<any>): Serialized {
 
 function autoSimplify(
   descriptor: Record<string, StructuredKind | PrimitiveKind>
-): SerializedDescriptor | null {
+): SerializedDescriptor {
   const serializable = {} as any;
   for (const [key, value] of Object.entries(descriptor)) {
     if (
@@ -126,13 +126,8 @@ function autoSimplify(
     } else if (value instanceof SSet) {
       serializable[key] = simplifySet(value);
     } else {
-      console.log(value);
       exhaustive(value);
     }
-  }
-
-  if (Object.keys(serializable).length === 0) {
-    return null;
   }
 
   return serializable;
