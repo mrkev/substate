@@ -10,7 +10,7 @@ export type StructuredKind =
   | LinkedPrimitive<any>
   | Struct<any>
   | Struct2<any>
-  | Structured<any, any>
+  | Structured<any, any, any>
   | SArray<any>
   | SSchemaArray<any>
   | SSet<any>;

@@ -136,7 +136,7 @@ function initializeStruct2(
   return instance;
 }
 
-function initializeStructured<S extends typeof Structured<any, any>>(
+function initializeStructured<S extends typeof Structured<any, any, any>>(
   json: Extract<Serialized, { $$: "structured" }>,
   spec: S
 ) {
@@ -147,7 +147,7 @@ function initializeStructured<S extends typeof Structured<any, any>>(
     instance = (spec as any).construct(
       json._value,
       deserializeWithSchema
-    ) as Structured<any, any>;
+    ) as Structured<any, any, any>;
   }
 
   (instance as any)._id = json._id;

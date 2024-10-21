@@ -73,7 +73,7 @@ export class SArray<T> extends LinkedArray<T> {
 
 /** Describes an array of subbable objects */
 export class SSchemaArray<
-  T extends Struct<any> | Struct2<any> | Structured<any, any>
+  T extends Struct<any> | Struct2<any> | Structured<any, any, any>
 > extends LinkedArray<T> {
   _schema: (typeof Struct | typeof Struct2 | typeof Structured)[];
 

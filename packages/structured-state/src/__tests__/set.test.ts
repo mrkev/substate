@@ -9,10 +9,14 @@ type SFoo = {
   numset: number[];
 };
 
+type AutoFoo = {
+  numset: s.SSet<number>;
+};
+
 class AudioContext {}
 
 /** Foo includes external value in constructor */
-class Foo extends s.Structured<SFoo, typeof Foo> {
+class Foo extends s.Structured<SFoo, AutoFoo, typeof Foo> {
   constructor(
     //
     readonly numset: s.SSet<number>,

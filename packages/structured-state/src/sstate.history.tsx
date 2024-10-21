@@ -1,7 +1,8 @@
 import { nanoid } from "nanoid";
 import { SSet } from ".";
 import { exhaustive } from "./assertions";
-import { replace, serialize } from "./serialization";
+import { serialize } from "./serialization";
+import { replace } from "./serializaiton.replace";
 import { SArray, SSchemaArray } from "./sstate";
 import { LinkedArray } from "./state/LinkedArray";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";

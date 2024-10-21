@@ -8,13 +8,13 @@ import {
   StructuredKind,
 } from "./StructuredKinds";
 import { exhaustive } from "./assertions";
-import { Serialized, SerializedDescriptor } from "./serialization";
+import { NSerialized, Serialized, SerializedDescriptor } from "./serialization";
 import { SArray, SSchemaArray } from "./sstate";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { CONTAINER_IGNORE_KEYS } from "./state/SubbableContainer";
 import { JSONValue } from "./types";
 
-function simplifyPrimitive(obj: LinkedPrimitive<any>): Serialized {
+function simplifyPrimitive(obj: LinkedPrimitive<any>): NSerialized["prim"] {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
@@ -25,7 +25,7 @@ function simplifyPrimitive(obj: LinkedPrimitive<any>): Serialized {
   };
 }
 
-function simplifySimpleArray(obj: SArray<any>): Serialized {
+function simplifySimpleArray(obj: SArray<any>): NSerialized["arr-simple"] {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
@@ -36,7 +36,9 @@ function simplifySimpleArray(obj: SArray<any>): Serialized {
   };
 }
 
-function simplifySchemaArray(obj: SSchemaArray<any>): Serialized {
+function simplifySchemaArray(
+  obj: SSchemaArray<any>
+): NSerialized["arr-schema"] {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
@@ -53,7 +55,7 @@ function simplifySchemaArray(obj: SSchemaArray<any>): Serialized {
   };
 }
 
-function simplifyStruct(obj: Struct<any>): Serialized {
+function simplifyStruct(obj: Struct<any>): NSerialized["struct"] {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
@@ -86,7 +88,7 @@ function simplifyStruct(obj: Struct<any>): Serialized {
   };
 }
 
-function simplifyStruct2(obj: Struct2<any>): Serialized {
+function simplifyStruct2(obj: Struct2<any>): NSerialized["struct2"] {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
@@ -133,7 +135,7 @@ function autoSimplify(
   return serializable;
 }
 
-function simplifyStructured(obj: Structured<any, any>): Serialized {
+function simplifyStructured(obj: Structured<any, any, any>): Serialized {
   console.log("simplifyStructured", autoSimplify(obj.autoSimplify()));
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);

@@ -57,7 +57,7 @@ export function debugOut(val: unknown, pad = 0, showUnknowns = true) {
 }
 
 export function debugOutStruct(
-  struct: Struct<any> | Struct2<any> | Structured<any, any>,
+  struct: Struct<any> | Struct2<any> | Structured<any, any, any>,
   pad = 0,
   showUnknowns: boolean
 ): string {

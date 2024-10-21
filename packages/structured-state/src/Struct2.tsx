@@ -5,6 +5,7 @@ import { MutationHashable } from "./state/MutationHashable";
 import { SubbableContainer } from "./state/SubbableContainer";
 import { Subbable, notify } from "./state/Subbable";
 import { getGlobalState, saveForHistory } from "./sstate.history";
+import { SString } from "./sstate";
 
 // export type AnyClass = {
 //   new (...args: any[]): Struct<any>;
@@ -96,4 +97,13 @@ export function create2<S extends Constructable>(
   const res = new Klass(...args) as any;
   res._init();
   return res;
+}
+
+class Foo extends Struct2<typeof Foo> {
+  override serialize(): readonly [name: SString] {
+    throw new Error("Method not implemented.");
+  }
+  constructor(readonly name: SString) {
+    super();
+  }
 }

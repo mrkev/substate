@@ -98,7 +98,7 @@ export class LinkedArray<S>
     return this._array.at(index);
   }
 
-  [Symbol.iterator](): IterableIterator<S> {
+  [Symbol.iterator](): ArrayIterator<S> {
     return this._array[Symbol.iterator]();
   }
 
@@ -331,13 +331,13 @@ export class LinkedArray<S>
     throw new Error("Method not implemented.");
   }
 
-  entries(): IterableIterator<[number, S]> {
+  entries(): ArrayIterator<[number, S]> {
     return this._array.entries();
   }
-  keys(): IterableIterator<number> {
+  keys(): ArrayIterator<number> {
     return this._array.keys();
   }
-  values(): IterableIterator<S> {
+  values(): ArrayIterator<S> {
     return this._array.values();
   }
   includes(searchElement: S, fromIndex?: number): boolean {

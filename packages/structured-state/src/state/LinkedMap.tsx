@@ -104,22 +104,22 @@ export class LinkedMap<K, V>
   }
 
   // Map<K, V> interface
-  entries(): IterableIterator<[K, V]> {
+  entries(): MapIterator<[K, V]> {
     return this._map.entries();
   }
 
   // Map<K, V> interface
-  keys(): IterableIterator<K> {
+  keys(): MapIterator<K> {
     return this._map.keys();
   }
 
   // Map<K, V> interface
-  values(): IterableIterator<V> {
+  values(): MapIterator<V> {
     return this._map.values();
   }
 
   // Map<K, V> interface
-  [Symbol.iterator](): IterableIterator<[K, V]> {
+  [Symbol.iterator](): MapIterator<[K, V]> {
     return this._map[Symbol.iterator]();
   }
 

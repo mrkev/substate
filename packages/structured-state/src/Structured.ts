@@ -1,5 +1,11 @@
 import { nanoid } from "nanoid";
-import { ApplyDeserialization, NeedsSchema, Schema } from "./serialization";
+import {
+  ApplyDeserialization,
+  ApplySerialization,
+  NeedsSchema,
+  Schema,
+} from "./serialization";
+import { SString } from "./sstate";
 import { getGlobalState, saveForHistory } from "./sstate.history";
 import type { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
 import { Subbable } from "./state/Subbable";
@@ -10,7 +16,7 @@ import { PrimitiveKind, StructuredKind } from "./StructuredKinds";
 //   new (...args: any[]): Struct<any>;
 // };
 
-type Struct2Serialized<S, T extends ConstructableStructure<S>> = Readonly<
+type Struct2Serialized<S, T extends ConstructableStructure<S, any>> = Readonly<
   ConstructorParameters<T>
 >;
 
@@ -21,18 +27,35 @@ export type DeserializeFunc = <M extends NeedsSchema, N extends Schema>(
   schema: N
 ) => ApplyDeserialization<M>;
 
-interface ConstructableStructure<S> {
-  new (...args: never[]): Structured<S, any>;
+interface ConstructableStructure<
+  S,
+  SAuto extends Record<string, StructuredKind | PrimitiveKind>
+> {
+  new (...args: never[]): Structured<S, SAuto, any>;
   construct(
     json: S,
     deserializeWithSchema: DeserializeFunc
-  ): Structured<S, any>;
+  ): Structured<S, any, any>;
 }
+
+type AutoToJSON<SAuto extends Record<string, StructuredKind | PrimitiveKind>> =
+  {
+    [Property in keyof SAuto]: SAuto[Property] extends StructuredKind
+      ? ApplySerialization<SAuto[Property]>
+      : SAuto[Property];
+  };
+
+type X = AutoToJSON<{ foo: SString; bar: number }>;
+
+// type SimpleForm = Record<string>
 
 // ConstructableStructure<any> instead of ConstructableStructure<S> because we acutally want it to take any params in the constructor, to allow for external arguments
 // we use external arguments to pass in for example the liveAudioContext, which is not available just from the serialized json
-export abstract class Structured<S, Sub extends ConstructableStructure<any>>
-  implements SubbableContainer, Subbable, Contained
+export abstract class Structured<
+  S,
+  SAuto extends Record<string, StructuredKind | PrimitiveKind>,
+  Sub extends ConstructableStructure<any, any>
+> implements SubbableContainer, Subbable, Contained
 {
   readonly _id: string;
   public _hash: number = 0;
@@ -42,7 +65,7 @@ export abstract class Structured<S, Sub extends ConstructableStructure<any>>
 
   abstract serialize(): S;
   abstract replace(json: S): void;
-  abstract autoSimplify(): Record<string, StructuredKind | PrimitiveKind>;
+  abstract autoSimplify(): SAuto;
 
   static IN_CREATE = false; // for debugging
 
@@ -59,7 +82,7 @@ export abstract class Structured<S, Sub extends ConstructableStructure<any>>
     // We don't actually do anything here. create() initializes structs
   }
 
-  static create<S, T extends ConstructableStructure<S>>(
+  static create<S, T extends ConstructableStructure<S, any>>(
     Klass: T,
     ...args: ConstructorParameters<T>
   ): InstanceType<T> {
@@ -81,7 +104,7 @@ export abstract class Structured<S, Sub extends ConstructableStructure<any>>
   }
 }
 
-export function initStructured(structured: Structured<any, any>) {
+export function initStructured(structured: Structured<any, any, any>) {
   const self = structured as any;
   // todo, make this more efficient than iterating throuhg all my props?
   // maybe with a close trick to see what gets initializded between Struct.super() and _init?
