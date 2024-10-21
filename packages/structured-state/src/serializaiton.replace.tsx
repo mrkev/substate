@@ -120,7 +120,7 @@ export function replaceSchemaArray<
         if (!isSeralizedStructured(elem)) {
           throw new Error("Expected serialized Structure, found " + elem.$$);
         }
-        struct.replace(elem._value, elem._autoValue);
+        struct.replace(elem._autoValue);
       }
     }
 
@@ -215,11 +215,14 @@ export function replaceStructured(
   json: NSerialized["structured"],
   obj: Structured<any, any, any>
 ) {
-  obj.replace(json._value, json._autoValue);
+  obj.replace(json._autoValue);
   SubbableContainer._notifyChange(obj, obj);
 }
 
-function replaceSSet(json: Extract<Serialized, { $$: "set" }>, obj: SSet<any>) {
+export function replaceSSet(
+  json: Extract<Serialized, { $$: "set" }>,
+  obj: SSet<any>
+) {
   throw new Error("NOT IMPLEMENTED");
   // TODO: SCHEMA?
   const initialized = json._value.map((x) => {

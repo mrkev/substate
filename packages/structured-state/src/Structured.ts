@@ -5,7 +5,6 @@ import {
   NeedsSchema,
   Schema,
 } from "./serialization";
-import { SString } from "./sstate";
 import { getGlobalState, saveForHistory } from "./sstate.history";
 import type { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
 import { Subbable } from "./state/Subbable";
@@ -63,7 +62,7 @@ export abstract class Structured<
   public _propagatedTokens = new WeakSet();
 
   abstract serialize(): S;
-  abstract replace(json: S, autoJson: JSONOfAuto<SAuto>): void;
+  abstract replace(autoJson: JSONOfAuto<SAuto>): void;
   abstract autoSimplify(): SAuto;
 
   static IN_CREATE = false; // for debugging

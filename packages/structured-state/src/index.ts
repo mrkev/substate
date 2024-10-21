@@ -1,6 +1,7 @@
 import {
   replacePrimitive,
   replaceSchemaArray,
+  replaceSSet,
   replaceStructured,
 } from "./serializaiton.replace";
 
@@ -63,5 +64,5 @@ export const replace = {
   // struct: initializeStruct,
   // struct2: initializeStruct2,
   structured: replaceStructured,
-  // set: initializeSet,
+  set: replaceSSet,
 } as const;
