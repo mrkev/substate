@@ -1,4 +1,3 @@
-import { SSet } from ".";
 import {
   assertSPrimitive,
   assertSSchemaArray,
@@ -11,17 +10,17 @@ import {
 } from "./assertions";
 import { initialize } from "./serialization.initialize";
 import { simplify } from "./serialization.simplify";
-import * as s from "./sstate";
-import { SArray, SSchemaArray } from "./sstate";
+import { SArray, SSchemaArray, SState } from "./sstate";
 import { _directPush, _directRemove } from "./state/LinkedArray";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
+import { SSet } from "./state/LinkedSet";
 import { SubbableContainer } from "./state/SubbableContainer";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
 import { StructuredKind } from "./StructuredKinds";
 
-// TODO: set, map
+// TODO: map
 
 export type SerializedDescriptor = Record<
   string,
@@ -34,112 +33,115 @@ export type SerializedTypePrimitive<T> = Readonly<{
   _value: T;
 }>;
 
-export type Serialized =
-  | Readonly<{
-      $$: "prim";
-      _id: string;
-      _value: unknown;
-    }>
-  | Readonly<{
-      $$: "arr-schema";
-      _id: string;
-      _value: (Serialized | unknown)[];
-    }>
-  | Readonly<{
-      $$: "arr-simple";
-      _id: string;
-      _value: readonly unknown[];
-    }>
-  | Readonly<{
-      $$: "struct";
-      _id: string;
-      _value: {
-        [key: string]: Serialized | unknown;
-      };
-    }>
-  | Readonly<{
-      $$: "struct2";
-      _id: string;
-      _value: readonly unknown[];
-    }>
-  | Readonly<{
-      $$: "structured";
-      _id: string;
-      _value: unknown;
-      _autoValue: SerializedDescriptor;
-    }>
-  | Readonly<{
-      $$: "set";
-      _id: string;
-      _value: readonly (Serialized | unknown)[];
-    }>;
+export type NSerialized = {
+  prim: Readonly<{
+    $$: "prim";
+    _id: string;
+    _value: unknown;
+  }>;
+  "arr-schema": Readonly<{
+    $$: "arr-schema";
+    _id: string;
+    _value: (Serialized | unknown)[];
+  }>;
+  "arr-simple": Readonly<{
+    $$: "arr-simple";
+    _id: string;
+    _value: readonly unknown[];
+  }>;
+  struct: Readonly<{
+    $$: "struct";
+    _id: string;
+    _value: {
+      [key: string]: Serialized | unknown;
+    };
+  }>;
+  struct2: Readonly<{
+    $$: "struct2";
+    _id: string;
+    _value: readonly unknown[];
+  }>;
+  structured: Readonly<{
+    $$: "structured";
+    _id: string;
+    _value: unknown;
+    _autoValue: SerializedDescriptor;
+  }>;
+  set: Readonly<{
+    $$: "set";
+    _id: string;
+    _value: readonly (Serialized | unknown)[];
+  }>;
+};
+
+export type Serialized = NSerialized[keyof NSerialized];
 
 export type S = {
   string: SerializedTypePrimitive<string>;
   number: SerializedTypePrimitive<number>;
   boolean: SerializedTypePrimitive<boolean>;
   null: SerializedTypePrimitive<null>;
-  primitive: Extract<Serialized, { $$: "prim" }>;
-  arrSchema: Extract<Serialized, { $$: "arr-schema" }>;
-  arr: Extract<Serialized, { $$: "arr-simple" }>;
-  struct: Extract<Serialized, { $$: "struct" }>;
-  struct2: Extract<Serialized, { $$: "struct2" }>;
-  structured: Extract<Serialized, { $$: "structured" }>;
-  set: Extract<Serialized, { $$: "set" }>;
+  primitive: NSerialized["prim"];
+  arrSchema: NSerialized["arr-schema"];
+  arr: NSerialized["arr-simple"];
+  struct: NSerialized["struct"];
+  struct2: NSerialized["struct2"];
+  structured: NSerialized["structured"];
+  set: NSerialized["set"];
 };
 
 export type ApplySerialization<T extends StructuredKind> =
-  T extends LinkedPrimitive<any>
-    ? Extract<Serialized, { $$: "prim" }>
+  T extends LinkedPrimitive<infer U>
+    ? SerializedTypePrimitive<U>
     : T extends Struct<any>
-    ? Extract<Serialized, { $$: "struct" }>
+    ? NSerialized["struct"]
     : T extends Struct2<any>
-    ? Extract<Serialized, { $$: "struct2" }>
+    ? NSerialized["struct2"]
     : T extends Structured<any, any>
-    ? Extract<Serialized, { $$: "structured" }>
+    ? NSerialized["structured"]
     : T extends SArray<any>
-    ? Extract<Serialized, { $$: "sarray" }>
+    ? NSerialized["arr-simple"]
     : T extends SSchemaArray<any>
-    ? Extract<Serialized, { $$: "arr-schema" }>
+    ? NSerialized["arr-schema"]
     : T extends SSet<any>
-    ? Extract<Serialized, { $$: "set" }>
+    ? NSerialized["set"]
     : never;
 
 export type ApplyDeserialization<
   S extends Serialized,
   T extends Struct<any> | Struct2<any> | Structured<any, any> = any
-> = S extends Extract<Serialized, { $$: "prim" }>
+> = S extends NSerialized["prim"]
   ? LinkedPrimitive<any>
-  : S extends Extract<Serialized, { $$: "struct" }>
+  : S extends NSerialized["struct"]
   ? Struct<any>
-  : S extends Extract<Serialized, { $$: "struct2" }>
+  : S extends NSerialized["struct2"]
   ? Struct2<any>
-  : S extends Extract<Serialized, { $$: "structured" }>
+  : S extends NSerialized["structured"]
   ? Structured<any, any>
-  : S extends Extract<Serialized, { $$: "sarray" }>
+  : S extends NSerialized["arr-simple"]
   ? SArray<any>
-  : S extends Extract<Serialized, { $$: "arr-schema" }>
+  : S extends NSerialized["arr-schema"]
   ? SSchemaArray<T>
-  : S extends Extract<Serialized, { $$: "set" }>
+  : S extends NSerialized["set"]
   ? SSet<T>
   : never;
 
 export type ObjectDeserialization<
   S extends Serialized,
   T extends Struct<any> | Struct2<any> | Structured<any, any> = any
-> = S extends Extract<Serialized, { $$: "prim" }>
+> = S extends NSerialized["prim"]
   ? LinkedPrimitive<any>
-  : S extends Extract<Serialized, { $$: "struct" }>
+  : S extends NSerialized["struct"]
   ? Struct<any>
-  : S extends Extract<Serialized, { $$: "struct2" }>
+  : S extends NSerialized["struct2"]
   ? Struct2<any>
-  : S extends Extract<Serialized, { $$: "structured" }>
+  : S extends NSerialized["structured"]
   ? Structured<any, any>
-  : S extends Extract<Serialized, { $$: "sarray" }>
+  : S extends NSerialized["arr-simple"]
   ? T[]
-  : S extends Extract<Serialized, { $$: "arr-schema" }>
+  : S extends NSerialized["arr-schema"]
   ? T[]
-  : S extends Extract<Serialized, { $$: "set" }>
+  : S extends NSerialized["set"]
   ? Set<T>
   : never;
 
@@ -177,7 +179,7 @@ export type NeedsSchemaStruct =
 export function construct(
   str: string,
   spec:
-    | s.SState<unknown>
+    | SState<unknown>
     | typeof Struct // Struct
     | (typeof Struct)[] // SArray
 ) {
@@ -237,10 +239,10 @@ export function replace(json: any, obj: StructuredKind) {
 }
 
 function replacePrimitive(
-  json: Extract<Serialized, { $$: "prim" }>,
+  json: SerializedTypePrimitive<any>,
   obj: LinkedPrimitive<any>
 ) {
-  obj.replace(json._value as any);
+  obj.replace(json._value);
 }
 
 function replaceSchemaArray<

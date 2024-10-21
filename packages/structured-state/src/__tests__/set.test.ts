@@ -26,7 +26,9 @@ class Foo extends s.Structured<SFoo, typeof Foo> {
   }
 
   override autoSimplify() {
-    return { numset: this.numset };
+    return {
+      numset: this.numset,
+    };
   }
 
   // All this is just boilerplate ugh
