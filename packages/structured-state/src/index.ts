@@ -1,32 +1,40 @@
+import {
+  replacePrimitive,
+  replaceSchemaArray,
+  replaceStructured,
+} from "./serializaiton.replace";
+
 export {
+  array,
+  arrayOf,
+  boolean,
+  map,
+  nil,
+  number,
   SArray,
   SBoolean,
+  set,
   SNil,
   SNumber,
   SSchemaArray,
   SString,
-  array,
-  arrayOf,
-  boolean,
-  nil,
-  number,
   string,
-  map,
-  set,
 } from "./sstate";
 
 export { create, Struct } from "./Struct";
-export { Struct2, create2 } from "./Struct2";
-export { Structured } from "./Structured";
-export type { DeserializeFunc } from "./Structured";
 export type { StructProps } from "./Struct";
+export { create2, Struct2 } from "./Struct2";
+export { Structured } from "./Structured";
+export type { DeserializeFunc, JSONOfAuto } from "./Structured";
 
 export { LinkedMap as SMap } from "./state/LinkedMap";
-export { SSet } from "./state/LinkedSet";
 export { LinkedPrimitive as SPrimitive } from "./state/LinkedPrimitive";
+export { SSet } from "./state/LinkedSet";
 
 export { useNewLinkedMap, useNewLinkedSet } from "./state/useNew";
 
+export { construct, serialize } from "./serialization";
+export type { S } from "./serialization";
 export { debugOut } from "./sstate.debug";
 export { getGlobalState, history } from "./sstate.history";
 export {
@@ -34,14 +42,26 @@ export {
   useStructure as useContainerWithSetter,
   useSPrimitive as usePrimitive,
 } from "./sstate.react";
-export { construct, serialize } from "./serialization";
-export type { S } from "./serialization";
 
-export { useDirtyTracker, DirtyObserver } from "./DirtyObserver";
+export { DirtyObserver, useDirtyTracker } from "./DirtyObserver";
 export type { DirtyState } from "./DirtyObserver";
 
 // TODO: eventually remove
 export { useSubscribeToSubbableMutationHashable } from "./state/MutationHashable";
 
-export type { StructuredKind, PrimitiveKind } from "./StructuredKinds";
 export { init } from "./serialization.initialize";
+export type { PrimitiveKind, StructuredKind } from "./StructuredKinds";
+
+export const replace = {
+  string: replacePrimitive<string>,
+  number: replacePrimitive<number>,
+  boolean: replacePrimitive<boolean>,
+  null: replacePrimitive<null>,
+  primitive: replacePrimitive<any>,
+  schemaArray: replaceSchemaArray, // todo: test
+  // array: initializeSimpleArray,
+  // struct: initializeStruct,
+  // struct2: initializeStruct2,
+  structured: replaceStructured,
+  // set: initializeSet,
+} as const;

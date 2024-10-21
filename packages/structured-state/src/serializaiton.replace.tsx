@@ -10,6 +10,7 @@ import {
 } from "./assertions";
 import {
   isSeralized,
+  isSeralizedStructured,
   NSerialized,
   Serialized,
   SerializedTypePrimitive,
@@ -68,13 +69,15 @@ export function replace(json: any, obj: StructuredKind) {
     throw e;
   }
 }
-function replacePrimitive(
-  json: SerializedTypePrimitive<any>,
-  obj: LinkedPrimitive<any>
+
+export function replacePrimitive<T>(
+  json: SerializedTypePrimitive<T>,
+  obj: LinkedPrimitive<T>
 ) {
   obj.replace(json._value);
 }
-function replaceSchemaArray<
+
+export function replaceSchemaArray<
   T extends Struct<any> | Struct2<any> | Structured<any, any, any>
 >(json: NSerialized["arr-schema"], arr: SSchemaArray<T>) {
   arr._replace((raw) => {
@@ -114,7 +117,10 @@ function replaceSchemaArray<
         console.warn("TODO: can't replace on Struct/Struct2");
         continue;
       } else {
-        struct.replace(elem._value);
+        if (!isSeralizedStructured(elem)) {
+          throw new Error("Expected serialized Structure, found " + elem.$$);
+        }
+        struct.replace(elem._value, elem._autoValue);
       }
     }
 
@@ -155,12 +161,14 @@ function replaceSchemaArray<
     return raw;
   });
 }
+
 function replaceSimpleArray(
   json: Extract<Serialized, { $$: "arr-simple" }>,
   arr: SArray<any>
 ) {
   arr._replace(json._value as any);
 }
+
 function replaceStruct(
   json: Extract<Serialized, { $$: "struct" }>,
   obj: Struct<any>
@@ -181,6 +189,7 @@ function replaceStruct(
   }
   SubbableContainer._notifyChange(obj, obj);
 }
+
 function replaceStruct2(
   json: Extract<Serialized, { $$: "struct2" }>,
   obj: Struct2<any>
@@ -201,14 +210,15 @@ function replaceStruct2(
   }
   SubbableContainer._notifyChange(obj, obj);
 }
-function replaceStructured(
+
+export function replaceStructured(
   json: NSerialized["structured"],
   obj: Structured<any, any, any>
 ) {
-  obj.replace(json._value);
+  obj.replace(json._value, json._autoValue);
   SubbableContainer._notifyChange(obj, obj);
-  return;
 }
+
 function replaceSSet(json: Extract<Serialized, { $$: "set" }>, obj: SSet<any>) {
   throw new Error("NOT IMPLEMENTED");
   // TODO: SCHEMA?

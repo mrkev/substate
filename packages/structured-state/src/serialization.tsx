@@ -189,3 +189,9 @@ export function isSeralized(json: unknown): json is Serialized {
     "$$" in json
   );
 }
+
+export function isSeralizedStructured(
+  json: unknown
+): json is NSerialized["structured"] {
+  return isSeralized(json) && json.$$ === "structured";
+}

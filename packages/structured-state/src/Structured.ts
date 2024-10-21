@@ -38,14 +38,13 @@ interface ConstructableStructure<
   ): Structured<S, any, any>;
 }
 
-type AutoToJSON<SAuto extends Record<string, StructuredKind | PrimitiveKind>> =
-  {
-    [Property in keyof SAuto]: SAuto[Property] extends StructuredKind
-      ? ApplySerialization<SAuto[Property]>
-      : SAuto[Property];
-  };
-
-type X = AutoToJSON<{ foo: SString; bar: number }>;
+export type JSONOfAuto<
+  SAuto extends Record<string, StructuredKind | PrimitiveKind>
+> = {
+  [Property in keyof SAuto]: SAuto[Property] extends StructuredKind
+    ? ApplySerialization<SAuto[Property]>
+    : SAuto[Property];
+};
 
 // type SimpleForm = Record<string>
 
@@ -64,7 +63,7 @@ export abstract class Structured<
   public _propagatedTokens = new WeakSet();
 
   abstract serialize(): S;
-  abstract replace(json: S): void;
+  abstract replace(json: S, autoJson: JSONOfAuto<SAuto>): void;
   abstract autoSimplify(): SAuto;
 
   static IN_CREATE = false; // for debugging
