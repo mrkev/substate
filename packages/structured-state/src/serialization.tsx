@@ -87,10 +87,10 @@ export type ApplySerialization<T extends StructuredKind> =
     ? NSerialized["struct2"]
     : T extends Structured<any, any, any>
     ? NSerialized["structured"]
-    : T extends SArray<any>
-    ? NSerialized["arr-simple"]
     : T extends SSchemaArray<any>
     ? NSerialized["arr-schema"]
+    : T extends SArray<any>
+    ? NSerialized["arr-simple"]
     : T extends SSet<any>
     ? NSerialized["set"]
     : never;
@@ -146,7 +146,7 @@ export type Schema =
   | typeof Struct // Struct
   | typeof Struct2 // Struct
   | typeof Structured // Struct
-  | (typeof Struct | typeof Struct2 | typeof Structured)[]; // SSchemaArray
+  | (typeof Struct | typeof Struct2 | typeof Structured<any, any, any>)[]; // SSchemaArray
 
 export type StructSchema =
   | typeof Struct // Struct

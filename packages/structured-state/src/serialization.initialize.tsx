@@ -1,7 +1,11 @@
 import { SSet } from ".";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
-import { Structured, initStructured } from "./Structured";
+import {
+  Structured,
+  initStructured,
+  ConstructableStructure,
+} from "./Structured";
 import {
   assertArray,
   assertConstructableObj,
@@ -12,6 +16,7 @@ import {
   exhaustive,
 } from "./assertions";
 import {
+  NSerialized,
   NeedsSchema,
   ObjectDeserialization,
   Schema,
@@ -24,14 +29,14 @@ import * as s from "./sstate";
 import { SArray, SSchemaArray } from "./sstate";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 
-function initializePrimitive(json: Extract<Serialized, { $$: "prim" }>) {
+function initializePrimitive(json: NSerialized["prim"]) {
   return new LinkedPrimitive(json._value, json._id);
 }
 
 function initializeSchemaArray(
-  json: Extract<Serialized, { $$: "arr-schema" }>,
+  json: NSerialized["arr-schema"],
   spec: StructSchema[]
-) {
+): SSchemaArray<any> {
   const initialized = json._value.map((x: any) => {
     // TODO: find right spec
     return initialize(x, spec);
@@ -65,7 +70,7 @@ export function deserializeWithSchema<S extends NeedsSchema>(
     case "structured": {
       assertNotArray(spec);
       assertConstructableStructured(spec);
-      return initializeStructured(json, spec) as any;
+      return initializeStructured(json, spec as any);
     }
     case "arr-schema": {
       assertConstructableObj(spec);
@@ -136,9 +141,9 @@ function initializeStruct2(
   return instance;
 }
 
-function initializeStructured<S extends typeof Structured<any, any, any>>(
-  json: Extract<Serialized, { $$: "structured" }>,
-  spec: S
+function initializeStructured<Spec extends ConstructableStructure<any, any>>(
+  json: NSerialized["structured"],
+  spec: Spec
 ) {
   let instance;
   if (json._autoValue != null && "autoConstruct" in spec) {
@@ -146,6 +151,7 @@ function initializeStructured<S extends typeof Structured<any, any, any>>(
   } else {
     instance = (spec as any).construct(
       json._value,
+      json._autoValue,
       deserializeWithSchema
     ) as Structured<any, any, any>;
   }
@@ -201,7 +207,7 @@ export function initialize(
     case "structured": {
       assertNotArray(spec);
       assertConstructableStructured(spec);
-      return initializeStructured(json, spec) as any;
+      return initializeStructured(json, spec as any);
     }
     case "set": {
       assertNotArray(spec);

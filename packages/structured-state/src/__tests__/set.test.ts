@@ -46,7 +46,7 @@ class Foo extends s.Structured<SFoo, AutoFoo, typeof Foo> {
   }
 
   // TODO: this is wrong actually
-  static construct(external: AudioContext): Foo {
+  static construct(external: AudioContext, auto: s.JSONOfAuto<AutoFoo>): Foo {
     return new Foo(s.set<number>(), external);
   }
 }

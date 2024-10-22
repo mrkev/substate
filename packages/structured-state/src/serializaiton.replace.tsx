@@ -166,7 +166,8 @@ function replaceSimpleArray(
   json: Extract<Serialized, { $$: "arr-simple" }>,
   arr: SArray<any>
 ) {
-  arr._replace(json._value as any);
+  throw new Error("replaceSimpleArray: not implemented");
+  // arr._replace(json._value as any);
 }
 
 function replaceStruct(

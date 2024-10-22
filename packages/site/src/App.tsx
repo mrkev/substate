@@ -43,9 +43,9 @@ import { nullthrows } from "./util";
 
 export function App() {
   const [project] = useState(() => {
-    const result = Structured.create(Project, "untitled track", [
-      Structured.create(AudioTrack, "track 1", [AudioClip.of(0, 4)]),
-      Structured.create(AudioTrack, "track 2", []),
+    const result = Project.of("untitled track", [
+      AudioTrack.of("track 1", [AudioClip.of(0, 4)]),
+      AudioTrack.of("track 2", []),
     ]);
     (window as any).project = result;
     return result;

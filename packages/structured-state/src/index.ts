@@ -58,7 +58,7 @@ export const replace = {
   number: replacePrimitive<number>,
   boolean: replacePrimitive<boolean>,
   null: replacePrimitive<null>,
-  primitive: replacePrimitive<any>,
+  primitive: replacePrimitive,
   schemaArray: replaceSchemaArray, // todo: test
   // array: initializeSimpleArray,
   // struct: initializeStruct,

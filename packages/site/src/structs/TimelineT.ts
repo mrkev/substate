@@ -1,10 +1,14 @@
-import { Structured } from "../../../structured-state/src";
+import { JSONOfAuto, Structured } from "../../../structured-state/src";
 
 export type TimeUnit = "pulses" | "seconds" | "bars";
 export type STimelineT = Readonly<{ t: number; u: TimeUnit }>;
 type AutoTimelineT = STimelineT;
 
-export class TimelineT extends Structured<STimelineT, typeof TimelineT> {
+export class TimelineT extends Structured<
+  STimelineT,
+  AutoTimelineT,
+  typeof TimelineT
+> {
   constructor(
     // time and unit
     public t: number,
@@ -33,7 +37,7 @@ export class TimelineT extends Structured<STimelineT, typeof TimelineT> {
     console.log("t is now", this.t, this._id, this._id);
   }
 
-  static construct({ t, u }: STimelineT): TimelineT {
+  static construct({ t, u }: STimelineT, auto: STimelineT): TimelineT {
     return Structured.create(TimelineT, t, u);
   }
 

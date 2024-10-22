@@ -1,7 +1,11 @@
 import {
+  arrayOf,
   DeserializeFunc,
-  SArray,
+  init,
+  JSONOfAuto,
+  replace,
   set,
+  SSchemaArray,
   SSet,
   SString,
   string,
@@ -16,18 +20,28 @@ type SerializedProject = Readonly<{
   // clips?: ApplySerialization<s.SSchemaArray<MidiClip>>;
 }>;
 
-export class Project extends Structured<SerializedProject, typeof Project> {
-  readonly name: SString;
+type AutoProject = {
+  name: SString;
+  tracks: SSchemaArray<AudioTrack>;
+  randomNumbers: SSet<number>;
+};
+
+export class Project extends Structured<
+  SerializedProject,
+  AutoProject,
+  typeof Project
+> {
   // readonly tracks: SSchemaArray<MidiTrack>;
   // readonly effects: SArray<Effect>;
-  readonly tracks: SArray<AudioTrack>;
+
   readonly randomNumbers: SSet<number>;
 
-  constructor(name: string, tracks?: AudioTrack[]) {
+  constructor(
+    readonly name: SString,
+    readonly tracks: SSchemaArray<AudioTrack>
+  ) {
     super();
-    this.tracks = SArray.create(tracks);
 
-    this.name = string(name);
     // this.tracks = arrayOf([MidiTrack], clips);
     // this.effects = array<Effect>();
     // [["foo", 3]] // why does this print as unknown when empty?
@@ -48,23 +62,41 @@ export class Project extends Structured<SerializedProject, typeof Project> {
     return { name: this.name.get() } as const;
   }
 
-  override replace(json: SerializedProject): void {
-    this.name.set(json.name);
+  override replace(json: JSONOfAuto<AutoProject>): void {
+    replace.string(json.name, this.name);
     // TODO: I should make replae only care about non-knowables. All knowables get auto-set.
     // this.clips._setRaw(json.clips)
   }
 
   static construct(
     json: SerializedProject,
+    auto: JSONOfAuto<AutoProject>,
     deserializeWithSchema: DeserializeFunc
   ) {
     // TODO: asnync constructs
     const tracks = json.tracks != null ? [] : undefined;
-    return Structured.create(Project, json.name, tracks);
+    return Structured.create(
+      Project,
+      init.string(auto.name),
+      init.schemaArray(auto.tracks, [AudioTrack as any])
+      // arrayOf([AudioTrack as any], tracks)
+    );
+  }
+
+  static of(name: string, tracks: AudioTrack[]) {
+    return Structured.create(
+      Project,
+      string(name),
+      arrayOf([AudioTrack as any], tracks)
+    );
   }
 
   addTrack(name: string) {
-    const track = Structured.create(AudioTrack, "untitled track", []);
+    const track = Structured.create(
+      AudioTrack,
+      string("untitled track"),
+      arrayOf([AudioTrack as any], [])
+    );
     this.tracks.push(track);
   }
 

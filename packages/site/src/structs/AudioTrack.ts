@@ -1,11 +1,12 @@
 import {
   arrayOf,
-  PrimitiveKind,
+  init,
+  JSONOfAuto,
+  replace,
   SSchemaArray,
   SString,
   string,
   Structured,
-  StructuredKind,
 } from "../../../structured-state/src";
 import { AudioClip, SClip } from "./AudioClip";
 
@@ -15,14 +16,21 @@ export type SAudioTrack = {
   clips: Array<SClip>;
 };
 
-export class AudioTrack extends Structured<SAudioTrack, typeof AudioTrack> {
-  public readonly name: SString;
-  public readonly clips: SSchemaArray<AudioClip>;
+export type AutoAudioTrack = {
+  name: SString;
+  clips: SSchemaArray<AudioClip>;
+};
 
-  constructor(name: string, clips: AudioClip[]) {
+export class AudioTrack extends Structured<
+  SAudioTrack,
+  AutoAudioTrack,
+  typeof AudioTrack
+> {
+  constructor(
+    public readonly name: SString,
+    public readonly clips: SSchemaArray<AudioClip>
+  ) {
     super();
-    this.name = string(name);
-    this.clips = arrayOf([AudioClip as any], clips);
   }
 
   override serialize(): SAudioTrack {
@@ -33,23 +41,38 @@ export class AudioTrack extends Structured<SAudioTrack, typeof AudioTrack> {
     };
   }
 
-  override autoSimplify(): Record<string, StructuredKind | PrimitiveKind> {
+  override autoSimplify(): AutoAudioTrack {
     return {
       name: this.name,
       clips: this.clips,
     };
   }
 
-  override replace(json: SAudioTrack): void {
-    throw new Error("Method not implemented.");
+  override replace(auto: JSONOfAuto<AutoAudioTrack>): void {
+    replace.string(auto.name, this.name);
+    replace.schemaArray(auto.clips, this.clips);
   }
 
-  static construct(json: SAudioTrack): AudioTrack {
-    const { name, clips } = json;
+  static of(name: string, clips: AudioClip[]) {
     return Structured.create(
       AudioTrack,
-      name,
-      clips.map((clip) => AudioClip.construct(clip))
+      string(name),
+      arrayOf([AudioClip as any], clips)
+    );
+  }
+
+  static construct(
+    json: SAudioTrack,
+    auto: JSONOfAuto<AutoAudioTrack>
+  ): AudioTrack {
+    // const { name, clips } = json;
+    // this.name = string(name);
+    // this.clips = arrayOf([AudioClip as any], clips);
+
+    return Structured.create(
+      AudioTrack,
+      init.string(auto.name),
+      init.schemaArray(auto.clips, [AudioClip as any])
     );
   }
 }

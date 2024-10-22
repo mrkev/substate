@@ -11,6 +11,7 @@ import { SSet } from "./state/LinkedSet";
 import { SubbableContainer } from "./state/SubbableContainer";
 import { getGlobalState } from "./sstate.history";
 import { JSONValue } from "./types";
+import { StructSchema } from "./serialization";
 
 // todo? create -> of
 export class SString extends LinkedPrimitive<string> {
@@ -148,7 +149,7 @@ export function nil(): SNil {
   return SNil.of(null);
 }
 
-export function arrayOf<T extends typeof Struct>(
+export function arrayOf<T extends StructSchema>(
   schema: T[],
   val?: InstanceType<T>[]
   // schema: NWArray<NWInLax<SubOutLax<T>>>

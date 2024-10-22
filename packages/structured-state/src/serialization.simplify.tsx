@@ -136,7 +136,7 @@ function autoSimplify(
 }
 
 function simplifyStructured(obj: Structured<any, any, any>): Serialized {
-  console.log("simplifyStructured", autoSimplify(obj.autoSimplify()));
+  // console.log("simplifyStructured", autoSimplify(obj.autoSimplify()));
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }

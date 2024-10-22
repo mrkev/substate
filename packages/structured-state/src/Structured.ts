@@ -26,13 +26,14 @@ export type DeserializeFunc = <M extends NeedsSchema, N extends Schema>(
   schema: N
 ) => ApplyDeserialization<M>;
 
-interface ConstructableStructure<
+export interface ConstructableStructure<
   S,
   SAuto extends Record<string, StructuredKind | PrimitiveKind>
 > {
   new (...args: never[]): Structured<S, SAuto, any>;
   construct(
     json: S,
+    auto: SAuto,
     deserializeWithSchema: DeserializeFunc
   ): Structured<S, any, any>;
 }
@@ -70,7 +71,7 @@ export abstract class Structured<
   // TODO: a way to force constructor to be private in children, so that they don't
   // create objects with `new XXX` and instead use `create()`? built-in create as a static prop
   // might be good too.
-  protected constructor() {
+  constructor() {
     if (!Structured.IN_CREATE) {
       throw new Error(
         `Attempted to initialize a Structured object without using Structured.create`

@@ -1,9 +1,8 @@
 import { nanoid } from "nanoid";
-import { Contained, StateChangeHandler } from "./LinkedPrimitive";
-import { MutationHashable } from "./MutationHashable";
-import { SubbableContainer } from "./SubbableContainer";
-import { Subbable, notify } from "./Subbable";
 import { saveForHistory } from "../sstate.history";
+import { StateChangeHandler } from "./LinkedPrimitive";
+import { Subbable, notify } from "./Subbable";
+import { SubbableContainer } from "./SubbableContainer";
 
 // .sort, .reverse, .fill, .copyWithin operate in place and return the array. SubbableArray
 // is not quite an array so the return types don't match.
