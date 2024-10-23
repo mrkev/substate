@@ -1,14 +1,8 @@
 import { nanoid } from "nanoid";
-import { SSet } from ".";
-import { exhaustive } from "./assertions";
-import { serialize } from "./serialization";
+import { nullthrows } from "./nullthrows";
 import { replace } from "./serializaiton.replace";
-import { SArray, SSchemaArray } from "./sstate";
+import { serialize } from "./serialization";
 import { LinkedArray } from "./state/LinkedArray";
-import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { Struct } from "./Struct";
-import { Struct2 } from "./Struct2";
-import { Structured } from "./Structured";
 import { StructuredKind } from "./StructuredKinds";
 import { WeakRefMap } from "./WeakRefMap";
 
@@ -145,120 +139,79 @@ export function recordHistory(
   });
 }
 
-function saveContraryRedo(undo: HistoryEntry) {
-  const globalState = getGlobalState();
-  const redo = {
+function historyEntryOfObjectsEntryModifies(
+  entry: HistoryEntry,
+  globalState: GlobalState
+) {
+  const newEntry = {
     id: `h-${nanoid(4)}`,
     objects: new Map<string, string>(),
-    name: undo.name,
+    name: entry.name,
   };
 
-  for (const [id] of undo.objects) {
-    const object = globalState.knownObjects.get(id);
-
-    if (object == null) {
-      throw new Error(`no known object with ${id} found`);
-    }
-
-    redo.objects.set(id, serialize(object));
+  for (const [id] of entry.objects) {
+    // get current state of object to save
+    const object = nullthrows(
+      globalState.knownObjects.get(id),
+      `no known object with ${id} found`
+    );
+    newEntry.objects.set(id, serialize(object));
   }
 
-  globalState.redoStack.push(redo);
+  return newEntry;
 }
 
-export function popHistory() {
+function popHistory() {
   const globalState = getGlobalState();
-  const { history, knownObjects } = globalState;
-  const prev = history.pop();
-  if (prev == null) {
+  const prevState = globalState.history.pop();
+  if (prevState == null) {
     return;
   }
 
-  saveContraryRedo(prev);
+  const redo = historyEntryOfObjectsEntryModifies(prevState, globalState);
+  globalState.redoStack.push(redo);
 
   // In reverse, to go back in time
-  for (const [id, serialized] of [...prev.objects.entries()].reverse()) {
-    const object = knownObjects.get(id);
+  // todo: are maps acutally ordered by insertion time?
+  for (const [id, serialized] of [...prevState.objects.entries()].reverse()) {
+    const object = nullthrows(
+      globalState.knownObjects.get(id),
+      `no known object with ${id} found`
+    );
 
-    if (object == null) {
-      throw new Error(`no known object with ${id} found`);
-    }
-
-    try {
-      const json = JSON.parse(serialized);
-      console.log("replacing", object, "with", json);
-      if (object instanceof LinkedPrimitive) {
-        replace(json, object);
-      } else if (object instanceof SArray) {
-        replace(json, object);
-      } else if (object instanceof SSchemaArray) {
-        replace(json, object);
-      } else if (object instanceof Struct) {
-        replace(json, object);
-      } else if (object instanceof Struct2) {
-        replace(json, object);
-      } else if (object instanceof Structured) {
-        replace(json, object);
-      } else if (object instanceof SSet) {
-        throw new Error("REPLACE SET NOT IMPLEMENTED");
-      } else {
-        exhaustive(object);
-      }
-    } catch (e) {
-      console.log("error with replace (probably parsing):", serialized);
-      throw e;
-    }
+    const json = JSON.parse(serialized);
+    console.log("replacing", object, "with", json);
+    replace(json, object);
   }
 }
 
 export function forwardHistory() {
   const globalState = getGlobalState();
-  const { history, knownObjects, redoStack } = globalState;
-  const next = redoStack.pop();
+  const next = globalState.redoStack.pop();
   if (next == null) {
     return;
   }
 
-  console.log("TODO");
+  const redo = historyEntryOfObjectsEntryModifies(next, globalState);
+  globalState.history.push(redo);
 
-  // saveContraryUndo(prev);
+  // In reverse, to go back in time. TODO: necessary?
+  for (const [id, serialized] of [...next.objects.entries()].reverse()) {
+    const object = nullthrows(
+      globalState.knownObjects.get(id),
+      `no known object with ${id} found`
+    );
 
-  // // In reverse, to go back in time
-  // for (const [id, serialized] of [...prev.objects.entries()].reverse()) {
-  //   const object = knownObjects.get(id);
-
-  //   if (object == null) {
-  //     throw new Error(`no known object with ${id} found`);
-  //   }
-
-  //   try {
-  //     const json = JSON.parse(serialized);
-  //     if (object instanceof LinkedPrimitive) {
-  //       replace(json, object);
-  //     } else if (object instanceof SArray) {
-  //       replace(json, object);
-  //     } else if (object instanceof SSchemaArray) {
-  //       replace(json, object);
-  //     } else if (object instanceof Struct) {
-  //       replace(json, object);
-  //     } else if (object instanceof Struct2) {
-  //       replace(json, object);
-  //     } else if (object instanceof Structured) {
-  //       replace(json, object);
-  //     } else {
-  //       exhaustive(object);
-  //     }
-  //   } catch (e) {
-  //     console.log("error with replace (probably parsing):", serialized);
-  //     throw e;
-  //   }
-  // }
+    const json = JSON.parse(serialized);
+    console.log("replacing", object, "with", json);
+    replace(json, object);
+  }
 }
 
 export const history = {
   push: pushHistory,
   record: recordHistory,
   //
-  pop: popHistory,
+  undo: popHistory,
   redo: forwardHistory,
 };

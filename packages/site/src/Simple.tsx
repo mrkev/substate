@@ -5,7 +5,7 @@ import * as s from "../../structured-state/src/sstate";
 import { debugOut } from "../../structured-state/src/sstate.debug";
 import {
   getGlobalState,
-  popHistory,
+  history,
   recordHistory,
 } from "../../structured-state/src/sstate.history";
 import {
@@ -46,8 +46,8 @@ export function App() {
   return (
     <>
       <div>
-        <button onClick={() => popHistory()}>undo</button>
-        <button onClick={() => popHistory()}>redo</button>
+        <button onClick={() => history.undo()}>undo</button>
+        <button onClick={() => history.redo()}>redo</button>
         <br></br>
         <CountButton name="distance" num={busLine.distance} />
         <CountButton name="stops" num={busLine.stops} />

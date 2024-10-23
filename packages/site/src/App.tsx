@@ -2,7 +2,6 @@ import hljs from "highlight.js";
 import { useState } from "react";
 import * as s from "../../structured-state/src/index";
 import {
-  Structured,
   construct,
   debugOut,
   serialize,
@@ -13,7 +12,6 @@ import {
 import {
   HistoryEntry,
   getGlobalState,
-  popHistory,
   recordHistory,
 } from "../../structured-state/src/sstate.history";
 import { LinkedArray } from "../../structured-state/src/state/LinkedArray";
@@ -64,7 +62,7 @@ export function App() {
         >
           save
         </button>
-        <button onClick={() => popHistory()}>undo</button>
+        <button onClick={() => s.history.undo()}>undo</button>
         <button onClick={() => s.history.redo()}>redo</button>
         <br></br>
         <button
