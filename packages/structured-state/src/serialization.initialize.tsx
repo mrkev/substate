@@ -46,7 +46,7 @@ function initializeSchemaArray(
   return new SSchemaArray(initialized as any, json._id, spec);
 }
 
-function initializeSimpleArray<T>(json: SerializedSimpleArray<T>) {
+function initializeSimpleArray<T>(json: SerializedSimpleArray<T>): SArray<T> {
   return new SArray<T>(json._value as any, json._id);
 }
 // helpers for structured

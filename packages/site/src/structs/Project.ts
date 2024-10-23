@@ -1,8 +1,10 @@
 import {
+  array,
   arrayOf,
   init,
   JSONOfAuto,
   replace,
+  SArray,
   set,
   SSchemaArray,
   SSet,
@@ -23,7 +25,10 @@ type AutoProject = {
   name: SString;
   tracks: SSchemaArray<AudioTrack>;
   randomNumbers: SSet<number>;
+  markers: SArray<Marker>;
 };
+
+export type Marker = readonly [number, string];
 
 export class Project extends Structured<AutoProject, typeof Project> {
   // readonly tracks: SSchemaArray<MidiTrack>;
@@ -33,7 +38,8 @@ export class Project extends Structured<AutoProject, typeof Project> {
 
   constructor(
     readonly name: SString,
-    readonly tracks: SSchemaArray<AudioTrack>
+    readonly tracks: SSchemaArray<AudioTrack>,
+    readonly markers: SArray<Marker>
   ) {
     super();
 
@@ -49,6 +55,7 @@ export class Project extends Structured<AutoProject, typeof Project> {
       name: this.name,
       tracks: this.tracks,
       randomNumbers: this.randomNumbers,
+      markers: this.markers,
     };
   }
 
@@ -63,15 +70,17 @@ export class Project extends Structured<AutoProject, typeof Project> {
     return Structured.create(
       Project,
       init.string(auto.name),
-      init.schemaArray(auto.tracks, [AudioTrack as any])
+      init.schemaArray(auto.tracks, [AudioTrack as any]),
+      init.array<Marker>(auto.markers as any) // todo: as any
     );
   }
 
-  static of(name: string, tracks: AudioTrack[]) {
+  static of(name: string, tracks: AudioTrack[], markers: Marker[]) {
     return Structured.create(
       Project,
       string(name),
-      arrayOf([AudioTrack as any], tracks)
+      arrayOf([AudioTrack as any], tracks),
+      array(markers)
     );
   }
 

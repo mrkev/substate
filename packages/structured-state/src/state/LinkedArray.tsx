@@ -47,9 +47,10 @@ export class LinkedArray<S>
   //   SubbableContainer._uncontain(item);
   // }
 
-  _replace(cb: (arr: Array<S>) => Array<S>) {
+  _replace(cb: (arr: Array<S>) => ReadonlyArray<S>) {
     SubbableContainer._uncontainAll(this, this._array);
-    this._array = cb(this._array); // todo, call ._destroy on child elements?
+    // as any to remove readonly
+    this._array = cb(this._array) as any; // todo, call ._destroy on child elements?
     SubbableContainer._containAll(this, this._array);
     SubbableContainer._notifyChange(this, this);
   }

@@ -14,6 +14,7 @@ import {
   isSeralizedStructured,
   NSerialized,
   Serialized,
+  SerializedSimpleArray,
   SerializedTypePrimitive,
 } from "./serialization";
 import { initialize } from "./serialization.initialize";
@@ -159,12 +160,10 @@ export function replaceSchemaArray<
   });
 }
 
-function replaceSimpleArray(
-  json: Extract<Serialized, { $$: "arr-simple" }>,
-  arr: SArray<any>
-) {
-  throw new Error("replaceSimpleArray: not implemented");
-  // arr._replace(json._value as any);
+function replaceSimpleArray<T>(json: SerializedSimpleArray<T>, arr: SArray<T>) {
+  arr._replace((raw) => {
+    return json._value;
+  });
 }
 
 function replaceStruct(

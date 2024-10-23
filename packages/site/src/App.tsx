@@ -28,22 +28,29 @@ import { nullthrows } from "./util";
 
 /**
  * TODO:
- * - Redo
+ * x Redo
  * x Dirty marker
  * - built-in clone for structs. In theory easy, since I already serialize/decerialize and that captures all the props I care about
  * - Multiple types in array?
  * x Smarter array history?
- * - sarray history
+ * x sarray history
  * x put all history in global state in one object (history.undo/pop/redo/push, etc)
  * - Make isDirty work better with undo (undo to save state makes isDirty = false)
  */
 
 export function App() {
   const [project] = useState(() => {
-    const result = Project.of("untitled track", [
-      AudioTrack.of("track 1", [AudioClip.of(0, 4)]),
-      AudioTrack.of("track 2", []),
-    ]);
+    const result = Project.of(
+      "untitled track",
+      [
+        AudioTrack.of("track 1", [AudioClip.of(0, 4)]),
+        AudioTrack.of("track 2", []),
+      ],
+      [
+        [0, "foo"],
+        [1, "bar"],
+      ]
+    );
     (window as any).project = result;
     return result;
   });
@@ -161,6 +168,7 @@ export function App() {
 
 function UProject({ project }: { project: Project }) {
   const [tracks] = useContainerWithSetter(project.tracks);
+  const markers = useContainer(project.markers);
   return (
     <div
       style={{
@@ -169,6 +177,18 @@ function UProject({ project }: { project: Project }) {
         gap: 8,
       }}
     >
+      <div>
+        {markers.map(String).join(",")}
+        <button
+          onClick={() => {
+            s.history.record("add marker", () => {
+              markers.push([0, "foo"]);
+            });
+          }}
+        >
+          +
+        </button>
+      </div>
       {tracks.map((track) => {
         return <TrackA project={project} key={track._id} track={track} />;
       })}
