@@ -357,7 +357,3 @@ export class LinkedArray<S>
     throw new Error("Method not implemented.");
   }
 }
-
-export function _directPush<S>(arr: Array<S>, ...items: S[]) {
-  return arr.push(...items);
-}

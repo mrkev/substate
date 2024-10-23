@@ -135,7 +135,7 @@ function autoSimplify(
   return serializable;
 }
 
-function simplifyStructured(obj: Structured<any, any, any>): Serialized {
+function simplifyStructured(obj: Structured<any, any>): Serialized {
   // console.log("simplifyStructured", autoSimplify(obj.autoSimplify()));
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
@@ -143,9 +143,6 @@ function simplifyStructured(obj: Structured<any, any, any>): Serialized {
   return {
     $$: "structured",
     _id: obj._id,
-    // todo: can remove .serialize() once we remove static .construct() too,
-    // now that .autoSimplify() is required
-    _value: obj.serialize(),
     _autoValue: autoSimplify(obj.autoSimplify()),
   };
 }

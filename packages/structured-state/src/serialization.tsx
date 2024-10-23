@@ -58,7 +58,6 @@ export type NSerialized = {
   structured: Readonly<{
     $$: "structured";
     _id: string;
-    _value: unknown;
     _autoValue: SerializedDescriptor;
   }>;
   set: Readonly<{
@@ -91,7 +90,7 @@ export type ApplySerialization<T extends StructuredKind> =
     ? NSerialized["struct"]
     : T extends Struct2<any>
     ? NSerialized["struct2"]
-    : T extends Structured<any, any, any>
+    : T extends Structured<any, any>
     ? NSerialized["structured"]
     : T extends SSchemaArray<any>
     ? NSerialized["arr-schema"]
@@ -103,7 +102,7 @@ export type ApplySerialization<T extends StructuredKind> =
 
 export type ApplyDeserialization<
   S extends Serialized,
-  T extends Struct<any> | Struct2<any> | Structured<any, any, any> = any
+  T extends Struct<any> | Struct2<any> | Structured<any, any> = any
 > = S extends NSerialized["prim"]
   ? LinkedPrimitive<any>
   : S extends NSerialized["struct"]
@@ -111,7 +110,7 @@ export type ApplyDeserialization<
   : S extends NSerialized["struct2"]
   ? Struct2<any>
   : S extends NSerialized["structured"]
-  ? Structured<any, any, any>
+  ? Structured<any, any>
   : S extends NSerialized["arr-simple"]
   ? SArray<any>
   : S extends NSerialized["arr-schema"]
@@ -122,7 +121,7 @@ export type ApplyDeserialization<
 
 export type ObjectDeserialization<
   S extends Serialized,
-  T extends Struct<any> | Struct2<any> | Structured<any, any, any> = any
+  T extends Struct<any> | Struct2<any> | Structured<any, any> = any
 > = S extends NSerialized["prim"]
   ? LinkedPrimitive<any>
   : S extends NSerialized["struct"]
@@ -130,7 +129,7 @@ export type ObjectDeserialization<
   : S extends NSerialized["struct2"]
   ? Struct2<any>
   : S extends NSerialized["structured"]
-  ? Structured<any, any, any>
+  ? Structured<any, any>
   : S extends NSerialized["arr-simple"]
   ? T[]
   : S extends NSerialized["arr-schema"]
@@ -152,7 +151,7 @@ export type Schema =
   | typeof Struct // Struct
   | typeof Struct2 // Struct
   | typeof Structured // Struct
-  | (typeof Struct | typeof Struct2 | typeof Structured<any, any, any>)[]; // SSchemaArray
+  | (typeof Struct | typeof Struct2 | typeof Structured<any, any>)[]; // SSchemaArray
 
 export type StructSchema =
   | typeof Struct // Struct

@@ -51,7 +51,7 @@ export function assertStruct2<T>(
 
 export function assertStructured<T>(
   value: unknown
-): asserts value is Structured<any, any, any> {
+): asserts value is Structured<any, any> {
   if (!(value instanceof Structured)) {
     console.log("ERR:", value, "to be structured");
     throw new Error("not a Structured"); // assertion error
@@ -74,7 +74,7 @@ export type Containable =
   | LinkedArray<unknown>
   | Struct<any>
   | Struct2<any>
-  | Structured<any, any, any>;
+  | Structured<any, any>;
 
 export function isContainable(
   val: unknown
@@ -83,7 +83,7 @@ export function isContainable(
   | LinkedArray<unknown>
   | Struct<any>
   | Struct2<any>
-  | Structured<any, any, any>
+  | Structured<any, any>
   | SSet<unknown> {
   return (
     val instanceof LinkedPrimitive ||

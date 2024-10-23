@@ -26,11 +26,7 @@ type AutoProject = {
   randomNumbers: SSet<number>;
 };
 
-export class Project extends Structured<
-  SerializedProject,
-  AutoProject,
-  typeof Project
-> {
+export class Project extends Structured<AutoProject, typeof Project> {
   // readonly tracks: SSchemaArray<MidiTrack>;
   // readonly effects: SArray<Effect>;
 
@@ -55,11 +51,6 @@ export class Project extends Structured<
       tracks: this.tracks,
       randomNumbers: this.randomNumbers,
     };
-  }
-
-  override serialize() {
-    // TODO: HOW TO SERIALIZE CLIPS
-    return { name: this.name.get() } as const;
   }
 
   override replace(json: JSONOfAuto<AutoProject>): void {

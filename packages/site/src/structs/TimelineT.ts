@@ -4,21 +4,13 @@ export type TimeUnit = "pulses" | "seconds" | "bars";
 export type STimelineT = Readonly<{ t: number; u: TimeUnit }>;
 type AutoTimelineT = STimelineT;
 
-export class TimelineT extends Structured<
-  STimelineT,
-  AutoTimelineT,
-  typeof TimelineT
-> {
+export class TimelineT extends Structured<AutoTimelineT, typeof TimelineT> {
   constructor(
     // time and unit
     public t: number,
     public u: TimeUnit
   ) {
     super();
-  }
-
-  override serialize(): STimelineT {
-    return { t: this.t, u: this.u };
   }
 
   override autoSimplify() {

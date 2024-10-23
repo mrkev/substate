@@ -7,7 +7,7 @@ import {
 } from "../../../structured-state/src";
 import { time, TimelineT } from "./TimelineT";
 
-export type SClip = {
+type SClip = {
   timelineStart: number;
   timelineLength: number;
 };
@@ -22,11 +22,7 @@ type AudioClipRaw = {
   timelineLength: S["structured"];
 };
 
-export class AudioClip extends Structured<
-  SClip,
-  AutoAudioClip,
-  typeof AudioClip
-> {
+export class AudioClip extends Structured<AutoAudioClip, typeof AudioClip> {
   constructor(
     readonly timelineStart: TimelineT,
     readonly timelineLength: TimelineT
@@ -40,13 +36,6 @@ export class AudioClip extends Structured<
       time(timelineStart, "seconds"),
       time(timelineLength, "seconds")
     );
-  }
-
-  override serialize(): SClip {
-    return {
-      timelineStart: this.timelineStart.t,
-      timelineLength: this.timelineLength.t,
-    };
   }
 
   override autoSimplify(): AutoAudioClip {

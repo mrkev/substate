@@ -18,7 +18,6 @@ import {
 } from "./serialization";
 import { initialize } from "./serialization.initialize";
 import { SArray, SSchemaArray } from "./sstate";
-import { _directPush } from "./state/LinkedArray";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SSet } from "./state/LinkedSet";
 import { SubbableContainer } from "./state/SubbableContainer";
@@ -79,7 +78,7 @@ export function replacePrimitive<T>(
 }
 
 export function replaceSchemaArray<
-  T extends Struct<any> | Struct2<any> | Structured<any, any, any>
+  T extends Struct<any> | Struct2<any> | Structured<any, any>
 >(json: NSerialized["arr-schema"], arr: SSchemaArray<T>) {
   // arr is current state, we want json by the end
 
@@ -128,17 +127,12 @@ export function replaceSchemaArray<
     }
 
     // 3. add all new elements from json
-    // TODO: child elements have new id, not JSON id
-    // could be solved by serializng only in Structured format, and forcing deserialization to be recursive.
-    // thus, on deserialization we would always have the id of the object being deserialized/constructed
     for (const [id, elem] of jsonIndex) {
       if (arrIndex.has(id)) {
         continue;
       }
       const initialized = initialize(elem, arr._schema[0] as any);
-      console.log("INITIALIZED", initialized);
-
-      _directPush(raw, initialized as any); // todo: as any
+      raw.push(initialized as any); // todo: as any
     }
 
     // 4. ensure order is same as in serialized version
@@ -161,7 +155,6 @@ export function replaceSchemaArray<
       return aIndex - bIndex;
     });
 
-    console.log("raw", raw);
     return raw;
   });
 }
@@ -218,7 +211,7 @@ function replaceStruct2(
 
 export function replaceStructured(
   json: NSerialized["structured"],
-  obj: Structured<any, any, any>
+  obj: Structured<any, any>
 ) {
   obj.replace(json._autoValue);
   SubbableContainer._notifyChange(obj, obj);

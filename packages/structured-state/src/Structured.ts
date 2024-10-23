@@ -15,7 +15,7 @@ import { PrimitiveKind, StructuredKind } from "./StructuredKinds";
 //   new (...args: any[]): Struct<any>;
 // };
 
-type Struct2Serialized<S, T extends ConstructableStructure<S, any>> = Readonly<
+type Struct2Serialized<S, T extends ConstructableStructure<any>> = Readonly<
   ConstructorParameters<T>
 >;
 
@@ -27,14 +27,13 @@ export type DeserializeFunc = <M extends NeedsSchema, N extends Schema>(
 ) => ApplyDeserialization<M>;
 
 export interface ConstructableStructure<
-  S,
   SAuto extends Record<string, StructuredKind | PrimitiveKind>
 > {
-  new (...args: never[]): Structured<S, SAuto, any>;
+  new (...args: never[]): Structured<SAuto, any>;
   construct(
     auto: SAuto,
     deserializeWithSchema: DeserializeFunc
-  ): Structured<S, any, any>;
+  ): Structured<any, any>;
 }
 
 export type JSONOfAuto<
@@ -45,14 +44,11 @@ export type JSONOfAuto<
     : SAuto[Property];
 };
 
-// type SimpleForm = Record<string>
-
 // ConstructableStructure<any> instead of ConstructableStructure<S> because we acutally want it to take any params in the constructor, to allow for external arguments
 // we use external arguments to pass in for example the liveAudioContext, which is not available just from the serialized json
 export abstract class Structured<
-  S,
   SAuto extends Record<string, StructuredKind | PrimitiveKind>,
-  Sub extends ConstructableStructure<any, any>
+  Sub extends ConstructableStructure<any>
 > implements SubbableContainer, Subbable, Contained
 {
   readonly _id: string;
@@ -61,7 +57,6 @@ export abstract class Structured<
   public _container = new Set<SubbableContainer>();
   public _propagatedTokens = new WeakSet();
 
-  abstract serialize(): S;
   abstract replace(autoJson: JSONOfAuto<SAuto>): void;
   abstract autoSimplify(): SAuto;
 
@@ -80,7 +75,7 @@ export abstract class Structured<
     // We don't actually do anything here. create() initializes structs
   }
 
-  static create<S, T extends ConstructableStructure<S, any>>(
+  static create<S, T extends ConstructableStructure<any>>(
     Klass: T,
     ...args: ConstructorParameters<T>
   ): InstanceType<T> {
@@ -102,7 +97,7 @@ export abstract class Structured<
   }
 }
 
-export function initStructured(structured: Structured<any, any, any>) {
+export function initStructured(structured: Structured<any, any>) {
   const self = structured as any;
   // todo, make this more efficient than iterating throuhg all my props?
   // maybe with a close trick to see what gets initializded between Struct.super() and _init?

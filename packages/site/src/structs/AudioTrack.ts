@@ -8,37 +8,19 @@ import {
   string,
   Structured,
 } from "../../../structured-state/src";
-import { AudioClip, SClip } from "./AudioClip";
-
-export type SAudioTrack = {
-  kind: "AudioTrack";
-  name: string;
-  clips: Array<SClip>;
-};
+import { AudioClip } from "./AudioClip";
 
 export type AutoAudioTrack = {
   name: SString;
   clips: SSchemaArray<AudioClip>;
 };
 
-export class AudioTrack extends Structured<
-  SAudioTrack,
-  AutoAudioTrack,
-  typeof AudioTrack
-> {
+export class AudioTrack extends Structured<AutoAudioTrack, typeof AudioTrack> {
   constructor(
     public readonly name: SString,
     public readonly clips: SSchemaArray<AudioClip>
   ) {
     super();
-  }
-
-  override serialize(): SAudioTrack {
-    return {
-      kind: "AudioTrack",
-      name: this.name.get(),
-      clips: this.clips._getRaw().map((clip) => clip.serialize()),
-    };
   }
 
   override autoSimplify(): AutoAudioTrack {

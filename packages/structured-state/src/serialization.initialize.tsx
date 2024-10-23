@@ -139,7 +139,7 @@ function initializeStruct2(
   return instance;
 }
 
-function initializeStructured<Spec extends ConstructableStructure<any, any>>(
+function initializeStructured<Spec extends ConstructableStructure<any>>(
   json: NSerialized["structured"],
   spec: Spec
 ) {
@@ -150,7 +150,7 @@ function initializeStructured<Spec extends ConstructableStructure<any, any>>(
     instance = (spec as any).construct(
       json._autoValue,
       deserializeWithSchema
-    ) as Structured<any, any, any>;
+    ) as Structured<any, any>;
   }
 
   (instance as any)._id = json._id;

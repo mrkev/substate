@@ -4,11 +4,6 @@ import { describe, expect, it } from "vitest";
 import * as s from "../index";
 import { Structured } from "../index";
 
-type SFoo = {
-  // todo: can use serialized type for SSet?
-  numset: number[];
-};
-
 type AutoFoo = {
   numset: s.SSet<number>;
 };
@@ -16,7 +11,7 @@ type AutoFoo = {
 class AudioContext {}
 
 /** Foo includes external value in constructor */
-class Foo extends s.Structured<SFoo, AutoFoo, typeof Foo> {
+class Foo extends s.Structured<AutoFoo, typeof Foo> {
   constructor(
     //
     readonly numset: s.SSet<number>,
@@ -41,9 +36,9 @@ class Foo extends s.Structured<SFoo, AutoFoo, typeof Foo> {
     // this.numset._setRaw(new Set(json.numset));
   }
 
-  override serialize(): SFoo {
-    return { numset: Array.from(this.numset) };
-  }
+  // serialize(): SFoo {
+  //   return { numset: Array.from(this.numset) };
+  // }
 
   // TODO: this is wrong actually
   static construct(auto: s.JSONOfAuto<AutoFoo>, external: AudioContext): Foo {
