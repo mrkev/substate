@@ -1,6 +1,5 @@
 import {
   arrayOf,
-  DeserializeFunc,
   init,
   JSONOfAuto,
   replace,
@@ -59,11 +58,8 @@ export class Project extends Structured<AutoProject, typeof Project> {
     // this.clips._setRaw(json.clips)
   }
 
-  static construct(
-    auto: JSONOfAuto<AutoProject>,
-    deserializeWithSchema: DeserializeFunc
-  ) {
-    // TODO: asnync constructs
+  static construct(auto: JSONOfAuto<AutoProject>) {
+    // TODO: asnync constructors
     return Structured.create(
       Project,
       init.string(auto.name),
@@ -80,11 +76,7 @@ export class Project extends Structured<AutoProject, typeof Project> {
   }
 
   addTrack(name: string) {
-    const track = Structured.create(
-      AudioTrack,
-      string("untitled track"),
-      arrayOf([AudioTrack as any], [])
-    );
+    const track = AudioTrack.of(name, []);
     this.tracks.push(track);
   }
 

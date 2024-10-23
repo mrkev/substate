@@ -159,10 +159,10 @@ export type StructSchema =
   | typeof Structured; // Struct
 
 export type NeedsSchema =
-  | Extract<Serialized, { $$: "struct" }>
-  | Extract<Serialized, { $$: "struct2" }>
-  | Extract<Serialized, { $$: "structured" }>
-  | Extract<Serialized, { $$: "arr-schema" }>;
+  | NSerialized["struct"]
+  | NSerialized["struct2"]
+  | NSerialized["structured"]
+  | NSerialized["arr-schema"];
 
 export type NeedsSchemaStruct =
   | Extract<Serialized, { $$: "struct" }>

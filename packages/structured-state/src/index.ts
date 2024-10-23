@@ -4,6 +4,7 @@ import {
   replaceSSet,
   replaceStructured,
 } from "./serializaiton.replace";
+import { simplifyStructured } from "./serialization.simplify";
 
 export {
   array,
@@ -66,3 +67,7 @@ export const replace = {
   structured: replaceStructured,
   set: replaceSSet,
 } as const;
+
+export const simplify = {
+  structured: simplifyStructured,
+};

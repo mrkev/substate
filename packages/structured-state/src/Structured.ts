@@ -28,12 +28,10 @@ export type DeserializeFunc = <M extends NeedsSchema, N extends Schema>(
 
 export interface ConstructableStructure<
   SAuto extends Record<string, StructuredKind | PrimitiveKind>
+  // ,Sub extends ConstructableStructure<any>
 > {
   new (...args: never[]): Structured<SAuto, any>;
-  construct(
-    auto: SAuto,
-    deserializeWithSchema: DeserializeFunc
-  ): Structured<any, any>;
+  construct(auto: SAuto): Structured<SAuto, any>;
 }
 
 export type JSONOfAuto<
@@ -75,15 +73,15 @@ export abstract class Structured<
     // We don't actually do anything here. create() initializes structs
   }
 
-  static create<S, T extends ConstructableStructure<any>>(
+  static create<T extends ConstructableStructure<any>>(
     Klass: T,
     ...args: ConstructorParameters<T>
   ): InstanceType<T> {
     Structured.IN_CREATE = true;
-    const res = new Klass(...args) as any;
+    const res = new Klass(...args);
     initStructured(res);
     Structured.IN_CREATE = false;
-    return res;
+    return res as any;
   }
 
   public featuredMutation(action: () => void) {
@@ -98,12 +96,12 @@ export abstract class Structured<
 }
 
 export function initStructured(structured: Structured<any, any>) {
-  const self = structured as any;
+  const self = structured;
   // todo, make this more efficient than iterating throuhg all my props?
   // maybe with a close trick to see what gets initializded between Struct.super() and _init?
   // or something along those lines?
   for (const key in structured) {
-    const child = self[key];
+    const child = (self as any)[key];
     SubbableContainer._contain(structured, child);
   }
   const globalState = getGlobalState();

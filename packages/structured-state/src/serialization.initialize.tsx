@@ -5,6 +5,7 @@ import {
   Structured,
   initStructured,
 } from "./Structured";
+import { StructuredKind } from "./StructuredKinds";
 import {
   assertArray,
   assertConstructableObj,
@@ -50,6 +51,8 @@ function initializeSimpleArray<T>(json: SerializedSimpleArray<T>) {
 }
 // helpers for structured
 
+type T = ObjectDeserialization<NSerialized["structured"]>;
+
 export function deserializeWithSchema<S extends NeedsSchema>(
   json: NeedsSchema,
   spec: StructSchema
@@ -68,7 +71,10 @@ export function deserializeWithSchema<S extends NeedsSchema>(
     case "structured": {
       assertNotArray(spec);
       assertConstructableStructured(spec);
-      return initializeStructured(json, spec as any);
+      return initializeStructured(
+        json,
+        spec as any
+      ) as ObjectDeserialization<S>; // todo
     }
     case "arr-schema": {
       assertConstructableObj(spec);
@@ -94,7 +100,7 @@ function initializeStruct(
 
   // offer a way to override initialization
   if ("_construct" in spec && typeof spec._construct === "function") {
-    const instance = spec._construct(_value, deserializeWithSchema);
+    const instance = spec._construct(_value);
     instance._id = _id;
     // console.log("_constructed", instance, "from", _value);
     instance._initConstructed(Object.keys(_value));
@@ -143,19 +149,10 @@ function initializeStructured<Spec extends ConstructableStructure<any>>(
   json: NSerialized["structured"],
   spec: Spec
 ) {
-  let instance;
-  if (json._autoValue != null && "autoConstruct" in spec) {
-    instance = (spec as any).autoConstruct(json._autoValue);
-  } else {
-    instance = (spec as any).construct(
-      json._autoValue,
-      deserializeWithSchema
-    ) as Structured<any, any>;
-  }
-
-  (instance as any)._id = json._id;
+  const instance = spec.construct(json._autoValue);
+  overrideId(instance, json._id);
   initStructured(instance);
-  return instance;
+  return instance as any; // todo
 }
 
 function initializeSet(
@@ -174,7 +171,7 @@ export function initialize(
   json: unknown,
   // A union of of the specs this json could follow
   spec: Schema
-): LinkedPrimitive<any> | SArray<any> | SSchemaArray<any> | Struct<any> {
+): StructuredKind {
   if (!isSeralized(json)) {
     console.log("not serialized", json);
     throw new Error("invalid serialization is not a non-null object");
@@ -233,3 +230,8 @@ export const init = {
   structured: initializeStructured,
   set: initializeSet,
 } as const;
+
+/** gets over reaadonly id */
+function overrideId(obj: StructuredKind, id: string) {
+  (obj as any)._id = id;
+}

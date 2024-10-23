@@ -36,13 +36,9 @@ class Foo extends s.Structured<AutoFoo, typeof Foo> {
     // this.numset._setRaw(new Set(json.numset));
   }
 
-  // serialize(): SFoo {
-  //   return { numset: Array.from(this.numset) };
-  // }
-
-  // TODO: this is wrong actually
-  static construct(auto: s.JSONOfAuto<AutoFoo>, external: AudioContext): Foo {
-    return new Foo(s.set<number>(), external);
+  static construct(auto: s.JSONOfAuto<AutoFoo>): Foo {
+    // todo: how can I include external dependencies, not created at construction time?
+    return new Foo(s.set<number>(), new AudioContext());
   }
 }
 

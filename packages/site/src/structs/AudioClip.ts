@@ -45,15 +45,6 @@ export class AudioClip extends Structured<AutoAudioClip, typeof AudioClip> {
     };
   }
 
-  // experimental
-  static autoConstruct(auto: AudioClipRaw): AudioClip {
-    return Structured.create(
-      AudioClip,
-      init.structured(auto.timelineStart, TimelineT),
-      init.structured(auto.timelineLength, TimelineT)
-    );
-  }
-
   override replace(auto: JSONOfAuto<AutoAudioClip>): void {
     replace.structured(auto.timelineStart, this.timelineStart);
     replace.structured(auto.timelineLength, this.timelineLength);
