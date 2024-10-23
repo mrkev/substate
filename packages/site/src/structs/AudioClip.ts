@@ -70,7 +70,7 @@ export class AudioClip extends Structured<
     replace.structured(auto.timelineLength, this.timelineLength);
   }
 
-  static construct(json: SClip, auto: JSONOfAuto<AutoAudioClip>): AudioClip {
+  static construct(auto: JSONOfAuto<AutoAudioClip>): AudioClip {
     return Structured.create(
       AudioClip,
       init.structured(auto.timelineStart, TimelineT),

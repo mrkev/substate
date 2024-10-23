@@ -69,17 +69,14 @@ export class Project extends Structured<
   }
 
   static construct(
-    json: SerializedProject,
     auto: JSONOfAuto<AutoProject>,
     deserializeWithSchema: DeserializeFunc
   ) {
     // TODO: asnync constructs
-    const tracks = json.tracks != null ? [] : undefined;
     return Structured.create(
       Project,
       init.string(auto.name),
       init.schemaArray(auto.tracks, [AudioTrack as any])
-      // arrayOf([AudioTrack as any], tracks)
     );
   }
 

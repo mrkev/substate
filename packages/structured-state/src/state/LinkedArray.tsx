@@ -61,7 +61,7 @@ export class LinkedArray<S>
   }
 
   private mutate<V>(mutator: (rep: Array<S>) => V): V {
-    saveForHistory(this);
+    saveForHistory(this as any); // todo: as any
     const result = mutator(this._array);
     SubbableContainer._notifyChange(this, this);
     return result;

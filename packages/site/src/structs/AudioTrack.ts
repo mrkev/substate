@@ -61,10 +61,7 @@ export class AudioTrack extends Structured<
     );
   }
 
-  static construct(
-    json: SAudioTrack,
-    auto: JSONOfAuto<AutoAudioTrack>
-  ): AudioTrack {
+  static construct(auto: JSONOfAuto<AutoAudioTrack>): AudioTrack {
     // const { name, clips } = json;
     // this.name = string(name);
     // this.clips = arrayOf([AudioClip as any], clips);

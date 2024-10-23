@@ -37,8 +37,8 @@ export class TimelineT extends Structured<
     console.log("t is now", this.t, this._id, this._id);
   }
 
-  static construct({ t, u }: STimelineT, auto: STimelineT): TimelineT {
-    return Structured.create(TimelineT, t, u);
+  static construct(auto: STimelineT): TimelineT {
+    return Structured.create(TimelineT, auto.t, auto.u);
   }
 
   public set(t: number, u?: TimeUnit) {

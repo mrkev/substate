@@ -32,12 +32,11 @@ import { nullthrows } from "./util";
  * TODO:
  * - Redo
  * x Dirty marker
- * - Multiple types in array?
- * - Smarter array history?
- * - useHistory
- *    - returns [history, push, pop] ?
- * x put all history in global state in one object (history.undo/pop/redo/push, etc)
  * - built-in clone for structs. In theory easy, since I already serialize/decerialize and that captures all the props I care about
+ * - Multiple types in array?
+ * x Smarter array history?
+ * - sarray history
+ * x put all history in global state in one object (history.undo/pop/redo/push, etc)
  * - Make isDirty work better with undo (undo to save state makes isDirty = false)
  */
 

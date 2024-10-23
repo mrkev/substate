@@ -1,10 +1,9 @@
-import { SSet } from ".";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
 import {
+  ConstructableStructure,
   Structured,
   initStructured,
-  ConstructableStructure,
 } from "./Structured";
 import {
   assertArray,
@@ -21,13 +20,14 @@ import {
   ObjectDeserialization,
   Schema,
   Serialized,
+  SerializedSimpleArray,
   SerializedTypePrimitive,
   StructSchema,
   isSeralized,
 } from "./serialization";
-import * as s from "./sstate";
 import { SArray, SSchemaArray } from "./sstate";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
+import { SSet } from "./state/LinkedSet";
 
 function initializePrimitive(json: NSerialized["prim"]) {
   return new LinkedPrimitive(json._value, json._id);
@@ -39,16 +39,14 @@ function initializeSchemaArray(
 ): SSchemaArray<any> {
   const initialized = json._value.map((x: any) => {
     // TODO: find right spec
-    return initialize(x, spec);
+    return initialize(x, spec[0]);
   });
 
-  return new s.SSchemaArray(initialized as any, json._id, spec);
+  return new SSchemaArray(initialized as any, json._id, spec);
 }
 
-function initializeSimpleArray(
-  json: Extract<Serialized, { $$: "arr-simple" }>
-) {
-  return new SArray(json._value as any, json._id);
+function initializeSimpleArray<T>(json: SerializedSimpleArray<T>) {
+  return new SArray<T>(json._value as any, json._id);
 }
 // helpers for structured
 
@@ -150,7 +148,6 @@ function initializeStructured<Spec extends ConstructableStructure<any, any>>(
     instance = (spec as any).autoConstruct(json._autoValue);
   } else {
     instance = (spec as any).construct(
-      json._value,
       json._autoValue,
       deserializeWithSchema
     ) as Structured<any, any, any>;
@@ -228,7 +225,7 @@ export const init = {
   number: initializeTypedPrimitive<number>,
   boolean: initializeTypedPrimitive<boolean>,
   null: initializeTypedPrimitive<null>,
-  primitive: initializeTypedPrimitive<unknown>,
+  primitive: initializeTypedPrimitive,
   schemaArray: initializeSchemaArray,
   array: initializeSimpleArray,
   struct: initializeStruct,

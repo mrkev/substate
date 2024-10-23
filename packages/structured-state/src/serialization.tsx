@@ -21,6 +21,12 @@ export type SerializedTypePrimitive<T> = Readonly<{
   _value: T;
 }>;
 
+export type SerializedSimpleArray<T> = Readonly<{
+  $$: "arr-simple";
+  _id: string;
+  _value: readonly T[];
+}>;
+
 export type NSerialized = {
   prim: Readonly<{
     $$: "prim";

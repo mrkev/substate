@@ -66,6 +66,7 @@ export interface SState<T> {}
 
 /** Describes an array */
 export class SArray<T> extends LinkedArray<T> {
+  // readonly _differentiator = "sarray";
   constructor(val: T[], id: string) {
     super(val, id);
     getGlobalState().knownObjects.set(this._id, this);

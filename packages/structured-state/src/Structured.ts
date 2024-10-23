@@ -32,7 +32,6 @@ export interface ConstructableStructure<
 > {
   new (...args: never[]): Structured<S, SAuto, any>;
   construct(
-    json: S,
     auto: SAuto,
     deserializeWithSchema: DeserializeFunc
   ): Structured<S, any, any>;
