@@ -8,6 +8,7 @@ import {
   assertStructured,
   exhaustive,
 } from "./assertions";
+import { nullthrows } from "./nullthrows";
 import {
   isSeralized,
   isSeralizedStructured,
@@ -17,7 +18,7 @@ import {
 } from "./serialization";
 import { initialize } from "./serialization.initialize";
 import { SArray, SSchemaArray } from "./sstate";
-import { _directPush, _directRemove } from "./state/LinkedArray";
+import { _directPush } from "./state/LinkedArray";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SSet } from "./state/LinkedSet";
 import { SubbableContainer } from "./state/SubbableContainer";
@@ -80,36 +81,38 @@ export function replacePrimitive<T>(
 export function replaceSchemaArray<
   T extends Struct<any> | Struct2<any> | Structured<any, any, any>
 >(json: NSerialized["arr-schema"], arr: SSchemaArray<T>) {
+  // arr is current state, we want json by the end
+
   arr._replace((raw) => {
-    const jsonSet = new Map<string, Serialized>();
+    const jsonIndex = new Map<string, Serialized>();
     const jsonOrder: string[] = [];
     for (const elem of json._value) {
       if (!isSeralized(elem)) {
-        console.warn(
-          "non structured object found in SSchemaArray. skipping replace."
+        console.error(
+          "ERR: non structured object found in SSchemaArray. skipping replace."
         );
         continue;
       }
-      jsonSet.set(elem._id, elem);
+      jsonIndex.set(elem._id, elem);
       jsonOrder.push(elem._id);
     }
 
-    // 1. delete all elements not present in serialized version
-    for (const struct of raw) {
-      if (!jsonSet.has(struct._id)) {
-        _directRemove(raw, struct);
+    const arrIndex = new Map<string, T>();
+
+    // 1. delete all elements not present in serialized version.
+    //    - the rest we keep and index for later
+    for (let i = raw.length - 1; i >= 0; i--) {
+      const struct = nullthrows(raw.at(i));
+      if (jsonIndex.has(struct._id)) {
+        arrIndex.set(struct._id, struct);
+      } else {
+        raw.splice(i, 1);
       }
     }
 
-    // now make the arrSet
-    const arrSet = new Map<string, T>();
-    for (const struct of raw) {
-      arrSet.set(struct._id, struct);
-    }
-
     // 2. replace all the elements present in arr and json
-    for (const [_, elem] of jsonSet) {
-      const struct = arrSet.get(elem._id);
+    for (const [_, elem] of jsonIndex) {
+      const struct = arrIndex.get(elem._id);
       if (struct == null) {
         continue;
       } else if (struct instanceof Struct || struct instanceof Struct2) {
@@ -128,8 +131,8 @@ export function replaceSchemaArray<
     // TODO: child elements have new id, not JSON id
     // could be solved by serializng only in Structured format, and forcing deserialization to be recursive.
     // thus, on deserialization we would always have the id of the object being deserialized/constructed
-    for (const [id, elem] of jsonSet) {
-      if (arrSet.has(id)) {
+    for (const [id, elem] of jsonIndex) {
+      if (arrIndex.has(id)) {
         continue;
       }
       const initialized = initialize(elem, arr._schema[0] as any);
@@ -143,6 +146,7 @@ export function replaceSchemaArray<
     raw.sort((a, b) => {
       const aIndex = jsonOrder.indexOf(a._id);
       if (aIndex < 0) {
+        debugger;
         console.warn(
           "replace: arr has an element not in json, this should never happen"
         );

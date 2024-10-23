@@ -219,6 +219,8 @@ export function forwardHistory() {
     return;
   }
 
+  console.log("TODO");
+
   // saveContraryUndo(prev);
 
   // // In reverse, to go back in time

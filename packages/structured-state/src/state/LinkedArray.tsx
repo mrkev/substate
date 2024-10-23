@@ -358,16 +358,6 @@ export class LinkedArray<S>
   }
 }
 
-export function _directRemove<S>(arr: Array<S>, searchElement: S): S | null {
-  const index = arr.indexOf(searchElement);
-  if (index === -1) {
-    return null;
-  }
-
-  // containment handled by splice
-  return arr.splice(index, 1)[0];
-}
-
 export function _directPush<S>(arr: Array<S>, ...items: S[]) {
   return arr.push(...items);
 }
