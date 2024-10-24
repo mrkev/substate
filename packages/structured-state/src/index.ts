@@ -1,6 +1,7 @@
 import {
   replacePrimitive,
   replaceSchemaArray,
+  replaceSimpleArray,
   replaceSSet,
   replaceStructured,
 } from "./serializaiton.replace";
@@ -48,8 +49,7 @@ export {
 export { DirtyObserver, useDirtyTracker } from "./DirtyObserver";
 export type { DirtyState } from "./DirtyObserver";
 
-// TODO: eventually remove
-export { useSubscribeToSubbableMutationHashable } from "./state/MutationHashable";
+// export { useSubscribeToSubbableMutationHashable } from "./state/MutationHashable";
 
 export { init } from "./serialization.initialize";
 export type { PrimitiveKind, StructuredKind } from "./StructuredKinds";
@@ -61,7 +61,7 @@ export const replace = {
   null: replacePrimitive<null>,
   primitive: replacePrimitive,
   schemaArray: replaceSchemaArray, // todo: test
-  // array: initializeSimpleArray,
+  array: replaceSimpleArray,
   // struct: initializeStruct,
   // struct2: initializeStruct2,
   structured: replaceStructured,

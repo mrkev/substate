@@ -27,6 +27,12 @@ export type SerializedSimpleArray<T> = Readonly<{
   _value: readonly T[];
 }>;
 
+export type SerializedSimpleSet<T> = Readonly<{
+  $$: "arr-simple";
+  _id: string;
+  _value: readonly T[];
+}>;
+
 export type NSerialized = {
   prim: Readonly<{
     $$: "prim";
@@ -36,7 +42,7 @@ export type NSerialized = {
   "arr-schema": Readonly<{
     $$: "arr-schema";
     _id: string;
-    _value: (Serialized | unknown)[];
+    _value: readonly (Serialized | unknown)[];
   }>;
   "arr-simple": Readonly<{
     $$: "arr-simple";

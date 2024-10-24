@@ -60,8 +60,8 @@ export function useStructure<S>(
 
 export function useContainer<S extends SubbableContainer>(
   obj: S,
-  allChanges: boolean = false
+  recursiveChanges: boolean = false
 ): S {
-  useSubscribeToSubbableMutationHashable(obj, undefined, allChanges);
+  useSubscribeToSubbableMutationHashable(obj, undefined, recursiveChanges);
   return obj;
 }

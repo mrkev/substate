@@ -160,7 +160,10 @@ export function replaceSchemaArray<
   });
 }
 
-function replaceSimpleArray<T>(json: SerializedSimpleArray<T>, arr: SArray<T>) {
+export function replaceSimpleArray<T>(
+  json: SerializedSimpleArray<T>,
+  arr: SArray<T>
+) {
   arr._replace((raw) => {
     return json._value;
   });
@@ -218,9 +221,14 @@ export function replaceStructured(
 
 export function replaceSSet(
   json: Extract<Serialized, { $$: "set" }>,
-  obj: SSet<any>
+  set: SSet<any>
 ) {
+  // TODO: can a set contain structured objects? like an array? do I need simple set and schema set?
   throw new Error("NOT IMPLEMENTED");
+
+  // set._replace((raw) => {
+  //   return json._value;
+  // });
   // TODO: SCHEMA?
   const initialized = json._value.map((x) => {
     // TODO: find if item exists in array

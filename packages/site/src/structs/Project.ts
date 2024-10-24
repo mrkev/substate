@@ -24,9 +24,6 @@ type AutoProject = {
 export type Marker = readonly [number, string];
 
 export class Project extends Structured<AutoProject, typeof Project> {
-  // readonly tracks: SSchemaArray<MidiTrack>;
-  // readonly effects: SArray<Effect>;
-
   readonly randomNumbers: SSet<number>;
 
   constructor(
@@ -52,11 +49,12 @@ export class Project extends Structured<AutoProject, typeof Project> {
     };
   }
 
+  // TODO: I should make replae only care about non-knowables. All knowables get auto-set.
   override replace(json: JSONOfAuto<AutoProject>): void {
     replace.string(json.name, this.name);
-    // TODO: replace other knowables
-    // TODO: I should make replae only care about non-knowables. All knowables get auto-set.
-    // this.clips._setRaw(json.clips)
+    replace.schemaArray(json.tracks, this.tracks);
+    replace.set(json.randomNumbers, this.randomNumbers);
+    replace.array(json.markers, this.markers);
   }
 
   static construct(auto: JSONOfAuto<AutoProject>) {

@@ -17,10 +17,8 @@ export class TimelineT extends Structured<AutoTimelineT, typeof TimelineT> {
   }
 
   override replace({ t, u }: AutoTimelineT): void {
-    console.log("replace", t, u);
     this.t = t;
     this.u = u;
-    console.log("t is now", this.t, this._id, this._id);
   }
 
   static construct(auto: AutoTimelineT): TimelineT {

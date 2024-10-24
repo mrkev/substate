@@ -1,5 +1,6 @@
 import { nanoid } from "nanoid";
 import { mutableset } from "../nullthrows";
+import { getGlobalState, saveForHistory } from "../sstate.history";
 import { SubbableContainer } from "./SubbableContainer";
 
 // TODO: missing: history
@@ -10,6 +11,7 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
     super(id);
     this._set = initialValue;
     SubbableContainer._containAll(this, this._set);
+    getGlobalState().knownObjects.set(this._id, this);
   }
 
   _getRaw(): ReadonlySet<S> {
@@ -30,9 +32,18 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
   }
 
   private mutate<V>(mutator: (raw: Set<S>) => V): V {
+    saveForHistory(this);
     const result = mutator(mutableset(this._set));
     SubbableContainer._notifyChange(this, this);
     return result;
+  }
+
+  _replace(cb: (set: Set<S>) => ReadonlySet<S>) {
+    // todo, call ._destroy on child elements?
+    SubbableContainer._uncontainAll(this, this._set);
+    this._set = cb(mutableset(this._set));
+    SubbableContainer._containAll(this, this._set);
+    SubbableContainer._notifyChange(this, this);
   }
 
   // In some future, create a set that does several operations at once

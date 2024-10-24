@@ -184,6 +184,7 @@ function UProject({ project }: { project: Project }) {
           onClick={() => {
             s.history.record("add marker", () => {
               markers.push([0, "foo"]);
+              console.log("pushed");
             });
           }}
         >

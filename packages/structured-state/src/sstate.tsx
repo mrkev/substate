@@ -4,14 +4,14 @@ import { nanoid } from "nanoid";
 import { Structured } from ".";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
+import { StructSchema } from "./serialization";
+import { getGlobalState } from "./sstate.history";
 import { LinkedArray } from "./state/LinkedArray";
 import { LinkedMap } from "./state/LinkedMap";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SSet } from "./state/LinkedSet";
 import { SubbableContainer } from "./state/SubbableContainer";
-import { getGlobalState } from "./sstate.history";
 import { JSONValue } from "./types";
-import { StructSchema } from "./serialization";
 
 // todo? create -> of
 export class SString extends LinkedPrimitive<string> {

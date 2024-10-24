@@ -119,6 +119,7 @@ export function recordHistory(
   return actAfter(action, function pushHistoryEnd() {
     const recorded = globalState.HISTORY_RECORDING;
     globalState.HISTORY_RECORDING = false;
+    console.log("recorded", recorded);
 
     if (recorded === false) {
       throw new Error("recorded === false, shouldn't happen");
