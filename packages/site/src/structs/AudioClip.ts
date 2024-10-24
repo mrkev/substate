@@ -1,16 +1,5 @@
-import {
-  init,
-  JSONOfAuto,
-  replace,
-  S,
-  Structured,
-} from "../../../structured-state/src";
+import { init, replace, S, Structured } from "../../../structured-state/src";
 import { time, TimelineT } from "./TimelineT";
-
-type SClip = {
-  timelineStart: number;
-  timelineLength: number;
-};
 
 type AutoAudioClip = {
   timelineStart: TimelineT;
@@ -45,12 +34,12 @@ export class AudioClip extends Structured<AutoAudioClip, typeof AudioClip> {
     };
   }
 
-  override replace(auto: JSONOfAuto<AutoAudioClip>): void {
+  override replace(auto: AudioClipRaw): void {
     replace.structured(auto.timelineStart, this.timelineStart);
     replace.structured(auto.timelineLength, this.timelineLength);
   }
 
-  static construct(auto: JSONOfAuto<AutoAudioClip>): AudioClip {
+  static construct(auto: AudioClipRaw): AudioClip {
     return Structured.create(
       AudioClip,
       init.structured(auto.timelineStart, TimelineT),

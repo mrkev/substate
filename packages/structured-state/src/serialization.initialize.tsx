@@ -38,11 +38,12 @@ function initializeSchemaArray(
   json: NSerialized["arr-schema"],
   spec: StructSchema[]
 ): SSchemaArray<any> {
-  const initialized = json._value.map((x: any) => {
+  const initialized = json._value.map((x) => {
     // TODO: find right spec
     return initialize(x, spec[0]);
   });
 
+  // todo: can only have schema arrays of structured objects rn apparently
   return new SSchemaArray(initialized as any, json._id, spec);
 }
 
@@ -170,7 +171,7 @@ function initializeSet(
 export function initialize(
   json: unknown,
   // A union of of the specs this json could follow
-  spec: Schema
+  spec: StructSchema | StructSchema[]
 ): StructuredKind {
   if (!isSeralized(json)) {
     console.log("not serialized", json);

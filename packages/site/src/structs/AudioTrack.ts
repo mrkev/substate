@@ -39,19 +39,19 @@ export class AudioTrack extends Structured<AutoAudioTrack, typeof AudioTrack> {
     return Structured.create(
       AudioTrack,
       string(name),
-      arrayOf([AudioClip as any], clips)
+      arrayOf([AudioClip], clips)
     );
   }
 
   static construct(auto: JSONOfAuto<AutoAudioTrack>): AudioTrack {
     // const { name, clips } = json;
     // this.name = string(name);
-    // this.clips = arrayOf([AudioClip as any], clips);
+    // this.clips = arrayOf([AudioClip], clips);
 
     return Structured.create(
       AudioTrack,
       init.string(auto.name),
-      init.schemaArray(auto.clips, [AudioClip as any])
+      init.schemaArray(auto.clips, [AudioClip])
     );
   }
 }

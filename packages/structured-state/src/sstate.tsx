@@ -77,7 +77,7 @@ export class SArray<T> extends LinkedArray<T> {
 export class SSchemaArray<
   T extends Struct<any> | Struct2<any> | Structured<any, any>
 > extends LinkedArray<T> {
-  _schema: (typeof Struct | typeof Struct2 | typeof Structured)[];
+  _schema: StructSchema[];
 
   // // TODO: do I need this? I think I was planning on using this in history, but since
   // // we just recreate the whole thing instead we don't need it anymore.
@@ -104,11 +104,7 @@ export class SSchemaArray<
   //   }
   // }
 
-  constructor(
-    val: T[],
-    id: string,
-    schema: (typeof Struct | typeof Struct2 | typeof Structured)[]
-  ) {
+  constructor(val: T[], id: string, schema: StructSchema[]) {
     super(val, id);
     getGlobalState().knownObjects.set(this._id, this);
     this._schema = schema;

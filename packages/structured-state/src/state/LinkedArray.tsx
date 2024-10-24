@@ -3,6 +3,7 @@ import { saveForHistory } from "../sstate.history";
 import { StateChangeHandler } from "./LinkedPrimitive";
 import { Subbable, notify } from "./Subbable";
 import { SubbableContainer } from "./SubbableContainer";
+import { mutablearr } from "../nullthrows";
 
 // .sort, .reverse, .fill, .copyWithin operate in place and return the array. SubbableArray
 // is not quite an array so the return types don't match.
@@ -31,8 +32,8 @@ export class LinkedArray<S>
   protected _array: Array<S>;
   readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
   _hash: number = 0;
-  public _container = new Set<SubbableContainer>();
-  _propagatedTokens = new WeakSet();
+  readonly _container = new Set<SubbableContainer>();
+  readonly _propagatedTokens = new WeakSet();
 
   /** See usage in SSchemaArray */
   // protected _containedIds: WeakRefMap<any> | null = null;
@@ -49,8 +50,7 @@ export class LinkedArray<S>
 
   _replace(cb: (arr: Array<S>) => ReadonlyArray<S>) {
     SubbableContainer._uncontainAll(this, this._array);
-    // as any to remove readonly
-    this._array = cb(this._array) as any; // todo, call ._destroy on child elements?
+    this._array = mutablearr(cb(this._array)); // todo, call ._destroy on child elements?
     SubbableContainer._containAll(this, this._array);
     SubbableContainer._notifyChange(this, this);
   }
@@ -62,7 +62,7 @@ export class LinkedArray<S>
   }
 
   private mutate<V>(mutator: (rep: Array<S>) => V): V {
-    saveForHistory(this as any); // todo: as any
+    saveForHistory(this);
     const result = mutator(this._array);
     SubbableContainer._notifyChange(this, this);
     return result;
@@ -309,7 +309,7 @@ export class LinkedArray<S>
     predicate: (value: S, index: number, obj: S[]) => unknown,
     thisArg?: any
   ): number {
-    return this._array.findIndex(predicate as any, thisArg);
+    return this._array.findIndex(predicate, thisArg);
   }
 
   findLast<S>(

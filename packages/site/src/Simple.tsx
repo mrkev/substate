@@ -14,6 +14,7 @@ import {
   useStructure,
 } from "../../structured-state/src/sstate.react";
 import "./App.css";
+import { setWindow } from "../../structured-state/src/nullthrows";
 
 export class BusLine extends Struct.Struct<BusLine> {
   readonly distance = s.number();
@@ -207,4 +208,4 @@ function ProjectDebug() {
   );
 }
 
-(window as any).project = busLine;
+setWindow("project", busLine);

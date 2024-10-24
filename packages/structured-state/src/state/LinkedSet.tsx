@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid";
+import { mutableset } from "../nullthrows";
 import { SubbableContainer } from "./SubbableContainer";
 
 // TODO: missing: history
@@ -29,7 +30,7 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
   }
 
   private mutate<V>(mutator: (raw: Set<S>) => V): V {
-    const result = mutator(this._set as any);
+    const result = mutator(mutableset(this._set));
     SubbableContainer._notifyChange(this, this);
     return result;
   }

@@ -52,8 +52,8 @@ export abstract class Structured<
   readonly _id: string;
   public _hash: number = 0;
   readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
-  public _container = new Set<SubbableContainer>();
-  public _propagatedTokens = new WeakSet();
+  readonly _container = new Set<SubbableContainer>();
+  readonly _propagatedTokens = new WeakSet();
 
   abstract replace(autoJson: JSONOfAuto<SAuto>): void;
   abstract autoSimplify(): SAuto;

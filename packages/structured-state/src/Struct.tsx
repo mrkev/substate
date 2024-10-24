@@ -44,9 +44,9 @@ export abstract class Struct<Child extends Struct<any>>
 {
   readonly _id: string;
   _hash: number = 0;
-  _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
-  public _container = new Set<SubbableContainer>();
-  _propagatedTokens = new WeakSet();
+  readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
+  readonly _container = new Set<SubbableContainer>();
+  readonly _propagatedTokens = new WeakSet();
 
   get _kind() {
     return this.constructor.name;

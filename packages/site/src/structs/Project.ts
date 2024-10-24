@@ -12,14 +12,7 @@ import {
   string,
   Structured,
 } from "../../../structured-state/src";
-import { Serialized } from "../../../structured-state/src/serialization";
 import { AudioTrack } from "./AudioTrack";
-
-type SerializedProject = Readonly<{
-  name: string;
-  tracks?: Extract<Serialized, { $$: "arr-schema" }>; // todo this is not working for some reason:
-  // clips?: ApplySerialization<s.SSchemaArray<MidiClip>>;
-}>;
 
 type AutoProject = {
   name: SString;
@@ -61,6 +54,7 @@ export class Project extends Structured<AutoProject, typeof Project> {
 
   override replace(json: JSONOfAuto<AutoProject>): void {
     replace.string(json.name, this.name);
+    // TODO: replace other knowables
     // TODO: I should make replae only care about non-knowables. All knowables get auto-set.
     // this.clips._setRaw(json.clips)
   }
@@ -70,8 +64,8 @@ export class Project extends Structured<AutoProject, typeof Project> {
     return Structured.create(
       Project,
       init.string(auto.name),
-      init.schemaArray(auto.tracks, [AudioTrack as any]),
-      init.array<Marker>(auto.markers as any) // todo: as any
+      init.schemaArray(auto.tracks, [AudioTrack]),
+      init.array<Marker>(auto.markers)
     );
   }
 
@@ -79,7 +73,7 @@ export class Project extends Structured<AutoProject, typeof Project> {
     return Structured.create(
       Project,
       string(name),
-      arrayOf([AudioTrack as any], tracks),
+      arrayOf([AudioTrack], tracks),
       array(markers)
     );
   }

@@ -23,8 +23,9 @@ import { Note } from "./structs/MidiTrack";
 import { Project } from "./structs/Project";
 import { TrackA } from "./ui/TrackA";
 import { nullthrows } from "./util";
+import { setWindow } from "../../structured-state/src/nullthrows";
 
-(window as any).s = s;
+setWindow("s", s);
 
 /**
  * TODO:
@@ -51,7 +52,7 @@ export function App() {
         [1, "bar"],
       ]
     );
-    (window as any).project = result;
+    setWindow("project", result);
     return result;
   });
 

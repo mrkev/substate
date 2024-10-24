@@ -5,6 +5,7 @@ import { LinkedArray } from "./state/LinkedArray";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
 import { SSet } from ".";
+import { StructSchema } from "./serialization";
 
 export function assertSPrimitive<T>(
   value: unknown
@@ -110,7 +111,7 @@ export function assertNotArray<T>(val: Array<T> | T): asserts val is T {
 }
 
 export function assertConstructableStruct(
-  spec: typeof Struct | typeof Struct2 | typeof Structured
+  spec: StructSchema
 ): asserts spec is typeof Struct {
   if (spec instanceof Struct) {
     throw new Error(`is not a Struct`);
@@ -118,7 +119,7 @@ export function assertConstructableStruct(
 }
 
 export function assertConstructableStruct2(
-  spec: typeof Struct | typeof Struct2 | typeof Structured
+  spec: StructSchema
 ): asserts spec is typeof Struct2 {
   if ((spec as any).__proto__ !== Struct2) {
     throw new Error(`is not a Struct2`);
@@ -126,7 +127,7 @@ export function assertConstructableStruct2(
 }
 
 export function assertConstructableStructured(
-  spec: typeof Struct | typeof Struct2 | typeof Structured
+  spec: StructSchema | typeof Structured
 ): asserts spec is typeof Structured {
   if ((spec as any).__proto__ !== Structured) {
     throw new Error(`is not a Structured`);
@@ -134,8 +135,8 @@ export function assertConstructableStructured(
 }
 
 export function assertConstructableObj(
-  spec: typeof Struct | typeof Struct2 | typeof Structured
-): asserts spec is typeof Structured | typeof Struct | typeof Struct2 {
+  spec: StructSchema
+): asserts spec is StructSchema {
   if (
     (spec as any).__proto__ === Structured ||
     (spec as any).__proto__ === Struct2 ||

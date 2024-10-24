@@ -132,7 +132,7 @@ export function replaceSchemaArray<
       if (arrIndex.has(id)) {
         continue;
       }
-      const initialized = initialize(elem, arr._schema[0] as any);
+      const initialized = initialize(elem, arr._schema[0]);
       raw.push(initialized as any); // todo: as any
     }
 

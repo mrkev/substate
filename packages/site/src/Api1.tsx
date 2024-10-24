@@ -1,4 +1,5 @@
 import { useContainer } from "../../structured-state/src/index";
+import { setWindow } from "../../structured-state/src/nullthrows";
 import * as nw from "../../structured-state/src/nw/nwschema";
 import {
   Concretized,
@@ -25,7 +26,9 @@ const project = ProjectState.create({
   tracks: [],
 });
 
-function Api1() {
+setWindow("project", project);
+
+export function Api1() {
   return (
     <>
       <CountEditor num={project.at("lions")} />
@@ -103,7 +106,3 @@ function ProjectDebug() {
     </pre>
   );
 }
-
-export default Api1;
-
-(window as any).project = project;

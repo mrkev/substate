@@ -5,7 +5,7 @@ import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SSet } from "./state/LinkedSet";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
-import { Structured } from "./Structured";
+import { ConstructableStructure, Structured } from "./Structured";
 import { StructuredKind } from "./StructuredKinds";
 
 // TODO: map
@@ -94,8 +94,8 @@ export type ApplySerialization<T extends StructuredKind> =
     ? NSerialized["structured"]
     : T extends SSchemaArray<any>
     ? NSerialized["arr-schema"]
-    : T extends SArray<any>
-    ? NSerialized["arr-simple"]
+    : T extends SArray<infer U>
+    ? SerializedSimpleArray<U>
     : T extends SSet<any>
     ? NSerialized["set"]
     : never;
@@ -156,7 +156,8 @@ export type Schema =
 export type StructSchema =
   | typeof Struct // Struct
   | typeof Struct2 // Struct
-  | typeof Structured; // Struct
+  // | typeof Structured; // Struct
+  | ConstructableStructure<any>;
 
 export type NeedsSchema =
   | NSerialized["struct"]

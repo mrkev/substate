@@ -8,8 +8,7 @@ export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
 export type StateChangeHandler<S> = (value: S) => void;
 
 export interface Contained {
-  // todo: readonly?
-  _container: Set<Subbable>;
+  readonly _container: Set<Subbable>;
 }
 
 /**
@@ -18,8 +17,8 @@ export interface Contained {
 export class LinkedPrimitive<S> implements Contained, Subbable {
   readonly _id: string;
   private _value: Readonly<S>;
-  _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
-  public _container = new Set<SubbableContainer>();
+  readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
+  readonly _container = new Set<SubbableContainer>();
 
   constructor(initialValue: S, id: string) {
     this._value = initialValue;
