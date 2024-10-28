@@ -6,13 +6,14 @@ import {
   assertStruct,
   assertStruct2,
   assertStructured,
+  assertSUnion,
   exhaustive,
 } from "./assertions";
 import { nullthrows } from "./nullthrows";
 import {
   isSeralized,
   isSeralizedStructured,
-  NSerialized,
+  NSimplified,
   Serialized,
   SerializedSimpleArray,
   SerializedTypePrimitive,
@@ -26,6 +27,7 @@ import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
 import { StructuredKind } from "./StructuredKinds";
+import { SUnion } from "./sunion";
 
 export function replace(json: any, obj: StructuredKind) {
   try {
@@ -62,6 +64,10 @@ export function replace(json: any, obj: StructuredKind) {
         assertSSet(obj);
         return replaceSSet(json, obj);
       }
+      case "union": {
+        assertSUnion(obj);
+        return replaceSUnion(json, obj);
+      }
       default:
         exhaustive(json, "invalid $$ type");
     }
@@ -80,7 +86,7 @@ export function replacePrimitive<T>(
 
 export function replaceSchemaArray<
   T extends Struct<any> | Struct2<any> | Structured<any, any>
->(json: NSerialized["arr-schema"], arr: SSchemaArray<T>) {
+>(json: NSimplified["arr-schema"], arr: SSchemaArray<T>) {
   // arr is current state, we want json by the end
 
   arr._replace((raw) => {
@@ -212,7 +218,7 @@ function replaceStruct2(
 }
 
 export function replaceStructured(
-  json: NSerialized["structured"],
+  json: NSimplified["structured"],
   obj: Structured<any, any>
 ) {
   obj.replace(json._autoValue);
@@ -247,4 +253,12 @@ export function replaceSSet(
 
   // obj._setRaw(initialized);
   return;
+}
+
+export function replaceSUnion(json: NSimplified["union"], obj: SUnion<any>) {
+  // todo: Schema. have user deifne a replace function so they can pick the right
+  // schema to use when initializing
+  const value = initialize(json._value, []);
+  obj.replace(value);
+  SubbableContainer._notifyChange(obj, obj);
 }

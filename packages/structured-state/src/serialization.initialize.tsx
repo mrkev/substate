@@ -1,10 +1,6 @@
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
-import {
-  ConstructableStructure,
-  Structured,
-  initStructured,
-} from "./Structured";
+import { ConstructableStructure, initStructured } from "./Structured";
 import { StructuredKind } from "./StructuredKinds";
 import {
   assertArray,
@@ -16,10 +12,9 @@ import {
   exhaustive,
 } from "./assertions";
 import {
-  NSerialized,
+  NSimplified,
   NeedsSchema,
   ObjectDeserialization,
-  Schema,
   Serialized,
   SerializedSimpleArray,
   SerializedTypePrimitive,
@@ -29,13 +24,14 @@ import {
 import { SArray, SSchemaArray } from "./sstate";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SSet } from "./state/LinkedSet";
+import { SUnion } from "./sunion";
 
-function initializePrimitive(json: NSerialized["prim"]) {
+function initializePrimitive(json: NSimplified["prim"]) {
   return new LinkedPrimitive(json._value, json._id);
 }
 
 function initializeSchemaArray(
-  json: NSerialized["arr-schema"],
+  json: NSimplified["arr-schema"],
   spec: StructSchema[]
 ): SSchemaArray<any> {
   const initialized = json._value.map((x) => {
@@ -52,7 +48,7 @@ function initializeSimpleArray<T>(json: SerializedSimpleArray<T>): SArray<T> {
 }
 // helpers for structured
 
-type T = ObjectDeserialization<NSerialized["structured"]>;
+type T = ObjectDeserialization<NSimplified["structured"]>;
 
 export function deserializeWithSchema<S extends NeedsSchema>(
   json: NeedsSchema,
@@ -147,7 +143,7 @@ function initializeStruct2(
 }
 
 function initializeStructured<Spec extends ConstructableStructure<any>>(
-  json: NSerialized["structured"],
+  json: NSimplified["structured"],
   spec: Spec
 ) {
   const instance = spec.construct(json._autoValue);
@@ -156,16 +152,22 @@ function initializeStructured<Spec extends ConstructableStructure<any>>(
   return instance as any; // todo
 }
 
-function initializeSet(
-  json: Extract<Serialized, { $$: "set" }>,
-  spec: StructSchema
-) {
+function initializeSet(json: NSimplified["set"], spec: StructSchema) {
   const initialized = json._value.map((x: any) => {
     // TODO: find right spec
     return initialize(x, spec);
   });
 
   return SSet.create(initialized as any, json._id);
+}
+
+function initializeSUnion(
+  json: NSimplified["union"],
+  spec: StructSchema
+): SUnion<StructuredKind> {
+  const initialized = initialize(json._value, spec);
+  const instance = new SUnion(initialized, json._id);
+  return instance;
 }
 
 export function initialize(
@@ -206,8 +208,11 @@ export function initialize(
     }
     case "set": {
       assertNotArray(spec);
-      assertConstructableStructured(spec);
       return initializeSet(json, spec) as any;
+    }
+    case "union": {
+      assertNotArray(spec);
+      return initializeSUnion(json, spec);
     }
     default:
       exhaustive(json, "invalid $$ type");
@@ -233,6 +238,8 @@ export const init = {
 } as const;
 
 /** gets over reaadonly id */
+// TODO: when I override ID, don't I have to update memory map btw?
+// TODOOOOOOOOOOOOOOOOOOOOO
 function overrideId(obj: StructuredKind, id: string) {
   (obj as any)._id = id;
 }

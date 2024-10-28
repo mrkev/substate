@@ -8,16 +8,25 @@ import {
   StructuredKind,
 } from "./StructuredKinds";
 import { exhaustive } from "./assertions";
-import { NSerialized, Serialized, SerializedDescriptor } from "./serialization";
+import { NSimplified, SerializedDescriptor } from "./serialization";
 import { SArray, SSchemaArray } from "./sstate";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { CONTAINER_IGNORE_KEYS } from "./state/SubbableContainer";
+import { SUnion } from "./sunion";
 import { JSONValue } from "./types";
 
-function simplifyPrimitive(obj: LinkedPrimitive<any>): NSerialized["prim"] {
+type SimplificationMetadata = Readonly<{
+  allIds: Set<string>;
+}>;
+
+function simplifyPrimitive(
+  obj: LinkedPrimitive<any>,
+  acc: SimplificationMetadata
+): NSimplified["prim"] {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
+  acc.allIds.add(obj._id);
   return {
     $$: "prim",
     _value: obj.get(),
@@ -25,40 +34,50 @@ function simplifyPrimitive(obj: LinkedPrimitive<any>): NSerialized["prim"] {
   };
 }
 
-function simplifySimpleArray(obj: SArray<any>): NSerialized["arr-simple"] {
+function simplifySimpleArray(
+  obj: SArray<any>,
+  acc: SimplificationMetadata
+): NSimplified["arr-simple"] {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
+  acc.allIds.add(obj._id);
   return {
     $$: "arr-simple",
-    _value: obj._getRaw().map((x) => simplify(x)),
+    _value: obj._getRaw().map((x) => simplify(x, acc)),
     _id: obj._id,
   };
 }
 
 function simplifySchemaArray(
-  obj: SSchemaArray<any>
-): NSerialized["arr-schema"] {
+  obj: SSchemaArray<any>,
+  acc: SimplificationMetadata
+): NSimplified["arr-schema"] {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
+  acc.allIds.add(obj._id);
   return {
     $$: "arr-schema",
     _value: obj._getRaw().map((x) => {
       if (!isStructuredKind(x)) {
         throw new Error("un-knowable found in schema array");
       } else {
-        return simplify(x);
+        return simplify(x, acc);
       }
     }),
     _id: obj._id,
   };
 }
 
-function simplifyStruct(obj: Struct<any>): NSerialized["struct"] {
+function simplifyStruct(
+  obj: Struct<any>,
+  acc: SimplificationMetadata
+): NSimplified["struct"] {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
+  acc.allIds.add(obj._id);
   // offer a way to override simplification
   if ("_simplify" in obj && typeof obj._simplify === "function") {
     return {
@@ -78,7 +97,7 @@ function simplifyStruct(obj: Struct<any>): NSerialized["struct"] {
     }
 
     const val = (obj as any)[key] as unknown;
-    result[key] = simplify(val as any);
+    result[key] = simplify(val as any, acc);
   }
 
   return {
@@ -88,10 +107,14 @@ function simplifyStruct(obj: Struct<any>): NSerialized["struct"] {
   };
 }
 
-function simplifyStruct2(obj: Struct2<any>): NSerialized["struct2"] {
+function simplifyStruct2(
+  obj: Struct2<any>,
+  acc: SimplificationMetadata
+): NSimplified["struct2"] {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
+  acc.allIds.add(obj._id);
   return {
     $$: "struct2",
     _id: obj._id,
@@ -100,9 +123,10 @@ function simplifyStruct2(obj: Struct2<any>): NSerialized["struct2"] {
 }
 
 function autoSimplify(
-  descriptor: Record<string, StructuredKind | PrimitiveKind>
+  descriptor: Record<string, StructuredKind | PrimitiveKind>,
+  acc: SimplificationMetadata
 ): SerializedDescriptor {
-  const serializable = {} as any;
+  const serializable: SerializedDescriptor = {};
   for (const [key, value] of Object.entries(descriptor)) {
     if (
       typeof value === "string" ||
@@ -114,19 +138,21 @@ function autoSimplify(
     } else if (typeof value === "function") {
       throw new Error("cant simplify function");
     } else if (value instanceof LinkedPrimitive) {
-      serializable[key] = simplifyPrimitive(value);
+      serializable[key] = simplifyPrimitive(value, acc);
     } else if (value instanceof SArray) {
-      serializable[key] = simplifySimpleArray(value);
+      serializable[key] = simplifySimpleArray(value, acc);
     } else if (value instanceof SSchemaArray) {
-      serializable[key] = simplifySchemaArray(value);
+      serializable[key] = simplifySchemaArray(value, acc);
     } else if (value instanceof Struct) {
-      serializable[key] = simplifyStruct(value);
+      serializable[key] = simplifyStruct(value, acc);
     } else if (value instanceof Struct2) {
-      serializable[key] = simplifyStruct2(value);
+      serializable[key] = simplifyStruct2(value, acc);
     } else if (value instanceof Structured) {
-      serializable[key] = simplifyStructured(value);
+      serializable[key] = simplifyStructured(value, acc);
     } else if (value instanceof SSet) {
-      serializable[key] = simplifySet(value);
+      serializable[key] = simplifySet(value, acc);
+    } else if (value instanceof SUnion) {
+      serializable[key] = simplifyUnion(value, acc);
     } else {
       exhaustive(value);
     }
@@ -135,32 +161,58 @@ function autoSimplify(
   return serializable;
 }
 
-export function simplifyStructured(obj: Structured<any, any>): Serialized {
+export function simplifyStructured(
+  obj: Structured<any, any>,
+  acc: SimplificationMetadata
+): NSimplified["structured"] {
   // console.log("simplifyStructured", autoSimplify(obj.autoSimplify()));
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
+  acc.allIds.add(obj._id);
   return {
     $$: "structured",
     _id: obj._id,
-    _autoValue: autoSimplify(obj.autoSimplify()),
+    _autoValue: autoSimplify(obj.autoSimplify(), acc),
   };
 }
 
-function simplifySet(obj: SSet<any>): Serialized {
+function simplifySet(
+  obj: SSet<any>,
+  acc: SimplificationMetadata
+): NSimplified["set"] {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
+  acc.allIds.add(obj._id);
   return {
     $$: "set",
     _value: Array.from(obj._getRaw()).map((x) => {
-      return simplify(x);
+      return simplify(x, acc);
     }),
     _id: obj._id,
   };
 }
 
-export function simplify(state: StructuredKind | JSONValue) {
+function simplifyUnion(
+  obj: SUnion<any>,
+  acc: SimplificationMetadata
+): NSimplified["union"] {
+  if (obj._container.size > 1) {
+    console.warn("multiple containers reference", obj);
+  }
+  acc.allIds.add(obj._id);
+  return {
+    $$: "union",
+    _value: simplifyStructuredKind(obj, acc),
+    _id: obj._id,
+  };
+}
+
+export function simplify(
+  state: StructuredKind | JSONValue,
+  acc: SimplificationMetadata
+) {
   if (
     typeof state === "string" ||
     typeof state === "number" ||
@@ -171,24 +223,51 @@ export function simplify(state: StructuredKind | JSONValue) {
   } else if (typeof state === "function") {
     throw new Error("cant simplify function");
   } else if (state instanceof LinkedPrimitive) {
-    return simplifyPrimitive(state);
+    return simplifyPrimitive(state, acc);
   } else if (state instanceof SArray) {
-    return simplifySimpleArray(state);
+    return simplifySimpleArray(state, acc);
   } else if (state instanceof SSchemaArray) {
-    return simplifySchemaArray(state);
+    return simplifySchemaArray(state, acc);
   } else if (state instanceof Struct) {
-    return simplifyStruct(state);
+    return simplifyStruct(state, acc);
   } else if (state instanceof Struct2) {
-    return simplifyStruct2(state);
+    return simplifyStruct2(state, acc);
   } else if (state instanceof Structured) {
-    return simplifyStructured(state);
+    return simplifyStructured(state, acc);
   } else if (state instanceof SSet) {
-    return simplifySet(state);
+    return simplifySet(state, acc);
+  } else if (state instanceof SUnion) {
+    return simplifyUnion(state, acc);
   } else if (typeof state === "object") {
     if (state.constructor !== Object && !Array.isArray(state)) {
       throw new Error("cant simplify non-literal object or array");
     }
     return state;
+  } else {
+    exhaustive(state);
+  }
+}
+
+export function simplifyStructuredKind(
+  state: StructuredKind,
+  acc: SimplificationMetadata
+) {
+  if (state instanceof LinkedPrimitive) {
+    return simplifyPrimitive(state, acc);
+  } else if (state instanceof SArray) {
+    return simplifySimpleArray(state, acc);
+  } else if (state instanceof SSchemaArray) {
+    return simplifySchemaArray(state, acc);
+  } else if (state instanceof Struct) {
+    return simplifyStruct(state, acc);
+  } else if (state instanceof Struct2) {
+    return simplifyStruct2(state, acc);
+  } else if (state instanceof Structured) {
+    return simplifyStructured(state, acc);
+  } else if (state instanceof SSet) {
+    return simplifySet(state, acc);
+  } else if (state instanceof SUnion) {
+    return simplifyUnion(state, acc);
   } else {
     exhaustive(state);
   }

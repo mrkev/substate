@@ -37,6 +37,7 @@ setWindow("s", s);
  * x sarray history
  * x put all history in global state in one object (history.undo/pop/redo/push, etc)
  * - Make isDirty work better with undo (undo to save state makes isDirty = false)
+ * - how to serialize elements contained by multiple parents? serialized format is element map and {_ref} to ids?
  */
 
 export function App() {
@@ -109,15 +110,6 @@ export function App() {
         </button>
         <button
           onClick={() => {
-            recordHistory("add random num", () => {
-              project.randomNumbers.add(Math.random());
-            });
-          }}
-        >
-          add random num
-        </button>
-        <button
-          onClick={() => {
             const serialized = serialize(project);
             console.log("serialized", serialized);
             const constructed = construct(serialized, Project);
@@ -139,26 +131,7 @@ export function App() {
           }}
         >
           <legend>Project</legend>
-          <button
-            onClick={() => {
-              s.history.record("move clip", () => {
-                const track0 = nullthrows(project.tracks.at(0));
-                const track1 = nullthrows(project.tracks.at(1));
-                const clip = nullthrows(track0.clips.at(0));
 
-                clip.timelineStart.set(4);
-                track0.clips.remove(clip);
-                track1.clips.push(clip);
-
-                // works if:
-                // track0.clips.remove(clip);
-                // clip.timelineStart.set(4);
-                // track1.clips.push(clip);
-              });
-            }}
-          >
-            move clip and change time
-          </button>
           <UProject project={project} />
         </fieldset>
         <HistoryStacks />
@@ -169,6 +142,7 @@ export function App() {
 
 function UProject({ project }: { project: Project }) {
   const [tracks] = useContainerWithSetter(project.tracks);
+  const randomNumbers = useContainer(project.randomNumbers);
   const markers = useContainer(project.markers);
   return (
     <div
@@ -179,7 +153,20 @@ function UProject({ project }: { project: Project }) {
       }}
     >
       <div>
-        {markers.map(String).join(",")}
+        Set: {randomNumbers.size}
+        <button
+          title="add random num"
+          onClick={() => {
+            recordHistory("add random num", () => {
+              project.randomNumbers.add(Math.random());
+            });
+          }}
+        >
+          +
+        </button>
+      </div>
+      <div>
+        SArray: {markers.map(String).join(",")}
         <button
           onClick={() => {
             s.history.record("add marker", () => {
@@ -191,6 +178,26 @@ function UProject({ project }: { project: Project }) {
           +
         </button>
       </div>
+      <button
+        onClick={() => {
+          s.history.record("move clip", () => {
+            const track0 = nullthrows(project.tracks.at(0));
+            const track1 = nullthrows(project.tracks.at(1));
+            const clip = nullthrows(track0.clips.at(0));
+
+            clip.timelineStart.set(4);
+            track0.clips.remove(clip);
+            track1.clips.push(clip);
+
+            // works if:
+            // track0.clips.remove(clip);
+            // clip.timelineStart.set(4);
+            // track1.clips.push(clip);
+          });
+        }}
+      >
+        move clip and change time
+      </button>
       {tracks.map((track) => {
         return <TrackA project={project} key={track._id} track={track} />;
       })}

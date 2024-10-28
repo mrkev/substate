@@ -33,7 +33,7 @@ export type SerializedSimpleSet<T> = Readonly<{
   _value: readonly T[];
 }>;
 
-export type NSerialized = {
+export type NSimplified = {
   prim: Readonly<{
     $$: "prim";
     _id: string;
@@ -71,83 +71,91 @@ export type NSerialized = {
     _id: string;
     _value: readonly (Serialized | unknown)[];
   }>;
+  union: Readonly<{
+    $$: "union";
+    _id: string;
+    _value: Serialized;
+  }>;
 };
 
-export type Serialized = NSerialized[keyof NSerialized];
+export type Serialized = NSimplified[keyof NSimplified];
 
 export type S = {
   string: SerializedTypePrimitive<string>;
   number: SerializedTypePrimitive<number>;
   boolean: SerializedTypePrimitive<boolean>;
   null: SerializedTypePrimitive<null>;
-  primitive: NSerialized["prim"];
-  arrSchema: NSerialized["arr-schema"];
-  arr: NSerialized["arr-simple"];
-  struct: NSerialized["struct"];
-  struct2: NSerialized["struct2"];
-  structured: NSerialized["structured"];
-  set: NSerialized["set"];
+  primitive: NSimplified["prim"];
+  arrSchema: NSimplified["arr-schema"];
+  arr: NSimplified["arr-simple"];
+  struct: NSimplified["struct"];
+  struct2: NSimplified["struct2"];
+  structured: NSimplified["structured"];
+  set: NSimplified["set"];
 };
 
 export type ApplySerialization<T extends StructuredKind> =
   T extends LinkedPrimitive<infer U>
     ? SerializedTypePrimitive<U>
     : T extends Struct<any>
-    ? NSerialized["struct"]
+    ? NSimplified["struct"]
     : T extends Struct2<any>
-    ? NSerialized["struct2"]
+    ? NSimplified["struct2"]
     : T extends Structured<any, any>
-    ? NSerialized["structured"]
+    ? NSimplified["structured"]
     : T extends SSchemaArray<any>
-    ? NSerialized["arr-schema"]
+    ? NSimplified["arr-schema"]
     : T extends SArray<infer U>
     ? SerializedSimpleArray<U>
     : T extends SSet<any>
-    ? NSerialized["set"]
+    ? NSimplified["set"]
     : never;
 
 export type ApplyDeserialization<
   S extends Serialized,
   T extends Struct<any> | Struct2<any> | Structured<any, any> = any
-> = S extends NSerialized["prim"]
+> = S extends NSimplified["prim"]
   ? LinkedPrimitive<any>
-  : S extends NSerialized["struct"]
+  : S extends NSimplified["struct"]
   ? Struct<any>
-  : S extends NSerialized["struct2"]
+  : S extends NSimplified["struct2"]
   ? Struct2<any>
-  : S extends NSerialized["structured"]
+  : S extends NSimplified["structured"]
   ? Structured<any, any>
-  : S extends NSerialized["arr-simple"]
+  : S extends NSimplified["arr-simple"]
   ? SArray<any>
-  : S extends NSerialized["arr-schema"]
+  : S extends NSimplified["arr-schema"]
   ? SSchemaArray<T>
-  : S extends NSerialized["set"]
+  : S extends NSimplified["set"]
   ? SSet<T>
   : never;
 
 export type ObjectDeserialization<
   S extends Serialized,
   T extends Struct<any> | Struct2<any> | Structured<any, any> = any
-> = S extends NSerialized["prim"]
+> = S extends NSimplified["prim"]
   ? LinkedPrimitive<any>
-  : S extends NSerialized["struct"]
+  : S extends NSimplified["struct"]
   ? Struct<any>
-  : S extends NSerialized["struct2"]
+  : S extends NSimplified["struct2"]
   ? Struct2<any>
-  : S extends NSerialized["structured"]
+  : S extends NSimplified["structured"]
   ? Structured<any, any>
-  : S extends NSerialized["arr-simple"]
+  : S extends NSimplified["arr-simple"]
   ? T[]
-  : S extends NSerialized["arr-schema"]
+  : S extends NSimplified["arr-schema"]
   ? T[]
-  : S extends NSerialized["set"]
+  : S extends NSimplified["set"]
   ? Set<T>
   : never;
 
 ///////////////////////////////
 
 export function serialize(state: StructuredKind) {
-  return JSON.stringify(simplify(state));
+  const allIds = new Set<string>();
+  const result = JSON.stringify(simplify(state, { allIds }));
+  console.log(allIds);
+  return result;
 }
 
 ///////////////////////////////
@@ -166,10 +174,10 @@ export type StructSchema =
   | ConstructableStructure<any>;
 
 export type NeedsSchema =
-  | NSerialized["struct"]
-  | NSerialized["struct2"]
-  | NSerialized["structured"]
-  | NSerialized["arr-schema"];
+  | NSimplified["struct"]
+  | NSimplified["struct2"]
+  | NSimplified["structured"]
+  | NSimplified["arr-schema"];
 
 export type NeedsSchemaStruct =
   | Extract<Serialized, { $$: "struct" }>
@@ -204,6 +212,6 @@ export function isSeralized(json: unknown): json is Serialized {
 
 export function isSeralizedStructured(
   json: unknown
-): json is NSerialized["structured"] {
+): json is NSimplified["structured"] {
   return isSeralized(json) && json.$$ === "structured";
 }

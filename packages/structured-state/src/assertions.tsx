@@ -4,8 +4,9 @@ import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { LinkedArray } from "./state/LinkedArray";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
-import { SSet } from ".";
+import { SSet, StructuredKind } from ".";
 import { StructSchema } from "./serialization";
+import { SUnion } from "./sunion";
 
 export function assertSPrimitive<T>(
   value: unknown
@@ -63,6 +64,15 @@ export function assertSSet<T>(value: unknown): asserts value is SSet<T> {
   if (!(value instanceof SSet)) {
     console.log("ERR:", value, "to be sset");
     throw new Error("not a SSet"); // assertion error
+  }
+}
+
+export function assertSUnion<T extends StructuredKind>(
+  value: unknown
+): asserts value is SUnion<T> {
+  if (!(value instanceof SUnion)) {
+    console.log("ERR:", value, "to be sunion");
+    throw new Error("not a SUnion"); // assertion error
   }
 }
 

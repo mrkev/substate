@@ -8,6 +8,7 @@ import { Struct } from "./Struct";
 import { exhaustive } from "./assertions";
 import { StructuredKind } from "./StructuredKinds";
 import { CONTAINER_IGNORE_KEYS } from "./state/SubbableContainer";
+import { SUnion } from "./sunion";
 
 function stringifyUnknown(val: unknown) {
   const res = stringify(val, {
@@ -45,6 +46,8 @@ export function debugOut(val: unknown, pad = 0, showUnknowns = true) {
     return debugOutStruct(val, pad, showUnknowns);
   } else if (val instanceof Structured) {
     return debugOutStruct(val, pad, showUnknowns);
+  } else if (val instanceof SUnion) {
+    return debugOutUnion(val, pad, showUnknowns);
   } else if (Array.isArray(val)) {
     return JSON.stringify(val);
   } else {
@@ -54,6 +57,14 @@ export function debugOut(val: unknown, pad = 0, showUnknowns = true) {
       return `(unknown: ${val.constructor.name})`;
     }
   }
+}
+
+export function debugOutUnion(
+  union: SUnion<any>,
+  pad = 0,
+  showUnknowns: boolean
+) {
+  return "union, todo";
 }
 
 export function debugOutStruct(
@@ -143,6 +154,8 @@ export function header(elem: StructuredKind, showContainerId = false) {
       return "Sct2";
     } else if (elem instanceof Structured) {
       return "Strd";
+    } else if (elem instanceof SUnion) {
+      return "uni";
     } else {
       exhaustive(elem);
     }

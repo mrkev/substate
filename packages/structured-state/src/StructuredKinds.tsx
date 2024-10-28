@@ -3,9 +3,11 @@ import { SArray, SSchemaArray } from "./sstate";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
+import { SUnion } from "./sunion";
 
 export type PrimitiveKind = number | string | boolean | null;
 
+// was KnowableObject before
 export type StructuredKind =
   | LinkedPrimitive<any>
   | Struct<any>
@@ -13,7 +15,8 @@ export type StructuredKind =
   | Structured<any, any>
   | SArray<any>
   | SSchemaArray<any>
-  | SSet<any>;
+  | SSet<any>
+  | SUnion<any>;
 
 export function isStructuredKind(val: unknown) {
   return (
@@ -22,6 +25,7 @@ export function isStructuredKind(val: unknown) {
     val instanceof Struct2 ||
     val instanceof Structured ||
     val instanceof SArray ||
-    val instanceof SSchemaArray
+    val instanceof SSchemaArray ||
+    val instanceof SUnion
   );
 }
