@@ -1,4 +1,9 @@
-import { init, replace, S, Structured } from "../../../structured-state/src";
+import {
+  InitFunctions,
+  replace,
+  S,
+  Structured,
+} from "../../../structured-state/src";
 import { time, TimelineT } from "./TimelineT";
 
 type AutoAudioClip = {
@@ -39,7 +44,7 @@ export class AudioClip extends Structured<AutoAudioClip, typeof AudioClip> {
     replace.structured(auto.timelineLength, this.timelineLength);
   }
 
-  static construct(auto: AudioClipRaw): AudioClip {
+  static construct(auto: AudioClipRaw, init: InitFunctions): AudioClip {
     return Structured.create(
       AudioClip,
       init.structured(auto.timelineStart, TimelineT),

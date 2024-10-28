@@ -63,7 +63,7 @@ function simplifySchemaArray(
       if (!isStructuredKind(x)) {
         throw new Error("un-knowable found in schema array");
       } else {
-        return simplify(x, acc);
+        return simplifyStructuredKind(x, acc);
       }
     }),
     _id: obj._id,
@@ -222,22 +222,17 @@ export function simplify(
     return state;
   } else if (typeof state === "function") {
     throw new Error("cant simplify function");
-  } else if (state instanceof LinkedPrimitive) {
-    return simplifyPrimitive(state, acc);
-  } else if (state instanceof SArray) {
-    return simplifySimpleArray(state, acc);
-  } else if (state instanceof SSchemaArray) {
-    return simplifySchemaArray(state, acc);
-  } else if (state instanceof Struct) {
-    return simplifyStruct(state, acc);
-  } else if (state instanceof Struct2) {
-    return simplifyStruct2(state, acc);
-  } else if (state instanceof Structured) {
-    return simplifyStructured(state, acc);
-  } else if (state instanceof SSet) {
-    return simplifySet(state, acc);
-  } else if (state instanceof SUnion) {
-    return simplifyUnion(state, acc);
+  } else if (
+    state instanceof LinkedPrimitive ||
+    state instanceof SArray ||
+    state instanceof SSchemaArray ||
+    state instanceof Struct ||
+    state instanceof Struct2 ||
+    state instanceof Structured ||
+    state instanceof SSet ||
+    state instanceof SUnion
+  ) {
+    return simplifyStructuredKind(state, acc);
   } else if (typeof state === "object") {
     if (state.constructor !== Object && !Array.isArray(state)) {
       throw new Error("cant simplify non-literal object or array");

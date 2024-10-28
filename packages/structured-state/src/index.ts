@@ -51,7 +51,8 @@ export type { DirtyState } from "./DirtyObserver";
 
 // export { useSubscribeToSubbableMutationHashable } from "./state/MutationHashable";
 
-export { init } from "./serialization.initialize";
+// export { init } from "./serialization.initialize";
+export type { InitFunctions } from "./serialization.initialize";
 export type { PrimitiveKind, StructuredKind } from "./StructuredKinds";
 
 export const replace = {

@@ -1,6 +1,6 @@
 import {
   arrayOf,
-  init,
+  InitFunctions,
   JSONOfAuto,
   replace,
   SSchemaArray,
@@ -43,7 +43,10 @@ export class AudioTrack extends Structured<AutoAudioTrack, typeof AudioTrack> {
     );
   }
 
-  static construct(auto: JSONOfAuto<AutoAudioTrack>): AudioTrack {
+  static construct(
+    auto: JSONOfAuto<AutoAudioTrack>,
+    init: InitFunctions
+  ): AudioTrack {
     // const { name, clips } = json;
     // this.name = string(name);
     // this.clips = arrayOf([AudioClip], clips);

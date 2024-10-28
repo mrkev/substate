@@ -5,6 +5,7 @@ import {
   NeedsSchema,
   Schema,
 } from "./serialization";
+import { InitFunctions } from "./serialization.initialize";
 import { getGlobalState, saveForHistory } from "./sstate.history";
 import type { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
 import { Subbable } from "./state/Subbable";
@@ -31,7 +32,7 @@ export interface ConstructableStructure<
   // ,Sub extends ConstructableStructure<any>
 > {
   new (...args: never[]): Structured<SAuto, any>;
-  construct(auto: SAuto): Structured<SAuto, any>;
+  construct(auto: SAuto, init: InitFunctions): Structured<SAuto, any>;
 }
 
 export type JSONOfAuto<

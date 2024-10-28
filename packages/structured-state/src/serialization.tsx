@@ -1,4 +1,4 @@
-import { initialize } from "./serialization.initialize";
+import { InitializationMetadata, initialize } from "./serialization.initialize";
 import { simplify } from "./serialization.simplify";
 import { SArray, SSchemaArray, SState } from "./sstate";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
@@ -15,39 +15,31 @@ export type SerializedDescriptor = Record<
   Serialized | string | number | boolean | null
 >;
 
-export type SerializedTypePrimitive<T> = Readonly<{
+export type SimplifiedTypePrimitive<T> = Readonly<{
   $$: "prim";
   _id: string;
   _value: T;
 }>;
 
-export type SerializedSimpleArray<T> = Readonly<{
+export type SimplifiedSimpleArray<T> = Readonly<{
   $$: "arr-simple";
   _id: string;
   _value: readonly T[];
 }>;
 
-export type SerializedSimpleSet<T> = Readonly<{
-  $$: "arr-simple";
+export type SimplifiedSimpleSet<T> = Readonly<{
+  $$: "set";
   _id: string;
   _value: readonly T[];
 }>;
 
 export type NSimplified = {
-  prim: Readonly<{
-    $$: "prim";
-    _id: string;
-    _value: unknown;
-  }>;
+  prim: SimplifiedTypePrimitive<unknown>;
+  "arr-simple": SimplifiedSimpleArray<unknown>;
   "arr-schema": Readonly<{
     $$: "arr-schema";
     _id: string;
-    _value: readonly (Serialized | unknown)[];
-  }>;
-  "arr-simple": Readonly<{
-    $$: "arr-simple";
-    _id: string;
-    _value: readonly unknown[];
+    _value: readonly Serialized[];
   }>;
   struct: Readonly<{
     $$: "struct";
@@ -81,10 +73,10 @@ export type NSimplified = {
 export type Serialized = NSimplified[keyof NSimplified];
 
 export type S = {
-  string: SerializedTypePrimitive<string>;
-  number: SerializedTypePrimitive<number>;
-  boolean: SerializedTypePrimitive<boolean>;
-  null: SerializedTypePrimitive<null>;
+  string: SimplifiedTypePrimitive<string>;
+  number: SimplifiedTypePrimitive<number>;
+  boolean: SimplifiedTypePrimitive<boolean>;
+  null: SimplifiedTypePrimitive<null>;
   primitive: NSimplified["prim"];
   arrSchema: NSimplified["arr-schema"];
   arr: NSimplified["arr-simple"];
@@ -96,7 +88,7 @@ export type S = {
 
 export type ApplySerialization<T extends StructuredKind> =
   T extends LinkedPrimitive<infer U>
-    ? SerializedTypePrimitive<U>
+    ? SimplifiedTypePrimitive<U>
     : T extends Struct<any>
     ? NSimplified["struct"]
     : T extends Struct2<any>
@@ -106,7 +98,7 @@ export type ApplySerialization<T extends StructuredKind> =
     : T extends SSchemaArray<any>
     ? NSimplified["arr-schema"]
     : T extends SArray<infer U>
-    ? SerializedSimpleArray<U>
+    ? SimplifiedSimpleArray<U>
     : T extends SSet<any>
     ? NSimplified["set"]
     : never;
@@ -193,7 +185,10 @@ export function construct(
 ) {
   try {
     const json = JSON.parse(str);
-    return initialize(json, spec as any);
+    const metadata = new InitializationMetadata();
+    const result = initialize(json, spec as any, metadata);
+    console.log("constructed", metadata.initializedObjects);
+    return result;
   } catch (e) {
     console.log("issue with", JSON.parse(str));
     throw e;

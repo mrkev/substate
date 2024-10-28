@@ -1,7 +1,7 @@
 import {
   array,
   arrayOf,
-  init,
+  InitFunctions,
   JSONOfAuto,
   replace,
   SArray,
@@ -57,7 +57,7 @@ export class Project extends Structured<AutoProject, typeof Project> {
     replace.array(json.markers, this.markers);
   }
 
-  static construct(auto: JSONOfAuto<AutoProject>) {
+  static construct(auto: JSONOfAuto<AutoProject>, init: InitFunctions) {
     // TODO: asnync constructors
     return Structured.create(
       Project,

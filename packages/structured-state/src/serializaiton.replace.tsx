@@ -15,8 +15,8 @@ import {
   isSeralizedStructured,
   NSimplified,
   Serialized,
-  SerializedSimpleArray,
-  SerializedTypePrimitive,
+  SimplifiedSimpleArray,
+  SimplifiedTypePrimitive,
 } from "./serialization";
 import { initialize } from "./serialization.initialize";
 import { SArray, SSchemaArray } from "./sstate";
@@ -78,7 +78,7 @@ export function replace(json: any, obj: StructuredKind) {
 }
 
 export function replacePrimitive<T>(
-  json: SerializedTypePrimitive<T>,
+  json: SimplifiedTypePrimitive<T>,
   obj: LinkedPrimitive<T>
 ) {
   obj.replace(json._value);
@@ -138,7 +138,7 @@ export function replaceSchemaArray<
       if (arrIndex.has(id)) {
         continue;
       }
-      const initialized = initialize(elem, arr._schema[0]);
+      const initialized = initialize(elem, arr._schema[0], null);
       raw.push(initialized as any); // todo: as any
     }
 
@@ -167,7 +167,7 @@ export function replaceSchemaArray<
 }
 
 export function replaceSimpleArray<T>(
-  json: SerializedSimpleArray<T>,
+  json: SimplifiedSimpleArray<T>,
   arr: SArray<T>
 ) {
   arr._replace((raw) => {
@@ -258,7 +258,7 @@ export function replaceSSet(
 export function replaceSUnion(json: NSimplified["union"], obj: SUnion<any>) {
   // todo: Schema. have user deifne a replace function so they can pick the right
   // schema to use when initializing
-  const value = initialize(json._value, []);
+  const value = initialize(json._value, [], null);
   obj.replace(value);
   SubbableContainer._notifyChange(obj, obj);
 }

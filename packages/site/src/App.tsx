@@ -31,7 +31,9 @@ setWindow("s", s);
  * TODO:
  * x Redo
  * x Dirty marker
- * - built-in clone for structs. In theory easy, since I already serialize/decerialize and that captures all the props I care about
+ * - serialization when two containers point to the same object
+ * x built-in clone for structs. In theory easy, since I already serialize/decerialize and that captures all the props I care about
+ *    // not doing this, to allow users control over clone, for example, to allow some non-structured state to be shared
  * - Multiple types in array?
  * x Smarter array history?
  * x sarray history
