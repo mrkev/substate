@@ -97,12 +97,11 @@ export abstract class Structured<
 }
 
 export function initStructured(structured: Structured<any, any>) {
-  const self = structured;
   // todo, make this more efficient than iterating throuhg all my props?
   // maybe with a close trick to see what gets initializded between Struct.super() and _init?
   // or something along those lines?
   for (const key in structured) {
-    const child = (self as any)[key];
+    const child = (structured as any)[key];
     SubbableContainer._contain(structured, child);
   }
   const globalState = getGlobalState();

@@ -36,7 +36,8 @@ export class Project extends Structured<AutoProject, typeof Project> {
     // this.tracks = arrayOf([MidiTrack], clips);
     // this.effects = array<Effect>();
     // [["foo", 3]] // why does this print as unknown when empty?
-    // TODO: it's bc it's unintialized
+    // NOTE: we don't initialize this, it's always a new set
+    // TODO: it's bc it's unintialized.
     this.randomNumbers = set();
   }
 

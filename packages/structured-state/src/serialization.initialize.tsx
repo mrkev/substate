@@ -16,6 +16,7 @@ import {
   NSimplified,
   NeedsSchema,
   ObjectDeserialization,
+  Serialized,
   SimplifiedSimpleArray,
   SimplifiedSimpleSet,
   SimplifiedTypePrimitive,
@@ -27,10 +28,29 @@ import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SSet } from "./state/LinkedSet";
 import { SUnion } from "./sunion";
 
+function find(
+  json: Serialized,
+  metadata: InitializationMetadata | null
+): StructuredKind | null {
+  const found = metadata?.initializedObjects.get(json._id);
+  if (found == null) {
+    return null;
+  }
+
+  // todo: verify json kind matches returned value, or ask for an expected kind class here?
+  return found;
+}
+
 function initializePrimitive<T>(
   json: SimplifiedTypePrimitive<T>,
   metadata: InitializationMetadata | null
-) {
+): SPrimitive<T> {
+  // TODO: optimize sieralized array with "references"?
+  const found = find(json, metadata);
+  if (found != null) {
+    return found as any;
+  }
+
   const result = new LinkedPrimitive(json._value, json._id);
   metadata?.initializedObjects.set(result._id, result);
   return result;
@@ -41,6 +61,11 @@ function initializeSchemaArray(
   spec: StructSchema[],
   metadata: InitializationMetadata | null
 ): SSchemaArray<any> {
+  const found = find(json, metadata);
+  if (found != null) {
+    return found as any;
+  }
+
   const initialized = json._value.map((x) => {
     // TODO: find right spec
     return initialize(x, spec[0], metadata);
@@ -56,6 +81,11 @@ function initializeSimpleArray<T>(
   json: SimplifiedSimpleArray<T>,
   metadata: InitializationMetadata | null
 ): SArray<T> {
+  const found = find(json, metadata);
+  if (found != null) {
+    return found as any;
+  }
+
   const result = new SArray<T>(json._value as any, json._id);
   metadata?.initializedObjects.set(result._id, result);
   return result;
@@ -106,23 +136,26 @@ function initializeStruct(
   spec: typeof Struct,
   metadata: InitializationMetadata | null
 ) {
-  const { _id, _value } = json;
+  const found = find(json, metadata);
+  if (found != null) {
+    return found as any;
+  }
 
   // offer a way to override initialization
   if ("_construct" in spec && typeof spec._construct === "function") {
-    const instance = spec._construct(_value);
-    instance._id = _id;
-    // console.log("_constructed", instance, "from", _value);
-    instance._initConstructed(Object.keys(_value));
+    const instance = spec._construct(json._value);
+    instance._id = json._id;
+    // console.log("_constructed", instance, "from", json._value);
+    instance._initConstructed(Object.keys(json._value));
     return instance;
   }
 
   const initialized: Record<any, any> = {};
-  for (const key of Object.keys(_value)) {
-    const value = _value[key];
+  for (const key of Object.keys(json._value)) {
+    const value = json._value[key];
     if (isSeralized(value)) {
       initialized[key] = initialize(
-        _value[key],
+        json._value[key],
         [initialized[key]?.schema],
         metadata
       );
@@ -131,14 +164,14 @@ function initializeStruct(
     }
   }
 
-  const instance = new (spec as any)(_value) as any;
-  instance._id = _id;
+  const instance = new (spec as any)(json._value) as any;
+  instance._id = json._id;
 
-  for (const key of Object.keys(_value)) {
-    const value = _value[key];
+  for (const key of Object.keys(json._value)) {
+    const value = json._value[key];
     if (isSeralized(value)) {
       instance[key] = initialize(
-        _value[key],
+        json._value[key],
         [instance[key]?.schema],
         metadata
       );
@@ -147,7 +180,7 @@ function initializeStruct(
     }
   }
 
-  instance._initConstructed(Object.keys(_value));
+  instance._initConstructed(Object.keys(json._value));
   metadata?.initializedObjects.set(instance._id, instance);
   return instance;
 }
@@ -157,6 +190,11 @@ function initializeStruct2(
   spec: typeof Struct2,
   metadata: InitializationMetadata | null
 ) {
+  const found = find(json, metadata);
+  if (found != null) {
+    return found as any;
+  }
+
   const { _id, _value } = json;
   const instance = new (spec as any)(..._value);
   instance._id = _id;
@@ -170,6 +208,11 @@ function initializeStructured<Spec extends ConstructableStructure<any>>(
   spec: Spec,
   metadata: InitializationMetadata | null
 ): InstanceType<Spec> {
+  const found = find(json, metadata);
+  if (found != null) {
+    return found as any;
+  }
+
   const instance = spec.construct(
     json._autoValue,
     metadata ? metadata.init : InitializationMetadata.plainInit
@@ -186,6 +229,11 @@ function initializeSet<T>(
   spec: StructSchema,
   metadata: InitializationMetadata | null
 ): SSet<T> {
+  const found = find(json, metadata);
+  if (found != null) {
+    return found as any;
+  }
+
   const initialized = json._value.map((x: any) => {
     // TODO: find right spec
     return initialize(x, spec, metadata);
@@ -201,6 +249,11 @@ function initializeSUnion(
   spec: StructSchema,
   metadata: InitializationMetadata | null
 ): SUnion<StructuredKind> {
+  const found = find(json, metadata);
+  if (found != null) {
+    return found as any;
+  }
+
   const initialized = initialize(json._value, spec, metadata);
   const result = new SUnion(initialized, json._id);
   metadata?.initializedObjects.set(result._id, result);
@@ -311,7 +364,7 @@ export class InitializationMetadata {
 
   /** used for replace */
   static plainInit: InitFunctions = {
-    string: (json: SimplifiedTypePrimitive<string>) =>
+    string: (json: SimplifiedTypePrimitive<string>): SString =>
       initializePrimitive<string>(json, null),
     number: (json: SimplifiedTypePrimitive<number>) =>
       initializePrimitive<number>(json, null),

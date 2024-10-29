@@ -49,7 +49,7 @@ export {
 export { DirtyObserver, useDirtyTracker } from "./DirtyObserver";
 export type { DirtyState } from "./DirtyObserver";
 
-// export { useSubscribeToSubbableMutationHashable } from "./state/MutationHashable";
+export { useSubscribeToSubbableMutationHashable } from "./state/MutationHashable";
 
 // export { init } from "./serialization.initialize";
 export type { InitFunctions } from "./serialization.initialize";

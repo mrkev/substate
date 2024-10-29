@@ -145,7 +145,8 @@ export type ObjectDeserialization<
 
 export function serialize(state: StructuredKind) {
   const allIds = new Set<string>();
-  const result = JSON.stringify(simplify(state, { allIds }));
+  const simplified = simplify(state, { allIds });
+  const result = JSON.stringify(simplified);
   console.log(allIds);
   return result;
 }

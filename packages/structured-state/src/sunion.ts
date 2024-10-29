@@ -1,14 +1,7 @@
 import { nanoid } from "nanoid";
-import {
-  getGlobalState,
-  number,
-  SNumber,
-  SString,
-  string,
-  StructuredKind,
-} from ".";
+import { getGlobalState, StructuredKind } from ".";
 import { saveForHistory } from "./sstate.history";
-import { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
+import { StateChangeHandler } from "./state/LinkedPrimitive";
 import { notify, Subbable } from "./state/Subbable";
 import { SubbableContainer, UpdateToken } from "./state/SubbableContainer";
 

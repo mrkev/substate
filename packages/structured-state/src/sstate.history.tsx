@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { nullthrows } from "./nullthrows";
+import { nullthrows, setWindow } from "./nullthrows";
 import { replace } from "./serializaiton.replace";
 import { serialize } from "./serialization";
 import { LinkedArray } from "./state/LinkedArray";
@@ -19,7 +19,7 @@ class GlobalState {
   readonly history = LinkedArray.create<HistoryEntry>();
   readonly redoStack = LinkedArray.create<HistoryEntry>();
   constructor() {
-    (window as any).globalState = this;
+    setWindow("globalState", this);
   }
 }
 

@@ -9,6 +9,7 @@ import {
   useContainerWithSetter,
   useDirtyTracker,
 } from "../../structured-state/src/index";
+import { setWindow } from "../../structured-state/src/nullthrows";
 import {
   HistoryEntry,
   getGlobalState,
@@ -23,7 +24,6 @@ import { Note } from "./structs/MidiTrack";
 import { Project } from "./structs/Project";
 import { TrackA } from "./ui/TrackA";
 import { nullthrows } from "./util";
-import { setWindow } from "../../structured-state/src/nullthrows";
 
 setWindow("s", s);
 
@@ -32,9 +32,17 @@ setWindow("s", s);
  * x Redo
  * x Dirty marker
  * - serialization when two containers point to the same object
+ * - SPrimitive only holds non-structs. SUnion only holds structs. SPrimitive requests a serialization function, and SString, SNumber, etc are automatic
+ *  - we need this cause I can put anything in sprimitive rn, and it causes issues when serializing.
  * x built-in clone for structs. In theory easy, since I already serialize/decerialize and that captures all the props I care about
  *    // not doing this, to allow users control over clone, for example, to allow some non-structured state to be shared
  * - Multiple types in array?
+ * - faster array history
+ *  - history for arrays just saves the whole array, which can get very slow, especially on wide or deep structures.
+ *    > we want to only record delete/add operations, and only save the items that were deleted, or record what items were added.
+ *    > note that edits will be handled at the object-level when they happen. we only want to record array-level changes, so delete/add should be enough.
+ *    > we can get cheeky and support "reposition", for .sort too.
+ * - async history, should be doable. if recordHistory gets called within another recordHistory, just defer its execution until the first one is done?
  * x Smarter array history?
  * x sarray history
  * x put all history in global state in one object (history.undo/pop/redo/push, etc)
