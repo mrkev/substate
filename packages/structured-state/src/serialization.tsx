@@ -1,27 +1,16 @@
 import { InitializationMetadata, initialize } from "./serialization.initialize";
-import {
-  isSimplePackage,
-  SimplificationMetadata,
-  simplifyAndPackage,
-} from "./serialization.simplify";
+import { isSimplePackage, simplifyAndPackage } from "./serialization.simplify";
 import { SArray, SSchemaArray, SState } from "./sstate";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SSet } from "./state/LinkedSet";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
 import { ConstructableStructure, Structured } from "./Structured";
-import { StructuredKind } from "./StructuredKinds";
-
-// TODO: map
-
-type Primitive = string | number | boolean | null;
+import { PrimitiveKind, StructuredKind } from "./StructuredKinds";
 
 export type Simplified = NSimplified[keyof NSimplified];
 
-export type SimplifiedDescriptor = Record<
-  string,
-  Simplified | string | number | boolean | null
->;
+export type SimplifiedDescriptor = Record<string, Simplified | PrimitiveKind>;
 
 export type SimplifiedTypePrimitive<T> = Readonly<{
   $$: "prim";
@@ -35,20 +24,42 @@ export type SimplifiedSimpleArray<T> = Readonly<{
   _value: readonly T[];
 }>;
 
+export type SimplifiedSchemaArray<T extends Simplified> = Readonly<{
+  $$: "arr-schema";
+  _id: string;
+  _value: readonly T[];
+}>;
+
 export type SimplifiedSimpleSet<T> = Readonly<{
-  $$: "set";
+  $$: "set-simple";
+  _id: string;
+  _value: readonly T[];
+}>;
+
+export type SimplifiedSchemaSet<T> = Readonly<{
+  $$: "set-schema";
   _id: string;
   _value: readonly T[];
 }>;
 
 export type NSimplified = {
   prim: SimplifiedTypePrimitive<unknown>;
+
+  "set-simple": SimplifiedSimpleSet<unknown>;
   "arr-simple": SimplifiedSimpleArray<unknown>;
+
   "arr-schema": Readonly<{
     $$: "arr-schema";
     _id: string;
     _value: readonly Simplified[];
   }>;
+
+  "set-schema": Readonly<{
+    $$: "set-schema";
+    _id: string;
+    _value: readonly Simplified[];
+  }>;
+
   struct: Readonly<{
     $$: "struct";
     _id: string;
@@ -66,17 +77,15 @@ export type NSimplified = {
     _id: string;
     _value: SimplifiedDescriptor;
   }>;
-  set: Readonly<{
-    $$: "set";
-    _id: string;
-    _value: readonly (Simplified | unknown)[];
-  }>;
+
+  // todo
   union: Readonly<{
     $$: "union";
     _id: string;
     _value: Simplified;
   }>;
-  // reference: Readonly<{ $$: "ref"; _to: string }>;
+  // todo
+  reference: Readonly<{ $$: "ref"; _id: string }>;
 };
 
 export type S = {
@@ -90,7 +99,7 @@ export type S = {
   struct: NSimplified["struct"];
   struct2: NSimplified["struct2"];
   structured: NSimplified["structured"];
-  set: NSimplified["set"];
+  set: NSimplified["set-simple"];
 };
 
 export type ApplySerialization<T extends StructuredKind> =
@@ -107,7 +116,7 @@ export type ApplySerialization<T extends StructuredKind> =
     : T extends SArray<infer U>
     ? SimplifiedSimpleArray<U>
     : T extends SSet<any>
-    ? NSimplified["set"]
+    ? NSimplified["set-simple"]
     : never;
 
 export type ApplyDeserialization<
@@ -125,7 +134,7 @@ export type ApplyDeserialization<
   ? SArray<any>
   : S extends NSimplified["arr-schema"]
   ? SSchemaArray<T>
-  : S extends NSimplified["set"]
+  : S extends NSimplified["set-simple"]
   ? SSet<T>
   : never;
 
@@ -144,7 +153,7 @@ export type ObjectDeserialization<
   ? T[]
   : S extends NSimplified["arr-schema"]
   ? T[]
-  : S extends NSimplified["set"]
+  : S extends NSimplified["set-simple"]
   ? Set<T>
   : never;
 
@@ -177,7 +186,8 @@ export type NeedsSchema =
   | NSimplified["struct"]
   | NSimplified["struct2"]
   | NSimplified["structured"]
-  | NSimplified["arr-schema"];
+  | NSimplified["arr-schema"]
+  | NSimplified["set-schema"];
 
 export type NeedsSchemaStruct =
   | Extract<Simplified, { $$: "struct" }>
@@ -193,11 +203,11 @@ export function construct(
 ) {
   try {
     const json = JSON.parse(str);
-    const metadata = new InitializationMetadata();
     if (!isSimplePackage(json)) {
       throw new Error("not a simple package");
     }
 
+    const metadata = new InitializationMetadata(json);
     const result = initialize(json.simplified, spec as any, metadata);
     console.log("constructed", metadata.initializedObjects);
     return result;

@@ -55,9 +55,14 @@ export class SUnion<S extends StructuredKind> implements SubbableContainer {
   }
 }
 
-// export function union<S extends StructuredKind>(value: S) {
-//   return SUnion.of(value);
-// }
+export function union<S extends StructuredKind>(value: S) {
+  return SUnion.of(value);
+}
+
+type Constructor<Name extends string, T extends unknown> = {
+  _name: string;
+  _value: T;
+};
 
 // const a = union<SString | SNumber>(string("foo"));
 // a.set(number(2));

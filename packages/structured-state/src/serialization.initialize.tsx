@@ -5,7 +5,6 @@ import { ConstructableStructure, initStructured } from "./Structured";
 import { StructuredKind } from "./StructuredKinds";
 import {
   assertArray,
-  assertConstructableObj,
   assertConstructableStruct,
   assertConstructableStruct2,
   assertConstructableStructured,
@@ -14,15 +13,15 @@ import {
 } from "./assertions";
 import {
   NSimplified,
-  NeedsSchema,
-  ObjectDeserialization,
   Simplified,
+  SimplifiedSchemaSet,
   SimplifiedSimpleArray,
   SimplifiedSimpleSet,
   SimplifiedTypePrimitive,
   StructSchema,
   isSimplified,
 } from "./serialization";
+import { SimplePackage } from "./serialization.simplify";
 import { SArray, SSchemaArray } from "./sstate";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SSet } from "./state/LinkedSet";
@@ -32,6 +31,7 @@ function find(
   json: Simplified,
   metadata: InitializationMetadata | null
 ): StructuredKind | null {
+  console.log("looking for", json._id, json.$$);
   const found = metadata?.initializedObjects.get(json._id);
   if (found == null) {
     return null;
@@ -92,44 +92,44 @@ function initializeSimpleArray<T>(
 }
 // helpers for structured
 
-export function deserializeWithSchema<S extends NeedsSchema>(
-  json: NeedsSchema,
-  spec: StructSchema,
-  metadata: InitializationMetadata | null
-): ObjectDeserialization<S> | ObjectDeserialization<S>[] {
-  switch (json.$$) {
-    case "struct": {
-      assertNotArray(spec);
-      assertConstructableStruct(spec);
-      return initializeStruct(json, spec, metadata);
-    }
-    case "struct2": {
-      assertNotArray(spec);
-      assertConstructableStruct2(spec);
-      return initializeStruct2(json, spec, metadata);
-    }
-    case "structured": {
-      assertNotArray(spec);
-      assertConstructableStructured(spec);
-      return initializeStructured(
-        json,
-        spec as any,
-        metadata
-      ) as ObjectDeserialization<S>; // todo
-    }
-    case "arr-schema": {
-      assertConstructableObj(spec);
-      const initialized = json._value.map((x: any) => {
-        return initialize(x, spec, metadata);
-      });
+// export function deserializeWithSchema<S extends NeedsSchema>(
+//   json: NeedsSchema,
+//   spec: StructSchema,
+//   metadata: InitializationMetadata | null
+// ): ObjectDeserialization<S> | ObjectDeserialization<S>[] {
+//   switch (json.$$) {
+//     case "struct": {
+//       assertNotArray(spec);
+//       assertConstructableStruct(spec);
+//       return initializeStruct(json, spec, metadata);
+//     }
+//     case "struct2": {
+//       assertNotArray(spec);
+//       assertConstructableStruct2(spec);
+//       return initializeStruct2(json, spec, metadata);
+//     }
+//     case "structured": {
+//       assertNotArray(spec);
+//       assertConstructableStructured(spec);
+//       return initializeStructured(
+//         json,
+//         spec as any,
+//         metadata
+//       ) as ObjectDeserialization<S>; // todo
+//     }
+//     case "arr-schema": {
+//       assertConstructableObj(spec);
+//       const initialized = json._value.map((x: any) => {
+//         return initialize(x, spec, metadata);
+//       });
 
-      return initialized as ObjectDeserialization<S>[]; // todo
-    }
+//       return initialized as ObjectDeserialization<S>[]; // todo
+//     }
 
-    default:
-      exhaustive(json);
-  }
-}
+//     default:
+//       exhaustive(json);
+//   }
+// }
 
 function initializeStruct(
   json: NSimplified["struct"],
@@ -224,6 +224,26 @@ function initializeStructured<Spec extends ConstructableStructure<any>>(
   return instance as any; // todo
 }
 
+function initializeSchemaSet<T extends Simplified>(
+  json: SimplifiedSchemaSet<T>,
+  spec: StructSchema,
+  metadata: InitializationMetadata | null
+): SSet<T> {
+  const found = find(json, metadata);
+  if (found != null) {
+    return found as any;
+  }
+
+  const initialized = json._value.map((x) => {
+    return initialize(x, spec, metadata);
+  });
+
+  const set = new Set<T>(initialized as any);
+  const result = SSet.create<T>(set, json._id);
+  metadata?.initializedObjects.set(result._id, result);
+  return result;
+}
+
 function initializeSet<T>(
   json: SimplifiedSimpleSet<T>,
   spec: StructSchema,
@@ -239,7 +259,8 @@ function initializeSet<T>(
     return initialize(x, spec, metadata);
   });
 
-  const result = SSet.create<T>(initialized as any, json._id);
+  const set = new Set<T>(initialized as any);
+  const result = SSet.create<T>(set, json._id);
   metadata?.initializedObjects.set(result._id, result);
   return result;
 }
@@ -297,13 +318,22 @@ export function initialize(
       assertConstructableStructured(spec);
       return initializeStructured(json, spec as any, metadata);
     }
-    case "set": {
+    case "set-simple": {
       assertNotArray(spec);
       return initializeSet(json, spec, metadata) as any;
+    }
+    case "set-schema": {
+      assertNotArray(spec);
+      return initializeSchemaSet(json, spec, metadata) as any;
     }
     case "union": {
       assertNotArray(spec);
       return initializeSUnion(json, spec, metadata);
+    }
+    case "ref": {
+      throw new Error("NOT IMPLEMENTED, ref");
+      // assertNotArray(spec);
+      // return initializeSUnion(json, spec, metadata);
     }
     default:
       exhaustive(json, "invalid $$ type");
@@ -331,6 +361,11 @@ export type InitFunctions = Readonly<{
 }>;
 
 export class InitializationMetadata {
+  readonly nodes: SimplePackage["nodes"];
+  constructor(pkg: SimplePackage) {
+    this.nodes = pkg.nodes;
+  }
+
   readonly initializedObjects = new Map<string, StructuredKind>();
 
   /** `this` on second argument to avoid double-initializing the same elements */

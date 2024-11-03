@@ -46,6 +46,7 @@ setWindow("s", s);
  * x put all history in global state in one object (history.undo/pop/redo/push, etc)
  * - Make isDirty work better with undo (undo to save state makes isDirty = false)
  * - how to serialize elements contained by multiple parents? serialized format is element map and {_ref} to ids?
+ * - map serialization, history
  */
 
 export function App() {

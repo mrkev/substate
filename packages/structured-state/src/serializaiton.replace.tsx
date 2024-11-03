@@ -31,7 +31,7 @@ import { Structured } from "./Structured";
 import { StructuredKind } from "./StructuredKinds";
 import { SUnion } from "./sunion";
 
-export function replacePackage(json: unknown, obj: StructuredKind) {
+export function replacePackage(json: unknown, obj: StructuredKind): void {
   if (!isSimplePackage(json)) {
     throw new Error("not a simple package");
   }
@@ -66,13 +66,20 @@ function replace(json: Simplified, obj: StructuredKind, acc: ReplaceMetadata) {
         assertStructured(obj);
         return replaceStructured(json, obj, acc);
       }
-      case "set": {
+      case "set-simple": {
         assertSSet(obj);
         return replaceSSet(json, obj);
+      }
+      case "set-schema": {
+        assertSSet(obj);
+        return replaceSchemaSet(json, obj);
       }
       case "union": {
         assertSUnion(obj);
         return replaceSUnion(json, obj);
+      }
+      case "ref": {
+        throw new Error("NOT IMPLEMENTED, ref");
       }
       default:
         exhaustive(json, "invalid $$ type");
@@ -226,7 +233,14 @@ export function replaceStructured(
   SubbableContainer._notifyChange(obj, obj);
 }
 
-export function replaceSSet(json: NSimplified["set"], set: SSet<any>) {
+export function replaceSchemaSet(
+  json: NSimplified["set-schema"],
+  set: SSet<any>
+) {
+  throw new Error("UNIMPLEMENETD");
+}
+
+export function replaceSSet(json: NSimplified["set-simple"], set: SSet<any>) {
   // TODO: can a set contain structured objects? like an array? do I need simple set and schema set?
   throw new Error("NOT IMPLEMENTED");
 
@@ -275,8 +289,8 @@ export class ReplaceMetadata {
       arr: SSchemaArray<T>
     ) => replaceSchemaArray(json, arr, this),
     array: replaceSimpleArray,
-    // struct: initializeStruct,
-    // struct2: initializeStruct2,
+    struct: replaceStruct,
+    struct2: replaceStruct2,
     structured: (json: NSimplified["structured"], obj: Structured<any, any>) =>
       replaceStructured(json, obj, this),
     set: replaceSSet,
@@ -309,8 +323,8 @@ export type ReplaceFunctions = Readonly<{
     arr: SSchemaArray<T>
   ) => void;
   array: <T>(json: SimplifiedSimpleArray<T>, arr: SArray<T>) => void;
-  // struct: (json: NSimplified["struct"], obj: Struct<any>) => void;
-  // struct2: (json: NSimplified["struct2"], obj: Struct2<any>) => void;
+  struct: (json: NSimplified["struct"], obj: Struct<any>) => void;
+  struct2: (json: NSimplified["struct2"], obj: Struct2<any>) => void;
   structured: (
     json: NSimplified["structured"],
     obj: Structured<any, any>

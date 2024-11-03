@@ -23,13 +23,15 @@ import { JSONValue } from "./types";
 export class SimplificationMetadata {
   readonly allIds = new Set<string>();
   readonly allObjs = new Map<string, Simplified>();
-  record<T extends Simplified>(obj: StructuredKind, simplified: T) {
+  record<T extends Simplified>(obj: StructuredKind, simplified: T): T {
+    console.log("simplifying", obj._id, simplified.$$);
     if (this.allIds.has(obj._id)) {
       throw new Error("Dubplicate " + obj._id);
     }
     this.allIds.add(obj._id);
     this.allObjs.set(obj._id, simplified);
-    return { $$: "ref", _to: obj._id };
+    // return { $$: "ref", _to: obj._id };
+    return simplified;
   }
 }
 
@@ -41,17 +43,11 @@ function simplifyPrimitive(
     console.warn("multiple containers reference", obj);
   }
 
-  acc.record(obj, {
+  return acc.record(obj, {
     $$: "prim",
     _value: obj.get(),
     _id: obj._id,
   });
-
-  return {
-    $$: "prim",
-    _value: obj.get(),
-    _id: obj._id,
-  };
 }
 
 function simplifySimpleArray(
@@ -61,12 +57,11 @@ function simplifySimpleArray(
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
-  // acc.record(obj);
-  return {
+  return acc.record(obj, {
     $$: "arr-simple",
     _value: obj._getRaw().map((x) => simplify(x, acc)),
     _id: obj._id,
-  };
+  });
 }
 
 function simplifySchemaArray(
@@ -76,8 +71,8 @@ function simplifySchemaArray(
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
-  // acc.record(obj);
-  return {
+
+  return acc.record(obj, {
     $$: "arr-schema",
     _value: obj._getRaw().map((x) => {
       if (!isStructuredKind(x)) {
@@ -87,7 +82,7 @@ function simplifySchemaArray(
       }
     }),
     _id: obj._id,
-  };
+  });
 }
 
 function simplifyStruct(
@@ -97,7 +92,7 @@ function simplifyStruct(
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
-  // acc.record(obj);
+
   // offer a way to override simplification
   if ("_simplify" in obj && typeof obj._simplify === "function") {
     return {
@@ -120,11 +115,11 @@ function simplifyStruct(
     result[key] = simplify(val as any, acc);
   }
 
-  return {
+  return acc.record(obj, {
     $$: "struct",
     _id: obj._id, // reduntant for typescript
     _value: result,
-  };
+  });
 }
 
 function simplifyStruct2(
@@ -134,12 +129,12 @@ function simplifyStruct2(
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
-  // acc.record(obj);
-  return {
+
+  return acc.record(obj, {
     $$: "struct2",
     _id: obj._id,
     _value: obj.serialize(),
-  };
+  });
 }
 
 function autoSimplify(
@@ -185,33 +180,32 @@ export function simplifyStructured(
   obj: Structured<any, any>,
   acc: SimplificationMetadata
 ): NSimplified["structured"] {
-  // console.log("simplifyStructured", autoSimplify(obj.autoSimplify()));
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
-  // acc.record(obj);
-  return {
+
+  return acc.record(obj, {
     $$: "structured",
     _id: obj._id,
     _value: autoSimplify(obj.autoSimplify(), acc),
-  };
+  });
 }
 
 function simplifySet(
   obj: SSet<any>,
   acc: SimplificationMetadata
-): NSimplified["set"] {
+): NSimplified["set-simple"] {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
-  // acc.record(obj);
-  return {
-    $$: "set",
+
+  return acc.record(obj, {
+    $$: "set-simple",
     _value: Array.from(obj._getRaw()).map((x) => {
       return simplify(x, acc);
     }),
     _id: obj._id,
-  };
+  });
 }
 
 function simplifyUnion(
@@ -221,17 +215,17 @@ function simplifyUnion(
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
-  // acc.record(obj);
-  return {
+
+  return acc.record(obj, {
     $$: "union",
     _value: simplifyStructuredKind(obj, acc),
     _id: obj._id,
-  };
+  });
 }
 
 export type SimplePackage = {
   nodes: Record<string, Simplified>;
-  root: string;
+  root: NSimplified["reference"];
   simplified: Simplified;
 };
 
@@ -253,7 +247,7 @@ export function simplifyAndPackage(state: StructuredKind): SimplePackage {
   const simplified = simplifyStructuredKind(state, acc);
   return {
     nodes: Object.fromEntries(acc.allObjs.entries()),
-    root: state._id,
+    root: { $$: "ref", _id: state._id },
     simplified,
   };
 }
