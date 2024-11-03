@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid";
+import { ReplaceFunctions } from "./serializaiton.replace";
 import {
   ApplyDeserialization,
   ApplySerialization,
@@ -56,7 +57,10 @@ export abstract class Structured<
   readonly _container = new Set<SubbableContainer>();
   readonly _propagatedTokens = new WeakSet();
 
-  abstract replace(autoJson: JSONOfAuto<SAuto>): void;
+  abstract replace(
+    autoJson: JSONOfAuto<SAuto>,
+    replace: ReplaceFunctions
+  ): void;
   abstract autoSimplify(): SAuto;
 
   static IN_CREATE = false; // for debugging

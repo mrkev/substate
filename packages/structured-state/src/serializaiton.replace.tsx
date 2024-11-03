@@ -16,10 +16,11 @@ import {
   NSimplified,
   Simplified,
   SimplifiedSimpleArray,
+  SimplifiedSimpleSet,
   SimplifiedTypePrimitive,
 } from "./serialization";
 import { initialize } from "./serialization.initialize";
-import { isSimplePackage } from "./serialization.simplify";
+import { isSimplePackage, SimplePackage } from "./serialization.simplify";
 import { SArray, SSchemaArray } from "./sstate";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SSet } from "./state/LinkedSet";
@@ -34,10 +35,11 @@ export function replacePackage(json: unknown, obj: StructuredKind) {
   if (!isSimplePackage(json)) {
     throw new Error("not a simple package");
   }
-  return replace(json.simplified, obj);
+  const acc = new ReplaceMetadata(json.nodes);
+  return replace(json.simplified, obj, acc);
 }
 
-function replace(json: Simplified, obj: StructuredKind) {
+function replace(json: Simplified, obj: StructuredKind, acc: ReplaceMetadata) {
   try {
     switch (json.$$) {
       case "prim": {
@@ -46,7 +48,7 @@ function replace(json: Simplified, obj: StructuredKind) {
       }
       case "arr-schema": {
         assertSSchemaArray(obj);
-        return replaceSchemaArray(json, obj);
+        return replaceSchemaArray(json, obj, acc);
       }
       case "arr-simple": {
         assertSSimpleArray(obj);
@@ -62,7 +64,7 @@ function replace(json: Simplified, obj: StructuredKind) {
       }
       case "structured": {
         assertStructured(obj);
-        return replaceStructured(json, obj);
+        return replaceStructured(json, obj, acc);
       }
       case "set": {
         assertSSet(obj);
@@ -90,7 +92,7 @@ export function replacePrimitive<T>(
 
 export function replaceSchemaArray<
   T extends Struct<any> | Struct2<any> | Structured<any, any>
->(json: NSimplified["arr-schema"], arr: SSchemaArray<T>) {
+>(json: NSimplified["arr-schema"], arr: SSchemaArray<T>, acc: ReplaceMetadata) {
   // arr is current state, we want json by the end
 
   arr._replace((raw) => {
@@ -133,7 +135,7 @@ export function replaceSchemaArray<
         if (!isSeralizedStructured(elem)) {
           throw new Error("Expected serialized Structure, found " + elem.$$);
         }
-        struct.replace(elem._value);
+        struct.replace(elem._value, acc.replace);
       }
     }
 
@@ -179,10 +181,7 @@ export function replaceSimpleArray<T>(
   });
 }
 
-function replaceStruct(
-  json: Extract<Simplified, { $$: "struct" }>,
-  obj: Struct<any>
-): void {
+function replaceStruct(json: NSimplified["struct"], obj: Struct<any>): void {
   // offer a way to override replacement
   if ("_replace" in obj && typeof obj._replace === "function") {
     obj._replace(json._value);
@@ -200,10 +199,7 @@ function replaceStruct(
   SubbableContainer._notifyChange(obj, obj);
 }
 
-function replaceStruct2(
-  json: Extract<Simplified, { $$: "struct2" }>,
-  obj: Struct2<any>
-): void {
+function replaceStruct2(json: NSimplified["struct2"], obj: Struct2<any>): void {
   // offer a way to override replacement
   if ("_replace" in obj && typeof obj._replace === "function") {
     obj._replace(json._value);
@@ -223,16 +219,14 @@ function replaceStruct2(
 
 export function replaceStructured(
   json: NSimplified["structured"],
-  obj: Structured<any, any>
+  obj: Structured<any, any>,
+  acc: ReplaceMetadata
 ) {
-  obj.replace(json._value);
+  obj.replace(json._value, acc.replace);
   SubbableContainer._notifyChange(obj, obj);
 }
 
-export function replaceSSet(
-  json: Extract<Simplified, { $$: "set" }>,
-  set: SSet<any>
-) {
+export function replaceSSet(json: NSimplified["set"], set: SSet<any>) {
   // TODO: can a set contain structured objects? like an array? do I need simple set and schema set?
   throw new Error("NOT IMPLEMENTED");
 
@@ -266,3 +260,60 @@ export function replaceSUnion(json: NSimplified["union"], obj: SUnion<any>) {
   obj.replace(value);
   SubbableContainer._notifyChange(obj, obj);
 }
+
+export class ReplaceMetadata {
+  constructor(readonly knownSimples: SimplePackage["nodes"]) {}
+  /** `this` on second argument to avoid double-initializing the same elements */
+  readonly replace: ReplaceFunctions = {
+    string: replacePrimitive<string>,
+    number: replacePrimitive<number>,
+    boolean: replacePrimitive<boolean>,
+    null: replacePrimitive<null>,
+    primitive: replacePrimitive,
+    schemaArray: <T extends Struct<any> | Struct2<any> | Structured<any, any>>(
+      json: NSimplified["arr-schema"],
+      arr: SSchemaArray<T>
+    ) => replaceSchemaArray(json, arr, this),
+    array: replaceSimpleArray,
+    // struct: initializeStruct,
+    // struct2: initializeStruct2,
+    structured: (json: NSimplified["structured"], obj: Structured<any, any>) =>
+      replaceStructured(json, obj, this),
+    set: replaceSSet,
+  } as const;
+}
+
+export type ReplaceFunctions = Readonly<{
+  string: (
+    json: SimplifiedTypePrimitive<string>,
+    obj: LinkedPrimitive<string>
+  ) => void;
+  number: (
+    json: SimplifiedTypePrimitive<number>,
+    obj: LinkedPrimitive<number>
+  ) => void;
+  boolean: (
+    json: SimplifiedTypePrimitive<boolean>,
+    obj: LinkedPrimitive<boolean>
+  ) => void;
+  null: (
+    json: SimplifiedTypePrimitive<null>,
+    obj: LinkedPrimitive<null>
+  ) => void;
+  primitive: <T>(
+    json: SimplifiedTypePrimitive<T>,
+    obj: LinkedPrimitive<T>
+  ) => void;
+  schemaArray: <T extends Struct<any> | Struct2<any> | Structured<any, any>>(
+    json: NSimplified["arr-schema"],
+    arr: SSchemaArray<T>
+  ) => void;
+  array: <T>(json: SimplifiedSimpleArray<T>, arr: SArray<T>) => void;
+  // struct: (json: NSimplified["struct"], obj: Struct<any>) => void;
+  // struct2: (json: NSimplified["struct2"], obj: Struct2<any>) => void;
+  structured: (
+    json: NSimplified["structured"],
+    obj: Structured<any, any>
+  ) => void;
+  set: <T>(json: SimplifiedSimpleSet<T>, obj: SSet<T>) => void;
+}>;

@@ -18,6 +18,11 @@ export type StructuredKind =
   | SSet<any>
   | SUnion<any>;
 
+export type StructuredStructureKind =
+  | Struct<any>
+  | Struct2<any>
+  | Structured<any, any>;
+
 export function isStructuredKind(val: unknown) {
   return (
     val instanceof LinkedPrimitive ||

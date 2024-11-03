@@ -1,6 +1,6 @@
 import {
   InitFunctions,
-  replace,
+  ReplaceFunctions,
   S,
   Structured,
 } from "../../../structured-state/src";
@@ -39,7 +39,7 @@ export class AudioClip extends Structured<AutoAudioClip, typeof AudioClip> {
     };
   }
 
-  override replace(auto: AudioClipRaw): void {
+  override replace(auto: AudioClipRaw, replace: ReplaceFunctions): void {
     replace.structured(auto.timelineStart, this.timelineStart);
     replace.structured(auto.timelineLength, this.timelineLength);
   }

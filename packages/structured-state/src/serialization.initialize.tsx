@@ -332,35 +332,34 @@ export type InitFunctions = Readonly<{
 
 export class InitializationMetadata {
   readonly initializedObjects = new Map<string, StructuredKind>();
-  readonly init: InitFunctions;
-  constructor() {
-    this.init = {
-      string: (json: SimplifiedTypePrimitive<string>) =>
-        initializePrimitive<string>(json, this),
-      number: (json: SimplifiedTypePrimitive<number>) =>
-        initializePrimitive<number>(json, this),
-      boolean: (json: SimplifiedTypePrimitive<boolean>) =>
-        initializePrimitive<boolean>(json, this),
-      null: (json: SimplifiedTypePrimitive<null>) =>
-        initializePrimitive<null>(json, this),
-      primitive: <T,>(json: SimplifiedTypePrimitive<T>) =>
-        initializePrimitive(json, this),
-      schemaArray: (json: NSimplified["arr-schema"], spec: StructSchema[]) =>
-        initializeSchemaArray(json, spec, this),
-      array: <T,>(json: SimplifiedSimpleArray<T>) =>
-        initializeSimpleArray(json, this),
-      struct: (json: NSimplified["struct"], spec: typeof Struct) =>
-        initializeStruct(json, spec, this),
-      struct2: (json: NSimplified["struct2"], spec: typeof Struct2) =>
-        initializeStruct2(json, spec, this),
-      structured: <Spec extends ConstructableStructure<any>>(
-        json: NSimplified["structured"],
-        spec: Spec
-      ) => initializeStructured(json, spec, this),
-      set: <T,>(json: SimplifiedSimpleSet<T>, spec: StructSchema) =>
-        initializeSet(json, spec, this),
-    } as const;
-  }
+
+  /** `this` on second argument to avoid double-initializing the same elements */
+  readonly init: InitFunctions = {
+    string: (json: SimplifiedTypePrimitive<string>) =>
+      initializePrimitive<string>(json, this),
+    number: (json: SimplifiedTypePrimitive<number>) =>
+      initializePrimitive<number>(json, this),
+    boolean: (json: SimplifiedTypePrimitive<boolean>) =>
+      initializePrimitive<boolean>(json, this),
+    null: (json: SimplifiedTypePrimitive<null>) =>
+      initializePrimitive<null>(json, this),
+    primitive: <T,>(json: SimplifiedTypePrimitive<T>) =>
+      initializePrimitive(json, this),
+    schemaArray: (json: NSimplified["arr-schema"], spec: StructSchema[]) =>
+      initializeSchemaArray(json, spec, this),
+    array: <T,>(json: SimplifiedSimpleArray<T>) =>
+      initializeSimpleArray(json, this),
+    struct: (json: NSimplified["struct"], spec: typeof Struct) =>
+      initializeStruct(json, spec, this),
+    struct2: (json: NSimplified["struct2"], spec: typeof Struct2) =>
+      initializeStruct2(json, spec, this),
+    structured: <Spec extends ConstructableStructure<any>>(
+      json: NSimplified["structured"],
+      spec: Spec
+    ) => initializeStructured(json, spec, this),
+    set: <T,>(json: SimplifiedSimpleSet<T>, spec: StructSchema) =>
+      initializeSet(json, spec, this),
+  } as const;
 
   /** used for replace */
   static plainInit: InitFunctions = {

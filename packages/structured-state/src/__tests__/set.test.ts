@@ -31,8 +31,11 @@ class Foo extends s.Structured<AutoFoo, typeof Foo> {
   }
 
   // All this is just boilerplate ugh
-  override replace(auto: s.JSONOfAuto<AutoFoo>): void {
-    s.replace.set(auto.numset, this.numset);
+  override replace(
+    auto: s.JSONOfAuto<AutoFoo>,
+    replace: s.ReplaceFunctions
+  ): void {
+    replace.set(auto.numset, this.numset);
     // this.numset._setRaw(new Set(json.numset));
   }
 

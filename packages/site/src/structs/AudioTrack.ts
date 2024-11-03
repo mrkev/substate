@@ -2,7 +2,7 @@ import {
   arrayOf,
   InitFunctions,
   JSONOfAuto,
-  replace,
+  ReplaceFunctions,
   SSchemaArray,
   SString,
   string,
@@ -30,7 +30,10 @@ export class AudioTrack extends Structured<AutoAudioTrack, typeof AudioTrack> {
     };
   }
 
-  override replace(auto: JSONOfAuto<AutoAudioTrack>): void {
+  override replace(
+    auto: JSONOfAuto<AutoAudioTrack>,
+    replace: ReplaceFunctions
+  ): void {
     replace.string(auto.name, this.name);
     replace.schemaArray(auto.clips, this.clips);
   }
@@ -47,10 +50,6 @@ export class AudioTrack extends Structured<AutoAudioTrack, typeof AudioTrack> {
     auto: JSONOfAuto<AutoAudioTrack>,
     init: InitFunctions
   ): AudioTrack {
-    // const { name, clips } = json;
-    // this.name = string(name);
-    // this.clips = arrayOf([AudioClip], clips);
-
     return Structured.create(
       AudioTrack,
       init.string(auto.name),

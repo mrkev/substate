@@ -1,10 +1,3 @@
-import {
-  replacePrimitive,
-  replaceSchemaArray,
-  replaceSimpleArray,
-  replaceSSet,
-  replaceStructured,
-} from "./serializaiton.replace";
 import { simplifyStructured } from "./serialization.simplify";
 
 export {
@@ -36,6 +29,7 @@ export { SSet } from "./state/LinkedSet";
 
 export { useNewLinkedMap, useNewLinkedSet } from "./state/useNew";
 
+export type { ReplaceFunctions } from "./serializaiton.replace";
 export { construct, serialize } from "./serialization";
 export type { S } from "./serialization";
 export { debugOut } from "./sstate.debug";
@@ -50,20 +44,6 @@ export { useSubscribeToSubbableMutationHashable } from "./state/MutationHashable
 // export { init } from "./serialization.initialize";
 export type { InitFunctions } from "./serialization.initialize";
 export type { PrimitiveKind, StructuredKind } from "./StructuredKinds";
-
-export const replace = {
-  string: replacePrimitive<string>,
-  number: replacePrimitive<number>,
-  boolean: replacePrimitive<boolean>,
-  null: replacePrimitive<null>,
-  primitive: replacePrimitive,
-  schemaArray: replaceSchemaArray, // todo: test
-  array: replaceSimpleArray,
-  // struct: initializeStruct,
-  // struct2: initializeStruct2,
-  structured: replaceStructured,
-  set: replaceSSet,
-} as const;
 
 export const simplify = {
   structured: simplifyStructured,

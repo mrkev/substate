@@ -3,7 +3,7 @@ import {
   arrayOf,
   InitFunctions,
   JSONOfAuto,
-  replace,
+  ReplaceFunctions,
   SArray,
   set,
   SSchemaArray,
@@ -49,7 +49,10 @@ export class Project extends Structured<AutoProject, typeof Project> {
   }
 
   // TODO: I should make replae only care about non-knowables. All knowables get auto-set.
-  override replace(json: JSONOfAuto<AutoProject>): void {
+  override replace(
+    json: JSONOfAuto<AutoProject>,
+    replace: ReplaceFunctions
+  ): void {
     replace.string(json.name, this.name);
     replace.schemaArray(json.tracks, this.tracks);
     replace.set(json.randomNumbers, this.randomNumbers);
