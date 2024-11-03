@@ -1,12 +1,30 @@
 import { nanoid } from "nanoid";
 import { nullthrows, setWindow } from "./nullthrows";
-import { replace } from "./serializaiton.replace";
-import { serialize } from "./serialization";
+import { serialize, Simplified } from "./serialization";
 import { LinkedArray } from "./state/LinkedArray";
 import { StructuredKind } from "./StructuredKinds";
 import { WeakRefMap } from "./WeakRefMap";
+import { replacePackage } from "./serializaiton.replace";
 
-export type HistoryEntry = {
+// todo: use this for faster performance with array history
+type ObjectSnapshot =
+  | {
+      kind: Exclude<Simplified["$$"], "arr-schema">;
+      id: string;
+      snapshot: string;
+    }
+  // only store the ids. encodes ids and order:
+  // - objects that went on to be added, no problem. future has more info than past, just delete it
+  // - objects that went on to be removed, we store in a map as they existed at removal time
+  // - oreder is encoded in array itself
+  | {
+      kind: "arr-schema";
+      id: string;
+      descriptor: string[];
+      removedObjs: Map<string, string>;
+    };
+
+export type HistorySnapshot = {
   id: string;
   name: string;
   objects: Map<string, string>; // id => serialized obj
@@ -16,8 +34,8 @@ export type HistoryEntry = {
 class GlobalState {
   HISTORY_RECORDING: Map<string, string> | false = false;
   readonly knownObjects = new WeakRefMap<StructuredKind>(10_000);
-  readonly history = LinkedArray.create<HistoryEntry>();
-  readonly redoStack = LinkedArray.create<HistoryEntry>();
+  readonly history = LinkedArray.create<HistorySnapshot>();
+  readonly redoStack = LinkedArray.create<HistorySnapshot>();
   constructor() {
     setWindow("globalState", this);
   }
@@ -141,10 +159,10 @@ export function recordHistory(
 }
 
 function historyEntryOfObjectsEntryModifies(
-  entry: HistoryEntry,
+  entry: HistorySnapshot,
   globalState: GlobalState
 ) {
-  const newEntry = {
+  const newEntry: HistorySnapshot = {
     id: `h-${nanoid(4)}`,
     objects: new Map<string, string>(),
     name: entry.name,
@@ -182,7 +200,7 @@ function popHistory() {
 
     const json = JSON.parse(serialized);
     console.log("replacing", object, "with", json);
-    replace(json, object);
+    replacePackage(json, object);
   }
 }
 
@@ -205,7 +223,7 @@ export function forwardHistory() {
 
     const json = JSON.parse(serialized);
     console.log("replacing", object, "with", json);
-    replace(json, object);
+    replacePackage(json, object);
   }
 }
 

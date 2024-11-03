@@ -39,25 +39,6 @@ export function useSPrimitive<S>(
   return [state, setter];
 }
 
-export function useStructure<S>(
-  linkedArray: SArray<S>
-): [SArray<S>, StateDispath<Array<S>>] {
-  useSubscribeToSubbableMutationHashable(linkedArray);
-
-  const setter: StateDispath<Array<S>> = useCallback(
-    function (newVal) {
-      if (newVal instanceof Function) {
-        linkedArray._setRaw(newVal(linkedArray._getRaw() as any));
-      } else {
-        linkedArray._setRaw(newVal);
-      }
-    },
-    [linkedArray]
-  );
-
-  return [linkedArray, setter];
-}
-
 export function useContainer<S extends SubbableContainer>(
   obj: S,
   recursiveChanges: boolean = false

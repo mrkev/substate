@@ -72,11 +72,6 @@ export class LinkedArray<S>
     return this._array;
   }
 
-  _setRaw(array: Array<S>) {
-    this._array = array;
-    notify(this, this);
-  }
-
   // me
   toJSON() {
     return this._array;
@@ -195,7 +190,7 @@ export class LinkedArray<S>
   // Array<S> interface, mutates
   fill(value: S, start?: number, end?: number): this {
     SubbableContainer._containAll(this, [value]);
-    // TODO: BREAKING: containment
+    console.warn("TODO: fill BREAKING: containment");
     return this.mutate((_array) => {
       _array.fill(value, start, end);
       return this;
@@ -205,7 +200,7 @@ export class LinkedArray<S>
   // Array<S> interface, mutates
   copyWithin(target: number, start: number, end?: number): this {
     return this.mutate((_array) => {
-      // TODO: BREAKING: containment
+      console.warn("TODO: copyWithin BREAKING: containment");
       _array.copyWithin(target, start, end);
       return this;
     });

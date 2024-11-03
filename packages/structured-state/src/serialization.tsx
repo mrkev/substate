@@ -1,5 +1,9 @@
 import { InitializationMetadata, initialize } from "./serialization.initialize";
-import { simplify } from "./serialization.simplify";
+import {
+  isSimplePackage,
+  SimplificationMetadata,
+  simplifyAndPackage,
+} from "./serialization.simplify";
 import { SArray, SSchemaArray, SState } from "./sstate";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SSet } from "./state/LinkedSet";
@@ -10,9 +14,13 @@ import { StructuredKind } from "./StructuredKinds";
 
 // TODO: map
 
-export type SerializedDescriptor = Record<
+type Primitive = string | number | boolean | null;
+
+export type Simplified = NSimplified[keyof NSimplified];
+
+export type SimplifiedDescriptor = Record<
   string,
-  Serialized | string | number | boolean | null
+  Simplified | string | number | boolean | null
 >;
 
 export type SimplifiedTypePrimitive<T> = Readonly<{
@@ -39,13 +47,13 @@ export type NSimplified = {
   "arr-schema": Readonly<{
     $$: "arr-schema";
     _id: string;
-    _value: readonly Serialized[];
+    _value: readonly Simplified[];
   }>;
   struct: Readonly<{
     $$: "struct";
     _id: string;
     _value: {
-      [key: string]: Serialized | unknown;
+      [key: string]: Simplified | unknown;
     };
   }>;
   struct2: Readonly<{
@@ -56,21 +64,20 @@ export type NSimplified = {
   structured: Readonly<{
     $$: "structured";
     _id: string;
-    _autoValue: SerializedDescriptor;
+    _value: SimplifiedDescriptor;
   }>;
   set: Readonly<{
     $$: "set";
     _id: string;
-    _value: readonly (Serialized | unknown)[];
+    _value: readonly (Simplified | unknown)[];
   }>;
   union: Readonly<{
     $$: "union";
     _id: string;
-    _value: Serialized;
+    _value: Simplified;
   }>;
+  // reference: Readonly<{ $$: "ref"; _to: string }>;
 };
-
-export type Serialized = NSimplified[keyof NSimplified];
 
 export type S = {
   string: SimplifiedTypePrimitive<string>;
@@ -104,7 +111,7 @@ export type ApplySerialization<T extends StructuredKind> =
     : never;
 
 export type ApplyDeserialization<
-  S extends Serialized,
+  S extends Simplified,
   T extends Struct<any> | Struct2<any> | Structured<any, any> = any
 > = S extends NSimplified["prim"]
   ? LinkedPrimitive<any>
@@ -123,7 +130,7 @@ export type ApplyDeserialization<
   : never;
 
 export type ObjectDeserialization<
-  S extends Serialized,
+  S extends Simplified,
   T extends Struct<any> | Struct2<any> | Structured<any, any> = any
 > = S extends NSimplified["prim"]
   ? LinkedPrimitive<any>
@@ -143,9 +150,9 @@ export type ObjectDeserialization<
 
 ///////////////////////////////
 
-export function serialize(state: StructuredKind) {
+export function serialize(state: StructuredKind): string {
   const allIds = new Set<string>();
-  const simplified = simplify(state, { allIds });
+  const simplified = simplifyAndPackage(state);
   const result = JSON.stringify(simplified);
   console.log(allIds);
   return result;
@@ -173,9 +180,9 @@ export type NeedsSchema =
   | NSimplified["arr-schema"];
 
 export type NeedsSchemaStruct =
-  | Extract<Serialized, { $$: "struct" }>
-  | Extract<Serialized, { $$: "struct2" }>
-  | Extract<Serialized, { $$: "structured" }>;
+  | Extract<Simplified, { $$: "struct" }>
+  | Extract<Simplified, { $$: "struct2" }>
+  | Extract<Simplified, { $$: "structured" }>;
 
 export function construct(
   str: string,
@@ -187,7 +194,11 @@ export function construct(
   try {
     const json = JSON.parse(str);
     const metadata = new InitializationMetadata();
-    const result = initialize(json, spec as any, metadata);
+    if (!isSimplePackage(json)) {
+      throw new Error("not a simple package");
+    }
+
+    const result = initialize(json.simplified, spec as any, metadata);
     console.log("constructed", metadata.initializedObjects);
     return result;
   } catch (e) {
@@ -196,7 +207,7 @@ export function construct(
   }
 }
 
-export function isSeralized(json: unknown): json is Serialized {
+export function isSimplified(json: unknown): json is Simplified {
   // TODO: more validation?
   return (
     typeof json === "object" &&
@@ -209,5 +220,5 @@ export function isSeralized(json: unknown): json is Serialized {
 export function isSeralizedStructured(
   json: unknown
 ): json is NSimplified["structured"] {
-  return isSeralized(json) && json.$$ === "structured";
+  return isSimplified(json) && json.$$ === "structured";
 }

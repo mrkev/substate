@@ -157,7 +157,7 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
     return this._set[Symbol.iterator]();
   }
 
-  // Set<S> interface, TODO
+  // Set<S> interface
   get [Symbol.toStringTag]() {
     return this.constructor.name;
   }

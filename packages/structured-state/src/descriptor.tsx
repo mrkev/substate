@@ -13,10 +13,3 @@ function structure<T extends Constructable, S>(opts: {
 }): Structure<T, S> {
   return new Structure(opts.class, opts.construct);
 }
-
-// const TrackStructure = s.structure({
-//   class: Track,
-//   construct: () => {
-//     return new Track(null as any);
-//   },
-// });

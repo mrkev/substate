@@ -16,12 +16,12 @@ import {
   NSimplified,
   NeedsSchema,
   ObjectDeserialization,
-  Serialized,
+  Simplified,
   SimplifiedSimpleArray,
   SimplifiedSimpleSet,
   SimplifiedTypePrimitive,
   StructSchema,
-  isSeralized,
+  isSimplified,
 } from "./serialization";
 import { SArray, SSchemaArray } from "./sstate";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
@@ -29,7 +29,7 @@ import { SSet } from "./state/LinkedSet";
 import { SUnion } from "./sunion";
 
 function find(
-  json: Serialized,
+  json: Simplified,
   metadata: InitializationMetadata | null
 ): StructuredKind | null {
   const found = metadata?.initializedObjects.get(json._id);
@@ -153,7 +153,7 @@ function initializeStruct(
   const initialized: Record<any, any> = {};
   for (const key of Object.keys(json._value)) {
     const value = json._value[key];
-    if (isSeralized(value)) {
+    if (isSimplified(value)) {
       initialized[key] = initialize(
         json._value[key],
         [initialized[key]?.schema],
@@ -169,7 +169,7 @@ function initializeStruct(
 
   for (const key of Object.keys(json._value)) {
     const value = json._value[key];
-    if (isSeralized(value)) {
+    if (isSimplified(value)) {
       instance[key] = initialize(
         json._value[key],
         [instance[key]?.schema],
@@ -214,7 +214,7 @@ function initializeStructured<Spec extends ConstructableStructure<any>>(
   }
 
   const instance = spec.construct(
-    json._autoValue,
+    json._value,
     metadata ? metadata.init : InitializationMetadata.plainInit
   );
   // note: we override id before calling initStructured. Important! So correct id gets registered
@@ -266,7 +266,7 @@ export function initialize(
   spec: StructSchema | StructSchema[],
   metadata: InitializationMetadata | null
 ): StructuredKind {
-  if (!isSeralized(json)) {
+  if (!isSimplified(json)) {
     console.log("not serialized", json);
     throw new Error("invalid serialization is not a non-null object");
   }

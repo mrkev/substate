@@ -51,9 +51,9 @@ export default tseslint.config(
 
       parserOptions: {
         project: [
-          "./packages/structured-state/tsconfig.json",
+          "./packages/structured-state/tsconfig.src.json",
           "./packages/structured-state/tsconfig.node.json",
-          "./packages/site/tsconfig.json",
+          "./packages/site/tsconfig.src.json",
           "./packages/site/tsconfig.node.json",
         ],
       },

@@ -79,7 +79,8 @@ export abstract class SubbableContainer
   }
 
   /**
-   * Creates a change notification to be propagated, starting at this object, and about change of a certain target
+   * Creates a change notification to be propagated, starting at this object,
+   * and about the change of a certain target
    */
   static _notifyChange(struct: SubbableContainer, target: SubbableContainer) {
     const token = new UpdateToken(target);

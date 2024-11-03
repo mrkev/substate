@@ -6,23 +6,21 @@ import {
   debugOut,
   serialize,
   useContainer,
-  useContainerWithSetter,
   useDirtyTracker,
 } from "../../structured-state/src/index";
 import { setWindow } from "../../structured-state/src/nullthrows";
 import {
-  HistoryEntry,
+  HistorySnapshot,
   getGlobalState,
   recordHistory,
 } from "../../structured-state/src/sstate.history";
 import { LinkedArray } from "../../structured-state/src/state/LinkedArray";
-import "./App.css";
-import { SchedulerTest } from "./SchedulerTest";
 import { AudioClip } from "./structs/AudioClip";
 import { AudioTrack } from "./structs/AudioTrack";
 import { Note } from "./structs/MidiTrack";
 import { Project } from "./structs/Project";
 import { TrackA } from "./ui/TrackA";
+import { SchedulerTest } from "./unused/SchedulerTest";
 import { nullthrows } from "./util";
 
 setWindow("s", s);
@@ -122,6 +120,7 @@ export function App() {
           onClick={() => {
             const serialized = serialize(project);
             console.log("serialized", serialized);
+            console.log("serialized", JSON.parse(serialized));
             const constructed = construct(serialized, Project);
             console.log("constructed", constructed);
             // setProject(constructed as any);
@@ -151,7 +150,7 @@ export function App() {
 }
 
 function UProject({ project }: { project: Project }) {
-  const [tracks] = useContainerWithSetter(project.tracks);
+  const tracks = useContainer(project.tracks);
   const randomNumbers = useContainer(project.randomNumbers);
   const markers = useContainer(project.markers);
   return (
@@ -275,7 +274,7 @@ function HistoryStacks() {
   );
 }
 
-function HistoryItem({ entry }: { entry: HistoryEntry }) {
+function HistoryItem({ entry }: { entry: HistorySnapshot }) {
   return (
     <details>
       <summary>

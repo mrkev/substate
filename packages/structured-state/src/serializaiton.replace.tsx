@@ -11,14 +11,15 @@ import {
 } from "./assertions";
 import { nullthrows } from "./nullthrows";
 import {
-  isSeralized,
   isSeralizedStructured,
+  isSimplified,
   NSimplified,
-  Serialized,
+  Simplified,
   SimplifiedSimpleArray,
   SimplifiedTypePrimitive,
 } from "./serialization";
 import { initialize } from "./serialization.initialize";
+import { isSimplePackage } from "./serialization.simplify";
 import { SArray, SSchemaArray } from "./sstate";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SSet } from "./state/LinkedSet";
@@ -29,12 +30,15 @@ import { Structured } from "./Structured";
 import { StructuredKind } from "./StructuredKinds";
 import { SUnion } from "./sunion";
 
-export function replace(json: any, obj: StructuredKind) {
-  try {
-    if (!isSeralized(json)) {
-      throw new Error("invalid serialization is not a non-null object");
-    }
+export function replacePackage(json: unknown, obj: StructuredKind) {
+  if (!isSimplePackage(json)) {
+    throw new Error("not a simple package");
+  }
+  return replace(json.simplified, obj);
+}
 
+function replace(json: Simplified, obj: StructuredKind) {
+  try {
     switch (json.$$) {
       case "prim": {
         assertSPrimitive(obj);
@@ -90,10 +94,10 @@ export function replaceSchemaArray<
   // arr is current state, we want json by the end
 
   arr._replace((raw) => {
-    const jsonIndex = new Map<string, Serialized>();
+    const jsonIndex = new Map<string, Simplified>();
     const jsonOrder: string[] = [];
     for (const elem of json._value) {
-      if (!isSeralized(elem)) {
+      if (!isSimplified(elem)) {
         console.error(
           "ERR: non structured object found in SSchemaArray. skipping replace."
         );
@@ -129,7 +133,7 @@ export function replaceSchemaArray<
         if (!isSeralizedStructured(elem)) {
           throw new Error("Expected serialized Structure, found " + elem.$$);
         }
-        struct.replace(elem._autoValue);
+        struct.replace(elem._value);
       }
     }
 
@@ -176,7 +180,7 @@ export function replaceSimpleArray<T>(
 }
 
 function replaceStruct(
-  json: Extract<Serialized, { $$: "struct" }>,
+  json: Extract<Simplified, { $$: "struct" }>,
   obj: Struct<any>
 ): void {
   // offer a way to override replacement
@@ -187,7 +191,7 @@ function replaceStruct(
   }
 
   for (const key in json._value) {
-    if (key === "$$" || isSeralized(json._value[key])) {
+    if (key === "$$" || isSimplified(json._value[key])) {
       // TODO: Serialized state gets replaced separately in history (?)
       continue;
     }
@@ -197,7 +201,7 @@ function replaceStruct(
 }
 
 function replaceStruct2(
-  json: Extract<Serialized, { $$: "struct2" }>,
+  json: Extract<Simplified, { $$: "struct2" }>,
   obj: Struct2<any>
 ): void {
   // offer a way to override replacement
@@ -208,7 +212,7 @@ function replaceStruct2(
   }
 
   for (const key in json._value) {
-    if (key === "$$" || isSeralized(json._value[key])) {
+    if (key === "$$" || isSimplified(json._value[key])) {
       // Serialized state gets replaced separately in history (?)
       continue;
     }
@@ -221,12 +225,12 @@ export function replaceStructured(
   json: NSimplified["structured"],
   obj: Structured<any, any>
 ) {
-  obj.replace(json._autoValue);
+  obj.replace(json._value);
   SubbableContainer._notifyChange(obj, obj);
 }
 
 export function replaceSSet(
-  json: Extract<Serialized, { $$: "set" }>,
+  json: Extract<Simplified, { $$: "set" }>,
   set: SSet<any>
 ) {
   // TODO: can a set contain structured objects? like an array? do I need simple set and schema set?

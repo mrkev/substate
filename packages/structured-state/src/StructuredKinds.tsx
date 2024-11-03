@@ -26,6 +26,7 @@ export function isStructuredKind(val: unknown) {
     val instanceof Structured ||
     val instanceof SArray ||
     val instanceof SSchemaArray ||
+    val instanceof SSet ||
     val instanceof SUnion
   );
 }

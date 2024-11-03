@@ -40,11 +40,7 @@ export { construct, serialize } from "./serialization";
 export type { S } from "./serialization";
 export { debugOut } from "./sstate.debug";
 export { getGlobalState, history } from "./sstate.history";
-export {
-  useContainer,
-  useStructure as useContainerWithSetter,
-  useSPrimitive as usePrimitive,
-} from "./sstate.react";
+export { useContainer, useSPrimitive as usePrimitive } from "./sstate.react";
 
 export { DirtyObserver, useDirtyTracker } from "./DirtyObserver";
 export type { DirtyState } from "./DirtyObserver";

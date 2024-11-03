@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from "react";
-import * as Struct from "../../structured-state/src/Struct";
-import { construct, serialize } from "../../structured-state/src/serialization";
-import * as s from "../../structured-state/src/sstate";
-import { debugOut } from "../../structured-state/src/sstate.debug";
+import * as Struct from "../../../structured-state/src/Struct";
+import { setWindow } from "../../../structured-state/src/nullthrows";
+import {
+  construct,
+  serialize,
+} from "../../../structured-state/src/serialization";
+import * as s from "../../../structured-state/src/sstate";
+import { debugOut } from "../../../structured-state/src/sstate.debug";
 import {
   getGlobalState,
   history,
   recordHistory,
-} from "../../structured-state/src/sstate.history";
+} from "../../../structured-state/src/sstate.history";
 import {
   useContainer,
   useSPrimitive,
-  useStructure,
-} from "../../structured-state/src/sstate.react";
+} from "../../../structured-state/src/sstate.react";
 import "./App.css";
-import { setWindow } from "../../structured-state/src/nullthrows";
 
 export class BusLine extends Struct.Struct<BusLine> {
   readonly distance = s.number();
@@ -42,6 +44,8 @@ const busLine = Struct.create(BusLine, {
   stops: 0,
   buses: [Struct.create(Bus, { name: "hello" })],
 });
+
+setWindow("project", busLine);
 
 export function App() {
   return (
@@ -103,7 +107,7 @@ export function App() {
 }
 
 function BusList() {
-  const [tracks] = useStructure(busLine.buses);
+  const tracks = useContainer(busLine.buses);
   return (
     <div>
       {tracks.map((track) => {
@@ -207,5 +211,3 @@ function ProjectDebug() {
     </div>
   );
 }
-
-setWindow("project", busLine);
