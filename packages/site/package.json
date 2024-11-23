@@ -8,16 +8,15 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@types/react": "^18.3.5",
-    "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.1",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
     "highlight.js": "^11.10.0",
-    "jsdom": "^25.0.0",
     "mobx": "^6.13.1",
     "mobx-react-lite": "^4.0.7",
     "mobx-state-tree": "^6.0.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "vite": "^5.4.3"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "vite": "^5.4.11"
   }
 }

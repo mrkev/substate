@@ -66,13 +66,9 @@ function replace(json: Simplified, obj: StructuredKind, acc: ReplaceMetadata) {
         assertStructured(obj);
         return replaceStructured(json, obj, acc);
       }
-      case "set-simple": {
+      case "set": {
         assertSSet(obj);
         return replaceSSet(json, obj);
-      }
-      case "set-schema": {
-        assertSSet(obj);
-        return replaceSchemaSet(json, obj);
       }
       case "union": {
         assertSUnion(obj);
@@ -233,14 +229,7 @@ export function replaceStructured(
   SubbableContainer._notifyChange(obj, obj);
 }
 
-export function replaceSchemaSet(
-  json: NSimplified["set-schema"],
-  set: SSet<any>
-) {
-  throw new Error("UNIMPLEMENETD");
-}
-
-export function replaceSSet(json: NSimplified["set-simple"], set: SSet<any>) {
+export function replaceSSet(json: NSimplified["set"], set: SSet<any>) {
   // TODO: can a set contain structured objects? like an array? do I need simple set and schema set?
   throw new Error("NOT IMPLEMENTED");
 
