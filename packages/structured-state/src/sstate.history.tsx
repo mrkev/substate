@@ -1,13 +1,13 @@
 import { nanoid } from "nanoid";
 import { nullthrows, setWindow } from "./nullthrows";
+import { replacePackage } from "./serializaiton.replace";
 import { serialize, Simplified } from "./serialization";
 import { LinkedArray } from "./state/LinkedArray";
 import { StructuredKind } from "./StructuredKinds";
 import { WeakRefMap } from "./WeakRefMap";
-import { replacePackage } from "./serializaiton.replace";
 
 // todo: use this for faster performance with array history
-type ObjectSnapshot =
+export type ObjectSnapshot =
   | {
       kind: Exclude<Simplified["$$"], "arr-schema">;
       id: string;
@@ -137,7 +137,7 @@ export function recordHistory(
   return actAfter(action, function pushHistoryEnd() {
     const recorded = globalState.HISTORY_RECORDING;
     globalState.HISTORY_RECORDING = false;
-    console.log("recorded", recorded);
+    // console.log("recorded", recorded);
 
     if (recorded === false) {
       throw new Error("recorded === false, shouldn't happen");
@@ -199,7 +199,7 @@ function popHistory() {
     );
 
     const json = JSON.parse(serialized);
-    console.log("replacing", object, "with", json);
+    // console.log("replacing", object, "with", json);
     replacePackage(json, object);
   }
 }
@@ -222,7 +222,7 @@ export function forwardHistory() {
     );
 
     const json = JSON.parse(serialized);
-    console.log("replacing", object, "with", json);
+    // console.log("replacing", object, "with", json);
     replacePackage(json, object);
   }
 }

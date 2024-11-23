@@ -16,7 +16,7 @@ import {
   NSimplified,
   Simplified,
   SimplifiedSimpleArray,
-  SimplifiedSimpleSet,
+  SimplifiedSet,
   SimplifiedTypePrimitive,
 } from "./serialization";
 import { initialize } from "./serialization.initialize";
@@ -329,5 +329,5 @@ export type ReplaceFunctions = Readonly<{
     json: NSimplified["structured"],
     obj: Structured<any, any>
   ) => void;
-  set: <T>(json: SimplifiedSimpleSet<T>, obj: SSet<T>) => void;
+  set: <T>(json: SimplifiedSet<T>, obj: SSet<T>) => void;
 }>;

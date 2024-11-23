@@ -5,6 +5,17 @@ export function nullthrows<T>(val: T | null | undefined, message?: string): T {
   return val;
 }
 
+export function assertNotNull<T>(
+  val: T | null | undefined,
+  message?: string
+): asserts val is T {
+  if (val == null) {
+    throw new Error(
+      message || `AssertionError: expected ${val} to be non nil.`
+    );
+  }
+}
+
 export function mutablearr<T>(arr: readonly T[]): T[] {
   return arr as any;
 }

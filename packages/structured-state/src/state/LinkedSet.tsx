@@ -2,14 +2,17 @@ import { nanoid } from "nanoid";
 import { mutableset } from "../nullthrows";
 import { getGlobalState, saveForHistory } from "../sstate.history";
 import { SubbableContainer } from "./SubbableContainer";
+import { StructSchema } from "../StructuredKinds";
 
 // TODO: missing: history
 export class SSet<S> extends SubbableContainer implements Set<S> {
   private _set: ReadonlySet<S>;
+  public _schema: StructSchema | null;
 
-  private constructor(initialValue: Set<S>, id: string) {
-    super(id);
-    this._set = initialValue;
+  private constructor(_set: Set<S>, _id: string, _schema: StructSchema | null) {
+    super(_id);
+    this._set = _set;
+    this._schema = _schema;
     SubbableContainer._containAll(this, this._set);
     getGlobalState().knownObjects.set(this._id, this);
   }
@@ -25,10 +28,17 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
     SubbableContainer._notifyChange(this, this);
   }
 
-  // TODO: method to initialize with id to make it unexposed to caller?
-  // or should I just use the constructor and the existence of `s.set()` make having `SSet.create` redundant.
-  public static create<T>(initialValue?: Set<T>, id?: string) {
-    return new this<T>(initialValue ?? new Set(), id ?? nanoid(5));
+  /** should only be used internally */
+  public static _create<T>(
+    initialValue?: Iterable<T>,
+    id?: string,
+    schema?: StructSchema | null
+  ) {
+    return new this<T>(
+      initialValue instanceof Set ? initialValue : new Set(initialValue),
+      id ?? nanoid(5),
+      schema ?? null
+    );
   }
 
   private mutate<V>(mutator: (raw: Set<S>) => V): V {

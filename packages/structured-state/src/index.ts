@@ -30,7 +30,8 @@ export { SSet } from "./state/LinkedSet";
 export { useNewLinkedMap, useNewLinkedSet } from "./state/useNew";
 
 export type { ReplaceFunctions } from "./serializaiton.replace";
-export { construct, serialize } from "./serialization";
+export { serialize } from "./serialization";
+export { construct } from "./serialization.construct";
 export type { S } from "./serialization";
 export { debugOut } from "./sstate.debug";
 export { getGlobalState, history } from "./sstate.history";

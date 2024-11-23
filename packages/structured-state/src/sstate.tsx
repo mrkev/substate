@@ -4,7 +4,6 @@ import { nanoid } from "nanoid";
 import { Structured } from ".";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
-import { StructSchema } from "./serialization";
 import { getGlobalState } from "./sstate.history";
 import { LinkedArray } from "./state/LinkedArray";
 import { LinkedMap } from "./state/LinkedMap";
@@ -12,6 +11,7 @@ import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SSet } from "./state/LinkedSet";
 import { SubbableContainer } from "./state/SubbableContainer";
 import { JSONValue } from "./types";
+import { StructSchema } from "./StructuredKinds";
 
 // todo? create -> of
 export class SString extends LinkedPrimitive<string> {
@@ -166,6 +166,13 @@ export function map<K, V>(initialValue?: Map<K, V>) {
   return LinkedMap.create(initialValue);
 }
 
-export function set<T>(initialValue?: Set<T>) {
-  return SSet.create(initialValue);
+export function set<T>(initialValue?: Iterable<T>) {
+  return SSet._create(initialValue);
+}
+
+export function setOf<T extends StructSchema>(
+  schema: T,
+  initialValue?: Iterable<InstanceType<T>>
+) {
+  return SSet._create(initialValue, undefined, schema);
 }

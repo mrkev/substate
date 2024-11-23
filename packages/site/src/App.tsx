@@ -27,6 +27,7 @@ setWindow("s", s);
 
 /**
  * TODO:
+ * - reference kind, serializes as id, looks in map when initializng. good for children to point to parents.
  * x Redo
  * x Dirty marker
  * - serialization when two containers point to the same object
@@ -47,6 +48,7 @@ setWindow("s", s);
  * - Make isDirty work better with undo (undo to save state makes isDirty = false)
  * - how to serialize elements contained by multiple parents? serialized format is element map and {_ref} to ids?
  * - map serialization, history
+ *
  */
 
 export function App() {

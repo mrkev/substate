@@ -2,7 +2,7 @@ import { SBoolean, SNil, SNumber, SPrimitive, SString } from ".";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
 import { ConstructableStructure, initStructured } from "./Structured";
-import { StructuredKind } from "./StructuredKinds";
+import { StructSchema, StructuredKind } from "./StructuredKinds";
 import {
   assertArray,
   assertConstructableStruct,
@@ -11,14 +11,13 @@ import {
   assertNotArray,
   exhaustive,
 } from "./assertions";
+import { assertNotNull } from "./nullthrows";
 import {
   NSimplified,
   Simplified,
-  SimplifiedSchemaSet,
+  SimplifiedSet,
   SimplifiedSimpleArray,
-  SimplifiedSimpleSet,
   SimplifiedTypePrimitive,
-  StructSchema,
   isSimplified,
 } from "./serialization";
 import { SimplePackage } from "./serialization.simplify";
@@ -31,7 +30,7 @@ function find(
   json: Simplified,
   metadata: InitializationMetadata | null
 ): StructuredKind | null {
-  console.log("looking for", json._id, json.$$);
+  // console.log("looking for", json._id, json.$$);
   const found = metadata?.initializedObjects.get(json._id);
   if (found == null) {
     return null;
@@ -90,6 +89,33 @@ function initializeSimpleArray<T>(
   metadata?.initializedObjects.set(result._id, result);
   return result;
 }
+
+function initializeSet<T>(
+  json: SimplifiedSet<T>,
+  spec: StructSchema | null,
+  metadata: InitializationMetadata | null
+): SSet<T> {
+  const found = find(json, metadata);
+  if (found != null) {
+    return found as any;
+  }
+
+  let result;
+  if (json._schema) {
+    const initialized = json._value.map((x: any) => {
+      // TODO: find right spec
+      return initialize(x, spec, metadata);
+    });
+
+    result = SSet._create<T>(initialized as any, json._id);
+  } else {
+    result = SSet._create<T>(json._value, json._id, null);
+  }
+
+  metadata?.initializedObjects.set(result._id, result);
+  return result;
+}
+
 // helpers for structured
 
 // export function deserializeWithSchema<S extends NeedsSchema>(
@@ -203,7 +229,7 @@ function initializeStruct2(
   return instance;
 }
 
-function initializeStructured<Spec extends ConstructableStructure<any>>(
+export function initializeStructured<Spec extends ConstructableStructure<any>>(
   json: NSimplified["structured"],
   spec: Spec,
   metadata: InitializationMetadata | null
@@ -222,47 +248,6 @@ function initializeStructured<Spec extends ConstructableStructure<any>>(
   initStructured(instance);
   metadata?.initializedObjects.set(instance._id, instance);
   return instance as any; // todo
-}
-
-function initializeSchemaSet<T extends Simplified>(
-  json: SimplifiedSchemaSet<T>,
-  spec: StructSchema,
-  metadata: InitializationMetadata | null
-): SSet<T> {
-  const found = find(json, metadata);
-  if (found != null) {
-    return found as any;
-  }
-
-  const initialized = json._value.map((x) => {
-    return initialize(x, spec, metadata);
-  });
-
-  const set = new Set<T>(initialized as any);
-  const result = SSet.create<T>(set, json._id);
-  metadata?.initializedObjects.set(result._id, result);
-  return result;
-}
-
-function initializeSet<T>(
-  json: SimplifiedSimpleSet<T>,
-  spec: StructSchema,
-  metadata: InitializationMetadata | null
-): SSet<T> {
-  const found = find(json, metadata);
-  if (found != null) {
-    return found as any;
-  }
-
-  const initialized = json._value.map((x: any) => {
-    // TODO: find right spec
-    return initialize(x, spec, metadata);
-  });
-
-  const set = new Set<T>(initialized as any);
-  const result = SSet.create<T>(set, json._id);
-  metadata?.initializedObjects.set(result._id, result);
-  return result;
 }
 
 function initializeSUnion(
@@ -284,7 +269,7 @@ function initializeSUnion(
 export function initialize(
   json: unknown,
   // A union of of the specs this json could follow
-  spec: StructSchema | StructSchema[],
+  spec: StructSchema | StructSchema[] | null,
   metadata: InitializationMetadata | null
 ): StructuredKind {
   if (!isSimplified(json)) {
@@ -305,29 +290,29 @@ export function initialize(
     }
     case "struct": {
       assertNotArray(spec);
+      assertNotNull(spec);
       assertConstructableStruct(spec);
       return initializeStruct(json, spec, metadata);
     }
     case "struct2": {
       assertNotArray(spec);
+      assertNotNull(spec);
       assertConstructableStruct2(spec);
       return initializeStruct2(json, spec, metadata);
     }
     case "structured": {
       assertNotArray(spec);
+      assertNotNull(spec, `Need constructor to initialize a Structured object`);
       assertConstructableStructured(spec);
       return initializeStructured(json, spec as any, metadata);
     }
-    case "set-simple": {
+    case "set": {
       assertNotArray(spec);
-      return initializeSet(json, spec, metadata) as any;
-    }
-    case "set-schema": {
-      assertNotArray(spec);
-      return initializeSchemaSet(json, spec, metadata) as any;
+      return initializeSet(json, spec, metadata);
     }
     case "union": {
       assertNotArray(spec);
+      assertNotNull(spec);
       return initializeSUnion(json, spec, metadata);
     }
     case "ref": {
@@ -357,7 +342,7 @@ export type InitFunctions = Readonly<{
     json: NSimplified["structured"],
     spec: Spec
   ) => InstanceType<Spec>;
-  set: <T>(json: SimplifiedSimpleSet<T>, spec: StructSchema) => SSet<T>;
+  set: <T>(json: SimplifiedSet<T>, spec: StructSchema) => SSet<T>;
 }>;
 
 export class InitializationMetadata {
@@ -392,7 +377,7 @@ export class InitializationMetadata {
       json: NSimplified["structured"],
       spec: Spec
     ) => initializeStructured(json, spec, this),
-    set: <T,>(json: SimplifiedSimpleSet<T>, spec: StructSchema) =>
+    set: <T,>(json: SimplifiedSet<T>, spec: StructSchema) =>
       initializeSet(json, spec, this),
   } as const;
 
@@ -420,7 +405,7 @@ export class InitializationMetadata {
       json: NSimplified["structured"],
       spec: Spec
     ) => initializeStructured(json, spec, null),
-    set: <T,>(json: SimplifiedSimpleSet<T>, spec: StructSchema) =>
+    set: <T,>(json: SimplifiedSet<T>, spec: StructSchema) =>
       initializeSet(json, spec, null),
   };
 }

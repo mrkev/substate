@@ -4,7 +4,7 @@ import { SSet } from "./LinkedSet";
 import { useSubscribeToSubbableMutationHashable } from "./MutationHashable";
 
 export function useNewLinkedSet<S>(): SSet<S> {
-  const [set] = useState<SSet<S>>(() => SSet.create<S>());
+  const [set] = useState<SSet<S>>(() => SSet._create<S>());
   useSubscribeToSubbableMutationHashable(set);
   return set;
 }

@@ -2,62 +2,45 @@
 
 import { describe, expect, it } from "vitest";
 import * as s from "../index";
-import { Structured } from "../index";
+import { setOf } from "../sstate";
+import { Minimal } from "../testUtils";
 
-type AutoFoo = {
-  numset: s.SSet<number>;
-};
-
-class AudioContext {}
-
-/** Foo includes external value in constructor */
-class Foo extends s.Structured<AutoFoo, typeof Foo> {
-  constructor(
-    //
-    readonly numset: s.SSet<number>,
-    readonly external: AudioContext
-  ) {
-    super();
-  }
-
-  static of(external: AudioContext) {
-    return Structured.create(Foo, s.set<number>(), external);
-  }
-
-  override autoSimplify() {
-    return {
-      numset: this.numset,
-    };
-  }
-
-  // All this is just boilerplate ugh
-  override replace(
-    auto: s.JSONOfAuto<AutoFoo>,
-    replace: s.ReplaceFunctions
-  ): void {
-    replace.set(auto.numset, this.numset);
-    // this.numset._setRaw(new Set(json.numset));
-  }
-
-  static construct(auto: s.JSONOfAuto<AutoFoo>): Foo {
-    // todo: how can I include external dependencies, not created at construction time?
-    return new Foo(s.set<number>(), new AudioContext());
-  }
-}
-
-const sets = Foo.of(new AudioContext());
-
-describe("sets", () => {
+describe("set", () => {
   it("add, hashes up", () => {
-    sets.numset.add(5);
-    expect(sets.numset.has(5)).toEqual(true);
-    expect(sets.numset._hash).toEqual(1);
-    expect(sets._hash).toEqual(1);
+    const set = s.set<number>([3]);
+    set.add(5);
+    expect(set.has(5)).toEqual(true);
+    expect(set.size).toEqual(2);
+    expect(set._hash).toEqual(1);
   });
 
-  it("clear", () => {
-    sets.numset.clear();
-    expect(sets.numset._hash).toEqual(2);
-    expect(sets._hash).toEqual(2);
+  it("serializes, constructs", () => {
+    const set = s.SSet._create([2], "foobar", null);
+    const serialized = s.serialize(set);
+    expect(serialized).toMatchSnapshot();
+    const constructed = s.construct(serialized, null);
+    expect(constructed).toMatchSnapshot();
+  });
+});
+
+describe("setOf", () => {
+  it("add, hashes up", () => {
+    const set = setOf(Minimal, []);
+    const min = s.Structured.create(Minimal);
+    set.add(min);
+    expect(set.has(min)).toEqual(true);
+    expect(set.size).toEqual(1);
+    expect(set._hash).toEqual(1);
+  });
+
+  it("serializes, constructs", () => {
+    const min = Minimal.withId("minid");
+    const set = s.SSet._create([min], "setid", Minimal);
+    const serialized = s.serialize(set);
+    expect(serialized).toMatchSnapshot();
+    console.log("constructing");
+    const constructed = s.construct(serialized, Minimal);
+    console.log(constructed);
+    expect(constructed).toMatchSnapshot();
   });
 });

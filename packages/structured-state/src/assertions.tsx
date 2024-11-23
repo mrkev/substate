@@ -5,8 +5,8 @@ import { LinkedArray } from "./state/LinkedArray";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
 import { SSet, StructuredKind } from ".";
-import { StructSchema } from "./serialization";
 import { SUnion } from "./sunion";
+import { StructSchema } from "./StructuredKinds";
 
 export function assertSPrimitive<T>(
   value: unknown

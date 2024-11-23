@@ -24,7 +24,7 @@ export class SimplificationMetadata {
   readonly allIds = new Set<string>();
   readonly allObjs = new Map<string, Simplified>();
   record<T extends Simplified>(obj: StructuredKind, simplified: T): T {
-    console.log("simplifying", obj._id, simplified.$$);
+    // console.log("simplifying", obj._id, simplified.$$);
     if (this.allIds.has(obj._id)) {
       throw new Error("Dubplicate " + obj._id);
     }
@@ -194,13 +194,14 @@ export function simplifyStructured(
 function simplifySet(
   obj: SSet<any>,
   acc: SimplificationMetadata
-): NSimplified["set-simple"] {
+): NSimplified["set"] {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
 
   return acc.record(obj, {
-    $$: "set-simple",
+    $$: "set",
+    _schema: obj._schema != null,
     _value: Array.from(obj._getRaw()).map((x) => {
       return simplify(x, acc);
     }),
