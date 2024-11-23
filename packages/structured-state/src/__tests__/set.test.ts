@@ -1,5 +1,3 @@
-// @vitest-environment jsdom
-
 import { describe, expect, it } from "vitest";
 import * as s from "../index";
 import { setOf } from "../sstate";
@@ -38,9 +36,7 @@ describe("setOf", () => {
     const set = s.SSet._create([min], "setid", Minimal);
     const serialized = s.serialize(set);
     expect(serialized).toMatchSnapshot();
-    console.log("constructing");
     const constructed = s.construct(serialized, Minimal);
-    console.log(constructed);
     expect(constructed).toMatchSnapshot();
   });
 });

@@ -25,5 +25,5 @@ export function mutableset<T>(set: ReadonlySet<T>): Set<T> {
 }
 
 export function setWindow(prop: string, value: any) {
-  (window as any)[prop] = value;
+  (globalThis as any)[prop] = value;
 }
