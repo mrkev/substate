@@ -3,15 +3,18 @@ import * as s from "../index";
 import { replacePackage } from "../serializaiton.replace";
 import { simplifyAndPackage } from "../serialization.simplify";
 import { StructSchema } from "../StructuredKinds";
-import { Minimal } from "../testUtils";
+import { Minimal, Simple } from "../testUtils";
 
 const testSet = <T>(initialValue?: Iterable<T>) =>
   s.SSet._create(initialValue, "foobar", undefined);
 
 const testSetOf = <T extends StructSchema>(
   schema: T,
-  initialValue?: Iterable<InstanceType<T>>
-) => s.SSet._create(initialValue, "setid", schema);
+  initialValue?: Iterable<InstanceType<T>>,
+  id?: string
+) => s.SSet._create(initialValue, id ?? "setid", schema);
+
+// TODO: test replace with non-mins to ensure replace does happen in children
 
 describe("set", () => {
   it("add, hashes up", () => {
@@ -76,6 +79,7 @@ describe("setOf", () => {
       Minimal.withId("5"),
     ]);
     const pkg = simplifyAndPackage(set);
+
     set.add(Minimal.withId("6"));
     set.add(Minimal.withId("7"));
     set.add(Minimal.withId("8"));
@@ -88,9 +92,39 @@ describe("setOf", () => {
     set.delete(three);
 
     expect(set.size).toBe(7);
+
     replacePackage(pkg, set);
     expect(set.size).toBe(5);
     expect(set).toMatchSnapshot();
+  });
+
+  it("replace structured", () => {
+    const [one] = [Simple.withIds("simple", "num")];
+
+    const set = testSetOf(Simple, [one], "set.rst");
+    const pkg = simplifyAndPackage(set);
+
+    expect(one.num.get()).toBe(0);
+
+    one.num.set(1);
+    expect(one.num.get()).toBe(1);
+
+    replacePackage(pkg, set);
+    expect(one.num.get()).toBe(0);
+  });
+
+  it("replace.prepare", () => {
+    const [one] = [Minimal.withId("1")];
+
+    const set = testSetOf(Minimal, [one], "set.rst");
+    const pkg = simplifyAndPackage(set);
+
+    expect(set.size).toBe(1);
+    set.delete(one);
+    expect(set.size).toBe(0);
+
+    replacePackage(pkg, set);
+    expect(set.size).toBe(1);
   });
 
   it("serializes, constructs", () => {

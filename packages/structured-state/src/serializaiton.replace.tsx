@@ -16,7 +16,6 @@ import {
   isSimplified,
   NSimplified,
   Simplified,
-  SimplifiedSchemaSet,
   SimplifiedSet,
   SimplifiedSimpleArray,
   SimplifiedTypePrimitive,
@@ -115,7 +114,7 @@ export function replaceSSet(
    * │  │ B │  │
    * │  └──────┘
    * │ A    │
-   * └──────┘ <- current
+   * └──────┘ <- current (set)
    */
 
   // we only ever have to get from json._value
@@ -129,11 +128,12 @@ export function replaceSSet(
     })
   );
 
-  const getFromB = (elem: unknown) => {
-    return b.get(isSimplified(elem) ? elem._id : elem);
+  const getWithAFromB = (elem: unknown) => {
+    const result = b.get(isStructuredKind(elem) ? elem._id : elem);
+    return result;
   };
 
-  const removeFromB = (elem: unknown) => {
+  const removeBFromB = (elem: unknown) => {
     b.delete(isSimplified(elem) ? elem._id : elem);
   };
 
@@ -155,7 +155,7 @@ export function replaceSSet(
 
   // 1. delete A
   for (const ai of set) {
-    const equivalent = getFromB(ai);
+    const equivalent = getWithAFromB(ai);
     if (equivalent == null) {
       set.delete(ai);
     }
@@ -163,6 +163,7 @@ export function replaceSSet(
 
   const replace2 = (curr: unknown, bi: unknown) => {
     if (isSimplified(bi) && isStructuredKind(curr)) {
+      // console.log("REPLACE");
       replace(bi, curr, acc);
     } else if (isSimplified(bi)) {
       throw new Error(`simplified found, but element is not structured in set`);
@@ -177,67 +178,17 @@ export function replaceSSet(
 
   // 2. replace
   for (const ai of set) {
-    const bi = getFromB(ai);
-
-    // replace(bi, ai, null)
+    const bi = getWithAFromB(ai);
     replace2(ai, bi);
-    removeFromB(bi);
+    removeBFromB(bi);
   }
 
   // 3. add C
-  for (const bi of b) {
+  for (const bi of b.values()) {
     const prepared = prepare(bi);
+
     set.add(prepared);
   }
-
-  // if (json._schema) {
-  //   const sjson = json as SimplifiedSchemaSet<Simplified>;
-  //   const scurr = set as SSet<StructuredKind>;
-
-  //   const jsonForId = new Map(sjson._value.map((x) => [x._id, x]));
-  //   const currForId = new Map(scurr.map((x) => [x._id, x]));
-
-  //   // 1. delete A
-  //   for (const a of set) {
-  //     if (!jsonForId.has(a._id)) {
-  //       set.delete(a);
-  //     }
-  //   }
-
-  //   // 2. replace
-  //   for (const b of scurr) {
-  //   }
-
-  //   // 3. add C
-  //   for (const c of sjson._value) {
-  //     // replace(c, null, )
-  //   }
-  // }
-
-  // // TODO: can a set contain structured objects? like an array? do I need simple set and schema set?
-  // throw new Error("NOT IMPLEMENTED");
-
-  // set._replace((raw) => {
-  //   return json._value;
-  // });
-  // TODO: SCHEMA?
-  const initialized = json._value.map((x) => {
-    // TODO: find if item exists in array
-    // if (isSeralized(x)) {
-    //   // const elem = arr._containedIds.get(x._id) as StructuredKind | null;
-    //   // if (elem != null) {
-    //   //   replace(x, elem);
-    //   //   return;
-    //   // }
-    //   // TODO: spec?
-    //   // return initialize(x, arr._schema[0] as any);
-    // } else {
-    return x;
-    // }
-  });
-
-  // obj._setRaw(initialized);
-  return;
 }
 
 export function replaceSchemaArray<
