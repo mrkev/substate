@@ -34,8 +34,8 @@ export type HistorySnapshot = {
 class GlobalState {
   HISTORY_RECORDING: Map<string, string> | false = false;
   readonly knownObjects = new WeakRefMap<StructuredKind>(10_000);
-  readonly history = LinkedArray.create<HistorySnapshot>();
-  readonly redoStack = LinkedArray.create<HistorySnapshot>();
+  readonly history = new LinkedArray<HistorySnapshot>([], "$$history", true);
+  readonly redoStack = new LinkedArray<HistorySnapshot>([], "$$redo", true);
   constructor() {
     setWindow("globalState", this);
   }

@@ -21,7 +21,7 @@ import {
   isSimplified,
 } from "./serialization";
 import { SimplePackage } from "./serialization.simplify";
-import { SArray, SSchemaArray } from "./sstate";
+import { SArray, SSchemaArray } from "./SArray";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SSet } from "./state/LinkedSet";
 import { SUnion } from "./sunion";

@@ -1,5 +1,32 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`set > replaces 1`] = `
+SSet {
+  "_container": Set {},
+  "_hash": 16,
+  "_id": "foobar",
+  "_propagatedTokens": WeakSet {},
+  "_schema": null,
+  "_set": Set {
+    4,
+    5,
+    [
+      1,
+      1,
+    ],
+    [
+      2,
+      2,
+    ],
+    [
+      3,
+      3,
+    ],
+  },
+  "_subscriptors": Set {},
+}
+`;
+
 exports[`set > serializes, constructs 1`] = `"{"nodes":{"foobar":{"$$":"set","_schema":false,"_value":[2],"_id":"foobar"}},"root":{"$$":"ref","_id":"foobar"},"simplified":{"$$":"set","_schema":false,"_value":[2],"_id":"foobar"}}"`;
 
 exports[`set > serializes, constructs 2`] = `
@@ -11,6 +38,59 @@ SSet {
   "_schema": null,
   "_set": Set {
     2,
+  },
+  "_subscriptors": Set {},
+}
+`;
+
+exports[`setOf > replaces 1`] = `
+SSet {
+  "_container": Set {},
+  "_hash": 20,
+  "_id": "setid",
+  "_propagatedTokens": WeakSet {},
+  "_schema": [Function],
+  "_set": Set {
+    [
+      "1",
+      {
+        "$$": "structured",
+        "_id": "1",
+        "_value": {},
+      },
+    ],
+    [
+      "2",
+      {
+        "$$": "structured",
+        "_id": "2",
+        "_value": {},
+      },
+    ],
+    [
+      "3",
+      {
+        "$$": "structured",
+        "_id": "3",
+        "_value": {},
+      },
+    ],
+    [
+      "4",
+      {
+        "$$": "structured",
+        "_id": "4",
+        "_value": {},
+      },
+    ],
+    [
+      "5",
+      {
+        "$$": "structured",
+        "_id": "5",
+        "_value": {},
+      },
+    ],
   },
   "_subscriptors": Set {},
 }

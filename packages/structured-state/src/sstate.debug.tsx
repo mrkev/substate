@@ -3,7 +3,7 @@ import { SSet, SString, Structured } from ".";
 import { Struct2 } from "./Struct2";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { MutationHashable } from "./state/MutationHashable";
-import { SArray, SSchemaArray } from "./sstate";
+import { SArray, SSchemaArray } from "./SArray";
 import { Struct } from "./Struct";
 import { exhaustive } from "./assertions";
 import { StructuredKind } from "./StructuredKinds";

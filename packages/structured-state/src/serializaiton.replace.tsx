@@ -10,25 +10,26 @@ import {
   exhaustive,
 } from "./assertions";
 import { nullthrows } from "./nullthrows";
+import { SArray, SSchemaArray } from "./SArray";
 import {
   isSeralizedStructured,
   isSimplified,
   NSimplified,
   Simplified,
-  SimplifiedSimpleArray,
+  SimplifiedSchemaSet,
   SimplifiedSet,
+  SimplifiedSimpleArray,
   SimplifiedTypePrimitive,
 } from "./serialization";
 import { initialize } from "./serialization.initialize";
 import { isSimplePackage, SimplePackage } from "./serialization.simplify";
-import { SArray, SSchemaArray } from "./sstate";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SSet } from "./state/LinkedSet";
 import { SubbableContainer } from "./state/SubbableContainer";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
-import { StructuredKind } from "./StructuredKinds";
+import { isStructuredKind, StructuredKind } from "./StructuredKinds";
 import { SUnion } from "./sunion";
 
 export function replacePackage(json: unknown, obj: StructuredKind): void {
@@ -68,7 +69,7 @@ function replace(json: Simplified, obj: StructuredKind, acc: ReplaceMetadata) {
       }
       case "set": {
         assertSSet(obj);
-        return replaceSSet(json, obj);
+        return replaceSSet(json, obj, acc);
       }
       case "union": {
         assertSUnion(obj);
@@ -91,6 +92,152 @@ export function replacePrimitive<T>(
   obj: LinkedPrimitive<T>
 ) {
   obj.replace(json._value);
+}
+
+export function replaceSSet(
+  json: NSimplified["set"],
+  set: SSet<any>,
+  acc: ReplaceMetadata
+) {
+  // set is current state
+
+  if (json._schema != Boolean(set._schema != null)) {
+    throw new Error("non-matching schemas");
+  }
+
+  /*
+   * 1. delete  A
+   * 2. replace B
+   * 3. add     C
+   *    ┌──────┐ <- json
+   *    │    C │
+   * ┌──│───┐  │
+   * │  │ B │  │
+   * │  └──────┘
+   * │ A    │
+   * └──────┘ <- current
+   */
+
+  // we only ever have to get from json._value
+  const b = new Map(
+    json._value.map((x) => {
+      if (isSimplified(x)) {
+        return [x._id, x];
+      } else {
+        return [x, x];
+      }
+    })
+  );
+
+  const getFromB = (elem: unknown) => {
+    return b.get(isSimplified(elem) ? elem._id : elem);
+  };
+
+  const removeFromB = (elem: unknown) => {
+    b.delete(isSimplified(elem) ? elem._id : elem);
+  };
+
+  const prepare = (elem: unknown) => {
+    if (isSimplified(elem)) {
+      const initialized = initialize(
+        elem,
+        nullthrows(
+          set._schema,
+          "set holds structured state, but defines no schema"
+        ),
+        null
+      );
+      return initialized;
+    } else {
+      return elem;
+    }
+  };
+
+  // 1. delete A
+  for (const ai of set) {
+    const equivalent = getFromB(ai);
+    if (equivalent == null) {
+      set.delete(ai);
+    }
+  }
+
+  const replace2 = (curr: unknown, bi: unknown) => {
+    if (isSimplified(bi) && isStructuredKind(curr)) {
+      replace(bi, curr, acc);
+    } else if (isSimplified(bi)) {
+      throw new Error(`simplified found, but element is not structured in set`);
+    } else if (isStructuredKind(curr)) {
+      throw new Error(
+        `structured kind found, but can't replace with non-simplified`
+      );
+    } else {
+      // do nothing
+    }
+  };
+
+  // 2. replace
+  for (const ai of set) {
+    const bi = getFromB(ai);
+
+    // replace(bi, ai, null)
+    replace2(ai, bi);
+    removeFromB(bi);
+  }
+
+  // 3. add C
+  for (const bi of b) {
+    const prepared = prepare(bi);
+    set.add(prepared);
+  }
+
+  // if (json._schema) {
+  //   const sjson = json as SimplifiedSchemaSet<Simplified>;
+  //   const scurr = set as SSet<StructuredKind>;
+
+  //   const jsonForId = new Map(sjson._value.map((x) => [x._id, x]));
+  //   const currForId = new Map(scurr.map((x) => [x._id, x]));
+
+  //   // 1. delete A
+  //   for (const a of set) {
+  //     if (!jsonForId.has(a._id)) {
+  //       set.delete(a);
+  //     }
+  //   }
+
+  //   // 2. replace
+  //   for (const b of scurr) {
+  //   }
+
+  //   // 3. add C
+  //   for (const c of sjson._value) {
+  //     // replace(c, null, )
+  //   }
+  // }
+
+  // // TODO: can a set contain structured objects? like an array? do I need simple set and schema set?
+  // throw new Error("NOT IMPLEMENTED");
+
+  // set._replace((raw) => {
+  //   return json._value;
+  // });
+  // TODO: SCHEMA?
+  const initialized = json._value.map((x) => {
+    // TODO: find if item exists in array
+    // if (isSeralized(x)) {
+    //   // const elem = arr._containedIds.get(x._id) as StructuredKind | null;
+    //   // if (elem != null) {
+    //   //   replace(x, elem);
+    //   //   return;
+    //   // }
+    //   // TODO: spec?
+    //   // return initialize(x, arr._schema[0] as any);
+    // } else {
+    return x;
+    // }
+  });
+
+  // obj._setRaw(initialized);
+  return;
 }
 
 export function replaceSchemaArray<
@@ -229,33 +376,6 @@ export function replaceStructured(
   SubbableContainer._notifyChange(obj, obj);
 }
 
-export function replaceSSet(json: NSimplified["set"], set: SSet<any>) {
-  // TODO: can a set contain structured objects? like an array? do I need simple set and schema set?
-  throw new Error("NOT IMPLEMENTED");
-
-  // set._replace((raw) => {
-  //   return json._value;
-  // });
-  // TODO: SCHEMA?
-  const initialized = json._value.map((x) => {
-    // TODO: find if item exists in array
-    // if (isSeralized(x)) {
-    //   // const elem = arr._containedIds.get(x._id) as StructuredKind | null;
-    //   // if (elem != null) {
-    //   //   replace(x, elem);
-    //   //   return;
-    //   // }
-    //   // TODO: spec?
-    //   // return initialize(x, arr._schema[0] as any);
-    // } else {
-    return x;
-    // }
-  });
-
-  // obj._setRaw(initialized);
-  return;
-}
-
 export function replaceSUnion(json: NSimplified["union"], obj: SUnion<any>) {
   // todo: Schema. have user deifne a replace function so they can pick the right
   // schema to use when initializing
@@ -282,7 +402,8 @@ export class ReplaceMetadata {
     struct2: replaceStruct2,
     structured: (json: NSimplified["structured"], obj: Structured<any, any>) =>
       replaceStructured(json, obj, this),
-    set: replaceSSet,
+    set: (json: NSimplified["set"], set: SSet<any>) =>
+      replaceSSet(json, set, this),
   } as const;
 }
 

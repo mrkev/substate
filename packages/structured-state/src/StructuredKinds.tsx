@@ -1,5 +1,5 @@
 import { SSet, Structured } from ".";
-import { SArray, SSchemaArray } from "./sstate";
+import { SArray, SSchemaArray } from "./SArray";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";

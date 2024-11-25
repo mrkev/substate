@@ -1,4 +1,4 @@
-import { SArray, SSchemaArray } from "./sstate";
+import { SArray, SSchemaArray } from "./SArray";
 import { Struct } from "./Struct";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { LinkedArray } from "./state/LinkedArray";

@@ -1,5 +1,5 @@
 import { simplifyAndPackage } from "./serialization.simplify";
-import { SArray, SSchemaArray } from "./sstate";
+import { SArray, SSchemaArray } from "./SArray";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SSet } from "./state/LinkedSet";
 import { Struct } from "./Struct";
@@ -32,6 +32,13 @@ export type SimplifiedSchemaArray<T extends Simplified> = Readonly<{
 export type SimplifiedSet<T> = Readonly<{
   $$: "set";
   _schema: boolean;
+  _id: string;
+  _value: readonly T[];
+}>;
+
+export type SimplifiedSchemaSet<T extends Simplified> = Readonly<{
+  $$: "set";
+  _schema: true;
   _id: string;
   _value: readonly T[];
 }>;

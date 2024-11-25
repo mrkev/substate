@@ -1,4 +1,4 @@
-import { SSet } from ".";
+import { SArray, SSchemaArray, SSet } from ".";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
@@ -14,7 +14,6 @@ import {
   Simplified,
   SimplifiedDescriptor,
 } from "./serialization";
-import { SArray, SSchemaArray } from "./sstate";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { CONTAINER_IGNORE_KEYS } from "./state/SubbableContainer";
 import { SUnion } from "./sunion";

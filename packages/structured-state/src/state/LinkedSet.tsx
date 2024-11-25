@@ -171,4 +171,14 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
   get [Symbol.toStringTag]() {
     return this.constructor.name;
   }
+
+  // non-standard
+
+  map<U>(callbackfn: (value: S) => U): U[] {
+    const result = [];
+    for (const value of this.values()) {
+      result.push(callbackfn(value));
+    }
+    return result;
+  }
 }

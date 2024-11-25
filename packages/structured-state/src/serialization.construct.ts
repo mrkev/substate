@@ -4,7 +4,6 @@ import {
   initializeStructured,
 } from "./serialization.initialize";
 import { isSimplePackage } from "./serialization.simplify";
-import { SState } from "./sstate";
 import { Struct } from "./Struct";
 import { ConstructableStructure } from "./Structured";
 import { StructSchema } from "./StructuredKinds";

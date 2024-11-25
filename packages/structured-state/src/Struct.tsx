@@ -1,13 +1,12 @@
 import { nanoid } from "nanoid";
 import { isContainable } from "./assertions";
 import {
-  SArray,
   SOut,
-  SSchemaArray,
   UNINITIALIZED_ARRAY,
   UNINITIALIZED_PRIMITIVE,
   UNINITIALIZED_TYPED_ARRAY,
 } from "./sstate";
+import { SArray, SSchemaArray } from "./SArray";
 import { getGlobalState, saveForHistory } from "./sstate.history";
 import type { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";

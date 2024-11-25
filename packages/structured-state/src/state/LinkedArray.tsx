@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { mutablearr } from "../nullthrows";
-import { saveForHistory } from "../sstate.history";
+import { getGlobalState, saveForHistory } from "../sstate.history";
 import { StateChangeHandler } from "./LinkedPrimitive";
 import { Subbable, notify } from "./Subbable";
 import { SubbableContainer } from "./SubbableContainer";
@@ -55,10 +55,13 @@ export class LinkedArray<S>
     SubbableContainer._notifyChange(this, this);
   }
 
-  constructor(initialValue: Array<S>, id: string) {
+  constructor(initialValue: Array<S>, id: string, anonymous = false) {
     this._id = id;
     this._array = initialValue;
     SubbableContainer._containAll(this, this._array);
+    if (!anonymous) {
+      getGlobalState().knownObjects.set(this._id, this);
+    }
   }
 
   private mutate<V>(mutator: (rep: Array<S>) => V): V {
@@ -206,7 +209,6 @@ export class LinkedArray<S>
     });
   }
 
-  // TODO: should this mutate and return itself? return a new LinkedArray? just return an array? probably the latter right?
   // Array<S> interface
   map<U>(
     callbackfn: (value: S, index: number, array: readonly S[]) => U,

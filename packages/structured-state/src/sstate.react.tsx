@@ -4,7 +4,7 @@ import type { LinkedPrimitive, StateDispath } from "./state/LinkedPrimitive";
 import { useSubscribeToSubbableMutationHashable } from "./state/MutationHashable";
 import { SubbableContainer } from "./state/SubbableContainer";
 import { subscribe } from "./state/Subbable";
-import { SArray } from "./sstate";
+import { SArray } from "./SArray";
 
 export function useSPrimitive<S>(
   linkedState: LinkedPrimitive<S>
