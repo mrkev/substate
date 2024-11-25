@@ -1,11 +1,11 @@
-import { simplifyAndPackage } from "./serialization.simplify";
-import { SArray, SSchemaArray } from "./SArray";
-import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { SSet } from "./state/LinkedSet";
-import { Struct } from "./Struct";
-import { Struct2 } from "./Struct2";
-import { Structured } from "./Structured";
-import { PrimitiveKind, StructuredKind } from "./StructuredKinds";
+import { SArray, SSchemaArray } from "../SArray";
+import { LinkedPrimitive } from "../state/LinkedPrimitive";
+import { SSet } from "../state/LinkedSet";
+import { Struct } from "../Struct";
+import { Struct2 } from "../Struct2";
+import { Structured } from "../Structured";
+import { PrimitiveKind, StructuredKind } from "../StructuredKinds";
+import { simplifyAndPackage } from "./simplify";
 
 export type Simplified = NSimplified[keyof NSimplified];
 
@@ -157,10 +157,8 @@ export type ObjectDeserialization<
 ///////////////////////////////
 
 export function serialize(state: StructuredKind): string {
-  const allIds = new Set<string>();
   const simplified = simplifyAndPackage(state);
   const result = JSON.stringify(simplified);
-  // console.log(allIds);
   return result;
 }
 

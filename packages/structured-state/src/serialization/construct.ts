@@ -2,11 +2,11 @@ import {
   InitializationMetadata,
   initialize,
   initializeStructured,
-} from "./serialization.initialize";
-import { isSimplePackage } from "./serialization.simplify";
-import { Struct } from "./Struct";
-import { ConstructableStructure } from "./Structured";
-import { StructSchema } from "./StructuredKinds";
+} from "./initialize";
+import { isSimplePackage } from "./simplify";
+import { Struct } from "../Struct";
+import { ConstructableStructure } from "../Structured";
+import { StructSchema } from "../StructuredKinds";
 
 export function construct(
   str: string,

@@ -1,10 +1,9 @@
 import { nanoid } from "nanoid";
 import { mutableset } from "../nullthrows";
 import { getGlobalState, saveForHistory } from "../sstate.history";
-import { SubbableContainer } from "./SubbableContainer";
 import { StructSchema } from "../StructuredKinds";
+import { SubbableContainer } from "./SubbableContainer";
 
-// TODO: missing: history
 export class SSet<S> extends SubbableContainer implements Set<S> {
   private _set: ReadonlySet<S>;
   public _schema: StructSchema | null;

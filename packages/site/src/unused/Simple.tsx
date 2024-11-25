@@ -4,7 +4,7 @@ import { setWindow } from "../../../structured-state/src/nullthrows";
 import {
   construct,
   serialize,
-} from "../../../structured-state/src/serialization";
+} from "../../../structured-state/src/serialization/serialization";
 import * as s from "../../../structured-state/src/sstate";
 import { debugOut } from "../../../structured-state/src/sstate.debug";
 import {

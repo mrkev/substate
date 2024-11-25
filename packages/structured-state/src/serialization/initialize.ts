@@ -1,8 +1,8 @@
-import { SBoolean, SNil, SNumber, SPrimitive, SString } from ".";
-import { Struct } from "./Struct";
-import { Struct2 } from "./Struct2";
-import { ConstructableStructure, initStructured } from "./Structured";
-import { StructSchema, StructuredKind } from "./StructuredKinds";
+import { SBoolean, SNil, SNumber, SPrimitive, SString } from "..";
+import { Struct } from "../Struct";
+import { Struct2 } from "../Struct2";
+import { ConstructableStructure, initStructured } from "../Structured";
+import { StructSchema, StructuredKind } from "../StructuredKinds";
 import {
   assertArray,
   assertConstructableStruct,
@@ -10,8 +10,8 @@ import {
   assertConstructableStructured,
   assertNotArray,
   exhaustive,
-} from "./assertions";
-import { assertNotNull } from "./nullthrows";
+} from "../assertions";
+import { assertNotNull } from "../nullthrows";
 import {
   NSimplified,
   Simplified,
@@ -20,11 +20,11 @@ import {
   SimplifiedTypePrimitive,
   isSimplified,
 } from "./serialization";
-import { SimplePackage } from "./serialization.simplify";
-import { SArray, SSchemaArray } from "./SArray";
-import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { SSet } from "./state/LinkedSet";
-import { SUnion } from "./sunion";
+import { SimplePackage } from "./simplify";
+import { SArray, SSchemaArray } from "../SArray";
+import { LinkedPrimitive } from "../state/LinkedPrimitive";
+import { SSet } from "../state/LinkedSet";
+import { SUnion } from "../sunion";
 
 function find(
   json: Simplified,
@@ -363,11 +363,11 @@ export class InitializationMetadata {
       initializePrimitive<boolean>(json, this),
     null: (json: SimplifiedTypePrimitive<null>) =>
       initializePrimitive<null>(json, this),
-    primitive: <T,>(json: SimplifiedTypePrimitive<T>) =>
+    primitive: <T>(json: SimplifiedTypePrimitive<T>) =>
       initializePrimitive(json, this),
     schemaArray: (json: NSimplified["arr-schema"], spec: StructSchema[]) =>
       initializeSchemaArray(json, spec, this),
-    array: <T,>(json: SimplifiedSimpleArray<T>) =>
+    array: <T>(json: SimplifiedSimpleArray<T>) =>
       initializeSimpleArray(json, this),
     struct: (json: NSimplified["struct"], spec: typeof Struct) =>
       initializeStruct(json, spec, this),
@@ -377,7 +377,7 @@ export class InitializationMetadata {
       json: NSimplified["structured"],
       spec: Spec
     ) => initializeStructured(json, spec, this),
-    set: <T,>(json: SimplifiedSet<T>, spec: StructSchema) =>
+    set: <T>(json: SimplifiedSet<T>, spec: StructSchema) =>
       initializeSet(json, spec, this),
   } as const;
 
@@ -391,11 +391,11 @@ export class InitializationMetadata {
       initializePrimitive<boolean>(json, null),
     null: (json: SimplifiedTypePrimitive<null>) =>
       initializePrimitive<null>(json, null),
-    primitive: <T,>(json: SimplifiedTypePrimitive<T>) =>
+    primitive: <T>(json: SimplifiedTypePrimitive<T>) =>
       initializePrimitive(json, null),
     schemaArray: (json: NSimplified["arr-schema"], spec: StructSchema[]) =>
       initializeSchemaArray(json, spec, null),
-    array: <T,>(json: SimplifiedSimpleArray<T>) =>
+    array: <T>(json: SimplifiedSimpleArray<T>) =>
       initializeSimpleArray(json, null),
     struct: (json: NSimplified["struct"], spec: typeof Struct) =>
       initializeStruct(json, spec, null),
@@ -405,7 +405,7 @@ export class InitializationMetadata {
       json: NSimplified["structured"],
       spec: Spec
     ) => initializeStructured(json, spec, null),
-    set: <T,>(json: SimplifiedSet<T>, spec: StructSchema) =>
+    set: <T>(json: SimplifiedSet<T>, spec: StructSchema) =>
       initializeSet(json, spec, null),
   };
 }

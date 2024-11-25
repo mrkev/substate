@@ -1,12 +1,12 @@
 import { nanoid } from "nanoid";
-import { ReplaceFunctions } from "./serializaiton.replace";
+import { ReplaceFunctions } from "./serialization/replace";
 import {
   ApplyDeserialization,
   ApplySerialization,
   NeedsSchema,
   Schema,
-} from "./serialization";
-import { InitFunctions } from "./serialization.initialize";
+} from "./serialization/serialization";
+import { InitFunctions } from "./serialization/initialize";
 import { getGlobalState, saveForHistory } from "./sstate.history";
 import type { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
 import { Subbable } from "./state/Subbable";

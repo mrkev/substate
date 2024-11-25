@@ -1,23 +1,23 @@
-import { SArray, SSchemaArray, SSet } from ".";
-import { Struct } from "./Struct";
-import { Struct2 } from "./Struct2";
-import { Structured } from "./Structured";
+import { SArray, SSchemaArray, SSet } from "..";
+import { Struct } from "../Struct";
+import { Struct2 } from "../Struct2";
+import { Structured } from "../Structured";
 import {
   isStructuredKind,
   PrimitiveKind,
   StructuredKind,
-} from "./StructuredKinds";
-import { exhaustive } from "./assertions";
+} from "../StructuredKinds";
+import { exhaustive } from "../assertions";
 import {
   isSimplified,
   NSimplified,
   Simplified,
   SimplifiedDescriptor,
 } from "./serialization";
-import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { CONTAINER_IGNORE_KEYS } from "./state/SubbableContainer";
-import { SUnion } from "./sunion";
-import { JSONValue } from "./types";
+import { LinkedPrimitive } from "../state/LinkedPrimitive";
+import { CONTAINER_IGNORE_KEYS } from "../state/SubbableContainer";
+import { SUnion } from "../sunion";
+import { JSONValue } from "../types";
 
 export class SimplificationMetadata {
   readonly allIds = new Set<string>();
@@ -201,7 +201,7 @@ function simplifySet(
   return acc.record(obj, {
     $$: "set",
     _schema: obj._schema != null,
-    _value: Array.from(obj._getRaw()).map((x) => {
+    _value: obj.map((x) => {
       return simplify(x, acc);
     }),
     _id: obj._id,

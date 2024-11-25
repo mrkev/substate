@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
 import { nullthrows, setWindow } from "./nullthrows";
-import { replacePackage } from "./serializaiton.replace";
-import { serialize, Simplified } from "./serialization";
+import { replacePackage } from "./serialization/replace";
+import { serialize, Simplified } from "./serialization/serialization";
 import { LinkedArray } from "./state/LinkedArray";
 import { StructuredKind } from "./StructuredKinds";
 import { WeakRefMap } from "./WeakRefMap";

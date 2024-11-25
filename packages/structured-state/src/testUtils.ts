@@ -1,6 +1,6 @@
 import * as s from "./index";
 import { Structured } from "./index";
-import { initializeStructured } from "./serialization.initialize";
+import { initializeStructured } from "./serialization/initialize";
 import { EmptyObject } from "./types";
 
 export class Minimal extends s.Structured<EmptyObject, typeof Minimal> {

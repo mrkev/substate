@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import * as s from "../index";
-import { replacePackage } from "../serializaiton.replace";
-import { simplifyAndPackage } from "../serialization.simplify";
+import { replacePackage } from "../serialization/replace";
+import { simplifyAndPackage } from "../serialization/simplify";
 import { StructSchema } from "../StructuredKinds";
 import { Minimal, Simple } from "../testUtils";
 

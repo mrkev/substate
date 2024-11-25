@@ -2,7 +2,7 @@ import { nanoid } from "nanoid";
 import { mutablearr } from "../nullthrows";
 import { getGlobalState, saveForHistory } from "../sstate.history";
 import { StateChangeHandler } from "./LinkedPrimitive";
-import { Subbable, notify } from "./Subbable";
+import { Subbable } from "./Subbable";
 import { SubbableContainer } from "./SubbableContainer";
 
 // .sort, .reverse, .fill, .copyWithin operate in place and return the array. SubbableArray
