@@ -109,7 +109,9 @@ describe("setOf", () => {
     one.num.set(1);
     expect(one.num.get()).toBe(1);
 
+    console.log(one.num.get());
     replacePackage(pkg, set);
+    console.log(one.num.get());
     expect(one.num.get()).toBe(0);
   });
 

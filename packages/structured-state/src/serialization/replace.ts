@@ -9,6 +9,7 @@ import {
   assertSUnion,
   exhaustive,
 } from "../assertions";
+import { nullthrows } from "../lib/nullthrows";
 import { SArray, SSchemaArray } from "../SArray";
 import { LinkedPrimitive } from "../state/LinkedPrimitive";
 import { SSet } from "../state/LinkedSet";
@@ -18,37 +19,38 @@ import { Struct2 } from "../Struct2";
 import { Structured } from "../Structured";
 import { StructuredKind } from "../StructuredKinds";
 import { SUnion } from "../sunion";
-import { initialize } from "./initialize";
+import { InitializationMetadata, initialize } from "./initialize";
 import { replaceSchemaArray, replaceSimpleArray } from "./replace.array";
 import { replaceSSet } from "./replace.set";
 import {
   isSimplified,
   NSimplified,
   Simplified,
+  SimplifiedRefOf,
   SimplifiedSet,
   SimplifiedSimpleArray,
   SimplifiedTypePrimitive,
 } from "./serialization";
-import { isSimplePackage, SimplePackage } from "./simplify";
+import { isSimplePackage } from "./simplify";
 
 export function replacePackage(json: unknown, obj: StructuredKind): void {
   if (!isSimplePackage(json)) {
     throw new Error("not a simple package");
   }
-  const acc = new ReplaceMetadata(json.nodes);
+  const acc = new InitializationMetadata(json);
   return replace(json.simplified, obj, acc);
 }
 
 export function replace(
   json: Simplified,
   obj: StructuredKind,
-  acc: ReplaceMetadata
+  acc: InitializationMetadata
 ) {
   try {
     switch (json.$$) {
       case "prim": {
         assertSPrimitive(obj);
-        return replacePrimitive(json, obj);
+        return replacePrimitive(json, obj, acc);
       }
       case "arr-schema": {
         assertSSchemaArray(obj);
@@ -79,7 +81,12 @@ export function replace(
         return replaceSUnion(json, obj);
       }
       case "ref": {
-        throw new Error("NOT IMPLEMENTED, ref");
+        const simple = nullthrows(
+          acc.knownSimples.get(json._id),
+          "ref not found"
+        );
+        return replace(simple, obj, acc);
+        // return replaceRef(json, obj, acc);
       }
       default:
         exhaustive(json, "invalid $$ type");
@@ -91,10 +98,25 @@ export function replace(
 }
 
 export function replacePrimitive<T>(
-  json: SimplifiedTypePrimitive<T>,
-  obj: LinkedPrimitive<T>
+  json: SimplifiedTypePrimitive<T> | SimplifiedRefOf<"prim">,
+  obj: LinkedPrimitive<T>,
+  acc: InitializationMetadata
 ) {
-  obj.replace(json._value);
+  switch (json.$$) {
+    case "prim": {
+      obj.replace(json._value);
+      return;
+    }
+    case "ref": {
+      const prim = nullthrows(acc.knownSimples.get(json._id), "ref not found");
+      // todo, ensure primitive
+      obj.replace((prim as any)._value);
+      return;
+    }
+
+    default:
+      exhaustive(json);
+  }
 }
 
 function replaceStruct(json: NSimplified["struct"], obj: Struct<any>): void {
@@ -136,9 +158,9 @@ function replaceStruct2(json: NSimplified["struct2"], obj: Struct2<any>): void {
 export function replaceStructured(
   json: NSimplified["structured"],
   obj: Structured<any, any>,
-  acc: ReplaceMetadata
+  acc: InitializationMetadata
 ) {
-  obj.replace(json._value, acc.replace);
+  obj.replace(json._value, replaceOfPkg(acc));
   SubbableContainer._notifyChange(obj, obj);
 }
 
@@ -150,26 +172,45 @@ export function replaceSUnion(json: NSimplified["union"], obj: SUnion<any>) {
   SubbableContainer._notifyChange(obj, obj);
 }
 
-export class ReplaceMetadata {
-  constructor(readonly knownSimples: SimplePackage["nodes"]) {}
+// export class ReplaceMetadata {
+//   readonly knownSimples: OrderedMap<string, Simplified>;
+//   constructor(pkg: SimplePackage) {
+//     this.knownSimples = OrderedMap.fromEntries(pkg.nodes);
+//   }
+// }
+
+export function replaceOfPkg(
+  metadata: InitializationMetadata
+): ReplaceFunctions {
   /** `this` on second argument to avoid double-initializing the same elements */
-  readonly replace: ReplaceFunctions = {
-    string: replacePrimitive<string>,
-    number: replacePrimitive<number>,
-    boolean: replacePrimitive<boolean>,
-    null: replacePrimitive<null>,
-    primitive: replacePrimitive,
+  return {
+    string: (
+      json: SimplifiedTypePrimitive<string>,
+      obj: LinkedPrimitive<string>
+    ) => replacePrimitive<string>(json, obj, metadata),
+    number: (
+      json: SimplifiedTypePrimitive<number>,
+      obj: LinkedPrimitive<number>
+    ) => replacePrimitive<number>(json, obj, metadata),
+    boolean: (
+      json: SimplifiedTypePrimitive<boolean>,
+      obj: LinkedPrimitive<boolean>
+    ) => replacePrimitive<boolean>(json, obj, metadata),
+    null: (json: SimplifiedTypePrimitive<null>, obj: LinkedPrimitive<null>) =>
+      replacePrimitive<null>(json, obj, metadata),
+    primitive: <T>(json: SimplifiedTypePrimitive<T>, obj: LinkedPrimitive<T>) =>
+      replacePrimitive(json, obj, metadata),
     schemaArray: <T extends Struct<any> | Struct2<any> | Structured<any, any>>(
       json: NSimplified["arr-schema"],
       arr: SSchemaArray<T>
-    ) => replaceSchemaArray(json, arr, this),
+    ) => replaceSchemaArray(json, arr, metadata),
     array: replaceSimpleArray,
     struct: replaceStruct,
     struct2: replaceStruct2,
     structured: (json: NSimplified["structured"], obj: Structured<any, any>) =>
-      replaceStructured(json, obj, this),
+      replaceStructured(json, obj, metadata),
     set: (json: NSimplified["set"], set: SSet<any>) =>
-      replaceSSet(json, set, this),
+      replaceSSet(json, set, metadata),
   } as const;
 }
 

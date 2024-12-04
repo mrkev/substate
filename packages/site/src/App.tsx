@@ -8,7 +8,8 @@ import {
   useContainer,
   useDirtyTracker,
 } from "../../structured-state/src/index";
-import { setWindow } from "../../structured-state/src/nullthrows";
+
+import { setWindow } from "../../structured-state/src/lib/nullthrows";
 import {
   HistorySnapshot,
   getGlobalState,

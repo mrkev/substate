@@ -1,8 +1,8 @@
-import { nullthrows } from "../nullthrows";
+import { nullthrows } from "../lib/nullthrows";
 import { SSet } from "../state/LinkedSet";
 import { isStructuredKind } from "../StructuredKinds";
-import { initialize } from "./initialize";
-import { ReplaceMetadata, replace } from "./replace";
+import { InitializationMetadata, initialize } from "./initialize";
+import { replace } from "./replace";
 import { NSimplified, isSimplified } from "./serialization";
 
 /**
@@ -23,7 +23,7 @@ import { NSimplified, isSimplified } from "./serialization";
 export function replaceSSet(
   json: NSimplified["set"],
   set: SSet<any>,
-  acc: ReplaceMetadata
+  acc: InitializationMetadata
 ) {
   // set is current state
   if (json._schema != Boolean(set._schema != null)) {
@@ -58,7 +58,7 @@ export function replaceSSet(
           set._schema,
           "set holds structured state, but defines no schema"
         ),
-        null
+        acc
       );
       return initialized;
     } else {

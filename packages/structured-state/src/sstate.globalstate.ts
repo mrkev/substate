@@ -1,4 +1,4 @@
-import { setWindow } from "./nullthrows";
+import { setWindow } from "./lib/nullthrows";
 import { HistorySnapshot, ObjectSnapshot } from "./sstate.history";
 import { LinkedArray } from "./state/LinkedArray";
 import { StructuredKind } from "./StructuredKinds";

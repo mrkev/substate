@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { mutableset } from "../nullthrows";
+import { mutableset } from "../lib/nullthrows";
 import { getGlobalState, saveForHistory } from "../sstate.history";
 import { StructSchema } from "../StructuredKinds";
 import { SubbableContainer } from "./SubbableContainer";

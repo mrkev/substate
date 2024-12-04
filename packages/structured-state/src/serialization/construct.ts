@@ -1,12 +1,24 @@
-import {
-  InitializationMetadata,
-  initialize,
-  initializeStructured,
-} from "./initialize";
-import { isSimplePackage } from "./simplify";
 import { Struct } from "../Struct";
 import { ConstructableStructure } from "../Structured";
 import { StructSchema } from "../StructuredKinds";
+import {
+  InitializationMetadata,
+  initialize,
+  initializePrimitive,
+  initializeStructured,
+} from "./initialize";
+import { isSimplePackage, SimplePackage } from "./simplify";
+
+function preInitialize(json: SimplePackage, metadata: InitializationMetadata) {
+  console.log(
+    "pre-init of nodes",
+    json.nodes.map(([_, node]) => `${node.$$}:${node._id}`)
+  );
+  for (const [id, node] of json.nodes) {
+    const _ = initializePrimitive(node as any, metadata);
+    console.log("inited", id);
+  }
+}
 
 export function construct(
   str: string,
@@ -25,6 +37,8 @@ export function construct(
     }
 
     const metadata = new InitializationMetadata(json);
+    preInitialize(json, metadata);
+
     const result = initialize(json.simplified, spec, metadata);
     return result;
   } catch (e) {
@@ -45,6 +59,8 @@ export const constructFn = {
       }
 
       const metadata = new InitializationMetadata(json);
+      preInitialize(json, metadata);
+
       const simple = json.simplified;
       if (simple.$$ !== "structured") {
         throw new Error(

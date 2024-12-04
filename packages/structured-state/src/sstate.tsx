@@ -6,7 +6,7 @@ import { StructSchema } from "./StructuredKinds";
 import { LinkedMap } from "./state/LinkedMap";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SSet } from "./state/LinkedSet";
-import { JSONValue } from "./types";
+import { JSONValue } from "./lib/types";
 
 // todo? create -> of
 export class SString extends LinkedPrimitive<string> {

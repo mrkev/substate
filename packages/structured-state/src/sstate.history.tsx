@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { nullthrows, setWindow } from "./nullthrows";
+import { nullthrows, setWindow } from "./lib/nullthrows";
 import { replacePackage } from "./serialization/replace";
 import { serialize, Simplified } from "./serialization/serialization";
 import { LinkedArray } from "./state/LinkedArray";

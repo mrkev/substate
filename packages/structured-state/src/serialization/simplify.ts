@@ -13,15 +13,19 @@ import {
   NSimplified,
   Simplified,
   SimplifiedDescriptor,
+  SimplifiedRefOf,
 } from "./serialization";
 import { LinkedPrimitive } from "../state/LinkedPrimitive";
 import { CONTAINER_IGNORE_KEYS } from "../state/SubbableContainer";
 import { SUnion } from "../sunion";
-import { JSONValue } from "../types";
+import { JSONValue } from "../lib/types";
+import { OrderedMap } from "../lib/OrderedMap";
 
 export class SimplificationMetadata {
   readonly allIds = new Set<string>();
   readonly allObjs = new Map<string, Simplified>();
+  readonly refered = new OrderedMap<string, Simplified>();
+
   record<T extends Simplified>(obj: StructuredKind, simplified: T): T {
     // console.log("simplifying", obj._id, simplified.$$);
     if (this.allIds.has(obj._id)) {
@@ -32,21 +36,62 @@ export class SimplificationMetadata {
     // return { $$: "ref", _to: obj._id };
     return simplified;
   }
+
+  reference<T extends Simplified>(simplified: T): SimplifiedRefOf<T["$$"]> {
+    const present = this.refered.get(simplified._id);
+    if (present != null) {
+      throw new Error("object already referenced. Not supported yet.");
+    }
+    this.refered.push(simplified._id, simplified);
+    return { $$: "ref", _id: simplified._id, kind: simplified.$$ };
+  }
+}
+
+export type SimplePackage = {
+  nodes: [string, Simplified][];
+  // root: NSimplified["ref"];
+  simplified: Simplified;
+};
+
+export function simplifyAndPackage(state: StructuredKind): SimplePackage {
+  const acc = new SimplificationMetadata();
+  const simplified = simplifyStructuredKind(state, acc);
+  return {
+    nodes: Array.from(acc.refered.entries()),
+    // todo: find right kind
+    // root: { $$: "ref", _id: state._id, kind: "ref" },
+    simplified,
+  };
+}
+
+export function isSimplePackage(json: unknown): json is SimplePackage {
+  // TODO: more validation?
+  return (
+    typeof json === "object" &&
+    json != null &&
+    !Array.isArray(json) &&
+    "nodes" in json &&
+    // "root" in json &&
+    "simplified" in json &&
+    isSimplified(json.simplified)
+  );
 }
 
 function simplifyPrimitive(
   obj: LinkedPrimitive<any>,
   acc: SimplificationMetadata
-): NSimplified["prim"] {
+): NSimplified["prim"] | SimplifiedRefOf<"prim"> {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
 
-  return acc.record(obj, {
-    $$: "prim",
-    _value: obj.get(),
-    _id: obj._id,
-  });
+  return acc.reference(
+    acc.record(obj, {
+      $$: "prim",
+      _value: obj.get(),
+      _id: obj._id,
+    })
+  );
 }
 
 function simplifySimpleArray(
@@ -221,35 +266,6 @@ function simplifyUnion(
     _value: simplifyStructuredKind(obj, acc),
     _id: obj._id,
   });
-}
-
-export type SimplePackage = {
-  nodes: Record<string, Simplified>;
-  root: NSimplified["reference"];
-  simplified: Simplified;
-};
-
-export function isSimplePackage(json: unknown): json is SimplePackage {
-  // TODO: more validation?
-  return (
-    typeof json === "object" &&
-    json != null &&
-    !Array.isArray(json) &&
-    "nodes" in json &&
-    "root" in json &&
-    "simplified" in json &&
-    isSimplified(json.simplified)
-  );
-}
-
-export function simplifyAndPackage(state: StructuredKind): SimplePackage {
-  const acc = new SimplificationMetadata();
-  const simplified = simplifyStructuredKind(state, acc);
-  return {
-    nodes: Object.fromEntries(acc.allObjs.entries()),
-    root: { $$: "ref", _id: state._id },
-    simplified,
-  };
 }
 
 function simplify(

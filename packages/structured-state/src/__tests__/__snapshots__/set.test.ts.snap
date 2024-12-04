@@ -18,7 +18,7 @@ SSet {
 }
 `;
 
-exports[`set > serializes, constructs 1`] = `"{"nodes":{"foobar":{"$$":"set","_schema":false,"_value":[2],"_id":"foobar"}},"root":{"$$":"ref","_id":"foobar"},"simplified":{"$$":"set","_schema":false,"_value":[2],"_id":"foobar"}}"`;
+exports[`set > serializes, constructs 1`] = `"{"nodes":[],"simplified":{"$$":"set","_schema":false,"_value":[2],"_id":"foobar"}}"`;
 
 exports[`set > serializes, constructs 2`] = `
 SSet {
@@ -92,7 +92,7 @@ SSet {
 }
 `;
 
-exports[`setOf > serializes, constructs 1`] = `"{"nodes":{"minid":{"$$":"structured","_id":"minid","_value":{}},"setid":{"$$":"set","_schema":true,"_value":[{"$$":"structured","_id":"minid","_value":{}}],"_id":"setid"}},"root":{"$$":"ref","_id":"setid"},"simplified":{"$$":"set","_schema":true,"_value":[{"$$":"structured","_id":"minid","_value":{}}],"_id":"setid"}}"`;
+exports[`setOf > serializes, constructs 1`] = `"{"nodes":[],"simplified":{"$$":"set","_schema":true,"_value":[{"$$":"structured","_id":"minid","_value":{}}],"_id":"setid"}}"`;
 
 exports[`setOf > serializes, constructs 2`] = `
 SSet {

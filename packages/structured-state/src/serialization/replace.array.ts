@@ -1,20 +1,24 @@
-import { Struct, SSchemaArray, SArray } from "..";
-import { nullthrows } from "../nullthrows";
+import { SArray, SSchemaArray, Struct } from "..";
+import { nullthrows } from "../lib/nullthrows";
 import { Struct2 } from "../Struct2";
 import { Structured } from "../Structured";
-import { initialize } from "./initialize";
-import { ReplaceMetadata } from "./replace";
+import { InitializationMetadata, initialize } from "./initialize";
+import { replaceOfPkg } from "./replace";
 import {
+  isSeralizedStructured,
+  isSimplified,
   NSimplified,
   Simplified,
-  isSimplified,
-  isSeralizedStructured,
   SimplifiedSimpleArray,
 } from "./serialization";
 
 export function replaceSchemaArray<
   T extends Struct<any> | Struct2<any> | Structured<any, any>
->(json: NSimplified["arr-schema"], arr: SSchemaArray<T>, acc: ReplaceMetadata) {
+>(
+  json: NSimplified["arr-schema"],
+  arr: SSchemaArray<T>,
+  acc: InitializationMetadata
+) {
   // arr is current state, we want json by the end
   arr._replace((raw) => {
     const jsonIndex = new Map<string, Simplified>();
@@ -56,7 +60,7 @@ export function replaceSchemaArray<
         if (!isSeralizedStructured(elem)) {
           throw new Error("Expected serialized Structure, found " + elem.$$);
         }
-        struct.replace(elem._value, acc.replace);
+        struct.replace(elem._value, replaceOfPkg(acc));
       }
     }
 
@@ -65,7 +69,7 @@ export function replaceSchemaArray<
       if (arrIndex.has(id)) {
         continue;
       }
-      const initialized = initialize(elem, arr._schema[0], null);
+      const initialized = initialize(elem, arr._schema[0], acc);
       raw.push(initialized as any); // todo: as any
     }
 

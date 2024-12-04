@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { mutablearr } from "../nullthrows";
+import { mutablearr } from "../lib/nullthrows";
 import { getGlobalState, saveForHistory } from "../sstate.history";
 import { StateChangeHandler } from "./LinkedPrimitive";
 import { Subbable } from "./Subbable";
