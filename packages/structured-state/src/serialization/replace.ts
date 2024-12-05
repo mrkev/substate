@@ -167,17 +167,11 @@ export function replaceStructured(
 export function replaceSUnion(json: NSimplified["union"], obj: SUnion<any>) {
   // todo: Schema. have user deifne a replace function so they can pick the right
   // schema to use when initializing
-  const value = initialize(json._value, [], null);
+  // todo: null as any, unimplemented
+  const value = initialize(json._value, [], null as any);
   obj.replace(value);
   SubbableContainer._notifyChange(obj, obj);
 }
-
-// export class ReplaceMetadata {
-//   readonly knownSimples: OrderedMap<string, Simplified>;
-//   constructor(pkg: SimplePackage) {
-//     this.knownSimples = OrderedMap.fromEntries(pkg.nodes);
-//   }
-// }
 
 export function replaceOfPkg(
   metadata: InitializationMetadata
