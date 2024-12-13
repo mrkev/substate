@@ -118,8 +118,8 @@ export type ApplySerialization<T extends StructuredKind> =
     ? NSimplified["arr-schema"]
     : T extends SArray<infer U>
     ? SimplifiedSimpleArray<U>
-    : T extends SSet<any>
-    ? NSimplified["set"]
+    : T extends SSet<infer U>
+    ? SimplifiedSet<U>
     : never;
 
 export type ApplyDeserialization<

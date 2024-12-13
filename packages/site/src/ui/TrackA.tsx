@@ -57,6 +57,17 @@ export function TrackA({
           }
         ></input>
       </legend>
+      <button
+        onClick={() => {
+          if (project.solodTracks.has(track)) {
+            project.solodTracks.delete(track);
+          } else {
+            project.solodTracks.add(track);
+          }
+        }}
+      >
+        S
+      </button>
       {clips.map((clip, i) => {
         return (
           <ClipA key={i} clip={clip} />

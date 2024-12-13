@@ -36,7 +36,7 @@ export function construct(
       throw new Error("not a simple package");
     }
 
-    const metadata = new InitializationMetadata(json);
+    const metadata = InitializationMetadata.fromPackage(json);
     preInitialize(json, metadata);
 
     const result = initialize(json.simplified, spec, metadata);
@@ -58,7 +58,7 @@ export const constructFn = {
         throw new Error("not a simple package");
       }
 
-      const metadata = new InitializationMetadata(json);
+      const metadata = InitializationMetadata.fromPackage(json);
       preInitialize(json, metadata);
 
       const simple = json.simplified;

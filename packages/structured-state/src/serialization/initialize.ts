@@ -407,11 +407,16 @@ export type InitFunctions = Readonly<{
 }>;
 
 export class InitializationMetadata {
-  readonly knownSimples: OrderedMap<string, Simplified>;
-  readonly initializedNodes: Map<string, StructuredKind>;
-  constructor(pkg: SimplePackage) {
-    this.knownSimples = OrderedMap.fromEntries(pkg.nodes);
-    this.initializedNodes = new Map();
+  constructor(
+    readonly knownSimples: OrderedMap<string, Simplified>,
+    readonly initializedNodes: Map<string, StructuredKind>
+  ) {}
+
+  static fromPackage(pkg: SimplePackage) {
+    return new InitializationMetadata(
+      OrderedMap.fromEntries(pkg.nodes),
+      new Map()
+    );
   }
 }
 

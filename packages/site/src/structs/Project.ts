@@ -14,14 +14,17 @@ import {
 } from "../../../structured-state/src";
 import { AudioTrack } from "./AudioTrack";
 
+type Marker = readonly [number, string];
+
 type AutoProject = {
   name: SString;
   tracks: SSchemaArray<AudioTrack>;
   randomNumbers: SSet<number>;
   markers: SArray<Marker>;
+  solodTracks: SSet<AudioTrack>;
 };
 
-export type Marker = readonly [number, string];
+type X = JSONOfAuto<AutoProject>["solodTracks"];
 
 export class Project extends Structured<AutoProject, typeof Project> {
   readonly randomNumbers: SSet<number>;
@@ -29,7 +32,8 @@ export class Project extends Structured<AutoProject, typeof Project> {
   constructor(
     readonly name: SString,
     readonly tracks: SSchemaArray<AudioTrack>,
-    readonly markers: SArray<Marker>
+    readonly markers: SArray<Marker>,
+    readonly solodTracks: SSet<AudioTrack>
   ) {
     super();
 
@@ -43,6 +47,7 @@ export class Project extends Structured<AutoProject, typeof Project> {
     return {
       name: this.name,
       tracks: this.tracks,
+      solodTracks: this.solodTracks,
       randomNumbers: this.randomNumbers,
       markers: this.markers,
     };
@@ -65,7 +70,8 @@ export class Project extends Structured<AutoProject, typeof Project> {
       Project,
       init.string(auto.name),
       init.schemaArray(auto.tracks, [AudioTrack]),
-      init.array<Marker>(auto.markers)
+      init.array<Marker>(auto.markers),
+      init.set<AudioTrack>(auto.solodTracks, AudioTrack)
     );
   }
 
@@ -74,7 +80,8 @@ export class Project extends Structured<AutoProject, typeof Project> {
       Project,
       string(name),
       arrayOf([AudioTrack], tracks),
-      array(markers)
+      array(markers),
+      set()
     );
   }
 

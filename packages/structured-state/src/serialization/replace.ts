@@ -37,7 +37,7 @@ export function replacePackage(json: unknown, obj: StructuredKind): void {
   if (!isSimplePackage(json)) {
     throw new Error("not a simple package");
   }
-  const acc = new InitializationMetadata(json);
+  const acc = InitializationMetadata.fromPackage(json);
   return replace(json.simplified, obj, acc);
 }
 

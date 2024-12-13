@@ -6,6 +6,7 @@ export function ClipA({ clip }: { clip: AudioClip }) {
   const timelineLength = useContainer(clip.timelineLength);
   return (
     <fieldset>
+      <legend>{clip.constructor.name}</legend>
       {timelineStart.t} {timelineStart.u} <br />
       {timelineLength.t} {timelineLength.u}
     </fieldset>
