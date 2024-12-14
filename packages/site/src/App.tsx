@@ -1,15 +1,15 @@
-import hljs from "highlight.js";
+// import hljs from "highlight.js";
 import { useState } from "react";
+import "react-json-pretty/themes/monikai.css";
+import { JsonView, allExpanded, darkStyles } from "react-json-view-lite";
+import "react-json-view-lite/dist/index.css";
 import * as s from "../../structured-state/src/index";
 import {
   construct,
-  debugOut,
-  debugOutHtml,
   serialize,
   useContainer,
   useDirtyTracker,
 } from "../../structured-state/src/index";
-
 import { setWindow } from "../../structured-state/src/lib/nullthrows";
 import {
   HistorySnapshot,
@@ -54,23 +54,21 @@ setWindow("s", s);
  *
  */
 
-export function App() {
-  const [project] = useState(() => {
-    const result = Project.of(
-      "untitled track",
-      [
-        AudioTrack.of("track 1", [AudioClip.of(0, 4)]),
-        AudioTrack.of("track 2", []),
-      ],
-      [
-        [0, "foo"],
-        [1, "bar"],
-      ]
-    );
-    setWindow("project", result);
-    return result;
-  });
+const project = Project.of(
+  "untitled track",
+  [
+    AudioTrack.of("track 1", [AudioClip.of(0, 4)]),
+    AudioTrack.of("track 2", []),
+  ],
+  [
+    [0, "foo"],
+    [1, "bar"],
+  ]
+);
 
+setWindow("project", project);
+
+export function App() {
   const [projectDirtyState, markProjectClean] = useDirtyTracker(project);
 
   return (
@@ -135,7 +133,15 @@ export function App() {
           construct test
         </button>
       </div>
-      <div style={{ display: "flex", flexDirection: "row", flexGrow: 1 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          flexGrow: 1,
+          gap: 8,
+          fontFamily: "monospace",
+        }}
+      >
         <ProjectDebug project={project} />
 
         <fieldset
@@ -193,26 +199,67 @@ function UProject({ project }: { project: Project }) {
           +
         </button>
       </div>
-      <button
-        onClick={() => {
-          s.history.record("move clip", () => {
-            const track0 = nullthrows(project.tracks.at(0));
-            const track1 = nullthrows(project.tracks.at(1));
-            const clip = nullthrows(track0.clips.at(0));
+      <div>
+        <input
+          type="button"
+          value={"move clip and change time"}
+          onClick={() => {
+            s.history.record("move clip", () => {
+              const track0 = nullthrows(project.tracks.at(0));
+              const track1 = nullthrows(project.tracks.at(1));
+              const clip = nullthrows(track0.clips.at(0));
 
-            clip.timelineStart.set(4);
-            track0.clips.remove(clip);
-            track1.clips.push(clip);
+              clip.timelineStart.set(4);
+              track0.clips.remove(clip);
+              track1.clips.push(clip);
 
-            // works if:
-            // track0.clips.remove(clip);
-            // clip.timelineStart.set(4);
-            // track1.clips.push(clip);
-          });
-        }}
-      >
-        move clip and change time
-      </button>
+              // works if:
+              // track0.clips.remove(clip);
+              // clip.timelineStart.set(4);
+              // track1.clips.push(clip);
+            });
+          }}
+        />
+      </div>
+
+      <div>
+        <input
+          type="button"
+          value={"add track"}
+          onClick={() =>
+            recordHistory("add track", () => {
+              project.addTrack("hello world");
+            })
+          }
+        />{" "}
+        <input
+          type="button"
+          value={"add 1000"}
+          onClick={() => {
+            const NUM = 1000;
+            performance.mark("1");
+            recordHistory(`add ${NUM} tracks`, () => {
+              for (let i = 0; i < NUM; i++) {
+                project.addTrack("hello world");
+              }
+            });
+            performance.mark("2");
+            performance.measure("Add 1000 items", "1", "2");
+            console.log("Added 1000");
+          }}
+        />{" "}
+        <input
+          type="button"
+          value={"del all"}
+          onClick={() => {
+            recordHistory("clear", () => {
+              project.clear();
+            });
+          }}
+        />
+      </div>
+      <hr style={{ width: "100%" }} />
+
       {tracks.map((track) => {
         return <TrackA project={project} key={track._id} track={track} />;
       })}
@@ -246,29 +293,52 @@ export function Notes(props: { notes: LinkedArray<Note> }) {
 }
 
 function ProjectDebug({ project }: { project: Project }) {
-  return <s.DebugOut val={project}></s.DebugOut>;
-  // const [useNew, setUseNew] = useState(false);
-  // useContainer(project, true);
-
-  // const value = useNew
-  //   ? debugOutHtml(project)
-  //   : hljs.highlight(debugOut(project), {
-  //       language: "javascript",
-  //     }).value;
-
-  // return (
-  //   <div>
-  //     <UtilityToggle title={"useNew"} toggled={useNew} onToggle={setUseNew}>
-  //       useNew
-  //     </UtilityToggle>
-  //     <div style={{ overflow: "scroll" }}>
-  //       <pre
-  //         style={{ textAlign: "left", width: 300, fontSize: 12 }}
-  //         dangerouslySetInnerHTML={{ __html: value }}
-  //       ></pre>
-  //     </div>
-  //   </div>
-  // );
+  const [tab, setTab] = useState<"struct" | "serialized">("struct");
+  return (
+    <div style={{ flex: "1 1 1px" }}>
+      <UtilityToggle
+        toggled={tab === "struct"}
+        onToggle={() => setTab("struct")}
+      >
+        struct
+      </UtilityToggle>
+      <UtilityToggle
+        toggled={tab === "serialized"}
+        onToggle={() => setTab("serialized")}
+      >
+        serialized
+      </UtilityToggle>
+      {tab === "struct" && <s.DebugOut val={project}></s.DebugOut>}
+      {tab === "serialized" && (
+        <div
+          style={{
+            overflow: "scroll",
+            textAlign: "left",
+            fontFamily: "monospace",
+          }}
+        >
+          <JsonView
+            data={JSON.parse(serialize(project))}
+            shouldExpandNode={allExpanded}
+            // style={defaultStyles}
+            style={darkStyles}
+          />
+          {/* <JsonView data={json} shouldExpandNode={allExpanded} style={darkStyles} /> */}
+          {/* <JSONPretty id="json-pretty" data={JSON.parse(serialize(project))} /> */}
+          {/* <JSONTree data={JSON.parse(serialize(project))} />; */}
+          {/* <pre
+            style={{ textAlign: "left", width: 300, fontSize: 12 }}
+            dangerouslySetInnerHTML={{
+              __html: hljs.highlight(
+                JSON.stringify(JSON.parse(serialize(project)), null, 2),
+                { language: "json" }
+              ).value,
+            }}
+          ></pre> */}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function HistoryStacks() {
@@ -276,11 +346,30 @@ function HistoryStacks() {
   const redoStack = useContainer(getGlobalState().redoStack);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        flex: "1 1 1px",
+        textAlign: "left",
+      }}
+    >
+      History:
       {history.map((entry, i) => {
         return <HistoryItem entry={entry} key={i} />;
       })}
-      <div>^ undo / v redo</div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          gap: "1ch",
+        }}
+      >
+        <span style={{ whiteSpace: "nowrap", flexShrink: 0 }}>{"> now "}</span>
+        <hr style={{ width: "100%" }} />
+      </div>
+      {/* <div>^ undo / v redo</div> */}
       {redoStack.map((entry, i) => {
         return <HistoryItem entry={entry} key={i} />;
       })}

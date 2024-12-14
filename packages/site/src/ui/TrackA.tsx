@@ -4,6 +4,7 @@ import { recordHistory } from "../../../structured-state/src/sstate.history";
 import { AudioTrack } from "../structs/AudioTrack";
 import { Project } from "../structs/Project";
 import { ClipA } from "./ClipA";
+import { UtilityToggle } from "../UtilityToggle";
 
 export function TrackA({
   track,
@@ -55,19 +56,20 @@ export function TrackA({
               project.tracks.remove(track);
             })
           }
-        ></input>
+        />
       </legend>
-      <button
-        onClick={() => {
+      <UtilityToggle
+        onToggle={() => {
           if (project.solodTracks.has(track)) {
             project.solodTracks.delete(track);
           } else {
             project.solodTracks.add(track);
           }
         }}
+        toggled={project.solodTracks.has(track)}
       >
-        S
-      </button>
+        s
+      </UtilityToggle>
       {clips.map((clip, i) => {
         return (
           <ClipA key={i} clip={clip} />

@@ -9,7 +9,7 @@ export function UtilityToggle({
   toggleStyle?: React.CSSProperties;
   toggled: boolean;
   onToggle: (toggled: boolean) => void;
-  title: string | null;
+  title?: string | null;
 }) {
   const style = toggled ? { ...styleArg, ...toggleStyle } : styleArg;
   return (
