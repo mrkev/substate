@@ -1,12 +1,12 @@
 import stringify from "json-stringify-deterministic";
-import { SSet, SString, Structured } from ".";
-import { Struct2 } from "./Struct2";
-import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { MutationHashable } from "./state/MutationHashable";
+import { SSet, Structured } from ".";
 import { SArray, SSchemaArray } from "./SArray";
 import { Struct } from "./Struct";
-import { exhaustive } from "./assertions";
+import { Struct2 } from "./Struct2";
 import { StructuredKind } from "./StructuredKinds";
+import { exhaustive } from "./assertions";
+import { LinkedPrimitive } from "./state/LinkedPrimitive";
+import { MutationHashable } from "./state/MutationHashable";
 import { CONTAINER_IGNORE_KEYS } from "./state/SubbableContainer";
 import { SUnion } from "./sunion";
 
@@ -176,7 +176,7 @@ export function header(elem: StructuredKind, showContainerId = false) {
 export function debugOutPrimitive(obj: LinkedPrimitive<any>) {
   const val = obj.get();
   if (typeof val === "string") {
-    return `${header(obj)} '${val}'`;
+    return `${header(obj)} "${val}"`;
   } else {
     return `${header(obj)} ${val}`;
   }

@@ -8,6 +8,15 @@ import { SUnion } from "./sunion";
 
 export type PrimitiveKind = number | string | boolean | null;
 
+export function isPrimitiveKind(val: unknown) {
+  return (
+    typeof val === "number" ||
+    typeof val === "string" ||
+    typeof val === "boolean" ||
+    val === null
+  );
+}
+
 // was KnowableObject before
 export type StructuredKind =
   | LinkedPrimitive<any>

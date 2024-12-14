@@ -6,7 +6,7 @@ import {
   serialize,
 } from "../../../structured-state/src/serialization/serialization";
 import * as s from "../../../structured-state/src/sstate";
-import { debugOut } from "../../../structured-state/src/sstate.debug";
+import { debugOut } from "../../../structured-state/src/debug.text";
 import {
   getGlobalState,
   history,

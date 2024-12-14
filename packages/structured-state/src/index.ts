@@ -32,7 +32,10 @@ export type { ReplaceFunctions } from "./serialization/replace";
 export { serialize } from "./serialization/serialization";
 export type { S } from "./serialization/serialization";
 export { construct } from "./serialization/construct";
-export { debugOut } from "./sstate.debug";
+export { debugOut } from "./debug.text";
+export { debugOutHtml } from "./debug.html";
+export { DebugOut } from "./debug.react";
+
 export { getGlobalState, history } from "./sstate.history";
 export { useContainer, useSPrimitive as usePrimitive } from "./sstate.react";
 

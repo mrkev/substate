@@ -4,6 +4,7 @@ import * as s from "../../structured-state/src/index";
 import {
   construct,
   debugOut,
+  debugOutHtml,
   serialize,
   useContainer,
   useDirtyTracker,
@@ -23,6 +24,7 @@ import { Project } from "./structs/Project";
 import { TrackA } from "./ui/TrackA";
 import { SchedulerTest } from "./unused/SchedulerTest";
 import { nullthrows } from "./util";
+import { UtilityToggle } from "./UtilityToggle";
 
 setWindow("s", s);
 
@@ -244,21 +246,29 @@ export function Notes(props: { notes: LinkedArray<Note> }) {
 }
 
 function ProjectDebug({ project }: { project: Project }) {
-  useContainer(project, true);
+  return <s.DebugOut val={project}></s.DebugOut>;
+  // const [useNew, setUseNew] = useState(false);
+  // useContainer(project, true);
 
-  const value = hljs.highlight(debugOut(project), {
-    language: "javascript",
-  }).value;
-  return (
-    <div style={{ overflow: "scroll" }}>
-      <pre
-        style={{ textAlign: "left", width: 300, fontSize: 12 }}
-        dangerouslySetInnerHTML={{ __html: value }}
-      >
-        {/* {debugOut(track)} */}
-      </pre>
-    </div>
-  );
+  // const value = useNew
+  //   ? debugOutHtml(project)
+  //   : hljs.highlight(debugOut(project), {
+  //       language: "javascript",
+  //     }).value;
+
+  // return (
+  //   <div>
+  //     <UtilityToggle title={"useNew"} toggled={useNew} onToggle={setUseNew}>
+  //       useNew
+  //     </UtilityToggle>
+  //     <div style={{ overflow: "scroll" }}>
+  //       <pre
+  //         style={{ textAlign: "left", width: 300, fontSize: 12 }}
+  //         dangerouslySetInnerHTML={{ __html: value }}
+  //       ></pre>
+  //     </div>
+  //   </div>
+  // );
 }
 
 function HistoryStacks() {
