@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "json-stringify-deterministic": "^1.0.12",
-    "nanoid": "^5.0.7"
+    "nanoid": "^5.0.9"
   },
   "peerDependencies": {
     "react": "^18.2.0",
@@ -32,8 +32,8 @@
   "devDependencies": {
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
-    "vite": "^5.4.3",
-    "vite-plugin-dts": "^4.1.0",
-    "vitest": "^2.0.5"
+    "vite": "^6.0.3",
+    "vite-plugin-dts": "^4.3.0",
+    "vitest": "^2.1.8"
   }
 }
