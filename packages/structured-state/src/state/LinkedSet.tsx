@@ -8,7 +8,7 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
   private _set: ReadonlySet<S>;
   public _schema: StructSchema | null;
 
-  private constructor(_set: Set<S>, _id: string, _schema: StructSchema | null) {
+  constructor(_set: Set<S>, _id: string, _schema: StructSchema | null) {
     super(_id);
     this._set = _set;
     this._schema = _schema;

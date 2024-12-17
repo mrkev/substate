@@ -13,7 +13,7 @@ import {
   NSimplified,
   Simplified,
   SimplifiedDescriptor,
-  SimplifiedRefOf,
+  SimplifiedRef,
 } from "./serialization";
 import { LinkedPrimitive } from "../state/LinkedPrimitive";
 import { CONTAINER_IGNORE_KEYS } from "../state/SubbableContainer";
@@ -22,25 +22,29 @@ import { JSONValue } from "../lib/types";
 import { OrderedMap } from "../lib/OrderedMap";
 
 export class SimplificationMetadata {
-  readonly allIds = new Set<string>();
   readonly allObjs = new Map<string, Simplified>();
   readonly refered = new OrderedMap<string, Simplified>();
 
-  record<T extends Simplified>(obj: StructuredKind, simplified: T): T {
+  record<T extends Simplified>(
+    obj: StructuredKind,
+    simplified: T
+  ): T | SimplifiedRef {
     // console.log("simplifying", obj._id, simplified.$$);
-    if (this.allIds.has(obj._id)) {
-      throw new Error("Dubplicate " + obj._id);
+    if (this.allObjs.has(obj._id)) {
+      return { $$: "ref", _id: obj._id, kind: simplified.$$ };
+      // throw new Error("Duplicate " + obj._id);
     }
-    this.allIds.add(obj._id);
     this.allObjs.set(obj._id, simplified);
     // return { $$: "ref", _to: obj._id };
     return simplified;
   }
 
-  reference<T extends Simplified>(simplified: T): SimplifiedRefOf<T["$$"]> {
+  reference<T extends Simplified>(simplified: T): SimplifiedRef {
     const present = this.refered.get(simplified._id);
     if (present != null) {
-      throw new Error("object already referenced. Not supported yet.");
+      throw new Error(
+        `object ${simplified._id}:${simplified.$$} already referenced. Not supported yet.`
+      );
     }
     this.refered.push(simplified._id, simplified);
     return { $$: "ref", _id: simplified._id, kind: simplified.$$ };
@@ -80,7 +84,7 @@ export function isSimplePackage(json: unknown): json is SimplePackage {
 function simplifyPrimitive(
   obj: LinkedPrimitive<any>,
   acc: SimplificationMetadata
-): NSimplified["prim"] | SimplifiedRefOf<"prim"> {
+): NSimplified["prim"] | SimplifiedRef {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
@@ -97,7 +101,7 @@ function simplifyPrimitive(
 function simplifySimpleArray(
   obj: SArray<any>,
   acc: SimplificationMetadata
-): NSimplified["arr-simple"] {
+): NSimplified["arr-simple"] | SimplifiedRef {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
@@ -111,7 +115,7 @@ function simplifySimpleArray(
 function simplifySchemaArray(
   obj: SSchemaArray<any>,
   acc: SimplificationMetadata
-): NSimplified["arr-schema"] {
+): NSimplified["arr-schema"] | SimplifiedRef {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
@@ -132,7 +136,7 @@ function simplifySchemaArray(
 function simplifyStruct(
   obj: Struct<any>,
   acc: SimplificationMetadata
-): NSimplified["struct"] {
+): NSimplified["struct"] | SimplifiedRef {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
@@ -169,7 +173,7 @@ function simplifyStruct(
 function simplifyStruct2(
   obj: Struct2<any>,
   acc: SimplificationMetadata
-): NSimplified["struct2"] {
+): NSimplified["struct2"] | SimplifiedRef {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
@@ -223,7 +227,7 @@ function autoSimplify(
 export function simplifyStructured(
   obj: Structured<any, any>,
   acc: SimplificationMetadata
-): NSimplified["structured"] {
+): NSimplified["structured"] | SimplifiedRef {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
@@ -238,7 +242,7 @@ export function simplifyStructured(
 function simplifySet(
   obj: SSet<any>,
   acc: SimplificationMetadata
-): NSimplified["set"] {
+): NSimplified["set"] | SimplifiedRef {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }
@@ -256,7 +260,7 @@ function simplifySet(
 function simplifyUnion(
   obj: SUnion<any>,
   acc: SimplificationMetadata
-): NSimplified["union"] {
+): NSimplified["union"] | SimplifiedRef {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
   }

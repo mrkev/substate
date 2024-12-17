@@ -43,10 +43,10 @@ export type SimplifiedSchemaSet<T extends Simplified> = Readonly<{
   _value: readonly T[];
 }>;
 
-export type SimplifiedRefOf<T extends keyof NSimplified> = Readonly<{
+export type SimplifiedRef = Readonly<{
   $$: "ref";
   _id: string;
-  kind: T;
+  kind: keyof NSimplified;
 }>;
 
 export type SimplifiedKind = NSimplified[keyof NSimplified]["$$"];
@@ -88,7 +88,7 @@ export type NSimplified = {
     _value: Simplified;
   }>;
   // todo
-  ref: SimplifiedRefOf<keyof NSimplified>;
+  ref: SimplifiedRef;
 };
 
 export type S = {

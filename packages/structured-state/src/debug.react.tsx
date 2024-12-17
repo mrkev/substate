@@ -15,11 +15,24 @@ import { ReactElement, ReactNode, useState } from "react";
 const collapsedPaths = set<string>();
 const collapseClasses = set<string>();
 
-export function DebugOut({ val }: { val: unknown }) {
+export function DebugOut({
+  val,
+  showUnknowns,
+  style,
+}: {
+  val: unknown;
+  showUnknowns?: boolean;
+  style?: React.CSSProperties;
+}) {
   return (
-    <div style={{ overflow: "scroll" }}>
+    <div style={{ overflow: "scroll", ...style }}>
       <pre style={{ textAlign: "left", width: 300, fontSize: 12 }}>
-        <DebugOutReact val={val} pad={0} path={"ROOT"} />
+        <DebugOutReact
+          val={val}
+          pad={0}
+          path={"ROOT"}
+          showUnknowns={showUnknowns}
+        />
       </pre>
     </div>
   );

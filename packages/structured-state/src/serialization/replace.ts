@@ -26,7 +26,7 @@ import {
   isSimplified,
   NSimplified,
   Simplified,
-  SimplifiedRefOf,
+  SimplifiedRef,
   SimplifiedSet,
   SimplifiedSimpleArray,
   SimplifiedTypePrimitive,
@@ -98,7 +98,7 @@ export function replace(
 }
 
 export function replacePrimitive<T>(
-  json: SimplifiedTypePrimitive<T> | SimplifiedRefOf<"prim">,
+  json: SimplifiedTypePrimitive<T> | SimplifiedRef<"prim">,
   obj: LinkedPrimitive<T>,
   acc: InitializationMetadata
 ) {

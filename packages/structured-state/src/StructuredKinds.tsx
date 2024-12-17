@@ -28,6 +28,16 @@ export type StructuredKind =
   | SSet<any>
   | SUnion<any>;
 
+export type StructuredKindConstructor =
+  | typeof LinkedPrimitive<any>
+  | typeof Struct<any>
+  | typeof Struct2<any>
+  | ConstructableStructure<any>
+  | typeof SArray<any>
+  | typeof SSchemaArray<any>
+  | typeof SSet<any>
+  | typeof SUnion<any>;
+
 export type StructuredStructureKind =
   | Struct<any>
   | Struct2<any>

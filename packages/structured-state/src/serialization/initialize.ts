@@ -3,7 +3,11 @@ import { SArray, SSchemaArray } from "../SArray";
 import { Struct } from "../Struct";
 import { Struct2 } from "../Struct2";
 import { ConstructableStructure, initStructured } from "../Structured";
-import { StructSchema, StructuredKind } from "../StructuredKinds";
+import {
+  StructSchema,
+  StructuredKind,
+  StructuredKindConstructor,
+} from "../StructuredKinds";
 import {
   assertArray,
   assertConstructableStruct,
@@ -14,13 +18,14 @@ import {
 } from "../assertions";
 import { OrderedMap } from "../lib/OrderedMap";
 import { assertNotNull, nullthrows } from "../lib/nullthrows";
+import { Constructor } from "../lib/types";
 import { LinkedPrimitive } from "../state/LinkedPrimitive";
 import { SSet } from "../state/LinkedSet";
 import { SUnion } from "../sunion";
 import {
   NSimplified,
   Simplified,
-  SimplifiedRefOf,
+  SimplifiedRef,
   SimplifiedSet,
   SimplifiedSimpleArray,
   SimplifiedTypePrimitive,
@@ -28,21 +33,73 @@ import {
 } from "./serialization";
 import { SimplePackage } from "./simplify";
 
-function find<T extends Simplified>(
+function find<T extends Simplified, O extends StructuredKind>(
   json: T,
-  metadata: InitializationMetadata
-): StructuredKind | null {
+  metadata: InitializationMetadata,
+  kind: Constructor<O>
+): O | null {
   // console.log("looking for", json._id, json.$$);
   const found = metadata.initializedNodes.get(json._id);
   if (found == null) {
     return null;
   }
 
+  if (!(found instanceof kind)) {
+    throw new Error(`found isn't ${kind.name}`);
+  }
+
   // todo: verify json kind matches returned value, or ask for an expected kind class here?
   return found;
 }
 
-function refKind<T extends keyof NSimplified>(
+function initializeRef(
+  json: SimplifiedRef,
+  metadata: InitializationMetadata
+): StructuredKind {
+  switch (json.kind) {
+    case "prim":
+      return initializePrimitiveRef(json, metadata);
+    case "arr-schema":
+    case "arr-simple":
+    case "ref":
+    case "set":
+    case "struct":
+    case "struct2":
+    case "structured":
+    case "union":
+      throw new Error("unimplemented ref of kind " + json.kind);
+    default:
+      exhaustive(json.kind);
+  }
+}
+
+export function initializePrimitiveRef<T>(
+  json: SimplifiedRef,
+  metadata: InitializationMetadata
+): SPrimitive<T> {
+  // fetch acutal node
+
+  // const found = find(json, metadata, SPrimitive);
+  // if (found != null) {
+  //   return found;
+  // }
+
+  const simple = nullthrows(
+    metadata.knownSimples.get(json._id),
+    `ref:${json._id}:${json.kind}: didn't find it pre-initialized nor in simples`
+  );
+
+  assertRefKind(simple, "prim");
+
+  const result = new LinkedPrimitive(simple._value, json._id);
+  metadata.initializedNodes.set(result._id, result);
+  return result as any;
+
+  // initialize it
+  // return initializePrimitive(simple, spec, metadata);
+}
+
+function assertRefKind<T extends keyof NSimplified>(
   simple: Simplified,
   kind: T
 ): asserts simple is NSimplified[T] {
@@ -54,36 +111,17 @@ function refKind<T extends keyof NSimplified>(
 }
 
 export function initializePrimitive<T>(
-  json: SimplifiedTypePrimitive<T> | SimplifiedRefOf<"prim">,
+  json: SimplifiedTypePrimitive<T>,
   metadata: InitializationMetadata
 ): SPrimitive<T> {
-  // TODO: optimize sieralized array with "references"?
-  const found = find(json, metadata);
+  const found = find(json, metadata, SPrimitive);
   if (found != null) {
-    return found as any;
+    return found;
   }
 
-  switch (json.$$) {
-    case "prim": {
-      const result = new LinkedPrimitive(json._value, json._id);
-      metadata.initializedNodes.set(result._id, result);
-      return result;
-    }
-    case "ref": {
-      const simple = nullthrows(
-        metadata?.knownSimples.get(json._id),
-        `ref:${json._id}:${json.kind}: didn't find it pre-initialized nor in simples`
-      );
-
-      refKind(simple, json.kind);
-      const result = new LinkedPrimitive(simple._value, json._id);
-      metadata.initializedNodes.set(result._id, result);
-      return result as any; // todo: primitive of kind
-    }
-
-    default:
-      exhaustive(json);
-  }
+  const result = new LinkedPrimitive(json._value, json._id);
+  metadata.initializedNodes.set(result._id, result);
+  return result;
 }
 
 function initializeSchemaArray(
@@ -91,9 +129,9 @@ function initializeSchemaArray(
   spec: StructSchema[],
   metadata: InitializationMetadata
 ): SSchemaArray<any> {
-  const found = find(json, metadata);
+  const found = find(json, metadata, SSchemaArray);
   if (found != null) {
-    return found as any;
+    return found;
   }
 
   const initialized = json._value.map((x) => {
@@ -111,7 +149,7 @@ function initializeSimpleArray<T>(
   json: SimplifiedSimpleArray<T>,
   metadata: InitializationMetadata
 ): SArray<T> {
-  const found = find(json, metadata);
+  const found = find(json, metadata, SArray);
   if (found != null) {
     return found as any;
   }
@@ -126,15 +164,14 @@ function initializeSet<T>(
   spec: StructSchema | null,
   metadata: InitializationMetadata
 ): SSet<T> {
-  const found = find(json, metadata);
+  const found = find(json, metadata, SSet);
   if (found != null) {
     return found as any;
   }
 
-  let result;
+  let result: SSet<T>;
   if (json._schema) {
-    const initialized = json._value.map((x: any) => {
-      // TODO: find right spec
+    const initialized = json._value.map((x) => {
       return initialize(x, spec, metadata);
     });
 
@@ -193,7 +230,7 @@ function initializeStruct(
   spec: typeof Struct,
   metadata: InitializationMetadata
 ) {
-  const found = find(json, metadata);
+  const found = find(json, metadata, spec as any);
   if (found != null) {
     return found as any;
   }
@@ -247,7 +284,7 @@ function initializeStruct2(
   spec: typeof Struct2,
   metadata: InitializationMetadata
 ) {
-  const found = find(json, metadata);
+  const found = find(json, metadata, spec as any);
   if (found != null) {
     return found as any;
   }
@@ -265,7 +302,7 @@ export function initializeStructured<Spec extends ConstructableStructure<any>>(
   spec: Spec,
   metadata: InitializationMetadata
 ): InstanceType<Spec> {
-  const found = find(json, metadata);
+  const found = find(json, metadata, spec as any);
   if (found != null) {
     return found as any;
   }
@@ -283,9 +320,9 @@ function initializeSUnion(
   spec: StructSchema,
   metadata: InitializationMetadata
 ): SUnion<StructuredKind> {
-  const found = find(json, metadata);
+  const found = find(json, metadata, SUnion);
   if (found != null) {
-    return found as any;
+    return found;
   }
 
   const initialized = initialize(json._value, spec, metadata);
@@ -357,34 +394,20 @@ export function initialize(
       return initializeSUnion(json, spec, metadata);
     }
     case "ref": {
-      // fetch acutal node
-      const simple = nullthrows(
-        metadata.knownSimples.get(json._id),
-        `ref:${json._id}:${json.kind}: didn't find it pre-initialized nor in simples`
-      );
-      refKind(simple, json.kind);
-      // initialize it
-      return initialize(simple, spec, metadata);
+      return initializeRef(json, metadata);
+      // // fetch acutal node
+      // const simple = nullthrows(
+      //   metadata.knownSimples.get(json._id),
+      //   `ref:${json._id}:${json.kind}: didn't find it pre-initialized nor in simples`
+      // );
+      // assertRefKind(simple, json.kind);
+      // // initialize it
+      // return initialize(simple, spec, metadata);
     }
     default:
       exhaustive(json, "invalid $$ type");
   }
 }
-
-// export function initializeRef(
-//   json: NSimplified["ref"],
-//   spec: StructSchema | StructSchema[] | null,
-//   metadata: InitializationMetadata
-// ): StructuredKind {
-//   // fetch acutal node
-//   const simple = nullthrows(
-//     metadata.knownSimples.get(json._id),
-//     `ref:${json._id}:${json.kind}: didn't find it pre-initialized nor in simples`
-//   );
-//   refKind(simple, json.kind);
-//   // initialize it
-//   return initialize(simple, spec, metadata);
-// }
 
 export type InitFunctions = Readonly<{
   string: (json: SimplifiedTypePrimitive<string>) => SString;
@@ -422,17 +445,21 @@ export class InitializationMetadata {
 
 /** `this` on second argument to avoid double-initializing the same elements */
 function initOfPkg(metadata: InitializationMetadata): InitFunctions {
+  const primitive = <T>(json: SimplifiedTypePrimitive<T> | SimplifiedRef) => {
+    switch (json.$$) {
+      case "prim":
+        return initializePrimitive<T>(json, metadata);
+      case "ref":
+        return initializePrimitiveRef<T>(json, metadata);
+    }
+  };
+
   return {
-    string: (json: SimplifiedTypePrimitive<string>) =>
-      initializePrimitive<string>(json, metadata),
-    number: (json: SimplifiedTypePrimitive<number>) =>
-      initializePrimitive<number>(json, metadata),
-    boolean: (json: SimplifiedTypePrimitive<boolean>) =>
-      initializePrimitive<boolean>(json, metadata),
-    null: (json: SimplifiedTypePrimitive<null>) =>
-      initializePrimitive<null>(json, metadata),
-    primitive: <T>(json: SimplifiedTypePrimitive<T>) =>
-      initializePrimitive(json, metadata),
+    string: primitive<string>,
+    number: primitive<number>,
+    boolean: primitive<boolean>,
+    null: primitive<null>,
+    primitive: primitive,
     schemaArray: (json: NSimplified["arr-schema"], spec: StructSchema[]) =>
       initializeSchemaArray(json, spec, metadata),
     array: <T>(json: SimplifiedSimpleArray<T>) =>
@@ -442,9 +469,17 @@ function initOfPkg(metadata: InitializationMetadata): InitFunctions {
     struct2: (json: NSimplified["struct2"], spec: typeof Struct2) =>
       initializeStruct2(json, spec, metadata),
     structured: <Spec extends ConstructableStructure<any>>(
-      json: NSimplified["structured"],
+      json: NSimplified["structured"] | SimplifiedRef,
       spec: Spec
-    ) => initializeStructured(json, spec, metadata),
+    ) => {
+      switch (json.$$) {
+        case "structured":
+          return initializeStructured(json, spec, metadata);
+        case "ref":
+          throw new Error("not implemented foo");
+        // return initializePrimitiveRef<T>(json, metadata);
+      }
+    },
     set: <T>(json: SimplifiedSet<T>, spec: StructSchema) =>
       initializeSet(json, spec, metadata),
   } as const;
