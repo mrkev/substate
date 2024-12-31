@@ -31,6 +31,10 @@ setWindow("s", s);
 /**
  * TODO:
  * - reference kind, serializes as id, looks in map when initializng. good for children to point to parents.
+ *   - can also achieve parent pointer by always serializing as reference, keeping a stack (as set) of position in serializaiton tree.
+ *     - if serializing something in the stack/set, serialize as ref
+ *     - if constructing something in the stack/set, revisit and point to parent later
+ *   - is this a good pattern? having objs point to parents? obj retention? data-flow?
  * x Redo
  * x Dirty marker
  * - serialization when two containers point to the same object

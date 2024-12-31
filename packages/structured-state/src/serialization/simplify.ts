@@ -21,6 +21,10 @@ import { SUnion } from "../sunion";
 import { JSONValue } from "../lib/types";
 import { OrderedMap } from "../lib/OrderedMap";
 
+function ref(simplified: Simplified): SimplifiedRef {
+  return { $$: "ref", _id: simplified._id, kind: simplified.$$ };
+}
+
 export class SimplificationMetadata {
   readonly allObjs = new Map<string, Simplified>();
   readonly refered = new OrderedMap<string, Simplified>();
@@ -31,7 +35,7 @@ export class SimplificationMetadata {
   ): T | SimplifiedRef {
     // console.log("simplifying", obj._id, simplified.$$);
     if (this.allObjs.has(obj._id)) {
-      return { $$: "ref", _id: obj._id, kind: simplified.$$ };
+      return ref(simplified);
       // throw new Error("Duplicate " + obj._id);
     }
     this.allObjs.set(obj._id, simplified);
@@ -47,7 +51,7 @@ export class SimplificationMetadata {
       );
     }
     this.refered.push(simplified._id, simplified);
-    return { $$: "ref", _id: simplified._id, kind: simplified.$$ };
+    return ref(simplified);
   }
 }
 
