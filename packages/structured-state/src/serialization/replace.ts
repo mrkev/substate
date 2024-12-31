@@ -98,7 +98,7 @@ export function replace(
 }
 
 export function replacePrimitive<T>(
-  json: SimplifiedTypePrimitive<T> | SimplifiedRef<"prim">,
+  json: SimplifiedTypePrimitive<T> | SimplifiedRef,
   obj: LinkedPrimitive<T>,
   acc: InitializationMetadata
 ) {
