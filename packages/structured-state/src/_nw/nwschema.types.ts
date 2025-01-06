@@ -1,7 +1,19 @@
 import { IsUnion } from "./utils";
-import { NWSchema, NWNumber, NWString, NWBoolean, NWObject, NWUnion, NWMap, NWNil, NWArray } from "./nwschema";
+import {
+  NWSchema,
+  NWNumber,
+  NWString,
+  NWBoolean,
+  NWObject,
+  NWUnion,
+  NWMap,
+  NWNil,
+  NWArray,
+} from "./nwschema";
 
-export type NWConsumeResult<T> = { status: "success"; value: T } | { status: "failure"; error: Error };
+export type NWConsumeResult<T> =
+  | { status: "success"; value: T }
+  | { status: "failure"; error: Error };
 
 export type NWOut<T extends NWSchema<unknown>> = T extends NWNumber
   ? number
