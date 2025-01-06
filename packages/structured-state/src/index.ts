@@ -7,13 +7,11 @@ export {
   map,
   nil,
   number,
-  SBoolean,
   set,
-  SNil,
-  SNumber,
-  SString,
   string,
 } from "./sstate";
+
+export { SBoolean, SNil, SNumber, SString } from "./sstate";
 
 export { create, Struct } from "./Struct";
 export type { StructProps } from "./Struct";
@@ -28,13 +26,13 @@ export { SSet } from "./state/LinkedSet";
 
 export { useNewLinkedMap, useNewLinkedSet } from "./state/useNew";
 
+export { debugOutHtml } from "./debug.html";
+export { DebugOut } from "./debug.react";
+export { debugOut as debugOutText } from "./debug.text";
+export { construct } from "./serialization/construct";
 export type { ReplaceFunctions } from "./serialization/replace";
 export { serialize } from "./serialization/serialization";
 export type { S } from "./serialization/serialization";
-export { construct } from "./serialization/construct";
-export { debugOut } from "./debug.text";
-export { debugOutHtml } from "./debug.html";
-export { DebugOut } from "./debug.react";
 
 export { getGlobalState, history } from "./sstate.history";
 export { useContainer, useSPrimitive as usePrimitive } from "./sstate.react";

@@ -53,6 +53,7 @@ export type SimplifiedKind = NSimplified[keyof NSimplified]["$$"];
 
 export type NSimplified = {
   prim: SimplifiedTypePrimitive<unknown>;
+  ref: SimplifiedRef;
 
   set: SimplifiedSet<unknown>;
   "arr-simple": SimplifiedSimpleArray<unknown>;
@@ -87,8 +88,6 @@ export type NSimplified = {
     _id: string;
     _value: Simplified;
   }>;
-  // todo
-  ref: SimplifiedRef;
 };
 
 export type S = {
