@@ -24,7 +24,6 @@ export function useSPrimitive<S>(
 
   const setter: StateDispath<S> = useCallback(
     (newVal) => {
-      // newVal instanceof Function
       if (newVal instanceof Function) {
         linkedState.set(newVal(linkedState.get()));
       } else {

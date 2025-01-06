@@ -25,6 +25,7 @@ import { TrackA } from "./ui/TrackA";
 import { SchedulerTest } from "./unused/SchedulerTest";
 import { nullthrows } from "./util";
 import { UtilityToggle } from "./UtilityToggle";
+import { JSONView } from "./JSONView";
 
 setWindow("s", s);
 
@@ -321,24 +322,7 @@ function ProjectDebug({ project }: { project: Project }) {
             fontFamily: "monospace",
           }}
         >
-          <JsonView
-            data={JSON.parse(serialize(project))}
-            shouldExpandNode={allExpanded}
-            // style={defaultStyles}
-            style={darkStyles}
-          />
-          {/* <JsonView data={json} shouldExpandNode={allExpanded} style={darkStyles} /> */}
-          {/* <JSONPretty id="json-pretty" data={JSON.parse(serialize(project))} /> */}
-          {/* <JSONTree data={JSON.parse(serialize(project))} />; */}
-          {/* <pre
-            style={{ textAlign: "left", width: 300, fontSize: 12 }}
-            dangerouslySetInnerHTML={{
-              __html: hljs.highlight(
-                JSON.stringify(JSON.parse(serialize(project)), null, 2),
-                { language: "json" }
-              ).value,
-            }}
-          ></pre> */}
+          <JSONView json={JSON.parse(serialize(project))} />
         </div>
       )}
     </div>
