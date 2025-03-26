@@ -35,7 +35,7 @@ export { serialize } from "./serialization/serialization";
 export type { S } from "./serialization/serialization";
 
 export { getGlobalState, history } from "./sstate.history";
-export { useContainer, useSPrimitive as usePrimitive } from "./sstate.react";
+export { useContainer, usePrimitive as usePrimitive } from "./state/hooks";
 
 export { DirtyObserver, useDirtyTracker } from "./DirtyObserver";
 export type { DirtyState } from "./DirtyObserver";

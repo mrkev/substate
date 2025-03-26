@@ -1,5 +1,6 @@
 import stringify from "json-stringify-deterministic";
-import { PrimitiveKind, set, SSet, string, Structured } from ".";
+import { ReactNode, useState } from "react";
+import { PrimitiveKind, set, SSet, Structured } from ".";
 import { SArray, SSchemaArray } from "./SArray";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
@@ -9,7 +10,6 @@ import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { MutationHashable } from "./state/MutationHashable";
 import { CONTAINER_IGNORE_KEYS } from "./state/SubbableContainer";
 import { SUnion } from "./sunion";
-import { ReactElement, ReactNode, useState } from "react";
 
 // TODO: allow for unregistered objects, so this doesn't show up on global known objects?
 const collapsedPaths = set<string>();

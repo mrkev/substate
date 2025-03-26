@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import * as s from "../sstate";
 import * as Struct from "../Struct";
+import { boolean, nil, number, string } from "../sstate";
 
 class Primitives extends Struct.Struct<Primitives> {
-  readonly num = s.number(0);
-  readonly str = s.string("hello world");
-  readonly bool = s.boolean(false);
-  readonly nil = s.nil();
+  readonly num = number(0);
+  readonly str = string("hello world");
+  readonly bool = boolean(false);
+  readonly nil = nil();
 }
 
 const prim = Struct.create(Primitives, {});

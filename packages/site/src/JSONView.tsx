@@ -95,7 +95,7 @@ function Collapser({
         });
       }}
     >
-      {display === "collapsed" ? "▶" : display === "full" ? "▼" : "⊖"}
+      {display === "collapsed" ? "▶" : display === "full" ? "▼" : "⊖"}{" "}
     </span>
   );
 }
@@ -152,7 +152,8 @@ function JSONRecord({
   }
   return (
     <>
-      <Collapser display={displayState} setDisplay={setDisplayState} /> {body}
+      <Collapser display={displayState} setDisplay={setDisplayState} />
+      {body}
     </>
   );
 }
@@ -239,7 +240,7 @@ function JSONArray({
   return (
     <>
       <Collapser display={displayState} setDisplay={setDisplayState} />
-      {" ["}
+      {"["}
       {body}
       {"]"}
     </>

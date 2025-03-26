@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { SArray } from "../../../structured-state/src/SArray";
 import * as Struct from "../../../structured-state/src/Struct";
-import { setWindow } from "../../../structured-state/src/nullthrows";
-import {
-  construct,
-  serialize,
-} from "../../../structured-state/src/serialization/serialization";
-import * as s from "../../../structured-state/src/sstate";
 import { debugOut } from "../../../structured-state/src/debug.text";
+import { setWindow } from "../../../structured-state/src/lib/nullthrows";
+import { construct } from "../../../structured-state/src/serialization/construct";
+import { serialize } from "../../../structured-state/src/serialization/serialization";
+import * as s from "../../../structured-state/src/sstate";
 import {
   getGlobalState,
   history,
@@ -14,8 +13,8 @@ import {
 } from "../../../structured-state/src/sstate.history";
 import {
   useContainer,
-  useSPrimitive,
-} from "../../../structured-state/src/sstate.react";
+  usePrimitive,
+} from "../../../structured-state/src/state/hooks";
 import "./App.css";
 
 export class BusLine extends Struct.Struct<BusLine> {
@@ -118,7 +117,7 @@ function BusList() {
 }
 
 function CountButton({ num, name }: { num: s.SNumber; name: string }) {
-  const [count, setCount] = useSPrimitive(num);
+  const [count, setCount] = usePrimitive(num);
   return (
     <button
       onClick={() => {
@@ -137,9 +136,9 @@ const BusEditor = React.memo(function TrackAImpl({
   tracks,
 }: {
   track: Bus;
-  tracks: s.SArray<Bus>;
+  tracks: SArray<Bus>;
 }) {
-  const [name, setName] = useSPrimitive(track.name);
+  const [name, setName] = usePrimitive(track.name);
   const [edit, setEdit] = useState(name);
 
   useEffect(() => {
