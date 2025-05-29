@@ -9,6 +9,7 @@ export {
   number,
   set,
   string,
+  primitive,
 } from "./sstate";
 
 export { SBoolean, SNil, SNumber, SString } from "./sstate";

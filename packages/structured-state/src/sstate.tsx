@@ -78,6 +78,10 @@ export function nil(): SNil {
   return SNil.of(null);
 }
 
+export function primitive<T>(value: T) {
+  return LinkedPrimitive.of(value);
+}
+
 export function arrayOf<T extends StructSchema>(
   schema: T[],
   val?: InstanceType<T>[]
