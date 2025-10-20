@@ -1,7 +1,6 @@
 // import hljs from "highlight.js";
 import { useState } from "react";
 import "react-json-pretty/themes/monikai.css";
-import { JsonView, allExpanded, darkStyles } from "react-json-view-lite";
 import "react-json-view-lite/dist/index.css";
 import * as s from "../../structured-state/src/index";
 import {
@@ -17,6 +16,7 @@ import {
   recordHistory,
 } from "../../structured-state/src/sstate.history";
 import { LinkedArray } from "../../structured-state/src/state/LinkedArray";
+import { JSONView } from "./JSONView";
 import { AudioClip } from "./structs/AudioClip";
 import { AudioTrack } from "./structs/AudioTrack";
 import { Note } from "./structs/MidiTrack";
@@ -25,7 +25,6 @@ import { TrackA } from "./ui/TrackA";
 import { SchedulerTest } from "./unused/SchedulerTest";
 import { nullthrows } from "./util";
 import { UtilityToggle } from "./UtilityToggle";
-import { JSONView } from "./JSONView";
 
 setWindow("s", s);
 
