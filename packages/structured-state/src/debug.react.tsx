@@ -12,8 +12,9 @@ import { CONTAINER_IGNORE_KEYS } from "./state/SubbableContainer";
 import { SUnion } from "./sunion";
 
 // TODO: allow for unregistered objects, so this doesn't show up on global known objects?
-const collapsedPaths = set<string>();
-const collapseClasses = set<string>();
+// comment out since we export DebugOut from index.ts, and so we're trying to create sents before all is initialized
+// const collapsedPaths = set<string>();
+// const collapseClasses = set<string>();
 
 export function DebugOut({
   val,
