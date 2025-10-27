@@ -1,4 +1,3 @@
-import { Contained } from "./LinkedPrimitive";
 import { MutationHashable } from "./MutationHashable";
 import { Subbable, SubbableCallback } from "./Subbable";
 import { isContainable } from "./isContainable";
@@ -21,30 +20,26 @@ export class UpdateToken {
   constructor(public target: Subbable) {}
 }
 
-export abstract class SubbableContainer
-  implements MutationHashable, Subbable, Contained
-{
+export interface SubbableContainer {
   readonly _id: string;
-  readonly _subscriptors: Set<SubbableCallback> = new Set();
-  public _hash: number = 0;
+  readonly _subscriptors: Set<SubbableCallback>;
+  _hash: number;
   // all containers can be contained
-  public readonly _container = new Set<SubbableContainer>();
-  public readonly _propagatedTokens = new WeakSet<UpdateToken>();
+  readonly _container: Set<SubbableContainer>;
+  readonly _propagatedTokens: WeakSet<UpdateToken>;
+}
 
-  constructor(id: string) {
-    this._id = id;
-  }
-
+export const subbableContainer = {
   // abstract _replace(val: T): void;
   // abstract _childChanged(child: Subbable): void;
 
-  static _contain(container: SubbableContainer, item: unknown) {
+  _contain(container: SubbableContainer, item: unknown) {
     if (isContainable(item)) {
       item._container.add(container);
     }
-  }
+  },
 
-  static _containAll(
+  _containAll(
     container: SubbableContainer,
     items: Array<unknown> | ReadonlySet<unknown> | IterableIterator<unknown>
   ) {
@@ -53,9 +48,9 @@ export abstract class SubbableContainer
         elem._container.add(container);
       }
     }
-  }
+  },
 
-  static _uncontain(container: SubbableContainer, item: unknown) {
+  _uncontain(container: SubbableContainer, item: unknown) {
     if (isContainable(item)) {
       if (!item._container.has(container)) {
         console.warn("_uncontain:", item._container, "does not contain", item);
@@ -67,35 +62,35 @@ export abstract class SubbableContainer
         (item as any)._destroy();
       }
     }
-  }
+  },
 
-  static _uncontainAll(
+  _uncontainAll(
     container: SubbableContainer,
     items: Array<unknown> | ReadonlySet<unknown>
   ) {
     for (const item of items) {
-      SubbableContainer._uncontain(container, item);
+      subbableContainer._uncontain(container, item);
     }
-  }
+  },
 
   /**
    * Creates a change notification to be propagated, starting at this object,
    * and about the change of a certain target
    */
-  static _notifyChange(struct: SubbableContainer, target: SubbableContainer) {
+  _notifyChange(struct: SubbableContainer, target: SubbableContainer) {
     const token = new UpdateToken(target);
     struct._propagatedTokens.add(token);
 
     MutationHashable.mutated(struct, target);
     for (const container of struct._container) {
-      SubbableContainer._childChanged(container, token);
+      subbableContainer._childChanged(container, token);
     }
 
     // it's a weak set, we don't need to remove
     // struct._propagatedTokens.delete(token)
-  }
+  },
 
-  static _childChanged(node: SubbableContainer, token: UpdateToken) {
+  _childChanged(node: SubbableContainer, token: UpdateToken) {
     if (node._propagatedTokens.has(token)) {
       // we already processed this event. stop here to prevent loops
       return;
@@ -104,10 +99,10 @@ export abstract class SubbableContainer
 
     MutationHashable.mutated(node, token.target);
     for (const container of node._container) {
-      SubbableContainer._childChanged(container, token);
+      subbableContainer._childChanged(container, token);
     }
 
     // it's a weak set, we don't need to remove
     // struct._propagatedTokens.delete(token)
-  }
-}
+  },
+};

@@ -1,6 +1,10 @@
 import { nanoid } from "nanoid";
-import { Subbable, notify } from "./Subbable";
-import { SubbableContainer, UpdateToken } from "./SubbableContainer";
+import { notify, Subbable } from "./Subbable";
+import {
+  subbableContainer,
+  SubbableContainer,
+  UpdateToken,
+} from "./SubbableContainer";
 
 export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
 export type StateChangeHandler<S> = (value: S) => void;
@@ -16,6 +20,8 @@ export class LinkedPrimitive<S> implements Contained, Subbable {
   readonly _id: string;
   private _value: Readonly<S>;
   readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
+
+  // Contained
   readonly _container = new Set<SubbableContainer>();
 
   private constructor(initialValue: S, id: string) {
@@ -38,7 +44,7 @@ export class LinkedPrimitive<S> implements Contained, Subbable {
     // we don't need to save the token, since primitvies, being leaves, will never be notified when a child changes
     const token = new UpdateToken(this);
     for (const container of this._container) {
-      SubbableContainer._childChanged(container, token);
+      subbableContainer._childChanged(container, token);
     }
   }
 

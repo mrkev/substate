@@ -25,6 +25,7 @@
     "react-json-tree": "^0.20.0",
     "react-json-view-lite": "^2.5.0",
     "react-router-dom": "^7.9.4",
-    "tailwindcss": "^4.1.16"
+    "tailwindcss": "^4.1.16",
+    "linked-state": "workspace:*"
   }
 }

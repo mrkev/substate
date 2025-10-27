@@ -2,7 +2,7 @@ import { nanoid } from "nanoid";
 import { mutablearr } from "./nullthrows";
 import { StateChangeHandler } from "./LinkedPrimitive";
 import { Subbable } from "./Subbable";
-import { SubbableContainer } from "./SubbableContainer";
+import { subbableContainer, SubbableContainer } from "./SubbableContainer";
 
 // .sort, .reverse, .fill, .copyWithin operate in place and return the array. SubbableArray
 // is not quite an array so the return types don't match.
@@ -49,16 +49,16 @@ export class LinkedArray<S>
   // }
 
   _replace(cb: (arr: Array<S>) => ReadonlyArray<S>) {
-    SubbableContainer._uncontainAll(this, this._array);
+    subbableContainer._uncontainAll(this, this._array);
     this._array = mutablearr(cb(this._array)); // todo, call ._destroy on child elements?
-    SubbableContainer._containAll(this, this._array);
-    SubbableContainer._notifyChange(this, this);
+    subbableContainer._containAll(this, this._array);
+    subbableContainer._notifyChange(this, this);
   }
 
   constructor(initialValue: Array<S>, id: string, anonymous = false) {
     this._id = id;
     this._array = initialValue;
-    SubbableContainer._containAll(this, this._array);
+    subbableContainer._containAll(this, this._array);
     if (!anonymous) {
       // getGlobalState().knownObjects.set(this._id, this);
     }
@@ -67,7 +67,7 @@ export class LinkedArray<S>
   private mutate<V>(mutator: (rep: Array<S>) => V): V {
     // saveForHistory(this);
     const result = mutator(this._array);
-    SubbableContainer._notifyChange(this, this);
+    subbableContainer._notifyChange(this, this);
     return result;
   }
 
@@ -118,7 +118,7 @@ export class LinkedArray<S>
 
     return this.mutate((rep) => {
       const res = rep.pop();
-      res != null && SubbableContainer._uncontain(this, res);
+      res != null && subbableContainer._uncontain(this, res);
       return res;
     });
   }
@@ -131,7 +131,7 @@ export class LinkedArray<S>
 
     return this.mutate((clone) => {
       const res = clone.shift();
-      res != null && SubbableContainer._uncontain(this, res);
+      res != null && subbableContainer._uncontain(this, res);
       return res;
     });
   }
@@ -141,7 +141,7 @@ export class LinkedArray<S>
     if (items.length < 1) {
       return this.length;
     }
-    SubbableContainer._containAll(this, items);
+    subbableContainer._containAll(this, items);
 
     return this.mutate((clone) => {
       return clone.push(...items);
@@ -153,7 +153,7 @@ export class LinkedArray<S>
     if (items.length < 1) {
       return this.length;
     }
-    SubbableContainer._containAll(this, items);
+    subbableContainer._containAll(this, items);
 
     return this.mutate((clone) => {
       return clone.unshift(...items);
@@ -180,11 +180,11 @@ export class LinkedArray<S>
   splice(start: number, deleteCount?: number): S[];
   splice(start: number, deleteCount: number, ...items: S[]): S[];
   splice(start: any, deleteCount?: any, ...items: any[]): S[] {
-    SubbableContainer._containAll(this, items);
+    subbableContainer._containAll(this, items);
     return this.mutate((_array) => {
       const deleted = _array.splice(start, deleteCount, ...items);
       for (const elem of deleted) {
-        SubbableContainer._uncontain(this, elem);
+        subbableContainer._uncontain(this, elem);
       }
       return deleted;
     });
@@ -192,7 +192,7 @@ export class LinkedArray<S>
 
   // Array<S> interface, mutates
   fill(value: S, start?: number, end?: number): this {
-    SubbableContainer._containAll(this, [value]);
+    subbableContainer._containAll(this, [value]);
     console.warn("TODO: fill BREAKING: containment");
     return this.mutate((_array) => {
       _array.fill(value, start, end);

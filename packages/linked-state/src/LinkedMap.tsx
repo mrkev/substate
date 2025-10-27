@@ -2,7 +2,11 @@ import { nanoid } from "nanoid";
 import { StateChangeHandler } from "./LinkedPrimitive";
 import { MutationHashable } from "./MutationHashable";
 import { Subbable } from "./Subbable";
-import { SubbableContainer, UpdateToken } from "./SubbableContainer";
+import {
+  subbableContainer,
+  SubbableContainer,
+  UpdateToken,
+} from "./SubbableContainer";
 
 // todo: history
 export class LinkedMap<K, V>
@@ -31,8 +35,8 @@ export class LinkedMap<K, V>
   private constructor(initialValue: Map<K, V>, id: string) {
     this._id = id;
     this._map = initialValue;
-    SubbableContainer._containAll(this, this._map.keys());
-    SubbableContainer._containAll(this, this._map.values());
+    subbableContainer._containAll(this, this._map.keys());
+    subbableContainer._containAll(this, this._map.values());
   }
 
   public static create<K, V>(initialValue?: Map<K, V>) {
@@ -52,8 +56,8 @@ export class LinkedMap<K, V>
 
   // Map<K, V> interface, mutates
   clear(): void {
-    SubbableContainer._uncontain(this, this._map.keys());
-    SubbableContainer._uncontain(this, this._map.values());
+    subbableContainer._uncontain(this, this._map.keys());
+    subbableContainer._uncontain(this, this._map.values());
     this._map.clear();
     MutationHashable.mutated(this, this);
   }
@@ -63,8 +67,8 @@ export class LinkedMap<K, V>
     if (!this._map.has(key)) {
       return false;
     }
-    SubbableContainer._uncontain(this, key);
-    SubbableContainer._uncontain(this, this._map.get(key));
+    subbableContainer._uncontain(this, key);
+    subbableContainer._uncontain(this, this._map.get(key));
     const result = this._map.delete(key);
     MutationHashable.mutated(this, this);
     return result;
@@ -90,8 +94,8 @@ export class LinkedMap<K, V>
 
   // Map<K, V> interface, mutates
   set(key: K, value: V): this {
-    SubbableContainer._contain(this, key);
-    SubbableContainer._contain(this, value);
+    subbableContainer._contain(this, key);
+    subbableContainer._contain(this, value);
 
     this._map.set(key, value);
     MutationHashable.mutated(this, this);

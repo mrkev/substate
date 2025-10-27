@@ -5,7 +5,7 @@
   ],
   "scripts": {
     "dev": "npm run --workspace=site dev",
-    "build": "npm run --workspace=structured-state build",
+    "build": "pnpx nx run-many -t build",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "test": "npm run --workspace=structured-state test"
   },
@@ -25,7 +25,9 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.4.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "nx": "22.0.1",
+    "@nx/eslint": "22.0.1"
   },
   "dependencies": {
     "@types/scheduler": "^0.26.0",
