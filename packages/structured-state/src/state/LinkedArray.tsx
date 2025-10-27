@@ -25,6 +25,7 @@ export type ArrayWithoutIndexer<T> = Omit<
   | "with"
 >;
 
+// NOTE: don't use LinkedArray directly, use SArray
 export class LinkedArray<S>
   implements ArrayWithoutIndexer<S>, SubbableContainer
 {
