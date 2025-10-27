@@ -1,8 +1,6 @@
 import { useCallback, useMemo } from "react";
-import {
-  MutationHashable,
-  useSubscribeToSubbableMutationHashable,
-} from "./state/MutationHashable";
+import { MutationHashable } from "./state/MutationHashable";
+import { useSubscribeToSubbableMutationHashable } from "./state/hooks";
 import { SubbableCallback } from "./state/Subbable";
 
 class MutationFlag implements MutationHashable {

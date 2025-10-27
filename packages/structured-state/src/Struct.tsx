@@ -12,9 +12,9 @@ import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { Subbable } from "./state/Subbable";
 import { SubbableContainer } from "./state/SubbableContainer";
 
-type IsEmptyObjType<T extends Record<PropertyKey, any>> = keyof T extends never
-  ? true
-  : false;
+type IsEmptyObjType<T extends Record<PropertyKey, unknown>> =
+  keyof T extends never ? true : false;
+
 type SPrimitiveFieldsToSOut<T extends Record<string, any>> = {
   [key in keyof T as T[key] extends LinkedPrimitive<any> | SArray<any>
     ? key

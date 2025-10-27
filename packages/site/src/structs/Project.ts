@@ -91,6 +91,6 @@ export class Project extends Structured<AutoProject, typeof Project> {
   }
 
   clear() {
-    while (this.tracks.pop()) {}
+    while (this.tracks.pop());
   }
 }

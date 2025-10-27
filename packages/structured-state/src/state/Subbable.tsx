@@ -1,5 +1,4 @@
-import { getGlobalState } from "../sstate.history";
-import { StateChangeHandler } from "./LinkedPrimitive";
+import type { StateChangeHandler } from "./LinkedPrimitive";
 
 /* Subbables are objects one can subscribe to */
 
@@ -25,15 +24,12 @@ export function notify(
   // that changed, or a recursive child
   target: Subbable
 ) {
-  const globalState = getGlobalState();
-  if (subbable !== globalState.history) {
-    // console.log(
-    //   "SENDING NOTIF TO",
-    //   subbable._subscriptors.size,
-    //   "CHANGED:",
-    //   subbable.constructor.name
-    // );
-  }
+  // console.log(
+  //   "SENDING NOTIF TO",
+  //   subbable._subscriptors.size,
+  //   "CHANGED:",
+  //   subbable.constructor.name
+  // );
 
   for (const cb of subbable._subscriptors) {
     cb(target, subbable);

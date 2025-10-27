@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SArray } from "../SArray";
+import { SArray } from "./SArray";
 
 describe("SArray", () => {
   it(".of", () => {

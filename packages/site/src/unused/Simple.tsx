@@ -29,7 +29,7 @@ export class BusLine extends Struct.Struct<BusLine> {
 
   clear() {
     recordHistory("remove all buses", () => {
-      while (this.buses.pop()) {}
+      while (this.buses.pop());
     });
   }
 }

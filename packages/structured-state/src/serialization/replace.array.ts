@@ -78,7 +78,7 @@ export function replaceSchemaArray<
     raw.sort((a, b) => {
       const aIndex = jsonOrder.indexOf(a._id);
       if (aIndex < 0) {
-        debugger;
+        // debugger;
         console.warn(
           "replace: arr has an element not in json, this should never happen"
         );

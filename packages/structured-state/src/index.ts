@@ -36,12 +36,14 @@ export { serialize } from "./serialization/serialization";
 export type { S } from "./serialization/serialization";
 
 export { getGlobalState, history } from "./sstate.history";
-export { useContainer, usePrimitive as usePrimitive } from "./state/hooks";
+export {
+  useContainer,
+  usePrimitive,
+  useSubscribeToSubbableMutationHashable,
+} from "./state/hooks";
 
 export { DirtyObserver, useDirtyTracker } from "./DirtyObserver";
 export type { DirtyState } from "./DirtyObserver";
-
-export { useSubscribeToSubbableMutationHashable } from "./state/MutationHashable";
 
 // export { init } from "./serialization.initialize";
 export type { InitFunctions } from "./serialization/initialize";

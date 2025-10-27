@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import type { LinkedPrimitive, StateDispath } from "./LinkedPrimitive";
-import { useSubscribeToSubbableMutationHashable } from "./MutationHashable";
-import { subscribe } from "./Subbable";
+import { Subbable, subscribe } from "./Subbable";
 import { SubbableContainer } from "./SubbableContainer";
+import { MutationHashable } from "./MutationHashable";
 
 export function usePrimitive<S>(
   linkedState: LinkedPrimitive<S>
@@ -18,6 +18,7 @@ export function usePrimitive<S>(
   }, [linkedState]);
 
   const apiState = linkedState.get();
+
   useEffect(() => {
     setState(() => apiState);
   }, [apiState]);
@@ -41,5 +42,22 @@ export function useContainer<S extends SubbableContainer>(
   recursiveChanges: boolean = false
 ): S {
   useSubscribeToSubbableMutationHashable(obj, undefined, recursiveChanges);
+  return obj;
+}
+
+export function useSubscribeToSubbableMutationHashable<
+  T extends MutationHashable & Subbable
+>(obj: T, cb?: () => void, recursiveChanges = false): T {
+  const [, setHash] = useState(() => MutationHashable.getMutationHash(obj));
+
+  useEffect(() => {
+    return subscribe(obj, (target) => {
+      // console.log("got notif", obj, "target is", target);
+      if (obj === target || recursiveChanges) {
+        setHash((prev) => (prev + 1) % Number.MAX_SAFE_INTEGER);
+        cb?.();
+      }
+    });
+  }, [cb, obj, recursiveChanges]);
   return obj;
 }

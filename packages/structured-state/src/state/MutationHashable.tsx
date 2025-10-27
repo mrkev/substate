@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { Subbable, SubbableCallback, notify, subscribe } from "./Subbable";
+import { Subbable, SubbableCallback, notify } from "./Subbable";
 
 export abstract class MutationHashable {
   readonly _subscriptors: Set<SubbableCallback> = new Set();
@@ -13,21 +12,4 @@ export abstract class MutationHashable {
     mh._hash = (mh._hash + 1) % Number.MAX_SAFE_INTEGER;
     notify(mh, target);
   }
-}
-
-export function useSubscribeToSubbableMutationHashable<
-  T extends MutationHashable & Subbable
->(obj: T, cb?: () => void, recursiveChanges = false): T {
-  const [, setHash] = useState(() => MutationHashable.getMutationHash(obj));
-
-  useEffect(() => {
-    return subscribe(obj, (target) => {
-      // console.log("got notif", obj, "target is", target);
-      if (obj === target || recursiveChanges) {
-        setHash((prev) => (prev + 1) % Number.MAX_SAFE_INTEGER);
-        cb?.();
-      }
-    });
-  }, [cb, obj, recursiveChanges]);
-  return obj;
 }
