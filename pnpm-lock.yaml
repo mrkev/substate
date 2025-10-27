@@ -103,6 +103,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.16
         version: 4.1.16(vite@7.1.12(@types/node@24.9.1)(jiti@2.6.1)(lightningcss@1.30.2)(yaml@2.8.1))
+      json-stringify-deterministic:
+        specifier: ^1.0.12
+        version: 1.0.12
       linked-state:
         specifier: workspace:*
         version: link:../linked-state

@@ -1,7 +1,5 @@
 // import hljs from "highlight.js";
 import { useState } from "react";
-import "react-json-pretty/themes/monikai.css";
-import "react-json-view-lite/dist/index.css";
 import * as s from "../../structured-state/src/index";
 import {
   construct,

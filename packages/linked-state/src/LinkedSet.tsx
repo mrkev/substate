@@ -74,7 +74,6 @@ export class LinkedSet<S>
   }
 
   _replace(cb: (set: Set<S>) => ReadonlySet<S>) {
-    // todo, call ._destroy on child elements?
     subbableContainer._uncontainAll(this, this._set);
     this._set = cb(mutableset(this._set));
     subbableContainer._containAll(this, this._set);

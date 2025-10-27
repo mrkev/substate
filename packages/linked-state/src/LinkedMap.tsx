@@ -9,7 +9,6 @@ import {
   UpdateToken,
 } from "./SubbableContainer";
 
-// todo: history
 export class LinkedMap<K, V>
   implements
     Map<K, V>,

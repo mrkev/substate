@@ -1,22 +1,22 @@
 import stringify from "json-stringify-deterministic";
 import { ReactNode, useState } from "react";
-import { PrimitiveKind, SSet, Structured } from ".";
-import { SArray, SSchemaArray } from "./SArray";
-import { Struct } from "./Struct";
-import { Struct2 } from "./Struct2";
-import { isPrimitiveKind, StructuredKind } from "./StructuredKinds";
-import { exhaustive } from "./assertions";
-import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { MutationHashable } from "./state/MutationHashable";
-import { CONTAINER_IGNORE_KEYS } from "./state/SubbableContainer";
-import { SUnion } from "./sunion";
+import { LinkedArray } from "../../../linked-state/src/LinkedArray";
+import { LinkedMap } from "../../../linked-state/src/LinkedMap";
+import { LinkedPrimitive } from "../../../linked-state/src/LinkedPrimitive";
+import { LinkedSet } from "../../../linked-state/src/LinkedSet";
+import { mutationHashable } from "../../../linked-state/src/MutationHashable";
+import { exhaustive } from "../../../structured-state/src/assertions";
 
-// TODO: allow for unregistered objects, so this doesn't show up on global known objects?
-// comment out since wea export DebugOut from index.ts, and so we're trying to create sents before all is initialized
-// const collapsedPaths = set<string>();
-// const collapseClasses = set<string>();
+const TAB_SIZE = 2;
+type DisplayState = "full" | "native" | "collapsed";
+type Debuggable =
+  | LinkedPrimitive<unknown>
+  | LinkedArray<unknown>
+  | LinkedMap<unknown, unknown>
+  | LinkedSet<unknown>;
+export type PrimitiveKind = number | string | boolean | null;
 
-export function DebugOut({
+export function LinkedStateDebug({
   val,
   showUnknowns,
   style,
@@ -71,7 +71,7 @@ export function DebugOutReact({
     return <DebugOutSimplePrm val={val} />;
   } else if (typeof val === "function") {
     return "(function)";
-  } else if (val instanceof SArray) {
+  } else if (val instanceof LinkedArray) {
     return (
       <DebugOutArray
         arr={val}
@@ -80,16 +80,7 @@ export function DebugOutReact({
         showUnknowns={showUnknowns}
       />
     );
-  } else if (val instanceof SSchemaArray) {
-    return (
-      <DebugOutArray
-        arr={val}
-        pad={pad}
-        path={path}
-        showUnknowns={showUnknowns}
-      />
-    );
-  } else if (val instanceof SSet) {
+  } else if (val instanceof LinkedSet) {
     return (
       <DebugOutSet
         set={val}
@@ -100,37 +91,10 @@ export function DebugOutReact({
     );
   } else if (val instanceof LinkedPrimitive) {
     return <DebugOutSPrimitive obj={val} path={path} />;
-  } else if (val instanceof Struct) {
+  } else if (val instanceof LinkedMap) {
     return (
-      <DebugOutStruct
-        struct={val}
-        pad={pad}
-        path={path}
-        showUnknowns={showUnknowns}
-      />
-    );
-  } else if (val instanceof Struct2) {
-    return (
-      <DebugOutStruct
-        struct={val}
-        pad={pad}
-        path={path}
-        showUnknowns={showUnknowns}
-      />
-    );
-  } else if (val instanceof Structured) {
-    return (
-      <DebugOutStruct
-        struct={val}
-        pad={pad}
-        path={path}
-        showUnknowns={showUnknowns}
-      />
-    );
-  } else if (val instanceof SUnion) {
-    return (
-      <DebugOutUnion
-        union={val}
+      <DebugOutMap
+        map={val}
         pad={pad}
         path={path}
         showUnknowns={showUnknowns}
@@ -147,29 +111,13 @@ export function DebugOutReact({
   }
 }
 
-function DebugOutUnion({
-  union,
-  pad,
-  showUnknowns,
-}: {
-  union: SUnion<any>;
-  pad: number;
-  path?: string;
-  showUnknowns: boolean;
-}) {
-  return "union, todo";
-}
-
-const TAB_SIZE = 2;
-type DisplayState = "full" | "native" | "collapsed";
-
-function DebugOutStruct({
-  struct,
+function DebugOutMap({
+  map,
   pad,
   path = "",
   showUnknowns,
 }: {
-  struct: Struct<any> | Struct2<any> | Structured<any, any>;
+  map: LinkedMap<unknown, unknown>;
   pad: number;
   path?: string;
   showUnknowns: boolean;
@@ -179,23 +127,17 @@ function DebugOutStruct({
   const showBody = displayState === "full" || displayState === "native";
 
   const body: Array<ReactNode> = ["{"];
-  const keys = Object.keys(struct);
+  const entries = [...map.entries()];
 
-  for (let i = 0; i < keys.length && showBody; i++) {
-    const key = keys[i];
+  for (let i = 0; i < entries.length && showBody; i++) {
+    const [key, val] = entries[i];
     const baseline = pad + TAB_SIZE;
-    if (struct instanceof Structured && CONTAINER_IGNORE_KEYS.has(key)) {
-      continue;
-    }
-    if (CONTAINER_IGNORE_KEYS.has(key)) {
-      continue;
-    }
-    const val: unknown = (struct as any)[key];
+
     body.push(
       <br key={`br-${key}`} />,
       " ".repeat(baseline),
       <span key={`span-${key}`} className={classOfKind("attr")}>
-        {key}
+        {String(key)}
       </span>,
       ": ",
       <DebugOutReact
@@ -216,7 +158,7 @@ function DebugOutStruct({
 
   return (
     <>
-      <span
+      {/* <span
         className={classOfKind("classname")}
         onClick={() => {
           setDisplayState((prev) => {
@@ -233,11 +175,11 @@ function DebugOutStruct({
           });
         }}
       >
-        {struct.constructor.name}
-      </span>{" "}
+        {map.constructor.name}
+      </span>{" "} */}
       {showHeader && (
         <>
-          <Header obj={struct} path={`${path}/${struct._id}`} />{" "}
+          <Header obj={map} path={`${path}/${map._id}`} />{" "}
         </>
       )}
       {body}
@@ -251,7 +193,7 @@ function DebugOutArray({
   path = "",
   showUnknowns,
 }: {
-  arr: SArray<any> | SSchemaArray<any>;
+  arr: LinkedArray<unknown>;
   pad: number;
   path?: string;
   showUnknowns: boolean;
@@ -297,7 +239,7 @@ function DebugOutSet({
   path = "",
   showUnknowns,
 }: {
-  set: SSet<any>;
+  set: LinkedSet<any>;
   pad: number;
   path?: string;
   showUnknowns: boolean;
@@ -343,27 +285,19 @@ function Header({
   path,
   showContainerId = false,
 }: {
-  obj: StructuredKind;
+  obj: Debuggable;
   path?: string;
   showContainerId?: boolean;
 }) {
   const kindStr = (() => {
-    if (obj instanceof SArray) {
-      return "arr";
-    } else if (obj instanceof SSchemaArray) {
-      return "s_arr";
-    } else if (obj instanceof SSet) {
-      return "set";
+    if (obj instanceof LinkedMap) {
+      return "lmap";
+    } else if (obj instanceof LinkedArray) {
+      return "larr";
+    } else if (obj instanceof LinkedSet) {
+      return "lset";
     } else if (obj instanceof LinkedPrimitive) {
-      return "prm";
-    } else if (obj instanceof Struct) {
-      return "Sct";
-    } else if (obj instanceof Struct2) {
-      return "Sct2";
-    } else if (obj instanceof Structured) {
-      return "Strd";
-    } else if (obj instanceof SUnion) {
-      return "uni";
+      return "lprm";
     } else {
       exhaustive(obj);
     }
@@ -372,7 +306,7 @@ function Header({
   const hashStr =
     obj instanceof LinkedPrimitive
       ? ""
-      : `.${MutationHashable.getMutationHash(obj)}`;
+      : `.${mutationHashable.getMutationHash(obj)}`;
 
   const container = showContainerId
     ? ` -^ ${[...obj._container.values()].map((v) => v._id).join(",")}`
@@ -449,3 +383,12 @@ const classOfKind = (
       exhaustive(kind);
   }
 };
+
+export function isPrimitiveKind(val: unknown) {
+  return (
+    typeof val === "number" ||
+    typeof val === "string" ||
+    typeof val === "boolean" ||
+    val === null
+  );
+}

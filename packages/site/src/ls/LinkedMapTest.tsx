@@ -2,19 +2,19 @@ import { useState } from "react";
 import { LinkedMap } from "../../../linked-state/src/LinkedMap";
 import { useContainer } from "../../../linked-state/src/hooks";
 
-const linkedMap = LinkedMap.create<number, string>();
-
-export function LinkedMapTest() {
+export function LinkedMapTest({
+  linkedMap,
+}: {
+  linkedMap: LinkedMap<number, string>;
+}) {
   const map = useContainer(linkedMap);
 
   const [key, setKey] = useState(0);
-  const [value, setValue] = useState("");
 
   const handleAdd = () => {
-    map.set(key, value || "(empty)");
+    map.set(key, "foo");
     console.log("added", map);
     setKey(key + 1);
-    setValue("foo");
   };
 
   const handleDelete = (k: number) => {

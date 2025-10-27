@@ -1,10 +1,10 @@
 import { nanoid } from "nanoid";
-import { mutablearr } from "./nullthrows";
-import { StateChangeHandler } from "./LinkedPrimitive";
 import { Contained } from "./Contained";
+import { StateChangeHandler } from "./LinkedPrimitive";
+import { MutationHashable } from "./MutationHashable";
+import { mutablearr } from "./nullthrows";
 import { Subbable } from "./Subbable";
 import { subbableContainer, SubbableContainer } from "./SubbableContainer";
-import { MutationHashable } from "./MutationHashable";
 
 // .sort, .reverse, .fill, .copyWithin operate in place and return the array. SubbableArray
 // is not quite an array so the return types don't match.
@@ -58,7 +58,7 @@ export class LinkedArray<S>
 
   _replace(cb: (arr: Array<S>) => ReadonlyArray<S>) {
     subbableContainer._uncontainAll(this, this._array);
-    this._array = mutablearr(cb(this._array)); // todo, call ._destroy on child elements?
+    this._array = mutablearr(cb(this._array));
     subbableContainer._containAll(this, this._array);
     subbableContainer._notifyChange(this, this);
   }

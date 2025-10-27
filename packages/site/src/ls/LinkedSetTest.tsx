@@ -2,9 +2,7 @@ import { useState } from "react";
 import { LinkedSet } from "../../../linked-state/src/LinkedSet";
 import { useContainer } from "../../../linked-state/src/hooks";
 
-const linkedSet = LinkedSet._create<number>();
-
-export function LinkedSetTest() {
+export function LinkedSetTest({ linkedSet }: { linkedSet: LinkedSet<number> }) {
   // Create a reactive LinkedSet (starts empty)
   const set = useContainer(linkedSet);
 
