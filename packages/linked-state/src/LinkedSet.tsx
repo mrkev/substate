@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { StateChangeHandler } from "./LinkedPrimitive";
+import { Contained, StateChangeHandler } from "./LinkedPrimitive";
 import { mutableset } from "./nullthrows";
 import { Subbable } from "./Subbable";
 import {
@@ -7,20 +7,23 @@ import {
   SubbableContainer,
   UpdateToken,
 } from "./SubbableContainer";
+import { MutationHashable } from "./MutationHashable";
 
-export class LinkedSet<S> implements SubbableContainer, Set<S> {
+export class LinkedSet<S>
+  implements SubbableContainer, MutationHashable, Contained, Set<S>
+{
   // main
   private _set: ReadonlySet<S>;
   // public _schema: StructSchema | null;
 
   // SubbableContainer
-  _id: string;
+  public readonly _id: string;
   public readonly _container = new Set<SubbableContainer>();
   public readonly _propagatedTokens: WeakSet<UpdateToken> = new WeakSet();
 
   // MutationHashable
-  _subscriptors = new Set<StateChangeHandler<Subbable>>();
-  _hash: number = 0;
+  public readonly _subscriptors = new Set<StateChangeHandler<Subbable>>();
+  public _hash: number = 0;
 
   private constructor(
     _set: Set<S>,

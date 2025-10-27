@@ -1,4 +1,4 @@
-import { MutationHashable } from "./MutationHashable";
+import { mutationHashable, MutationHashable } from "./MutationHashable";
 import { Subbable, SubbableCallback } from "./Subbable";
 import { isContainable } from "./isContainable";
 
@@ -20,13 +20,17 @@ export class UpdateToken {
   constructor(public target: Subbable) {}
 }
 
+//  implements MutationHashable, Subbable, Contained
 export interface SubbableContainer {
   readonly _id: string;
+  readonly _propagatedTokens: WeakSet<UpdateToken>;
+
+  // MutationHashable
   readonly _subscriptors: Set<SubbableCallback>;
   _hash: number;
-  // all containers can be contained
-  readonly _container: Set<SubbableContainer>;
-  readonly _propagatedTokens: WeakSet<UpdateToken>;
+
+  // Contained
+  readonly _container: Set<SubbableContainer>; // all containers can be contained
 }
 
 export const subbableContainer = {
@@ -81,7 +85,7 @@ export const subbableContainer = {
     const token = new UpdateToken(target);
     struct._propagatedTokens.add(token);
 
-    MutationHashable.mutated(struct, target);
+    mutationHashable.mutated(struct, target);
     for (const container of struct._container) {
       subbableContainer._childChanged(container, token);
     }
@@ -97,7 +101,7 @@ export const subbableContainer = {
     }
     node._propagatedTokens.add(token);
 
-    MutationHashable.mutated(node, token.target);
+    mutationHashable.mutated(node, token.target);
     for (const container of node._container) {
       subbableContainer._childChanged(container, token);
     }

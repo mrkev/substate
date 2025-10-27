@@ -1,8 +1,9 @@
 import { nanoid } from "nanoid";
 import { mutablearr } from "./nullthrows";
-import { StateChangeHandler } from "./LinkedPrimitive";
+import { Contained, StateChangeHandler } from "./LinkedPrimitive";
 import { Subbable } from "./Subbable";
 import { subbableContainer, SubbableContainer } from "./SubbableContainer";
+import { MutationHashable } from "./MutationHashable";
 
 // .sort, .reverse, .fill, .copyWithin operate in place and return the array. SubbableArray
 // is not quite an array so the return types don't match.
@@ -26,12 +27,18 @@ export type ArrayWithoutIndexer<T> = Omit<
 
 // NOTE: don't use LinkedArray directly, use SArray
 export class LinkedArray<S>
-  implements ArrayWithoutIndexer<S>, SubbableContainer
+  implements
+    ArrayWithoutIndexer<S>,
+    SubbableContainer,
+    MutationHashable,
+    Contained
 {
   readonly _id: string;
   protected _array: Array<S>;
   readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
   _hash: number = 0;
+
+  // Contained
   readonly _container = new Set<SubbableContainer>();
   readonly _propagatedTokens = new WeakSet();
 
