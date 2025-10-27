@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { LinkedPrimitive } from "./LinkedPrimitive";
 
-describe("sstate", () => {
-  it("LinkedPrimitive.of", () => {
+describe("LinkedPrimitive", () => {
+  it(".of", () => {
     const prim = LinkedPrimitive.of(3);
     expect(prim.get()).toEqual(3);
   });

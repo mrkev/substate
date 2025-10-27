@@ -1,6 +1,6 @@
-import { mutationHashable, MutationHashable } from "./MutationHashable";
+import { isContainable } from "./Contained";
+import { mutationHashable } from "./MutationHashable";
 import { Subbable, SubbableCallback } from "./Subbable";
-import { isContainable } from "./isContainable";
 
 /** Keys to ignore from SubbableContainer when serializing */
 export const CONTAINER_IGNORE_KEYS = new Set<string>([

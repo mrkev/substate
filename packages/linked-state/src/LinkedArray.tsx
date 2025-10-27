@@ -1,6 +1,7 @@
 import { nanoid } from "nanoid";
 import { mutablearr } from "./nullthrows";
-import { Contained, StateChangeHandler } from "./LinkedPrimitive";
+import { StateChangeHandler } from "./LinkedPrimitive";
+import { Contained } from "./Contained";
 import { Subbable } from "./Subbable";
 import { subbableContainer, SubbableContainer } from "./SubbableContainer";
 import { MutationHashable } from "./MutationHashable";

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { LinkedSet } from "./LinkedSet";
 
-describe("sstate", () => {
-  it("LinkedPrimitive.of", () => {
+describe("LinkedSet", () => {
+  it(".of", () => {
     const set = LinkedSet.create();
     expect(set).not.toBeNull();
   });

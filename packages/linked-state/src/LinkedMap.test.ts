@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { LinkedMap } from "./LinkedMap";
 
-describe("sstate", () => {
-  it("LinkedPrimitive.of", () => {
+describe("LinkedMap", () => {
+  it(".of", () => {
     const map = LinkedMap.create();
     expect(map).not.toBeNull();
   });

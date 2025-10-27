@@ -2,6 +2,11 @@ import { LinkedArray } from "./LinkedArray";
 import { LinkedMap } from "./LinkedMap";
 import { LinkedPrimitive } from "./LinkedPrimitive";
 import { LinkedSet } from "./LinkedSet";
+import { Subbable } from "./Subbable";
+
+export interface Contained {
+  readonly _container: Set<Subbable>;
+}
 
 export function isContainable(
   val: unknown
