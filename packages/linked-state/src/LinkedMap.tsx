@@ -12,6 +12,7 @@ import {
 export class LinkedMap<K, V>
   implements Map<K, V>, Subbable, MutationHashable, SubbableContainer
 {
+  // main
   private _map: Map<K, V>;
 
   // SubbableContainer

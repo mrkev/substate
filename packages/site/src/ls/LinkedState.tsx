@@ -1,6 +1,11 @@
-import { LinkedMapTester } from "./LinkedMapTest";
+import { LinkedMapTest } from "./LinkedMapTest";
+import { LinkedSetTest } from "./LinkedSetTest";
 
 export function LinkedState() {
-  return <LinkedMapTester />;
-  return "hello";
+  return (
+    <>
+      <LinkedMapTest />
+      <LinkedSetTest />
+    </>
+  );
 }

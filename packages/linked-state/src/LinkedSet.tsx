@@ -22,7 +22,7 @@ export class LinkedSet<S> implements SubbableContainer, Set<S> {
   _subscriptors = new Set<StateChangeHandler<Subbable>>();
   _hash: number = 0;
 
-  constructor(
+  private constructor(
     _set: Set<S>,
     _id: string
     // _schema: StructSchema | null

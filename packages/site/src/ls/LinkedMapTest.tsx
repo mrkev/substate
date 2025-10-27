@@ -4,7 +4,7 @@ import { useContainer } from "../../../linked-state/src/hooks";
 
 const linkedMap = LinkedMap.create<number, string>();
 
-export function LinkedMapTester() {
+export function LinkedMapTest() {
   const map = useContainer(linkedMap);
 
   const [key, setKey] = useState(0);
