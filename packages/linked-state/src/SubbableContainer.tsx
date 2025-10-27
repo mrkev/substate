@@ -17,7 +17,7 @@ export const CONTAINER_IGNORE_KEYS = new Set<string>([
  * - it holds the target of the update, acting like an "event" in that sense: a record of the update
  */
 export class UpdateToken {
-  constructor(public target: Subbable) {}
+  constructor(public readonly target: Subbable) {}
 }
 
 //  implements MutationHashable, Subbable, Contained

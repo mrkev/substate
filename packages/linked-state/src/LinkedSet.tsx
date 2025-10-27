@@ -48,6 +48,10 @@ export class LinkedSet<S>
     subbableContainer._notifyChange(this, this);
   }
 
+  public static create<T>(initialValue?: Set<T>) {
+    return new this<T>(initialValue ?? new Set(), nanoid(5));
+  }
+
   /** should only be used internally */
   public static _create<T>(
     initialValue?: Iterable<T>,
