@@ -26,8 +26,8 @@ export function LinkedStateDebug({
   style?: React.CSSProperties;
 }) {
   return (
-    <div style={{ overflow: "scroll", ...style }}>
-      <pre style={{ textAlign: "left", width: 300, fontSize: 12 }}>
+    <div className="overflow-scroll" style={style}>
+      <pre className="text-start" style={{ width: 300, fontSize: 12 }}>
         <DebugOutReact
           val={val}
           pad={0}

@@ -13,8 +13,8 @@ export class LinkedMap<K, V>
   implements
     Map<K, V>,
     Subbable,
-    MutationHashable,
     SubbableContainer,
+    MutationHashable,
     Contained
 {
   // main

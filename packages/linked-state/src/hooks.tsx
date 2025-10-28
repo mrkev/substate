@@ -50,7 +50,7 @@ export function useContainer<S extends SubbableContainer>(
 export function useSubscribeToSubbableMutationHashable<
   T extends MutationHashable & Subbable
 >(obj: T, cb?: () => void, recursiveChanges = false): T {
-  const [, setHash] = useState(() => mutationHashable.getMutationHash(obj));
+  const [hash, setHash] = useState(() => mutationHashable.getMutationHash(obj));
 
   useEffect(() => {
     return subscribe(obj, (target) => {

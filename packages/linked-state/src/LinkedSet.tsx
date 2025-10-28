@@ -1,6 +1,7 @@
 import { nanoid } from "nanoid";
-import { StateChangeHandler } from "./LinkedPrimitive";
 import { Contained } from "./Contained";
+import { StateChangeHandler } from "./LinkedPrimitive";
+import { MutationHashable } from "./MutationHashable";
 import { mutableset } from "./nullthrows";
 import { Subbable } from "./Subbable";
 import {
@@ -8,14 +9,12 @@ import {
   SubbableContainer,
   UpdateToken,
 } from "./SubbableContainer";
-import { MutationHashable } from "./MutationHashable";
 
 export class LinkedSet<S>
-  implements SubbableContainer, MutationHashable, Contained, Set<S>
+  implements Set<S>, Subbable, SubbableContainer, MutationHashable, Contained
 {
   // main
   private _set: ReadonlySet<S>;
-  // public _schema: StructSchema | null;
 
   // SubbableContainer
   public readonly _id: string;
@@ -29,7 +28,7 @@ export class LinkedSet<S>
   private constructor(
     _set: Set<S>,
     _id: string
-    // _schema: StructSchema | null
+    // public _schema: StructSchema | null
   ) {
     this._id = _id;
     this._set = _set;
@@ -54,17 +53,17 @@ export class LinkedSet<S>
   }
 
   /** should only be used internally */
-  public static _create<T>(
-    initialValue?: Iterable<T>,
-    id?: string
-    // schema?: StructSchema | null
-  ) {
-    return new this<T>(
-      initialValue instanceof Set ? initialValue : new Set(initialValue),
-      id ?? nanoid(5)
-      // schema ?? null
-    );
-  }
+  // public static _create<T>(
+  //   initialValue?: Iterable<T>,
+  //   id?: string
+  //   // schema?: StructSchema | null
+  // ) {
+  //   return new this<T>(
+  //     initialValue instanceof Set ? initialValue : new Set(initialValue),
+  //     id ?? nanoid(5)
+  //     // schema ?? null
+  //   );
+  // }
 
   private mutate<V>(mutator: (raw: Set<S>) => V): V {
     // saveForHistory(this);

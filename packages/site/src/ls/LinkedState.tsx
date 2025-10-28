@@ -1,24 +1,33 @@
 import { useState } from "react";
 import { useSubscribeToSubbableMutationHashable } from "../../../linked-state/src/hooks";
+import { LinkedArray } from "../../../linked-state/src/LinkedArray";
 import { LinkedMap } from "../../../linked-state/src/LinkedMap";
 import { LinkedSet } from "../../../linked-state/src/LinkedSet";
 import { MutationHashable } from "../../../linked-state/src/MutationHashable";
 import { Subbable } from "../../../linked-state/src/Subbable";
 import { UtilityToggle } from "../UtilityToggle";
+import { LinkedArrayTest } from "./LinkedArrayTest";
 import { LinkedMapTest } from "./LinkedMapTest";
 import { LinkedSetTest } from "./LinkedSetTest";
 import { LinkedStateDebug } from "./LinkedStateDebug";
 
 const linkedMap = LinkedMap.create<number, string>();
 const linkedSet = LinkedSet.create<number>();
+const linkedArray = LinkedArray.create<number>();
+
+// todo:
+// LinkedArray
+// LinkedPrimitive
 
 export function LinkedState() {
   return (
-    <div className="flex flex-row">
+    <div className="grid grid-cols-4">
       <Debug val={linkedMap}></Debug>
       <LinkedMapTest linkedMap={linkedMap} />
       <Debug val={linkedSet}></Debug>
       <LinkedSetTest linkedSet={linkedSet} />
+      <Debug val={linkedArray}></Debug>
+      <LinkedArrayTest linkedArray={linkedArray} />
     </div>
   );
 }

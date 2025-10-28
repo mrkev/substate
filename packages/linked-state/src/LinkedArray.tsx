@@ -30,18 +30,26 @@ export type ArrayWithoutIndexer<T> = Omit<
 export class LinkedArray<S>
   implements
     ArrayWithoutIndexer<S>,
+    Subbable,
     SubbableContainer,
     MutationHashable,
     Contained
 {
-  readonly _id: string;
+  // main
   protected _array: Array<S>;
+
+  // Subbable
   readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
+
+  // MutationHashable
   _hash: number = 0;
+
+  // SubbableContainer
+  readonly _id: string;
+  readonly _propagatedTokens = new WeakSet();
 
   // Contained
   readonly _container = new Set<SubbableContainer>();
-  readonly _propagatedTokens = new WeakSet();
 
   /** See usage in SSchemaArray */
   // protected _containedIds: WeakRefMap<any> | null = null;
@@ -63,7 +71,7 @@ export class LinkedArray<S>
     subbableContainer._notifyChange(this, this);
   }
 
-  constructor(initialValue: Array<S>, id: string, anonymous = false) {
+  private constructor(initialValue: Array<S>, id: string, anonymous = false) {
     this._id = id;
     this._array = initialValue;
     subbableContainer._containAll(this, this._array);
@@ -97,9 +105,6 @@ export class LinkedArray<S>
     return this._array.length;
   }
 
-  // GETTER. Things with getters get tricky.
-  // THis makes this a cointainer, and makes us wonder if this should be
-  // a LinkedState too insteaed.
   at(index: number): S | undefined {
     return this._array.at(index);
   }

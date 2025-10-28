@@ -13,7 +13,7 @@ export type StateChangeHandler<S> = (value: S) => void;
 /**
  * LinkedState is a Subbable, a single atomic primitive
  */
-export class LinkedPrimitive<S> implements Contained, Subbable {
+export class LinkedPrimitive<S> implements Subbable, Contained {
   readonly _id: string;
   private _value: Readonly<S>;
   readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
