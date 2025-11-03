@@ -1,10 +1,17 @@
-export { LinkedPrimitive } from "./LinkedPrimitive";
 export { LinkedArray } from "./LinkedArray";
 export { LinkedMap } from "./LinkedMap";
+export { LinkedPrimitive } from "./LinkedPrimitive";
 export { LinkedSet } from "./LinkedSet";
 
 export {
+  //
   useContainer,
   usePrimitive,
-  useSubscribeToSubbableMutationHashable,
 } from "./hooks";
+
+export {
+  //
+  useNewLinkedArray,
+  useNewLinkedMap,
+  useNewLinkedSet,
+} from "./useNew";

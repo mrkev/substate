@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/linked-state.umd.cjs",
   "module": "./dist/linked-state.js",
   "types": "./dist/index.d.ts",
@@ -26,8 +27,8 @@
     "nanoid": "^5.1.6"
   },
   "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
+    "react": ">=18.0.0 || >=19.0.0",
+    "react-dom": ">=18.0.0 || >=19.0.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.2",
@@ -35,5 +36,28 @@
     "vite": "^7.1.12",
     "vite-plugin-dts": "^4.5.4",
     "vitest": "^4.0.4"
+  },
+  "homepage": "https://aykev.dev/substate/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mrkev/substate.git",
+    "directory": "packages/linked-state"
+  },
+  "keywords": [
+    "state",
+    "state-management",
+    "reactive",
+    "react",
+    "react-state",
+    "array",
+    "set",
+    "map",
+    "primitive"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
