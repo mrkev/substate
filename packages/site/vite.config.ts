@@ -8,5 +8,15 @@ export default defineConfig({
   build: {
     outDir: "../../docs",
     emptyOutDir: true, // also necessary
+    rollupOptions: {
+      input: {
+        site: "./index.html",
+      },
+    },
+    minify: false,
   },
+  // instead of having absolute paths pointing at assets in `index.html`, use
+  // relative paths. Works better with github pages where /assets/foobar.js
+  // referes to another site
+  base: "./",
 });
