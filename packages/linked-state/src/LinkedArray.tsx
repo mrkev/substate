@@ -183,6 +183,7 @@ export class LinkedArray<S>
 
   // Array<S> interface, mutates
   reverse(): this {
+    // TODO: if empty do nothing?
     return this.mutate((clone) => {
       clone.reverse();
       return this;

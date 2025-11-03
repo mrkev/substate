@@ -280,7 +280,7 @@ function DebugOutSet({
   );
 }
 
-function Header({
+export function Header({
   obj,
   path,
   showContainerId = false,

@@ -1,14 +1,38 @@
 import { useState } from "react";
-import { useContainer } from "../../../linked-state/src/hooks";
+import { twMerge } from "tailwind-merge";
 import { LinkedArray } from "../../../linked-state/src/LinkedArray";
+import { DebugOutReact, Header } from "./LinkedStateDebug";
+import { useContainer } from "../../../linked-state/src/hooks";
 
 export function LinkedArrayTest({
   linkedArray,
 }: {
   linkedArray: LinkedArray<number>;
 }) {
-  const [input, setInput] = useState(0);
   const arr = useContainer(linkedArray);
+  return (
+    <div className="overflow-scroll">
+      <pre className="text-start" style={{ fontSize: 12 }}>
+        <DebugOutArray arr={arr} pad={0} showUnknowns={true} />
+      </pre>
+    </div>
+  );
+}
+
+const TAB_SIZE = 2;
+
+function DebugOutArray({
+  arr,
+  pad,
+  path = "",
+  showUnknowns,
+}: {
+  arr: LinkedArray<number>;
+  pad: number;
+  path?: string;
+  showUnknowns: boolean;
+}) {
+  const [input, setInput] = useState(0);
 
   const handleAdd = () => {
     arr.push(input);
@@ -16,7 +40,6 @@ export function LinkedArrayTest({
   };
 
   const handleUnshift = () => {
-    if (!input) return;
     arr.unshift(input);
     setInput(input + 1);
   };
@@ -46,49 +69,85 @@ export function LinkedArrayTest({
     arr.remove(item);
   };
 
-  const items = Array.from(arr.values());
+  const result = [];
+
+  for (let i = 0; i < arr.length; i++) {
+    const baseline = pad + TAB_SIZE;
+    const elem = arr.at(i);
+    result.push(
+      <br key={`br-${i}`} />,
+      " ".repeat(baseline),
+      <DebugOutReact
+        key={`elem-${i}`}
+        val={elem}
+        pad={baseline}
+        path={`${path}/${i}`}
+        showUnknowns={showUnknowns}
+      />,
+      " ",
+      <TxtButton title="delete" onClick={() => elem && handleRemove(elem)}>
+        del.
+      </TxtButton>
+    );
+  }
+
+  if (result.length > -1) {
+    result.push(<br key={`brend`} />, " ".repeat(pad));
+  }
 
   return (
-    <div
-      style={{ fontFamily: "sans-serif", maxWidth: 400, margin: "1rem auto" }}
-    >
-      <h2>LinkedArray Tester</h2>
-
-      <div style={{ display: "flex", gap: "4px", marginBottom: "8px" }}>
-        <button onClick={handleAdd}>Push</button>
-        <button onClick={handleUnshift}>Unshift</button>
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          gap: "4px",
-          flexWrap: "wrap",
-          marginBottom: "8px",
-        }}
+    <>
+      <Header obj={arr} /> {"["}
+      <br />
+      {" ".repeat(TAB_SIZE)}
+      <TxtButton
+        title="unshift"
+        onClick={handleUnshift}
+        className="bg-transparent"
       >
-        <button onClick={handlePop}>Pop</button>
-        <button onClick={handleShift}>Shift</button>
-        <button onClick={handleReverse}>Reverse</button>
-        <button onClick={handleSort}>Sort</button>
-        <button onClick={handleClear}>Clear</button>
-      </div>
+        +,
+      </TxtButton>{" "}
+      <TxtButton title="shift" onClick={handleShift}>
+        -,
+      </TxtButton>{" "}
+      <TxtButton title="push" onClick={handleAdd}>
+        ,+
+      </TxtButton>{" "}
+      <TxtButton title="pop" onClick={handlePop}>
+        ,-
+      </TxtButton>
+      <span className="text-gray-500"> (len. {arr.length})</span>
+      {result}
+      {"]"}{" "}
+      <TxtButton title="Reverse" onClick={handleReverse}>
+        rev.
+      </TxtButton>{" "}
+      <TxtButton title="Sort" onClick={handleSort}>
+        sort
+      </TxtButton>{" "}
+      <TxtButton title="Clear" onClick={handleClear}>
+        clear
+      </TxtButton>
+    </>
+  );
+}
 
-      <ul>
-        {items.length === 0 ? (
-          <li style={{ color: "#888" }}>Array is empty</li>
-        ) : (
-          items.map((v, i) => (
-            <li key={i}>
-              {v} <button onClick={() => handleRemove(v)}>Remove</button>
-            </li>
-          ))
-        )}
-      </ul>
-
-      <div style={{ marginTop: "1rem", color: "#555" }}>
-        <small>Length: {arr.length}</small>
-      </div>
-    </div>
+function TxtButton({
+  style,
+  className,
+  ...rest
+}: React.DetailedHTMLProps<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  HTMLButtonElement
+>) {
+  return (
+    <button
+      className={twMerge("text-gray-500 hover:underline", className)}
+      style={{
+        background: "none",
+        ...style,
+      }}
+      {...rest}
+    />
   );
 }
