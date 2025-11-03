@@ -11,7 +11,7 @@ export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
 export type StateChangeHandler<S> = (value: S) => void;
 
 /**
- * LinkedState is a Subbable, a single atomic primitive
+ * LinkedPrimitive is a Subbable holding a single atomic value
  */
 export class LinkedPrimitive<S> implements Subbable, Contained {
   readonly _id: string;

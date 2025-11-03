@@ -503,10 +503,10 @@ export function useSubbable<S>(
     });
   }, [linkedState]);
 
-  const apiState = linkedState.get();
-  useEffect(() => {
-    setState(() => apiState);
-  }, [apiState]);
+  // const apiState = linkedState.get();
+  // useEffect(() => {
+  //   setState(() => apiState);
+  // }, [apiState]);
 
   const setter: StateDispath<S> = useCallback(
     (newVal) => {

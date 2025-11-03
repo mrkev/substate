@@ -384,7 +384,7 @@ const classOfKind = (
   }
 };
 
-export function isPrimitiveKind(val: unknown) {
+function isPrimitiveKind(val: unknown) {
   return (
     typeof val === "number" ||
     typeof val === "string" ||

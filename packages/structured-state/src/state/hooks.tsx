@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import type { LinkedPrimitive, StateDispath } from "./LinkedPrimitive";
+import { MutationHashable } from "./MutationHashable";
 import { Subbable, subscribe } from "./Subbable";
 import { SubbableContainer } from "./SubbableContainer";
-import { MutationHashable } from "./MutationHashable";
 
 export function usePrimitive<S>(
   linkedState: LinkedPrimitive<S>
@@ -16,12 +16,6 @@ export function usePrimitive<S>(
       }
     });
   }, [linkedState]);
-
-  const apiState = linkedState.get();
-
-  useEffect(() => {
-    setState(() => apiState);
-  }, [apiState]);
 
   const setter: StateDispath<S> = useCallback(
     (newVal) => {
