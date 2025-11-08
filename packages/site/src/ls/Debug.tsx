@@ -10,7 +10,6 @@ import { UtilityToggle } from "../UtilityToggle";
 import { LinkedStateDebug } from "./LinkedStateDebug";
 
 export function DebugContainer({ val }: { val: MutationHashable & Subbable }) {
-  useSubscribeToSubbableMutationHashable(val);
   const [tab, setTab] = useState<"struct" | "serialized">("struct");
   return (
     <div>
@@ -36,6 +35,7 @@ export function DebugContainer({ val }: { val: MutationHashable & Subbable }) {
     </div>
   );
 }
+
 export function DebugPrimitive({ val }: { val: LinkedPrimitive<unknown> }) {
   usePrimitive(val);
   const [tab, setTab] = useState<"struct" | "serialized">("struct");

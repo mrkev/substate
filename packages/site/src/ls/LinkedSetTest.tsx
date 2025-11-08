@@ -1,28 +1,26 @@
 import { useState } from "react";
 import { LinkedSet } from "../../../linked-state/src/LinkedSet";
-import { useContainer } from "../../../linked-state/src/hooks";
+import { useLink } from "../../../linked-state/src/hooks";
 
 export function LinkedSetTest({ linkedSet }: { linkedSet: LinkedSet<number> }) {
-  // Create a reactive LinkedSet (starts empty)
-  const set = useContainer(linkedSet);
-
+  const set = useLink(linkedSet);
   const [input, setInput] = useState(0);
 
   const handleAdd = () => {
-    set.add(input);
+    set().add(input);
     setInput(input + 1);
   };
 
   const handleDelete = (value: number) => {
-    set.delete(value);
+    set().delete(value);
   };
 
   const handleClear = () => {
-    set.clear();
+    set().clear();
   };
 
   // Convert to array for rendering
-  const items = Array.from(set.values());
+  const items = Array.from(set().values());
 
   return (
     <div
@@ -48,7 +46,7 @@ export function LinkedSetTest({ linkedSet }: { linkedSet: LinkedSet<number> }) {
       </ul>
 
       <div style={{ marginTop: "1rem", color: "#555" }}>
-        <small>Size: {set.size}</small>
+        <small>Size: {set().size}</small>
       </div>
     </div>
   );

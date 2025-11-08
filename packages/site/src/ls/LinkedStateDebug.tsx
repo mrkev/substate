@@ -1,5 +1,6 @@
 import stringify from "json-stringify-deterministic";
 import { ReactNode, useState } from "react";
+import { useLink, usePrimitive } from "../../../linked-state/src/hooks";
 import { LinkedArray } from "../../../linked-state/src/LinkedArray";
 import { LinkedMap } from "../../../linked-state/src/LinkedMap";
 import { LinkedPrimitive } from "../../../linked-state/src/LinkedPrimitive";
@@ -90,7 +91,7 @@ export function DebugOutReact({
       />
     );
   } else if (val instanceof LinkedPrimitive) {
-    return <DebugOutSPrimitive obj={val} path={path} />;
+    return <DebugOutPrimitive obj={val} path={path} />;
   } else if (val instanceof LinkedMap) {
     return (
       <DebugOutMap
@@ -112,7 +113,7 @@ export function DebugOutReact({
 }
 
 function DebugOutMap({
-  map,
+  map: linkedMap,
   pad,
   path = "",
   showUnknowns,
@@ -122,12 +123,14 @@ function DebugOutMap({
   path?: string;
   showUnknowns: boolean;
 }) {
+  const map = useLink(linkedMap);
+  console.log("RENDER", map);
   const [displayState, setDisplayState] = useState<DisplayState>("full");
   const showHeader = displayState === "full";
   const showBody = displayState === "full" || displayState === "native";
 
   const body: Array<ReactNode> = ["{"];
-  const entries = [...map.entries()];
+  const entries = [...map().entries()];
 
   for (let i = 0; i < entries.length && showBody; i++) {
     const [key, val] = entries[i];
@@ -179,7 +182,7 @@ function DebugOutMap({
       </span>{" "} */}
       {showHeader && (
         <>
-          <Header obj={map} path={`${path}/${map._id}`} />{" "}
+          <Header obj={linkedMap} path={`${path}/${linkedMap._id}`} />{" "}
         </>
       )}
       {body}
@@ -188,7 +191,7 @@ function DebugOutMap({
 }
 
 function DebugOutArray({
-  arr,
+  arr: linkedArray,
   pad,
   path = "",
   showUnknowns,
@@ -198,11 +201,12 @@ function DebugOutArray({
   path?: string;
   showUnknowns: boolean;
 }) {
+  const arr = useLink(linkedArray);
   const result = [];
 
-  for (let i = 0; i < arr.length; i++) {
+  for (let i = 0; i < arr().length; i++) {
     const baseline = pad + TAB_SIZE;
-    const elem = arr.at(i);
+    const elem = arr().at(i);
     result.push(
       <br key={`br-${i}`} />,
       " ".repeat(baseline),
@@ -226,7 +230,7 @@ function DebugOutArray({
 
   return (
     <>
-      <Header obj={arr} /> {"["}
+      <Header obj={arr()} /> {"["}
       {result}
       {"]"}
     </>
@@ -234,7 +238,7 @@ function DebugOutArray({
 }
 
 function DebugOutSet({
-  set,
+  set: linkedSet,
   pad,
   path = "",
   showUnknowns,
@@ -244,10 +248,12 @@ function DebugOutSet({
   path?: string;
   showUnknowns: boolean;
 }) {
+  const set = useLink(linkedSet);
+
   const result = [];
 
   let i = 0;
-  for (const elem of set) {
+  for (const elem of set()) {
     const baseline = pad + TAB_SIZE;
     result.push(
       <br key={`br-${i}`} />,
@@ -273,7 +279,7 @@ function DebugOutSet({
 
   return (
     <>
-      <Header obj={set} /> {"("}
+      <Header obj={set()} /> {"("}
       {result}
       {")"}
     </>
@@ -322,14 +328,14 @@ export function Header({
   );
 }
 
-function DebugOutSPrimitive({
+function DebugOutPrimitive({
   obj,
   path = "",
 }: {
   obj: LinkedPrimitive<any>;
   path?: string;
 }) {
-  const val = obj.get();
+  const [val] = usePrimitive(obj);
   if (isPrimitiveKind(val)) {
     return (
       <>

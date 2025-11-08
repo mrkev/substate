@@ -1,34 +1,31 @@
 import { LinkedArray } from "../../../linked-state/src/LinkedArray";
 import { LinkedMap } from "../../../linked-state/src/LinkedMap";
+import { LinkedPrimitive } from "../../../linked-state/src/LinkedPrimitive";
 import { LinkedSet } from "../../../linked-state/src/LinkedSet";
+import { DebugContainer, DebugPrimitive } from "./Debug";
 import { LinkedArrayTest } from "./LinkedArrayTest";
 import { LinkedMapTest } from "./LinkedMapTest";
-import { LinkedSetTest } from "./LinkedSetTest";
-import { LinkedPrimitive } from "../../../linked-state/src/LinkedPrimitive";
 import { LinkedPrimitiveTester } from "./LinkedPrimitiveTest";
-import { DebugContainer, DebugPrimitive } from "./Debug";
+import { LinkedSetTest } from "./LinkedSetTest";
 
-const linkedMap = LinkedMap.create<number, string>();
-const linkedSet = LinkedSet.create<number>();
-const linkedArray = LinkedArray.create<number>();
-const linkedPrimitive = LinkedPrimitive.of(0);
+const map = LinkedMap.create<number, string>();
+const set = LinkedSet.create<number>();
+const array = LinkedArray.create<number>();
+const primitive = LinkedPrimitive.of(0);
 
 export function LinkedStateTest() {
   return (
     <div className="grid grid-cols-4">
-      <DebugContainer val={linkedMap}></DebugContainer>
-      <LinkedMapTest linkedMap={linkedMap} />
-      <DebugContainer val={linkedSet}></DebugContainer>
-      <LinkedSetTest linkedSet={linkedSet} />
-      {/*  */}
-
-      <DebugContainer val={linkedArray}></DebugContainer>
-      <div>
+      <DebugContainer val={map}></DebugContainer>
+      <LinkedMapTest linkedMap={map} />
+      <DebugContainer val={set}></DebugContainer>
+      <LinkedSetTest linkedSet={set} />
+      <div className="col-span-2">
         <h2>LinkedArray Tester</h2>
-        <LinkedArrayTest linkedArray={linkedArray} />
+        <LinkedArrayTest linkedArray={array} />
       </div>
-      <DebugPrimitive val={linkedPrimitive}></DebugPrimitive>
-      <LinkedPrimitiveTester linkedPrimitive={linkedPrimitive} />
+      <DebugPrimitive val={primitive}></DebugPrimitive>
+      <LinkedPrimitiveTester linkedPrimitive={primitive} />
     </div>
   );
 }

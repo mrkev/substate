@@ -1,28 +1,27 @@
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
+import { useLink } from "../../../linked-state/src/hooks";
 import { LinkedArray } from "../../../linked-state/src/LinkedArray";
 import { DebugOutReact, Header } from "./LinkedStateDebug";
-import { useContainer } from "../../../linked-state/src/hooks";
+
+const TAB_SIZE = 2;
 
 export function LinkedArrayTest({
   linkedArray,
 }: {
   linkedArray: LinkedArray<number>;
 }) {
-  const arr = useContainer(linkedArray);
   return (
     <div className="overflow-scroll">
-      <pre className="text-start" style={{ fontSize: 12 }}>
-        <DebugOutArray arr={arr} pad={0} showUnknowns={true} />
+      <pre className="text-start text-sm">
+        <DebugOutArray arr={linkedArray} pad={0} showUnknowns={true} />
       </pre>
     </div>
   );
 }
 
-const TAB_SIZE = 2;
-
 function DebugOutArray({
-  arr,
+  arr: linkedArray,
   pad,
   path = "",
   showUnknowns,
@@ -32,48 +31,49 @@ function DebugOutArray({
   path?: string;
   showUnknowns: boolean;
 }) {
+  const arr = useLink(linkedArray);
   const [input, setInput] = useState(0);
 
   const handleAdd = () => {
-    arr.push(input);
+    arr().push(input);
     setInput(input + 1);
   };
 
   const handleUnshift = () => {
-    arr.unshift(input);
+    arr().unshift(input);
     setInput(input + 1);
   };
 
   const handlePop = () => {
-    arr.pop();
+    arr().pop();
   };
 
   const handleShift = () => {
-    arr.shift();
+    arr().shift();
   };
 
   const handleReverse = () => {
-    arr.reverse();
+    arr().reverse();
   };
 
   const handleSort = () => {
-    arr.sort((a, b) => a - b);
+    arr().sort((a, b) => a - b);
   };
 
   const handleClear = () => {
     // simplest way to clear (splice from start to end)
-    arr.splice(0, arr.length);
+    arr().splice(0, arr().length);
   };
 
   const handleRemove = (item: number) => {
-    arr.remove(item);
+    arr().remove(item);
   };
 
   const result = [];
 
-  for (let i = 0; i < arr.length; i++) {
+  for (let i = 0; i < arr().length; i++) {
     const baseline = pad + TAB_SIZE;
-    const elem = arr.at(i);
+    const elem = arr().at(i);
     result.push(
       <br key={`br-${i}`} />,
       " ".repeat(baseline),
@@ -97,7 +97,7 @@ function DebugOutArray({
 
   return (
     <>
-      <Header obj={arr} /> {"["}
+      <Header obj={arr()} /> {"["}
       <br />
       {" ".repeat(TAB_SIZE)}
       <TxtButton

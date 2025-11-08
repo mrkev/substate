@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import type { LinkedPrimitive, StateDispath } from "./LinkedPrimitive";
 import { mutationHashable, MutationHashable } from "./MutationHashable";
 import { Subbable, subscribe } from "./Subbable";
@@ -17,14 +17,6 @@ export function usePrimitive<S>(
     });
   }, [linkedState]);
 
-  const apiState = linkedState.get();
-
-  useEffect(() => {
-    // TODO
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setState(() => apiState);
-  }, [apiState]);
-
   const setter: StateDispath<S> = useCallback(
     (newVal) => {
       if (newVal instanceof Function) {
@@ -37,6 +29,28 @@ export function usePrimitive<S>(
   );
 
   return [state, setter];
+}
+
+export function useLink<S extends Subbable & MutationHashable>(
+  obj: S,
+  recursiveChanges: boolean = false
+): () => S {
+  "use no memo"; // dont memo this hook
+  const _hash = useSyncExternalStore(
+    useCallback(
+      (onStoreChange) => {
+        return subscribe(obj, (target) => {
+          // console.log("got notif", obj, "target is", target);
+          if (obj === target || recursiveChanges) {
+            onStoreChange();
+          }
+        });
+      },
+      [obj, recursiveChanges]
+    ),
+    useCallback(() => obj._hash, [obj])
+  );
+  return () => obj;
 }
 
 export function useContainer<S extends SubbableContainer>(

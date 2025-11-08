@@ -38,6 +38,10 @@ export class LinkedMap<K, V>
     return this._map;
   }
 
+  dupe(): ReadonlyMap<K, V> {
+    return new Map(this._map);
+  }
+
   private constructor(initialValue: Map<K, V>, id: string) {
     this._id = id;
     this._map = initialValue;

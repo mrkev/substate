@@ -1,32 +1,31 @@
 import { useState } from "react";
 import { LinkedMap } from "../../../linked-state/src/LinkedMap";
-import { useContainer } from "../../../linked-state/src/hooks";
+import { useContainer, useLink } from "../../../linked-state/src/hooks";
 
 export function LinkedMapTest({
   linkedMap,
 }: {
   linkedMap: LinkedMap<number, string>;
 }) {
-  const map = useContainer(linkedMap);
+  const map = useLink(linkedMap);
 
   const [key, setKey] = useState(0);
 
   const handleAdd = () => {
-    map.set(key, "foo");
-    console.log("added", map);
+    map().set(key, "foo");
     setKey(key + 1);
   };
 
   const handleDelete = (k: number) => {
-    map.delete(k);
+    map().delete(k);
   };
 
   const handleClear = () => {
-    map.clear();
+    map().clear();
   };
 
   // Convert map to array for rendering
-  const entries = Array.from(map.entries());
+  const entries = Array.from(map().entries());
 
   return (
     <div
@@ -52,7 +51,7 @@ export function LinkedMapTest({
       </ul>
 
       <div style={{ marginTop: "1rem", color: "#555" }}>
-        <small>Size: {map.size}</small>
+        <small>Size: {map().size}</small>
       </div>
     </div>
   );

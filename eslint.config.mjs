@@ -9,7 +9,7 @@ import js from "@eslint/js";
 
 export default defineConfig([
   {
-    ignores: ["**/dist", "eslint.config.mjs"],
+    ignores: ["**/dist", "eslint.config.mjs", "docs"],
   },
 
   js.configs.recommended,
