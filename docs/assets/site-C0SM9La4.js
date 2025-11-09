@@ -16210,8 +16210,8 @@ let LinkedMap$1 = class LinkedMap {
     SubbableContainer._containAll(this, this._map.keys());
     SubbableContainer._containAll(this, this._map.values());
   }
-  static create(initialValue) {
-    return new this(initialValue ?? /* @__PURE__ */ new Map(), nanoid(5));
+  static create(initial) {
+    return new this(new Map(initial), nanoid(5));
   }
   map(callbackfn) {
     const mapped = [];
@@ -19918,8 +19918,8 @@ class LinkedSet {
     subbableContainer._containAll(this, set2);
     subbableContainer._notifyChange(this, this);
   }
-  static create(initialValue) {
-    return new this(initialValue ?? /* @__PURE__ */ new Set(), nanoid(5));
+  static create(initial) {
+    return new this(new Set(initial), nanoid(5));
   }
   /** should only be used internally */
   // public static _create<T>(

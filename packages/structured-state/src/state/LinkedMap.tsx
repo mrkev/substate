@@ -36,8 +36,12 @@ export class LinkedMap<K, V>
     SubbableContainer._containAll(this, this._map.values());
   }
 
-  public static create<K, V>(initialValue?: Map<K, V>) {
-    return new this<K, V>(initialValue ?? new Map(), nanoid(5));
+  public static create<K, V>(
+    initial?:
+      | (readonly (readonly [K, V])[] | null)
+      | (Iterable<readonly [K, V]> | null)
+  ) {
+    return new this<K, V>(new Map(initial), nanoid(5));
   }
 
   map<T>(callbackfn: (value: V, key: K, map: Map<K, V>) => T): T[] {
