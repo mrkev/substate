@@ -1,10 +1,12 @@
 import type { StateChangeHandler } from "./LinkedPrimitive";
+import { printId } from "./printId";
 
 /* Subbables are objects one can subscribe to */
 
 export type SubbableCallback = (changed: Subbable, notified: Subbable) => void;
 
 export interface Subbable {
+  readonly _id: string;
   readonly _subscriptors: Set<SubbableCallback>;
 }
 
@@ -25,10 +27,12 @@ export function notify(
   target: Subbable
 ) {
   // console.log(
-  //   "SENDING NOTIF TO",
+  //   "[notify]",
   //   subbable._subscriptors.size,
-  //   "CHANGED:",
-  //   subbable.constructor.name
+  //   "subs of",
+  //   `(${printId(subbable as any)})`,
+  //   "changed:",
+  //   `(${printId(target as any)})`
   // );
 
   for (const cb of subbable._subscriptors) {

@@ -22,8 +22,10 @@ export class UpdateToken {
 
 //  implements MutationHashable, Subbable, Contained
 export interface SubbableContainer {
-  readonly _id: string;
   readonly _propagatedTokens: WeakSet<UpdateToken>;
+
+  // Subbable
+  readonly _id: string;
 
   // MutationHashable
   readonly _subscriptors: Set<SubbableCallback>;

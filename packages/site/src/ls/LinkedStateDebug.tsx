@@ -29,7 +29,7 @@ export function LinkedStateDebug({
   return (
     <div className="overflow-scroll" style={style}>
       <pre className="text-start" style={{ width: 300, fontSize: 12 }}>
-        <DebugOutReact
+        <DynamicTest
           val={val}
           pad={0}
           path={"ROOT"}
@@ -52,7 +52,7 @@ function stringifyUnknown(val: unknown) {
   }
 }
 
-export function DebugOutReact({
+export function DynamicTest({
   val,
   pad,
   path = "",
@@ -143,7 +143,7 @@ function DebugOutMap({
         {String(key)}
       </span>,
       ": ",
-      <DebugOutReact
+      <DynamicTest
         key={`elem-${key}`}
         val={val}
         pad={baseline}
@@ -210,7 +210,7 @@ function DebugOutArray({
     result.push(
       <br key={`br-${i}`} />,
       " ".repeat(baseline),
-      <DebugOutReact
+      <DynamicTest
         key={`elem-${i}`}
         val={elem}
         pad={baseline}
@@ -258,7 +258,7 @@ function DebugOutSet({
     result.push(
       <br key={`br-${i}`} />,
       " ".repeat(baseline),
-      <DebugOutReact
+      <DynamicTest
         key={`elem-${i}`}
         val={elem}
         pad={baseline}
@@ -295,7 +295,9 @@ export function Header({
   path?: string;
   showContainerId?: boolean;
 }) {
-  const obj = useLink(objarg)();
+  // we are printing the _hash, which changes every time any child changes,
+  // so we want to listen ot recursive changes
+  const obj = useLink(objarg, true)();
 
   const kindStr = (() => {
     if (obj instanceof LinkedMap) {

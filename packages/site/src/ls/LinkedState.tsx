@@ -2,7 +2,6 @@ import { LinkedArray } from "../../../linked-state/src/LinkedArray";
 import { LinkedMap } from "../../../linked-state/src/LinkedMap";
 import { LinkedPrimitive } from "../../../linked-state/src/LinkedPrimitive";
 import { LinkedSet } from "../../../linked-state/src/LinkedSet";
-import { DebugContainer, DebugPrimitive } from "./Debug";
 import { LinkedArrayTest } from "./LinkedArrayTest";
 import { LinkedMapTest } from "./LinkedMapTest";
 import { LinkedPrimitiveTester } from "./LinkedPrimitiveTest";
@@ -14,7 +13,6 @@ const array = LinkedArray.create<number>();
 const primitive = LinkedPrimitive.of(0);
 
 export function LinkedStateTest() {
-  console.log("RUN THIS hi");
   return (
     <div className="grid grid-cols-4 gap-2">
       <LinkedMapTest

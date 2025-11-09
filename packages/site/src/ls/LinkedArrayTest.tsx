@@ -2,7 +2,7 @@ import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { useLink } from "../../../linked-state/src/hooks";
 import { LinkedArray } from "../../../linked-state/src/LinkedArray";
-import { DebugOutReact, Header } from "./LinkedStateDebug";
+import { DynamicTest, Header } from "./LinkedStateDebug";
 import { TxtButton } from "./TxtButton";
 
 const TAB_SIZE = 2;
@@ -18,13 +18,13 @@ export function LinkedArrayTest({
     <div className={twMerge("overflow-scroll", className)}>
       <h2>LinkedArray Tester</h2>
       <pre className="text-start text-sm">
-        <DebugOutArray arr={linkedArray} pad={0} showUnknowns={true} />
+        <DynamicTestArray arr={linkedArray} pad={0} showUnknowns={true} />
       </pre>
     </div>
   );
 }
 
-function DebugOutArray({
+export function DynamicTestArray({
   arr: linkedArray,
   pad,
   path = "",
@@ -33,55 +33,55 @@ function DebugOutArray({
   arr: LinkedArray<number>;
   pad: number;
   path?: string;
-  showUnknowns: boolean;
+  showUnknowns?: boolean;
 }) {
-  const arr = useLink(linkedArray);
+  const larr = useLink(linkedArray);
   const [input, setInput] = useState(0);
 
   const handleAdd = () => {
-    arr().push(input);
+    larr().push(input);
     setInput(input + 1);
   };
 
   const handleUnshift = () => {
-    arr().unshift(input);
+    larr().unshift(input);
     setInput(input + 1);
   };
 
   const handlePop = () => {
-    arr().pop();
+    larr().pop();
   };
 
   const handleShift = () => {
-    arr().shift();
+    larr().shift();
   };
 
   const handleReverse = () => {
-    arr().reverse();
+    larr().reverse();
   };
 
   const handleSort = () => {
-    arr().sort((a, b) => a - b);
+    larr().sort((a, b) => a - b);
   };
 
   const handleClear = () => {
     // simplest way to clear (splice from start to end)
-    arr().splice(0, arr().length);
+    larr().splice(0, larr().length);
   };
 
   const handleRemove = (item: number) => {
-    arr().remove(item);
+    larr().remove(item);
   };
 
   const result = [];
 
-  for (let i = 0; i < arr().length; i++) {
+  for (let i = 0; i < larr().length; i++) {
     const baseline = pad + TAB_SIZE;
-    const elem = arr().at(i);
+    const elem = larr().at(i);
     result.push(
       <br key={`br-${i}`} />,
       " ".repeat(baseline),
-      <DebugOutReact
+      <DynamicTest
         key={`elem-${i}`}
         val={elem}
         pad={baseline}
@@ -89,9 +89,12 @@ function DebugOutArray({
         showUnknowns={showUnknowns}
       />,
       " ",
-      <TxtButton title="delete" onClick={() => elem && handleRemove(elem)}>
-        del.
-      </TxtButton>
+      <TxtButton
+        key={`del-${i}`}
+        title="delete"
+        onClick={() => elem != null && handleRemove(elem)}
+        children="del."
+      />
     );
   }
 
@@ -101,9 +104,9 @@ function DebugOutArray({
 
   return (
     <>
-      <Header obj={arr()} /> {"["}
+      <Header obj={larr()} /> {"["}
       <br />
-      {" ".repeat(TAB_SIZE)}
+      {" ".repeat(TAB_SIZE + pad)}
       <TxtButton
         title="unshift"
         onClick={handleUnshift}
@@ -120,7 +123,7 @@ function DebugOutArray({
       <TxtButton title="pop" onClick={handlePop}>
         ,-
       </TxtButton>
-      <span className="text-gray-500"> (len. {arr.length})</span>
+      <span className="text-gray-500"> (len. {larr().length})</span>
       {result}
       {"]"}{" "}
       <TxtButton title="Reverse" onClick={handleReverse}>

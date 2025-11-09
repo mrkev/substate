@@ -2,16 +2,10 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "react-json-pretty/themes/monikai.css";
 import "react-json-view-lite/dist/index.css";
-import {
-  BrowserRouter,
-  HashRouter,
-  Outlet,
-  Route,
-  Routes,
-} from "react-router-dom";
+import { HashRouter, Outlet, Route, Routes } from "react-router-dom";
 import { App } from "./App.tsx";
 import { LinkedStateTest } from "./ls/LinkedState.tsx";
-import { LinkedStateTest2 } from "./ls/LinkedState2.tsx";
+import { LinkedStateNestedTest } from "./ls/LinkedStateNested.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -38,7 +32,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           {/* Parent route with the layout */}
           <Route path="/" element={<App />} />
           <Route path="/ls" element={<LinkedStateTest />} />
-          <Route path="/ls2" element={<LinkedStateTest2 />} />
+          <Route path="/ls2" element={<LinkedStateNestedTest />} />
         </Route>
       </Routes>
     </HashRouter>

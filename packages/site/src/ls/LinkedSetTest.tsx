@@ -2,7 +2,7 @@ import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { LinkedSet } from "../../../linked-state/src/LinkedSet";
 import { useLink } from "../../../linked-state/src/hooks";
-import { DebugOutReact, Header } from "./LinkedStateDebug";
+import { DynamicTest, Header } from "./LinkedStateDebug";
 import { TxtButton } from "./TxtButton";
 
 export function LinkedSetTest({
@@ -59,7 +59,7 @@ function DebugOutSet({
     result.push(
       <br key={`br-${i}`} />,
       " ".repeat(baseline),
-      <DebugOutReact
+      <DynamicTest
         key={`elem-${i}`}
         val={elem}
         pad={baseline}
