@@ -2,20 +2,35 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import type { LinkedPrimitive, StateDispath } from "./LinkedPrimitive";
 import { mutationHashable, MutationHashable } from "./MutationHashable";
 import { Subbable, subscribe } from "./Subbable";
-import { SubbableContainer } from "./SubbableContainer";
 
 export function usePrimitive<S>(
   linkedState: LinkedPrimitive<S>
 ): [S, StateDispath<S>] {
-  const [state, setState] = useState<S>(() => linkedState.get());
+  // "use no memo" not needed afaik
 
-  useEffect(() => {
-    return subscribe(linkedState, (target) => {
-      if (target === linkedState) {
-        setState(() => linkedState.get());
-      }
-    });
-  }, [linkedState]);
+  const externalStoreSub = useCallback(
+    (onStoreChange: () => void) => {
+      return subscribe(linkedState, (target) => {
+        // console.log(
+        //   "got notif",
+        //   obj,
+        //   "target is",
+        //   target,
+        //   "notifying?",
+        //   obj === target || recursiveChanges
+        // );
+        if (linkedState === target) {
+          onStoreChange();
+        }
+      });
+    },
+    [linkedState]
+  );
+
+  const value = useSyncExternalStore(
+    externalStoreSub,
+    useCallback(() => linkedState.get(), [linkedState])
+  );
 
   const setter: StateDispath<S> = useCallback(
     (newVal) => {
@@ -28,7 +43,7 @@ export function usePrimitive<S>(
     [linkedState]
   );
 
-  return [state, setter];
+  return [value, setter];
 }
 
 export function useLink<S extends Subbable & MutationHashable>(
@@ -60,14 +75,7 @@ export function useLink<S extends Subbable & MutationHashable>(
   return () => obj;
 }
 
-export function useContainer<S extends SubbableContainer>(
-  obj: S,
-  recursiveChanges: boolean = false
-): S {
-  useSubscribeToSubbableMutationHashable(obj, undefined, recursiveChanges);
-  return obj;
-}
-
+// TODO: remove
 export function useSubscribeToSubbableMutationHashable<
   T extends MutationHashable & Subbable
 >(obj: T, cb?: () => void, recursiveChanges = false): T {

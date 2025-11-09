@@ -23283,58 +23283,54 @@ const getDefaultConfig = () => {
 };
 const twMerge = /* @__PURE__ */ createTailwindMerge(getDefaultConfig);
 function usePrimitive(linkedState) {
-  const $ = compilerRuntimeExports.c(10);
+  const $ = compilerRuntimeExports.c(9);
   let t0;
   if ($[0] !== linkedState) {
-    t0 = () => linkedState.get();
+    t0 = (onStoreChange) => subscribe(linkedState, (target) => {
+      if (linkedState === target) {
+        onStoreChange();
+      }
+    });
     $[0] = linkedState;
     $[1] = t0;
   } else {
     t0 = $[1];
   }
-  const [state, setState] = reactExports.useState(t0);
+  const externalStoreSub = t0;
   let t1;
-  let t2;
   if ($[2] !== linkedState) {
-    t1 = () => subscribe(linkedState, (target) => {
-      if (target === linkedState) {
-        setState(() => linkedState.get());
-      }
-    });
-    t2 = [linkedState];
+    t1 = () => linkedState.get();
     $[2] = linkedState;
     $[3] = t1;
-    $[4] = t2;
   } else {
     t1 = $[3];
-    t2 = $[4];
   }
-  reactExports.useEffect(t1, t2);
-  let t3;
-  if ($[5] !== linkedState) {
-    t3 = (newVal) => {
+  const value = reactExports.useSyncExternalStore(externalStoreSub, t1);
+  let t2;
+  if ($[4] !== linkedState) {
+    t2 = (newVal) => {
       if (newVal instanceof Function) {
         linkedState.set(newVal(linkedState.get()));
       } else {
         linkedState.set(newVal);
       }
     };
-    $[5] = linkedState;
-    $[6] = t3;
+    $[4] = linkedState;
+    $[5] = t2;
   } else {
-    t3 = $[6];
+    t2 = $[5];
   }
-  const setter = t3;
-  let t4;
-  if ($[7] !== setter || $[8] !== state) {
-    t4 = [state, setter];
-    $[7] = setter;
-    $[8] = state;
-    $[9] = t4;
+  const setter = t2;
+  let t3;
+  if ($[6] !== setter || $[7] !== value) {
+    t3 = [value, setter];
+    $[6] = setter;
+    $[7] = value;
+    $[8] = t3;
   } else {
-    t4 = $[9];
+    t3 = $[8];
   }
-  return t4;
+  return t3;
 }
 function useLink(obj, recursiveChanges = false) {
   "use no memo";
@@ -24941,7 +24937,7 @@ function LinkedStateTest() {
 const map = LinkedMap2.create();
 LinkedSet.create();
 LinkedPrimitive2.of(0);
-function LinkedStateTest2(t0) {
+function LinkedStateNestedTest(t0) {
   const $ = compilerRuntimeExports.c(10);
   const {
     className
@@ -25017,7 +25013,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(/* @__PURE__ */ jsxR
     ] }), children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/", element: /* @__PURE__ */ jsxRuntimeExports.jsx(App, {}) }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/ls", element: /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedStateTest, {}) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/ls2", element: /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedStateTest2, {}) })
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/ls2", element: /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedStateNestedTest, {}) })
     ] }) })
   }
 ) }));

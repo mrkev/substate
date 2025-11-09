@@ -3,9 +3,8 @@ import { LinkedMap } from "./LinkedMap";
 import { LinkedPrimitive } from "./LinkedPrimitive";
 import { LinkedSet } from "./LinkedSet";
 import { MutationHashable, mutationHashable } from "./MutationHashable";
-import { Subbable } from "./Subbable";
 
-export function printId(obj: MutationHashable & Subbable) {
+export function printId(obj: MutationHashable) {
   const kindStr = (() => {
     if (obj instanceof LinkedMap) {
       return "lmap";

@@ -2,15 +2,6 @@ import { isContainable } from "./Contained";
 import { mutationHashable } from "./MutationHashable";
 import { Subbable, SubbableCallback } from "./Subbable";
 
-/** Keys to ignore from SubbableContainer when serializing */
-export const CONTAINER_IGNORE_KEYS = new Set<string>([
-  "_id",
-  "_hash",
-  "_subscriptors",
-  "_container",
-  "_propagatedTokens",
-]);
-
 /**
  * A token is unique to an update (a call to _notifyChange). It serves two purposes:
  * - it helps us prevent loops by ensuring an event isn't processed twice

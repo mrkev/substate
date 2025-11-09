@@ -5,7 +5,7 @@ export { LinkedSet } from "./LinkedSet";
 
 export {
   //
-  useContainer,
+  useLink,
   usePrimitive,
 } from "./hooks";
 
