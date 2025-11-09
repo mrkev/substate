@@ -7,7 +7,7 @@
     "dev": "npm run --workspace=site dev",
     "build": "pnpx nx run-many -t build",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
-    "test": "npm run --workspace=structured-state test"
+    "test": "pnpm -r run test"
   },
   "devDependencies": {
     "@eslint/compat": "^1.4.0",
