@@ -3,16 +3,20 @@ import { twMerge } from "tailwind-merge";
 import { useLink } from "../../../linked-state/src/hooks";
 import { LinkedArray } from "../../../linked-state/src/LinkedArray";
 import { DebugOutReact, Header } from "./LinkedStateDebug";
+import { TxtButton } from "./TxtButton";
 
 const TAB_SIZE = 2;
 
 export function LinkedArrayTest({
   linkedArray,
+  className,
 }: {
   linkedArray: LinkedArray<number>;
+  className?: string;
 }) {
   return (
-    <div className="overflow-scroll">
+    <div className={twMerge("overflow-scroll", className)}>
+      <h2>LinkedArray Tester</h2>
       <pre className="text-start text-sm">
         <DebugOutArray arr={linkedArray} pad={0} showUnknowns={true} />
       </pre>
@@ -129,25 +133,5 @@ function DebugOutArray({
         clear
       </TxtButton>
     </>
-  );
-}
-
-function TxtButton({
-  style,
-  className,
-  ...rest
-}: React.DetailedHTMLProps<
-  React.ButtonHTMLAttributes<HTMLButtonElement>,
-  HTMLButtonElement
->) {
-  return (
-    <button
-      className={twMerge("text-gray-500 hover:underline", className)}
-      style={{
-        background: "none",
-        ...style,
-      }}
-      {...rest}
-    />
   );
 }

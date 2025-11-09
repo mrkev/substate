@@ -14,16 +14,19 @@ const array = LinkedArray.create<number>();
 const primitive = LinkedPrimitive.of(0);
 
 export function LinkedStateTest() {
+  console.log("RUN THIS hi");
   return (
-    <div className="grid grid-cols-4">
+    <div className="grid grid-cols-4 gap-2">
       <DebugContainer val={map}></DebugContainer>
-      <LinkedMapTest linkedMap={map} />
-      <DebugContainer val={set}></DebugContainer>
-      <LinkedSetTest linkedSet={set} />
-      <div className="col-span-2">
-        <h2>LinkedArray Tester</h2>
-        <LinkedArrayTest linkedArray={array} />
-      </div>
+      <LinkedMapTest map={map} />
+      <LinkedSetTest
+        className="col-span-2 rounded-sm bg-gray-700/10 p-4"
+        linkedSet={set}
+      />
+      <LinkedArrayTest
+        className="col-span-2 rounded-sm bg-gray-700/10 p-4"
+        linkedArray={array}
+      />
       <DebugPrimitive val={primitive}></DebugPrimitive>
       <LinkedPrimitiveTester linkedPrimitive={primitive} />
     </div>

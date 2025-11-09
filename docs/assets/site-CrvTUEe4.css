@@ -12,7 +12,11 @@
     --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     --color-gray-500: oklch(55.1% .027 264.364);
+    --color-gray-700: oklch(37.3% .034 259.733);
     --spacing: .25rem;
+    --text-sm: .875rem;
+    --text-sm--line-height: calc(1.25 / .875);
+    --radius-sm: .25rem;
     --default-font-family: var(--font-sans);
     --default-mono-font-family: var(--font-mono);
   }
@@ -280,6 +284,10 @@
     position: static;
   }
 
+  .col-span-2 {
+    grid-column: span 2 / span 2;
+  }
+
   .container {
     width: 100%;
   }
@@ -346,13 +354,31 @@
     overflow: scroll;
   }
 
+  .rounded-sm {
+    border-radius: var(--radius-sm);
+  }
+
   .border {
     border-style: var(--tw-border-style);
     border-width: 1px;
   }
 
+  .bg-gray-700\/10 {
+    background-color: #3641531a;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-gray-700\/10 {
+      background-color: color-mix(in oklab, var(--color-gray-700) 10%, transparent);
+    }
+  }
+
   .bg-transparent {
     background-color: #0000;
+  }
+
+  .p-4 {
+    padding: calc(var(--spacing) * 4);
   }
 
   .text-start {
@@ -361,6 +387,11 @@
 
   .font-mono {
     font-family: var(--font-mono);
+  }
+
+  .text-sm {
+    font-size: var(--text-sm);
+    line-height: var(--tw-leading, var(--text-sm--line-height));
   }
 
   .text-gray-500 {

@@ -52,6 +52,7 @@ export default defineConfig([
       "@typescript-eslint/no-this-alias": "off",
       "@typescript-eslint/no-unnecessary-type-constraint": "off",
       "react/react-in-jsx-scope": "off", // unnecessary for modern React
+      "react/no-children-prop": "off",
       "react-refresh/only-export-components": [
         "warn",
         {
