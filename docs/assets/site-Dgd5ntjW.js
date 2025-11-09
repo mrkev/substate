@@ -15577,7 +15577,7 @@ function replaceSimpleArray(json, arr) {
     return json._value;
   });
 }
-function isPrimitiveKind$1(val) {
+function isPrimitiveKind$2(val) {
   return typeof val === "number" || typeof val === "string" || typeof val === "boolean" || val === null;
 }
 function isStructuredKind(val) {
@@ -16963,7 +16963,7 @@ function header$1(elem, showContainerId = false) {
 }
 function debugOutSPrimitive(obj) {
   const val = obj.get();
-  if (isPrimitiveKind$1(val)) {
+  if (isPrimitiveKind$2(val)) {
     return `${header$1(obj)} ${debugOutPrm(val)}`;
   } else {
     return `${header$1(obj)} ${val}`;
@@ -17237,7 +17237,7 @@ function DebugOutUnion({
 }) {
   return "union, todo";
 }
-const TAB_SIZE$4 = 2;
+const TAB_SIZE$5 = 2;
 function DebugOutStruct(t0) {
   const $ = compilerRuntimeExports.c(20);
   const {
@@ -17256,7 +17256,7 @@ function DebugOutStruct(t0) {
     const keys = Object.keys(struct);
     for (let i = 0; i < keys.length && showBody; i++) {
       const key = keys[i];
-      const baseline = pad + TAB_SIZE$4;
+      const baseline = pad + TAB_SIZE$5;
       if (struct instanceof Structured && CONTAINER_IGNORE_KEYS.has(key)) {
         continue;
       }
@@ -17368,7 +17368,7 @@ function DebugOutArray$2(t0) {
   if ($[0] !== arr || $[1] !== pad || $[2] !== path || $[3] !== showUnknowns) {
     result = [];
     for (let i = 0; i < arr.length; i++) {
-      const baseline = pad + TAB_SIZE$4;
+      const baseline = pad + TAB_SIZE$5;
       const elem = arr.at(i);
       result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$2, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`));
     }
@@ -17437,7 +17437,7 @@ function DebugOutSet$2(t0) {
     result = [];
     let i = 0;
     for (const elem of set2) {
-      const baseline = pad + TAB_SIZE$4;
+      const baseline = pad + TAB_SIZE$5;
       result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$2, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`));
       i++;
     }
@@ -17624,7 +17624,7 @@ function DebugOutSPrimitive(t0) {
   let val;
   if ($[0] !== obj) {
     val = obj.get();
-    t2 = isPrimitiveKind$1(val);
+    t2 = isPrimitiveKind$2(val);
     $[0] = obj;
     $[1] = t2;
     $[2] = val;
@@ -17968,7 +17968,7 @@ const s = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   usePrimitive: usePrimitive$1,
   useSubscribeToSubbableMutationHashable: useSubscribeToSubbableMutationHashable$1
 }, Symbol.toStringTag, { value: "Module" }));
-const TAB_SIZE$3 = 2;
+const TAB_SIZE$4 = 2;
 function JSONView(t0) {
   const $ = compilerRuntimeExports.c(9);
   const {
@@ -18181,7 +18181,7 @@ function JSONRecord(t0) {
     }
     for (let i = 0; i < keys.length && displayState === "full"; i++) {
       const key = keys[i];
-      const baseline = pad + TAB_SIZE$3;
+      const baseline = pad + TAB_SIZE$4;
       const val = record[key];
       body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$1("attr"), children: key }, `span-${key}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val, pad: baseline, path: `${path}/${key}`, showUnknowns }, `elem-${key}`));
     }
@@ -18299,7 +18299,7 @@ function JSONArray(t0) {
         body.push(t5);
       }
       for (let i = 0; i < arr.length && displayState === "full"; i++) {
-        const baseline = pad + TAB_SIZE$3;
+        const baseline = pad + TAB_SIZE$4;
         const elem = arr[i];
         body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`));
       }
@@ -19856,6 +19856,10 @@ class LinkedPrimitive2 {
   _id;
   _value;
   _subscriptors = /* @__PURE__ */ new Set();
+  // MutationHashable
+  // Although linkedPrimitive can and usually works as normal state, we implement
+  // MutationHashable so it's easy to use with useLink like other LinkedState
+  _hash = 0;
   // Contained
   _container = /* @__PURE__ */ new Set();
   constructor(initialValue, id) {
@@ -19867,7 +19871,7 @@ class LinkedPrimitive2 {
   }
   set(value) {
     this._value = value;
-    notify(this, this);
+    mutationHashable.mutated(this, this);
     const token = new UpdateToken2(this);
     for (const container of this._container) {
       subbableContainer._childChanged(container, token);
@@ -20326,860 +20330,6 @@ class LinkedArray2 {
   flat(depth) {
     throw new Error("Method not implemented.");
   }
-}
-function usePrimitive(linkedState) {
-  const $ = compilerRuntimeExports.c(10);
-  let t0;
-  if ($[0] !== linkedState) {
-    t0 = () => linkedState.get();
-    $[0] = linkedState;
-    $[1] = t0;
-  } else {
-    t0 = $[1];
-  }
-  const [state, setState] = reactExports.useState(t0);
-  let t1;
-  let t2;
-  if ($[2] !== linkedState) {
-    t1 = () => subscribe(linkedState, (target) => {
-      if (target === linkedState) {
-        setState(() => linkedState.get());
-      }
-    });
-    t2 = [linkedState];
-    $[2] = linkedState;
-    $[3] = t1;
-    $[4] = t2;
-  } else {
-    t1 = $[3];
-    t2 = $[4];
-  }
-  reactExports.useEffect(t1, t2);
-  let t3;
-  if ($[5] !== linkedState) {
-    t3 = (newVal) => {
-      if (newVal instanceof Function) {
-        linkedState.set(newVal(linkedState.get()));
-      } else {
-        linkedState.set(newVal);
-      }
-    };
-    $[5] = linkedState;
-    $[6] = t3;
-  } else {
-    t3 = $[6];
-  }
-  const setter = t3;
-  let t4;
-  if ($[7] !== setter || $[8] !== state) {
-    t4 = [state, setter];
-    $[7] = setter;
-    $[8] = state;
-    $[9] = t4;
-  } else {
-    t4 = $[9];
-  }
-  return t4;
-}
-function useLink(obj, recursiveChanges = false) {
-  "use no memo";
-  reactExports.useSyncExternalStore(reactExports.useCallback((onStoreChange) => {
-    return subscribe(obj, (target) => {
-      if (obj === target || recursiveChanges) {
-        onStoreChange();
-      }
-    });
-  }, [obj, recursiveChanges]), reactExports.useCallback(() => obj._hash, [obj]));
-  return () => obj;
-}
-function useContainer(obj, t0) {
-  const recursiveChanges = false;
-  useSubscribeToSubbableMutationHashable(obj, void 0, recursiveChanges);
-  return obj;
-}
-function useSubscribeToSubbableMutationHashable(obj, cb, t0) {
-  const $ = compilerRuntimeExports.c(7);
-  const recursiveChanges = t0;
-  let t1;
-  if ($[0] !== obj) {
-    t1 = () => mutationHashable.getMutationHash(obj);
-    $[0] = obj;
-    $[1] = t1;
-  } else {
-    t1 = $[1];
-  }
-  const [, setHash] = reactExports.useState(t1);
-  let t2;
-  let t3;
-  if ($[2] !== cb || $[3] !== obj || $[4] !== recursiveChanges) {
-    t2 = () => subscribe(obj, (target) => {
-      if (obj === target || recursiveChanges) {
-        setHash(_temp$3);
-      }
-    });
-    t3 = [cb, obj, recursiveChanges];
-    $[2] = cb;
-    $[3] = obj;
-    $[4] = recursiveChanges;
-    $[5] = t2;
-    $[6] = t3;
-  } else {
-    t2 = $[5];
-    t3 = $[6];
-  }
-  reactExports.useEffect(t2, t3);
-  return obj;
-}
-function _temp$3(prev) {
-  return (prev + 1) % Number.MAX_SAFE_INTEGER;
-}
-const TAB_SIZE$2 = 2;
-function LinkedStateDebug(t0) {
-  const $ = compilerRuntimeExports.c(7);
-  const {
-    val,
-    showUnknowns,
-    style
-  } = t0;
-  let t1;
-  if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
-    t1 = {
-      width: 300,
-      fontSize: 12
-    };
-    $[0] = t1;
-  } else {
-    t1 = $[0];
-  }
-  let t2;
-  if ($[1] !== showUnknowns || $[2] !== val) {
-    t2 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start", style: t1, children: /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val, pad: 0, path: "ROOT", showUnknowns }) });
-    $[1] = showUnknowns;
-    $[2] = val;
-    $[3] = t2;
-  } else {
-    t2 = $[3];
-  }
-  let t3;
-  if ($[4] !== style || $[5] !== t2) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "overflow-scroll", style, children: t2 });
-    $[4] = style;
-    $[5] = t2;
-    $[6] = t3;
-  } else {
-    t3 = $[6];
-  }
-  return t3;
-}
-function stringifyUnknown(val) {
-  const res = stringify(val, {
-    space: " ",
-    cycles: true
-  });
-  if (res === "{\n}") {
-    return "{}";
-  } else {
-    return res;
-  }
-}
-function DebugOutReact(t0) {
-  const $ = compilerRuntimeExports.c(24);
-  const {
-    val,
-    pad,
-    path: t1,
-    showUnknowns: t2
-  } = t0;
-  const path = t1 === void 0 ? "" : t1;
-  const showUnknowns = t2 === void 0 ? true : t2;
-  if (typeof val === "string" || typeof val === "number" || typeof val === "boolean" || val == null) {
-    let t3;
-    if ($[0] !== val) {
-      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm, { val });
-      $[0] = val;
-      $[1] = t3;
-    } else {
-      t3 = $[1];
-    }
-    return t3;
-  } else {
-    if (typeof val === "function") {
-      return "(function)";
-    } else {
-      if (val instanceof LinkedArray2) {
-        let t3;
-        if ($[2] !== pad || $[3] !== path || $[4] !== showUnknowns || $[5] !== val) {
-          t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutArray$1, { arr: val, pad, path, showUnknowns });
-          $[2] = pad;
-          $[3] = path;
-          $[4] = showUnknowns;
-          $[5] = val;
-          $[6] = t3;
-        } else {
-          t3 = $[6];
-        }
-        return t3;
-      } else {
-        if (val instanceof LinkedSet) {
-          let t3;
-          if ($[7] !== pad || $[8] !== path || $[9] !== showUnknowns || $[10] !== val) {
-            t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSet$1, { set: val, pad, path, showUnknowns });
-            $[7] = pad;
-            $[8] = path;
-            $[9] = showUnknowns;
-            $[10] = val;
-            $[11] = t3;
-          } else {
-            t3 = $[11];
-          }
-          return t3;
-        } else {
-          if (val instanceof LinkedPrimitive2) {
-            let t3;
-            if ($[12] !== path || $[13] !== val) {
-              t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutPrimitive, { obj: val, path });
-              $[12] = path;
-              $[13] = val;
-              $[14] = t3;
-            } else {
-              t3 = $[14];
-            }
-            return t3;
-          } else {
-            if (val instanceof LinkedMap2) {
-              let t3;
-              if ($[15] !== pad || $[16] !== path || $[17] !== showUnknowns || $[18] !== val) {
-                t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutMap, { map: val, pad, path, showUnknowns });
-                $[15] = pad;
-                $[16] = path;
-                $[17] = showUnknowns;
-                $[18] = val;
-                $[19] = t3;
-              } else {
-                t3 = $[19];
-              }
-              return t3;
-            } else {
-              if (Array.isArray(val)) {
-                let t3;
-                if ($[20] !== val) {
-                  t3 = JSON.stringify(val);
-                  $[20] = val;
-                  $[21] = t3;
-                } else {
-                  t3 = $[21];
-                }
-                return t3;
-              } else {
-                if (showUnknowns) {
-                  let t3;
-                  if ($[22] !== val) {
-                    t3 = stringifyUnknown(val);
-                    $[22] = val;
-                    $[23] = t3;
-                  } else {
-                    t3 = $[23];
-                  }
-                  return `(unknown: ${t3})`;
-                } else {
-                  return `(unknown: ${val.constructor.name})`;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-function DebugOutMap(t0) {
-  const $ = compilerRuntimeExports.c(17);
-  const {
-    map: linkedMap2,
-    pad,
-    path: t1,
-    showUnknowns
-  } = t0;
-  const path = t1 === void 0 ? "" : t1;
-  const map2 = useLink(linkedMap2);
-  console.log("RENDER", map2);
-  const [displayState] = reactExports.useState("full");
-  const showHeader = displayState === "full";
-  const showBody = displayState === "full" || displayState === "native";
-  let body;
-  if ($[0] !== map2 || $[1] !== pad || $[2] !== path || $[3] !== showBody || $[4] !== showUnknowns) {
-    body = ["{"];
-    let t22;
-    if ($[6] !== map2) {
-      t22 = [...map2().entries()];
-      $[6] = map2;
-      $[7] = t22;
-    } else {
-      t22 = $[7];
-    }
-    const entries = t22;
-    for (let i = 0; i < entries.length && showBody; i++) {
-      const [key, val] = entries[i];
-      const baseline = pad + TAB_SIZE$2;
-      body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind("attr"), children: String(key) }, `span-${key}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val, pad: baseline, path: `${path}/${key}`, showUnknowns }, `elem-${key}`));
-    }
-    if (!showBody) {
-      body.push("...", "}");
-    } else {
-      let t32;
-      if ($[8] !== pad) {
-        t32 = " ".repeat(pad);
-        $[8] = pad;
-        $[9] = t32;
-      } else {
-        t32 = $[9];
-      }
-      body.push("\n", t32, "}");
-    }
-    $[0] = map2;
-    $[1] = pad;
-    $[2] = path;
-    $[3] = showBody;
-    $[4] = showUnknowns;
-    $[5] = body;
-  } else {
-    body = $[5];
-  }
-  let t2;
-  if ($[10] !== linkedMap2 || $[11] !== path || $[12] !== showHeader) {
-    t2 = showHeader && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: linkedMap2, path: `${path}/${linkedMap2._id}` }),
-      " "
-    ] });
-    $[10] = linkedMap2;
-    $[11] = path;
-    $[12] = showHeader;
-    $[13] = t2;
-  } else {
-    t2 = $[13];
-  }
-  let t3;
-  if ($[14] !== body || $[15] !== t2) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      t2,
-      body
-    ] });
-    $[14] = body;
-    $[15] = t2;
-    $[16] = t3;
-  } else {
-    t3 = $[16];
-  }
-  return t3;
-}
-function DebugOutArray$1(t0) {
-  const $ = compilerRuntimeExports.c(15);
-  const {
-    arr: linkedArray,
-    pad,
-    path: t1,
-    showUnknowns
-  } = t0;
-  const path = t1 === void 0 ? "" : t1;
-  const arr = useLink(linkedArray);
-  let result;
-  if ($[0] !== arr || $[1] !== pad || $[2] !== path || $[3] !== showUnknowns) {
-    result = [];
-    for (let i = 0; i < arr().length; i++) {
-      const baseline = pad + TAB_SIZE$2;
-      const elem = arr().at(i);
-      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`));
-    }
-    if (result.length > 0) {
-      let t22;
-      if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
-        t22 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, "brend");
-        $[5] = t22;
-      } else {
-        t22 = $[5];
-      }
-      let t32;
-      if ($[6] !== pad) {
-        t32 = " ".repeat(pad);
-        $[6] = pad;
-        $[7] = t32;
-      } else {
-        t32 = $[7];
-      }
-      result.push(t22, t32);
-    }
-    $[0] = arr;
-    $[1] = pad;
-    $[2] = path;
-    $[3] = showUnknowns;
-    $[4] = result;
-  } else {
-    result = $[4];
-  }
-  let t2;
-  if ($[8] !== arr) {
-    t2 = arr();
-    $[8] = arr;
-    $[9] = t2;
-  } else {
-    t2 = $[9];
-  }
-  let t3;
-  if ($[10] !== t2) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: t2 });
-    $[10] = t2;
-    $[11] = t3;
-  } else {
-    t3 = $[11];
-  }
-  let t4;
-  if ($[12] !== result || $[13] !== t3) {
-    t4 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      t3,
-      " ",
-      "[",
-      result,
-      "]"
-    ] });
-    $[12] = result;
-    $[13] = t3;
-    $[14] = t4;
-  } else {
-    t4 = $[14];
-  }
-  return t4;
-}
-function DebugOutSet$1(t0) {
-  const $ = compilerRuntimeExports.c(15);
-  const {
-    set: linkedSet,
-    pad,
-    path: t1,
-    showUnknowns
-  } = t0;
-  const path = t1 === void 0 ? "" : t1;
-  const set2 = useLink(linkedSet);
-  let result;
-  if ($[0] !== pad || $[1] !== path || $[2] !== set2 || $[3] !== showUnknowns) {
-    result = [];
-    let i = 0;
-    for (const elem of set2()) {
-      const baseline = pad + TAB_SIZE$2;
-      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`));
-      i++;
-    }
-    if (result.length > 0) {
-      let t22;
-      if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
-        t22 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, "brend");
-        $[5] = t22;
-      } else {
-        t22 = $[5];
-      }
-      let t32;
-      if ($[6] !== pad) {
-        t32 = " ".repeat(pad);
-        $[6] = pad;
-        $[7] = t32;
-      } else {
-        t32 = $[7];
-      }
-      result.push(t22, t32);
-    }
-    $[0] = pad;
-    $[1] = path;
-    $[2] = set2;
-    $[3] = showUnknowns;
-    $[4] = result;
-  } else {
-    result = $[4];
-  }
-  let t2;
-  if ($[8] !== set2) {
-    t2 = set2();
-    $[8] = set2;
-    $[9] = t2;
-  } else {
-    t2 = $[9];
-  }
-  let t3;
-  if ($[10] !== t2) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: t2 });
-    $[10] = t2;
-    $[11] = t3;
-  } else {
-    t3 = $[11];
-  }
-  let t4;
-  if ($[12] !== result || $[13] !== t3) {
-    t4 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      t3,
-      " ",
-      "(",
-      result,
-      ")"
-    ] });
-    $[12] = result;
-    $[13] = t3;
-    $[14] = t4;
-  } else {
-    t4 = $[14];
-  }
-  return t4;
-}
-function Header(t0) {
-  const $ = compilerRuntimeExports.c(15);
-  const {
-    obj,
-    path,
-    showContainerId: t1
-  } = t0;
-  const showContainerId = t1 === void 0 ? false : t1;
-  let t2;
-  bb0: {
-    if (obj instanceof LinkedMap2) {
-      t2 = "lmap";
-      break bb0;
-    } else {
-      if (obj instanceof LinkedArray2) {
-        t2 = "larr";
-        break bb0;
-      } else {
-        if (obj instanceof LinkedSet) {
-          t2 = "lset";
-          break bb0;
-        } else {
-          if (obj instanceof LinkedPrimitive2) {
-            t2 = "lprm";
-            break bb0;
-          } else {
-            exhaustive(obj);
-          }
-        }
-      }
-    }
-    t2 = void 0;
-  }
-  const kindStr = t2;
-  let t3;
-  if ($[0] !== obj) {
-    t3 = obj instanceof LinkedPrimitive2 ? "" : `.${mutationHashable.getMutationHash(obj)}`;
-    $[0] = obj;
-    $[1] = t3;
-  } else {
-    t3 = $[1];
-  }
-  const hashStr = t3;
-  let t4;
-  if ($[2] !== obj._container || $[3] !== showContainerId) {
-    t4 = showContainerId ? ` -^ ${[...obj._container.values()].map(_temp$2).join(",")}` : "";
-    $[2] = obj._container;
-    $[3] = showContainerId;
-    $[4] = t4;
-  } else {
-    t4 = $[4];
-  }
-  const container = t4;
-  classOfKind("hash");
-  let t5;
-  if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
-    t5 = classOfKind("kind");
-    $[5] = t5;
-  } else {
-    t5 = $[5];
-  }
-  let t6;
-  if ($[6] === Symbol.for("react.memo_cache_sentinel")) {
-    t6 = classOfKind("kind");
-    $[6] = t6;
-  } else {
-    t6 = $[6];
-  }
-  let t7;
-  if ($[7] !== kindStr) {
-    t7 = /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: t6, children: kindStr });
-    $[7] = kindStr;
-    $[8] = t7;
-  } else {
-    t7 = $[8];
-  }
-  let t8;
-  if ($[9] !== container || $[10] !== hashStr || $[11] !== obj._id || $[12] !== path || $[13] !== t7) {
-    t8 = /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: t5, title: path, children: [
-      "(",
-      t7,
-      ": ",
-      obj._id,
-      hashStr,
-      container,
-      ")"
-    ] });
-    $[9] = container;
-    $[10] = hashStr;
-    $[11] = obj._id;
-    $[12] = path;
-    $[13] = t7;
-    $[14] = t8;
-  } else {
-    t8 = $[14];
-  }
-  return t8;
-}
-function _temp$2(v) {
-  return v._id;
-}
-function DebugOutPrimitive(t0) {
-  const $ = compilerRuntimeExports.c(14);
-  const {
-    obj,
-    path: t1
-  } = t0;
-  const path = t1 === void 0 ? "" : t1;
-  const [val] = usePrimitive(obj);
-  if (isPrimitiveKind(val)) {
-    const t2 = `${path}/${obj._id}`;
-    let t3;
-    if ($[0] !== obj || $[1] !== t2) {
-      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj, path: t2 });
-      $[0] = obj;
-      $[1] = t2;
-      $[2] = t3;
-    } else {
-      t3 = $[2];
-    }
-    let t4;
-    if ($[3] !== val) {
-      t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm, { val });
-      $[3] = val;
-      $[4] = t4;
-    } else {
-      t4 = $[4];
-    }
-    let t5;
-    if ($[5] !== t3 || $[6] !== t4) {
-      t5 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-        t3,
-        " ",
-        t4
-      ] });
-      $[5] = t3;
-      $[6] = t4;
-      $[7] = t5;
-    } else {
-      t5 = $[7];
-    }
-    return t5;
-  } else {
-    const t2 = `${path}/${obj._id}`;
-    let t3;
-    if ($[8] !== obj || $[9] !== t2) {
-      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj, path: t2 });
-      $[8] = obj;
-      $[9] = t2;
-      $[10] = t3;
-    } else {
-      t3 = $[10];
-    }
-    const t4 = String(val);
-    let t5;
-    if ($[11] !== t3 || $[12] !== t4) {
-      t5 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-        t3,
-        " ",
-        t4
-      ] });
-      $[11] = t3;
-      $[12] = t4;
-      $[13] = t5;
-    } else {
-      t5 = $[13];
-    }
-    return t5;
-  }
-}
-function DebugOutSimplePrm({
-  val
-}) {
-  switch (true) {
-    case typeof val === "string":
-      return /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: classOfKind("string"), children: [
-        '"',
-        val,
-        '"'
-      ] });
-    case typeof val === "number":
-      return /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind("number"), children: String(val) });
-    default:
-      return String(val);
-  }
-}
-const classOfKind = (kind) => {
-  switch (kind) {
-    case "attr":
-      return "hljs-attr";
-    case "number":
-    case "hash":
-      return "hljs-number";
-    case "string":
-      return "hljs-string";
-    case "classname":
-      return "hljs-title class_";
-    case "prm":
-    case "kind":
-      return "hljs-comment";
-    default:
-      exhaustive(kind);
-  }
-};
-function isPrimitiveKind(val) {
-  return typeof val === "number" || typeof val === "string" || typeof val === "boolean" || val === null;
-}
-function DebugContainer(t0) {
-  const $ = compilerRuntimeExports.c(16);
-  const {
-    val
-  } = t0;
-  const [tab, setTab] = reactExports.useState("struct");
-  const t1 = tab === "struct";
-  let t2;
-  if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
-    t2 = () => setTab("struct");
-    $[0] = t2;
-  } else {
-    t2 = $[0];
-  }
-  let t3;
-  if ($[1] !== t1) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(UtilityToggle, { toggled: t1, onToggle: t2, children: "struct" });
-    $[1] = t1;
-    $[2] = t3;
-  } else {
-    t3 = $[2];
-  }
-  const t4 = tab === "serialized";
-  let t5;
-  if ($[3] === Symbol.for("react.memo_cache_sentinel")) {
-    t5 = () => setTab("serialized");
-    $[3] = t5;
-  } else {
-    t5 = $[3];
-  }
-  let t6;
-  if ($[4] !== t4) {
-    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx(UtilityToggle, { toggled: t4, onToggle: t5, children: "serialized" });
-    $[4] = t4;
-    $[5] = t6;
-  } else {
-    t6 = $[5];
-  }
-  let t7;
-  if ($[6] !== tab || $[7] !== val) {
-    t7 = tab === "struct" && /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedStateDebug, { val });
-    $[6] = tab;
-    $[7] = val;
-    $[8] = t7;
-  } else {
-    t7 = $[8];
-  }
-  let t8;
-  if ($[9] !== tab) {
-    t8 = tab === "serialized" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "overflow-scroll text-start font-mono", children: "Not available" });
-    $[9] = tab;
-    $[10] = t8;
-  } else {
-    t8 = $[10];
-  }
-  let t9;
-  if ($[11] !== t3 || $[12] !== t6 || $[13] !== t7 || $[14] !== t8) {
-    t9 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-      t3,
-      t6,
-      t7,
-      t8
-    ] });
-    $[11] = t3;
-    $[12] = t6;
-    $[13] = t7;
-    $[14] = t8;
-    $[15] = t9;
-  } else {
-    t9 = $[15];
-  }
-  return t9;
-}
-function DebugPrimitive(t0) {
-  const $ = compilerRuntimeExports.c(16);
-  const {
-    val
-  } = t0;
-  usePrimitive(val);
-  const [tab, setTab] = reactExports.useState("struct");
-  const t1 = tab === "struct";
-  let t2;
-  if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
-    t2 = () => setTab("struct");
-    $[0] = t2;
-  } else {
-    t2 = $[0];
-  }
-  let t3;
-  if ($[1] !== t1) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(UtilityToggle, { toggled: t1, onToggle: t2, children: "struct" });
-    $[1] = t1;
-    $[2] = t3;
-  } else {
-    t3 = $[2];
-  }
-  const t4 = tab === "serialized";
-  let t5;
-  if ($[3] === Symbol.for("react.memo_cache_sentinel")) {
-    t5 = () => setTab("serialized");
-    $[3] = t5;
-  } else {
-    t5 = $[3];
-  }
-  let t6;
-  if ($[4] !== t4) {
-    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx(UtilityToggle, { toggled: t4, onToggle: t5, children: "serialized" });
-    $[4] = t4;
-    $[5] = t6;
-  } else {
-    t6 = $[5];
-  }
-  let t7;
-  if ($[6] !== tab || $[7] !== val) {
-    t7 = tab === "struct" && /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedStateDebug, { val });
-    $[6] = tab;
-    $[7] = val;
-    $[8] = t7;
-  } else {
-    t7 = $[8];
-  }
-  let t8;
-  if ($[9] !== tab) {
-    t8 = tab === "serialized" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "overflow-scroll text-start font-mono", children: "Not available" });
-    $[9] = tab;
-    $[10] = t8;
-  } else {
-    t8 = $[10];
-  }
-  let t9;
-  if ($[11] !== t3 || $[12] !== t6 || $[13] !== t7 || $[14] !== t8) {
-    t9 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-      t3,
-      t6,
-      t7,
-      t8
-    ] });
-    $[11] = t3;
-    $[12] = t6;
-    $[13] = t7;
-    $[14] = t8;
-    $[15] = t9;
-  } else {
-    t9 = $[15];
-  }
-  return t9;
 }
 const CLASS_PART_SEPARATOR = "-";
 const createClassGroupUtils = (config) => {
@@ -24132,6 +23282,716 @@ const getDefaultConfig = () => {
   };
 };
 const twMerge = /* @__PURE__ */ createTailwindMerge(getDefaultConfig);
+function usePrimitive(linkedState) {
+  const $ = compilerRuntimeExports.c(10);
+  let t0;
+  if ($[0] !== linkedState) {
+    t0 = () => linkedState.get();
+    $[0] = linkedState;
+    $[1] = t0;
+  } else {
+    t0 = $[1];
+  }
+  const [state, setState] = reactExports.useState(t0);
+  let t1;
+  let t2;
+  if ($[2] !== linkedState) {
+    t1 = () => subscribe(linkedState, (target) => {
+      if (target === linkedState) {
+        setState(() => linkedState.get());
+      }
+    });
+    t2 = [linkedState];
+    $[2] = linkedState;
+    $[3] = t1;
+    $[4] = t2;
+  } else {
+    t1 = $[3];
+    t2 = $[4];
+  }
+  reactExports.useEffect(t1, t2);
+  let t3;
+  if ($[5] !== linkedState) {
+    t3 = (newVal) => {
+      if (newVal instanceof Function) {
+        linkedState.set(newVal(linkedState.get()));
+      } else {
+        linkedState.set(newVal);
+      }
+    };
+    $[5] = linkedState;
+    $[6] = t3;
+  } else {
+    t3 = $[6];
+  }
+  const setter = t3;
+  let t4;
+  if ($[7] !== setter || $[8] !== state) {
+    t4 = [state, setter];
+    $[7] = setter;
+    $[8] = state;
+    $[9] = t4;
+  } else {
+    t4 = $[9];
+  }
+  return t4;
+}
+function useLink(obj, recursiveChanges = false) {
+  "use no memo";
+  reactExports.useSyncExternalStore(reactExports.useCallback((onStoreChange) => {
+    return subscribe(obj, (target) => {
+      if (obj === target || recursiveChanges) {
+        onStoreChange();
+      }
+    });
+  }, [obj, recursiveChanges]), reactExports.useCallback(() => obj._hash, [obj]));
+  return () => obj;
+}
+function useContainer(obj, t0) {
+  const recursiveChanges = false;
+  useSubscribeToSubbableMutationHashable(obj, void 0, recursiveChanges);
+  return obj;
+}
+function useSubscribeToSubbableMutationHashable(obj, cb, t0) {
+  const $ = compilerRuntimeExports.c(7);
+  const recursiveChanges = t0;
+  let t1;
+  if ($[0] !== obj) {
+    t1 = () => mutationHashable.getMutationHash(obj);
+    $[0] = obj;
+    $[1] = t1;
+  } else {
+    t1 = $[1];
+  }
+  const [, setHash] = reactExports.useState(t1);
+  let t2;
+  let t3;
+  if ($[2] !== cb || $[3] !== obj || $[4] !== recursiveChanges) {
+    t2 = () => subscribe(obj, (target) => {
+      if (obj === target || recursiveChanges) {
+        setHash(_temp$3);
+      }
+    });
+    t3 = [cb, obj, recursiveChanges];
+    $[2] = cb;
+    $[3] = obj;
+    $[4] = recursiveChanges;
+    $[5] = t2;
+    $[6] = t3;
+  } else {
+    t2 = $[5];
+    t3 = $[6];
+  }
+  reactExports.useEffect(t2, t3);
+  return obj;
+}
+function _temp$3(prev) {
+  return (prev + 1) % Number.MAX_SAFE_INTEGER;
+}
+const TAB_SIZE$3 = 2;
+function LinkedStateDebug(t0) {
+  const $ = compilerRuntimeExports.c(7);
+  const {
+    val,
+    showUnknowns,
+    style
+  } = t0;
+  let t1;
+  if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
+    t1 = {
+      width: 300,
+      fontSize: 12
+    };
+    $[0] = t1;
+  } else {
+    t1 = $[0];
+  }
+  let t2;
+  if ($[1] !== showUnknowns || $[2] !== val) {
+    t2 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start", style: t1, children: /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val, pad: 0, path: "ROOT", showUnknowns }) });
+    $[1] = showUnknowns;
+    $[2] = val;
+    $[3] = t2;
+  } else {
+    t2 = $[3];
+  }
+  let t3;
+  if ($[4] !== style || $[5] !== t2) {
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "overflow-scroll", style, children: t2 });
+    $[4] = style;
+    $[5] = t2;
+    $[6] = t3;
+  } else {
+    t3 = $[6];
+  }
+  return t3;
+}
+function stringifyUnknown(val) {
+  const res = stringify(val, {
+    space: " ",
+    cycles: true
+  });
+  if (res === "{\n}") {
+    return "{}";
+  } else {
+    return res;
+  }
+}
+function DebugOutReact(t0) {
+  const $ = compilerRuntimeExports.c(24);
+  const {
+    val,
+    pad,
+    path: t1,
+    showUnknowns: t2
+  } = t0;
+  const path = t1 === void 0 ? "" : t1;
+  const showUnknowns = t2 === void 0 ? true : t2;
+  if (typeof val === "string" || typeof val === "number" || typeof val === "boolean" || val == null) {
+    let t3;
+    if ($[0] !== val) {
+      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm, { val });
+      $[0] = val;
+      $[1] = t3;
+    } else {
+      t3 = $[1];
+    }
+    return t3;
+  } else {
+    if (typeof val === "function") {
+      return "(function)";
+    } else {
+      if (val instanceof LinkedArray2) {
+        let t3;
+        if ($[2] !== pad || $[3] !== path || $[4] !== showUnknowns || $[5] !== val) {
+          t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutArray$1, { arr: val, pad, path, showUnknowns });
+          $[2] = pad;
+          $[3] = path;
+          $[4] = showUnknowns;
+          $[5] = val;
+          $[6] = t3;
+        } else {
+          t3 = $[6];
+        }
+        return t3;
+      } else {
+        if (val instanceof LinkedSet) {
+          let t3;
+          if ($[7] !== pad || $[8] !== path || $[9] !== showUnknowns || $[10] !== val) {
+            t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSet$1, { set: val, pad, path, showUnknowns });
+            $[7] = pad;
+            $[8] = path;
+            $[9] = showUnknowns;
+            $[10] = val;
+            $[11] = t3;
+          } else {
+            t3 = $[11];
+          }
+          return t3;
+        } else {
+          if (val instanceof LinkedPrimitive2) {
+            let t3;
+            if ($[12] !== path || $[13] !== val) {
+              t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutPrimitive$1, { obj: val, path });
+              $[12] = path;
+              $[13] = val;
+              $[14] = t3;
+            } else {
+              t3 = $[14];
+            }
+            return t3;
+          } else {
+            if (val instanceof LinkedMap2) {
+              let t3;
+              if ($[15] !== pad || $[16] !== path || $[17] !== showUnknowns || $[18] !== val) {
+                t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutMap$1, { map: val, pad, path, showUnknowns });
+                $[15] = pad;
+                $[16] = path;
+                $[17] = showUnknowns;
+                $[18] = val;
+                $[19] = t3;
+              } else {
+                t3 = $[19];
+              }
+              return t3;
+            } else {
+              if (Array.isArray(val)) {
+                let t3;
+                if ($[20] !== val) {
+                  t3 = JSON.stringify(val);
+                  $[20] = val;
+                  $[21] = t3;
+                } else {
+                  t3 = $[21];
+                }
+                return t3;
+              } else {
+                if (showUnknowns) {
+                  let t3;
+                  if ($[22] !== val) {
+                    t3 = stringifyUnknown(val);
+                    $[22] = val;
+                    $[23] = t3;
+                  } else {
+                    t3 = $[23];
+                  }
+                  return `(unknown: ${t3})`;
+                } else {
+                  return `(unknown: ${val.constructor.name})`;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+function DebugOutMap$1(t0) {
+  const $ = compilerRuntimeExports.c(17);
+  const {
+    map: linkedMap2,
+    pad,
+    path: t1,
+    showUnknowns
+  } = t0;
+  const path = t1 === void 0 ? "" : t1;
+  const map2 = useLink(linkedMap2);
+  console.log("RENDER", map2);
+  const [displayState] = reactExports.useState("full");
+  const showHeader = displayState === "full";
+  const showBody = displayState === "full" || displayState === "native";
+  let body;
+  if ($[0] !== map2 || $[1] !== pad || $[2] !== path || $[3] !== showBody || $[4] !== showUnknowns) {
+    body = ["{"];
+    let t22;
+    if ($[6] !== map2) {
+      t22 = [...map2().entries()];
+      $[6] = map2;
+      $[7] = t22;
+    } else {
+      t22 = $[7];
+    }
+    const entries = t22;
+    for (let i = 0; i < entries.length && showBody; i++) {
+      const [key, val] = entries[i];
+      const baseline = pad + TAB_SIZE$3;
+      body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind("attr"), children: String(key) }, `span-${key}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val, pad: baseline, path: `${path}/${key}`, showUnknowns }, `elem-${key}`));
+    }
+    if (!showBody) {
+      body.push("...", "}");
+    } else {
+      let t32;
+      if ($[8] !== pad) {
+        t32 = " ".repeat(pad);
+        $[8] = pad;
+        $[9] = t32;
+      } else {
+        t32 = $[9];
+      }
+      body.push("\n", t32, "}");
+    }
+    $[0] = map2;
+    $[1] = pad;
+    $[2] = path;
+    $[3] = showBody;
+    $[4] = showUnknowns;
+    $[5] = body;
+  } else {
+    body = $[5];
+  }
+  let t2;
+  if ($[10] !== linkedMap2 || $[11] !== path || $[12] !== showHeader) {
+    t2 = showHeader && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: linkedMap2, path: `${path}/${linkedMap2._id}` }),
+      " "
+    ] });
+    $[10] = linkedMap2;
+    $[11] = path;
+    $[12] = showHeader;
+    $[13] = t2;
+  } else {
+    t2 = $[13];
+  }
+  let t3;
+  if ($[14] !== body || $[15] !== t2) {
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      t2,
+      body
+    ] });
+    $[14] = body;
+    $[15] = t2;
+    $[16] = t3;
+  } else {
+    t3 = $[16];
+  }
+  return t3;
+}
+function DebugOutArray$1(t0) {
+  const $ = compilerRuntimeExports.c(15);
+  const {
+    arr: linkedArray,
+    pad,
+    path: t1,
+    showUnknowns
+  } = t0;
+  const path = t1 === void 0 ? "" : t1;
+  const arr = useLink(linkedArray);
+  let result;
+  if ($[0] !== arr || $[1] !== pad || $[2] !== path || $[3] !== showUnknowns) {
+    result = [];
+    for (let i = 0; i < arr().length; i++) {
+      const baseline = pad + TAB_SIZE$3;
+      const elem = arr().at(i);
+      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`));
+    }
+    if (result.length > 0) {
+      let t22;
+      if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
+        t22 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, "brend");
+        $[5] = t22;
+      } else {
+        t22 = $[5];
+      }
+      let t32;
+      if ($[6] !== pad) {
+        t32 = " ".repeat(pad);
+        $[6] = pad;
+        $[7] = t32;
+      } else {
+        t32 = $[7];
+      }
+      result.push(t22, t32);
+    }
+    $[0] = arr;
+    $[1] = pad;
+    $[2] = path;
+    $[3] = showUnknowns;
+    $[4] = result;
+  } else {
+    result = $[4];
+  }
+  let t2;
+  if ($[8] !== arr) {
+    t2 = arr();
+    $[8] = arr;
+    $[9] = t2;
+  } else {
+    t2 = $[9];
+  }
+  let t3;
+  if ($[10] !== t2) {
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: t2 });
+    $[10] = t2;
+    $[11] = t3;
+  } else {
+    t3 = $[11];
+  }
+  let t4;
+  if ($[12] !== result || $[13] !== t3) {
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      t3,
+      " ",
+      "[",
+      result,
+      "]"
+    ] });
+    $[12] = result;
+    $[13] = t3;
+    $[14] = t4;
+  } else {
+    t4 = $[14];
+  }
+  return t4;
+}
+function DebugOutSet$1(t0) {
+  const $ = compilerRuntimeExports.c(15);
+  const {
+    set: linkedSet,
+    pad,
+    path: t1,
+    showUnknowns
+  } = t0;
+  const path = t1 === void 0 ? "" : t1;
+  const set2 = useLink(linkedSet);
+  let result;
+  if ($[0] !== pad || $[1] !== path || $[2] !== set2 || $[3] !== showUnknowns) {
+    result = [];
+    let i = 0;
+    for (const elem of set2()) {
+      const baseline = pad + TAB_SIZE$3;
+      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`));
+      i++;
+    }
+    if (result.length > 0) {
+      let t22;
+      if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
+        t22 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, "brend");
+        $[5] = t22;
+      } else {
+        t22 = $[5];
+      }
+      let t32;
+      if ($[6] !== pad) {
+        t32 = " ".repeat(pad);
+        $[6] = pad;
+        $[7] = t32;
+      } else {
+        t32 = $[7];
+      }
+      result.push(t22, t32);
+    }
+    $[0] = pad;
+    $[1] = path;
+    $[2] = set2;
+    $[3] = showUnknowns;
+    $[4] = result;
+  } else {
+    result = $[4];
+  }
+  let t2;
+  if ($[8] !== set2) {
+    t2 = set2();
+    $[8] = set2;
+    $[9] = t2;
+  } else {
+    t2 = $[9];
+  }
+  let t3;
+  if ($[10] !== t2) {
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: t2 });
+    $[10] = t2;
+    $[11] = t3;
+  } else {
+    t3 = $[11];
+  }
+  let t4;
+  if ($[12] !== result || $[13] !== t3) {
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      t3,
+      " ",
+      "(",
+      result,
+      ")"
+    ] });
+    $[12] = result;
+    $[13] = t3;
+    $[14] = t4;
+  } else {
+    t4 = $[14];
+  }
+  return t4;
+}
+function Header(t0) {
+  const $ = compilerRuntimeExports.c(16);
+  const {
+    obj: objarg,
+    path,
+    showContainerId: t1
+  } = t0;
+  const showContainerId = t1 === void 0 ? false : t1;
+  const t2 = useLink(objarg);
+  let hashStr;
+  let kindStr;
+  let obj;
+  let t3;
+  if ($[0] !== showContainerId || $[1] !== t2) {
+    obj = t2();
+    let t42;
+    bb0: {
+      if (obj instanceof LinkedMap2) {
+        t42 = "lmap";
+        break bb0;
+      } else {
+        if (obj instanceof LinkedArray2) {
+          t42 = "larr";
+          break bb0;
+        } else {
+          if (obj instanceof LinkedSet) {
+            t42 = "lset";
+            break bb0;
+          } else {
+            if (obj instanceof LinkedPrimitive2) {
+              t42 = "lprm";
+              break bb0;
+            } else {
+              exhaustive(obj);
+            }
+          }
+        }
+      }
+      t42 = void 0;
+    }
+    kindStr = t42;
+    hashStr = `.${mutationHashable.getMutationHash(obj)}`;
+    t3 = showContainerId ? ` -^ ${[...obj._container.values()].map(_temp$2).join(",")}` : "";
+    $[0] = showContainerId;
+    $[1] = t2;
+    $[2] = hashStr;
+    $[3] = kindStr;
+    $[4] = obj;
+    $[5] = t3;
+  } else {
+    hashStr = $[2];
+    kindStr = $[3];
+    obj = $[4];
+    t3 = $[5];
+  }
+  const container = t3;
+  classOfKind("hash");
+  let t4;
+  if ($[6] === Symbol.for("react.memo_cache_sentinel")) {
+    t4 = classOfKind("kind");
+    $[6] = t4;
+  } else {
+    t4 = $[6];
+  }
+  let t5;
+  if ($[7] === Symbol.for("react.memo_cache_sentinel")) {
+    t5 = classOfKind("kind");
+    $[7] = t5;
+  } else {
+    t5 = $[7];
+  }
+  let t6;
+  if ($[8] !== kindStr) {
+    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: t5, children: kindStr });
+    $[8] = kindStr;
+    $[9] = t6;
+  } else {
+    t6 = $[9];
+  }
+  let t7;
+  if ($[10] !== container || $[11] !== hashStr || $[12] !== obj._id || $[13] !== path || $[14] !== t6) {
+    t7 = /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: t4, title: path, children: [
+      "(",
+      t6,
+      ": ",
+      obj._id,
+      hashStr,
+      container,
+      ")"
+    ] });
+    $[10] = container;
+    $[11] = hashStr;
+    $[12] = obj._id;
+    $[13] = path;
+    $[14] = t6;
+    $[15] = t7;
+  } else {
+    t7 = $[15];
+  }
+  return t7;
+}
+function _temp$2(v) {
+  return v._id;
+}
+function DebugOutPrimitive$1(t0) {
+  const $ = compilerRuntimeExports.c(14);
+  const {
+    obj,
+    path: t1
+  } = t0;
+  const path = t1 === void 0 ? "" : t1;
+  const [val] = usePrimitive(obj);
+  if (isPrimitiveKind$1(val)) {
+    const t2 = `${path}/${obj._id}`;
+    let t3;
+    if ($[0] !== obj || $[1] !== t2) {
+      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj, path: t2 });
+      $[0] = obj;
+      $[1] = t2;
+      $[2] = t3;
+    } else {
+      t3 = $[2];
+    }
+    let t4;
+    if ($[3] !== val) {
+      t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm, { val });
+      $[3] = val;
+      $[4] = t4;
+    } else {
+      t4 = $[4];
+    }
+    let t5;
+    if ($[5] !== t3 || $[6] !== t4) {
+      t5 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        t3,
+        " ",
+        t4
+      ] });
+      $[5] = t3;
+      $[6] = t4;
+      $[7] = t5;
+    } else {
+      t5 = $[7];
+    }
+    return t5;
+  } else {
+    const t2 = `${path}/${obj._id}`;
+    let t3;
+    if ($[8] !== obj || $[9] !== t2) {
+      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj, path: t2 });
+      $[8] = obj;
+      $[9] = t2;
+      $[10] = t3;
+    } else {
+      t3 = $[10];
+    }
+    const t4 = String(val);
+    let t5;
+    if ($[11] !== t3 || $[12] !== t4) {
+      t5 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        t3,
+        " ",
+        t4
+      ] });
+      $[11] = t3;
+      $[12] = t4;
+      $[13] = t5;
+    } else {
+      t5 = $[13];
+    }
+    return t5;
+  }
+}
+function DebugOutSimplePrm({
+  val
+}) {
+  switch (true) {
+    case typeof val === "string":
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: classOfKind("string"), children: [
+        '"',
+        val,
+        '"'
+      ] });
+    case typeof val === "number":
+      return /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind("number"), children: String(val) });
+    default:
+      return String(val);
+  }
+}
+const classOfKind = (kind) => {
+  switch (kind) {
+    case "attr":
+      return "hljs-attr";
+    case "number":
+    case "hash":
+      return "hljs-number";
+    case "string":
+      return "hljs-string";
+    case "classname":
+      return "hljs-title class_";
+    case "prm":
+    case "kind":
+      return "hljs-comment";
+    default:
+      exhaustive(kind);
+  }
+};
+function isPrimitiveKind$1(val) {
+  return typeof val === "number" || typeof val === "string" || typeof val === "boolean" || val === null;
+}
 function TxtButton(t0) {
   const $ = compilerRuntimeExports.c(12);
   let className;
@@ -24183,7 +24043,7 @@ function TxtButton(t0) {
   }
   return t3;
 }
-const TAB_SIZE$1 = 2;
+const TAB_SIZE$2 = 2;
 function LinkedArrayTest(t0) {
   const $ = compilerRuntimeExports.c(8);
   const {
@@ -24334,7 +24194,7 @@ function DebugOutArray(t0) {
   if ($[18] !== arr || $[19] !== handleRemove || $[20] !== pad || $[21] !== path || $[22] !== showUnknowns) {
     result = [];
     for (let i = 0; i < arr().length; i++) {
-      const baseline = pad + TAB_SIZE$1;
+      const baseline = pad + TAB_SIZE$2;
       const elem = arr().at(i);
       result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`), " ", /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "delete", onClick: () => elem && handleRemove(elem), children: "del." }));
     }
@@ -24385,7 +24245,7 @@ function DebugOutArray(t0) {
   let t13;
   if ($[31] === Symbol.for("react.memo_cache_sentinel")) {
     t12 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {});
-    t13 = " ".repeat(TAB_SIZE$1);
+    t13 = " ".repeat(TAB_SIZE$2);
     $[31] = t12;
     $[32] = t13;
   } else {
@@ -24505,337 +24365,384 @@ function _temp$1(a, b) {
   return a - b;
 }
 function LinkedMapTest(t0) {
-  const $ = compilerRuntimeExports.c(33);
+  const $ = compilerRuntimeExports.c(8);
   const {
-    map: map2
+    map: map2,
+    className
   } = t0;
-  const lmap = useLink(map2);
-  const [key, setKey] = reactExports.useState(0);
   let t1;
-  if ($[0] !== key || $[1] !== lmap) {
-    t1 = () => {
-      lmap().set(key, "foo");
-      setKey(key + 1);
-    };
-    $[0] = key;
-    $[1] = lmap;
-    $[2] = t1;
-  } else {
-    t1 = $[2];
-  }
-  const handleAdd = t1;
-  let t2;
-  if ($[3] !== lmap) {
-    t2 = (k) => {
-      lmap().delete(k);
-    };
-    $[3] = lmap;
-    $[4] = t2;
-  } else {
-    t2 = $[4];
-  }
-  const handleDelete = t2;
-  let t3;
-  if ($[5] !== lmap) {
-    t3 = () => {
-      lmap().clear();
-    };
-    $[5] = lmap;
-    $[6] = t3;
-  } else {
-    t3 = $[6];
-  }
-  const handleClear = t3;
-  let t4;
-  if ($[7] !== lmap) {
-    t4 = Array.from(lmap().entries());
-    $[7] = lmap;
-    $[8] = t4;
-  } else {
-    t4 = $[8];
-  }
-  const entries = t4;
-  let t5;
-  let t6;
-  let t7;
-  if ($[9] === Symbol.for("react.memo_cache_sentinel")) {
-    t5 = {
-      fontFamily: "sans-serif",
-      maxWidth: 400,
-      margin: "1rem auto"
-    };
-    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { children: "LinkedMap Tester" });
-    t7 = {
-      display: "flex",
-      gap: "4px",
-      marginBottom: "8px"
-    };
-    $[9] = t5;
-    $[10] = t6;
-    $[11] = t7;
-  } else {
-    t5 = $[9];
-    t6 = $[10];
-    t7 = $[11];
-  }
-  let t8;
-  if ($[12] !== handleAdd) {
-    t8 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: handleAdd, children: "Add" });
-    $[12] = handleAdd;
-    $[13] = t8;
-  } else {
-    t8 = $[13];
-  }
-  let t9;
-  if ($[14] !== handleClear) {
-    t9 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: handleClear, children: "Clear" });
-    $[14] = handleClear;
-    $[15] = t9;
-  } else {
-    t9 = $[15];
-  }
-  let t10;
-  if ($[16] !== t8 || $[17] !== t9) {
-    t10 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: t7, children: [
-      t8,
-      t9
-    ] });
-    $[16] = t8;
-    $[17] = t9;
-    $[18] = t10;
-  } else {
-    t10 = $[18];
-  }
-  let t11;
-  if ($[19] !== entries || $[20] !== handleDelete) {
-    t11 = entries.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("li", { style: {
-      color: "#888"
-    }, children: "Map is empty" }) : entries.map((t122) => {
-      const [k_0, v] = t122;
-      return /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: k_0 }),
-        ": ",
-        v,
-        " ",
-        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => handleDelete(k_0), children: "Delete" })
-      ] }, k_0);
-    });
-    $[19] = entries;
-    $[20] = handleDelete;
-    $[21] = t11;
-  } else {
-    t11 = $[21];
-  }
-  let t12;
-  if ($[22] !== t11) {
-    t12 = /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { children: t11 });
-    $[22] = t11;
-    $[23] = t12;
-  } else {
-    t12 = $[23];
-  }
-  let t13;
-  if ($[24] === Symbol.for("react.memo_cache_sentinel")) {
-    t13 = {
-      marginTop: "1rem",
-      color: "#555"
-    };
-    $[24] = t13;
-  } else {
-    t13 = $[24];
-  }
-  let t14;
-  if ($[25] !== lmap) {
-    t14 = lmap();
-    $[25] = lmap;
-    $[26] = t14;
-  } else {
-    t14 = $[26];
-  }
-  let t15;
-  if ($[27] !== t14.size) {
-    t15 = /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: t13, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("small", { children: [
-      "Size: ",
-      t14.size
-    ] }) });
-    $[27] = t14.size;
-    $[28] = t15;
-  } else {
-    t15 = $[28];
-  }
-  let t16;
-  if ($[29] !== t10 || $[30] !== t12 || $[31] !== t15) {
-    t16 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: t5, children: [
-      t6,
-      t10,
-      t12,
-      t15
-    ] });
-    $[29] = t10;
-    $[30] = t12;
-    $[31] = t15;
-    $[32] = t16;
-  } else {
-    t16 = $[32];
-  }
-  return t16;
-}
-function LinkedPrimitiveTester(t0) {
-  const $ = compilerRuntimeExports.c(31);
-  const {
-    linkedPrimitive
-  } = t0;
-  const [value, setValue] = usePrimitive(linkedPrimitive);
-  let t1;
-  if ($[0] !== setValue) {
-    t1 = () => setValue(_temp);
-    $[0] = setValue;
+  if ($[0] !== className) {
+    t1 = twMerge("overflow-scroll", className);
+    $[0] = className;
     $[1] = t1;
   } else {
     t1 = $[1];
   }
-  const increment = t1;
   let t2;
-  if ($[2] !== setValue) {
-    t2 = () => setValue(_temp2);
-    $[2] = setValue;
-    $[3] = t2;
+  if ($[2] === Symbol.for("react.memo_cache_sentinel")) {
+    t2 = /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { children: "LinkedArray Tester" });
+    $[2] = t2;
   } else {
-    t2 = $[3];
+    t2 = $[2];
   }
-  const decrement = t2;
   let t3;
-  if ($[4] !== setValue) {
-    t3 = () => setValue(0);
-    $[4] = setValue;
-    $[5] = t3;
+  if ($[3] !== map2) {
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutMap, { map: map2, pad: 0, showUnknowns: true }) });
+    $[3] = map2;
+    $[4] = t3;
   } else {
-    t3 = $[5];
+    t3 = $[4];
   }
-  const reset = t3;
   let t4;
-  if ($[6] !== setValue) {
-    t4 = () => setValue(Math.floor(Math.random() * 100));
-    $[6] = setValue;
+  if ($[5] !== t1 || $[6] !== t3) {
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: t1, children: [
+      t2,
+      t3
+    ] });
+    $[5] = t1;
+    $[6] = t3;
     $[7] = t4;
   } else {
     t4 = $[7];
   }
-  const setRandom = t4;
+  return t4;
+}
+const TAB_SIZE$1 = 2;
+function DebugOutMap(t0) {
+  const $ = compilerRuntimeExports.c(24);
+  const {
+    map: linkedMap2,
+    pad,
+    path: t1,
+    showUnknowns
+  } = t0;
+  const path = t1 === void 0 ? "" : t1;
+  const lmap = useLink(linkedMap2);
+  const body = [];
+  let t2;
+  if ($[0] !== lmap) {
+    t2 = [...lmap().entries()];
+    $[0] = lmap;
+    $[1] = t2;
+  } else {
+    t2 = $[1];
+  }
+  const entries = t2;
+  const [key, setKey] = reactExports.useState(0);
+  let t3;
+  if ($[2] !== key || $[3] !== lmap) {
+    t3 = () => {
+      lmap().set(key, "foo");
+      setKey(key + 1);
+    };
+    $[2] = key;
+    $[3] = lmap;
+    $[4] = t3;
+  } else {
+    t3 = $[4];
+  }
+  const handleAdd = t3;
+  let t4;
+  if ($[5] !== lmap) {
+    t4 = (k) => {
+      lmap().delete(k);
+    };
+    $[5] = lmap;
+    $[6] = t4;
+  } else {
+    t4 = $[6];
+  }
+  const handleDelete = t4;
   let t5;
-  let t6;
-  let t7;
-  if ($[8] === Symbol.for("react.memo_cache_sentinel")) {
-    t5 = {
-      fontFamily: "sans-serif",
-      maxWidth: 300,
-      margin: "1rem auto",
-      textAlign: "center"
+  if ($[7] !== lmap) {
+    t5 = () => {
+      lmap().clear();
     };
-    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { children: "LinkedPrimitive Tester" });
-    t7 = {
-      fontSize: "2rem",
-      fontWeight: "bold",
-      marginBottom: "1rem"
-    };
+    $[7] = lmap;
     $[8] = t5;
-    $[9] = t6;
-    $[10] = t7;
   } else {
     t5 = $[8];
-    t6 = $[9];
-    t7 = $[10];
   }
+  const handleClear = t5;
+  for (let i = 0; i < entries.length; i++) {
+    const [key_0, val] = entries[i];
+    const baseline = pad + TAB_SIZE$1;
+    body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key_0}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind("attr"), children: String(key_0) }, `span-${key_0}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val, pad: baseline, path: `${path}/s${key_0}`, showUnknowns }, `elem-${key_0}`), " ", /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "delete", onClick: () => handleDelete(key_0), className: "bg-transparent", children: "del." }));
+  }
+  let t6;
+  if ($[9] !== pad) {
+    t6 = " ".repeat(pad);
+    $[9] = pad;
+    $[10] = t6;
+  } else {
+    t6 = $[10];
+  }
+  body.push("\n", t6, "}");
+  const t7 = `${path}/${linkedMap2._id}`;
   let t8;
-  if ($[11] !== value) {
-    t8 = /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: t7, children: value });
-    $[11] = value;
-    $[12] = t8;
+  if ($[11] !== linkedMap2 || $[12] !== t7) {
+    t8 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: linkedMap2, path: t7 });
+    $[11] = linkedMap2;
+    $[12] = t7;
+    $[13] = t8;
   } else {
-    t8 = $[12];
-  }
-  let t9;
-  if ($[13] === Symbol.for("react.memo_cache_sentinel")) {
-    t9 = {
-      display: "flex",
-      gap: "8px",
-      justifyContent: "center"
-    };
-    $[13] = t9;
-  } else {
-    t9 = $[13];
+    t8 = $[13];
   }
   let t10;
-  if ($[14] !== decrement) {
-    t10 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: decrement, children: "-" });
-    $[14] = decrement;
-    $[15] = t10;
+  let t9;
+  if ($[14] === Symbol.for("react.memo_cache_sentinel")) {
+    t9 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {});
+    t10 = " ".repeat(TAB_SIZE$1 - 1);
+    $[14] = t10;
+    $[15] = t9;
   } else {
-    t10 = $[15];
+    t10 = $[14];
+    t9 = $[15];
   }
   let t11;
-  if ($[16] !== increment) {
-    t11 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: increment, children: "+" });
-    $[16] = increment;
+  if ($[16] !== handleAdd) {
+    t11 = /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "add", onClick: handleAdd, className: "bg-transparent", children: " + " });
+    $[16] = handleAdd;
     $[17] = t11;
   } else {
     t11 = $[17];
   }
   let t12;
-  if ($[18] !== reset) {
-    t12 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: reset, children: "Reset" });
-    $[18] = reset;
+  if ($[18] !== lmap) {
+    t12 = lmap();
+    $[18] = lmap;
     $[19] = t12;
   } else {
     t12 = $[19];
   }
   let t13;
-  if ($[20] !== t10 || $[21] !== t11 || $[22] !== t12) {
-    t13 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: t9, children: [
-      t10,
-      t11,
-      t12
+  if ($[20] !== t12.size) {
+    t13 = /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-gray-500", children: [
+      "(len. ",
+      t12.size,
+      ")"
     ] });
-    $[20] = t10;
-    $[21] = t11;
-    $[22] = t12;
-    $[23] = t13;
+    $[20] = t12.size;
+    $[21] = t13;
   } else {
-    t13 = $[23];
+    t13 = $[21];
   }
   let t14;
-  if ($[24] === Symbol.for("react.memo_cache_sentinel")) {
-    t14 = {
-      marginTop: "1rem"
-    };
-    $[24] = t14;
+  if ($[22] !== handleClear) {
+    t14 = /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "clear", onClick: handleClear, children: "clear" });
+    $[22] = handleClear;
+    $[23] = t14;
   } else {
-    t14 = $[24];
+    t14 = $[23];
   }
-  let t15;
-  if ($[25] !== setRandom) {
-    t15 = /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: t14, children: /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: setRandom, children: "Random" }) });
-    $[25] = setRandom;
-    $[26] = t15;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    t8,
+    " ",
+    "{",
+    t9,
+    t10,
+    t11,
+    t13,
+    " ",
+    body,
+    " ",
+    t14
+  ] });
+}
+function LinkedPrimitiveTester(t0) {
+  const $ = compilerRuntimeExports.c(8);
+  const {
+    linkedPrimitive,
+    className
+  } = t0;
+  let t1;
+  if ($[0] !== className) {
+    t1 = twMerge("overflow-scroll", className);
+    $[0] = className;
+    $[1] = t1;
   } else {
-    t15 = $[26];
+    t1 = $[1];
   }
-  let t16;
-  if ($[27] !== t13 || $[28] !== t15 || $[29] !== t8) {
-    t16 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: t5, children: [
-      t6,
-      t8,
-      t13,
-      t15
+  let t2;
+  if ($[2] === Symbol.for("react.memo_cache_sentinel")) {
+    t2 = /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { children: "LinkedPrimitive Tester" });
+    $[2] = t2;
+  } else {
+    t2 = $[2];
+  }
+  let t3;
+  if ($[3] !== linkedPrimitive) {
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutPrimitive, { obj: linkedPrimitive }) });
+    $[3] = linkedPrimitive;
+    $[4] = t3;
+  } else {
+    t3 = $[4];
+  }
+  let t4;
+  if ($[5] !== t1 || $[6] !== t3) {
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: t1, children: [
+      t2,
+      t3
     ] });
-    $[27] = t13;
-    $[28] = t15;
-    $[29] = t8;
-    $[30] = t16;
+    $[5] = t1;
+    $[6] = t3;
+    $[7] = t4;
   } else {
-    t16 = $[30];
+    t4 = $[7];
   }
-  return t16;
+  return t4;
+}
+function isPrimitiveKind(val) {
+  return typeof val === "number" || typeof val === "string" || typeof val === "boolean" || val === null;
+}
+function DebugOutPrimitive(t0) {
+  const $ = compilerRuntimeExports.c(34);
+  const {
+    obj,
+    path: t1
+  } = t0;
+  const path = t1 === void 0 ? "" : t1;
+  const [value, setValue] = usePrimitive(obj);
+  let t2;
+  if ($[0] !== setValue) {
+    t2 = () => setValue(_temp);
+    $[0] = setValue;
+    $[1] = t2;
+  } else {
+    t2 = $[1];
+  }
+  const increment = t2;
+  let t3;
+  if ($[2] !== setValue) {
+    t3 = () => setValue(_temp2);
+    $[2] = setValue;
+    $[3] = t3;
+  } else {
+    t3 = $[3];
+  }
+  const decrement = t3;
+  let t4;
+  if ($[4] !== setValue) {
+    t4 = () => setValue(0);
+    $[4] = setValue;
+    $[5] = t4;
+  } else {
+    t4 = $[5];
+  }
+  const reset = t4;
+  let t5;
+  if ($[6] !== setValue) {
+    t5 = () => setValue(Math.floor(Math.random() * 100));
+    $[6] = setValue;
+    $[7] = t5;
+  } else {
+    t5 = $[7];
+  }
+  const setRandom = t5;
+  if (isPrimitiveKind(value)) {
+    const t6 = `${path}/${obj._id}`;
+    let t7;
+    if ($[8] !== obj || $[9] !== t6) {
+      t7 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj, path: t6 });
+      $[8] = obj;
+      $[9] = t6;
+      $[10] = t7;
+    } else {
+      t7 = $[10];
+    }
+    let t8;
+    if ($[11] !== decrement) {
+      t8 = /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "decrement", onClick: decrement, children: "-" });
+      $[11] = decrement;
+      $[12] = t8;
+    } else {
+      t8 = $[12];
+    }
+    let t9;
+    if ($[13] !== value) {
+      t9 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm, { val: value });
+      $[13] = value;
+      $[14] = t9;
+    } else {
+      t9 = $[14];
+    }
+    let t10;
+    if ($[15] !== increment) {
+      t10 = /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "increment", onClick: increment, children: "+" });
+      $[15] = increment;
+      $[16] = t10;
+    } else {
+      t10 = $[16];
+    }
+    let t11;
+    if ($[17] !== reset) {
+      t11 = /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "reset", onClick: reset, children: "reset" });
+      $[17] = reset;
+      $[18] = t11;
+    } else {
+      t11 = $[18];
+    }
+    let t12;
+    if ($[19] !== setRandom) {
+      t12 = /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "random", onClick: setRandom, children: "random" });
+      $[19] = setRandom;
+      $[20] = t12;
+    } else {
+      t12 = $[20];
+    }
+    let t13;
+    if ($[21] !== t10 || $[22] !== t11 || $[23] !== t12 || $[24] !== t7 || $[25] !== t8 || $[26] !== t9) {
+      t13 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        t7,
+        " ",
+        t8,
+        " ",
+        t9,
+        " ",
+        t10,
+        " ",
+        t11,
+        " ",
+        t12
+      ] });
+      $[21] = t10;
+      $[22] = t11;
+      $[23] = t12;
+      $[24] = t7;
+      $[25] = t8;
+      $[26] = t9;
+      $[27] = t13;
+    } else {
+      t13 = $[27];
+    }
+    return t13;
+  } else {
+    const t6 = `${path}/${obj._id}`;
+    let t7;
+    if ($[28] !== obj || $[29] !== t6) {
+      t7 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj, path: t6 });
+      $[28] = obj;
+      $[29] = t6;
+      $[30] = t7;
+    } else {
+      t7 = $[30];
+    }
+    const t8 = String(value);
+    let t9;
+    if ($[31] !== t7 || $[32] !== t8) {
+      t9 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        t7,
+        " ",
+        t8
+      ] });
+      $[31] = t7;
+      $[32] = t8;
+      $[33] = t9;
+    } else {
+      t9 = $[33];
+    }
+    return t9;
+  }
 }
 function _temp2(v_0) {
   return v_0 - 1;
@@ -24939,7 +24846,7 @@ function DebugOutSet(t0) {
     let i = 0;
     for (const elem of set2()) {
       const baseline = pad + TAB_SIZE;
-      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`), " ", /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "shift", onClick: () => handleDelete(elem), children: "-" }));
+      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`), " ", /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "shift", onClick: () => handleDelete(elem), children: "del." }));
       i++;
     }
     if (result.length > -1) {
@@ -24998,7 +24905,7 @@ function DebugOutSet(t0) {
   }
   let t9;
   if ($[22] !== handleAdd) {
-    t9 = /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "unshift", onClick: handleAdd, className: "bg-transparent", children: " + " });
+    t9 = /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "add", onClick: handleAdd, className: "bg-transparent", children: " + " });
     $[22] = handleAdd;
     $[23] = t9;
   } else {
@@ -25015,7 +24922,7 @@ function DebugOutSet(t0) {
   let t11;
   if ($[26] !== t10.size) {
     t11 = /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-gray-500", children: [
-      " (len. ",
+      "(len. ",
       t10.size,
       ")"
     ] });
@@ -25026,7 +24933,7 @@ function DebugOutSet(t0) {
   }
   let t12;
   if ($[28] !== handleClear) {
-    t12 = /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "shift", onClick: handleClear, children: "clear" });
+    t12 = /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "clear", onClick: handleClear, children: "clear" });
     $[28] = handleClear;
     $[29] = t12;
   } else {
@@ -25068,18 +24975,89 @@ function LinkedStateTest() {
   let t0;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
     t0 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-4 gap-2", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(DebugContainer, { val: map }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedMapTest, { map }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedMapTest, { className: "col-span-2 rounded-sm bg-gray-700/10 p-4", map }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedSetTest, { className: "col-span-2 rounded-sm bg-gray-700/10 p-4", linkedSet: set }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedArrayTest, { className: "col-span-2 rounded-sm bg-gray-700/10 p-4", linkedArray: array }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(DebugPrimitive, { val: primitive }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedPrimitiveTester, { linkedPrimitive: primitive })
+      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedPrimitiveTester, { className: "col-span-2 rounded-sm bg-gray-700/10 p-4", linkedPrimitive: primitive })
     ] });
     $[0] = t0;
   } else {
     t0 = $[0];
   }
   return t0;
+}
+function DebugContainer(t0) {
+  const $ = compilerRuntimeExports.c(16);
+  const {
+    val
+  } = t0;
+  const [tab, setTab] = reactExports.useState("struct");
+  const t1 = tab === "struct";
+  let t2;
+  if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
+    t2 = () => setTab("struct");
+    $[0] = t2;
+  } else {
+    t2 = $[0];
+  }
+  let t3;
+  if ($[1] !== t1) {
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(UtilityToggle, { toggled: t1, onToggle: t2, children: "struct" });
+    $[1] = t1;
+    $[2] = t3;
+  } else {
+    t3 = $[2];
+  }
+  const t4 = tab === "serialized";
+  let t5;
+  if ($[3] === Symbol.for("react.memo_cache_sentinel")) {
+    t5 = () => setTab("serialized");
+    $[3] = t5;
+  } else {
+    t5 = $[3];
+  }
+  let t6;
+  if ($[4] !== t4) {
+    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx(UtilityToggle, { toggled: t4, onToggle: t5, children: "serialized" });
+    $[4] = t4;
+    $[5] = t6;
+  } else {
+    t6 = $[5];
+  }
+  let t7;
+  if ($[6] !== tab || $[7] !== val) {
+    t7 = tab === "struct" && /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedStateDebug, { val });
+    $[6] = tab;
+    $[7] = val;
+    $[8] = t7;
+  } else {
+    t7 = $[8];
+  }
+  let t8;
+  if ($[9] !== tab) {
+    t8 = tab === "serialized" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "overflow-scroll text-start font-mono", children: "Not available" });
+    $[9] = tab;
+    $[10] = t8;
+  } else {
+    t8 = $[10];
+  }
+  let t9;
+  if ($[11] !== t3 || $[12] !== t6 || $[13] !== t7 || $[14] !== t8) {
+    t9 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      t3,
+      t6,
+      t7,
+      t8
+    ] });
+    $[11] = t3;
+    $[12] = t6;
+    $[13] = t7;
+    $[14] = t8;
+    $[15] = t9;
+  } else {
+    t9 = $[15];
+  }
+  return t9;
 }
 const linkedMap = LinkedMap2.create();
 LinkedSet.create();

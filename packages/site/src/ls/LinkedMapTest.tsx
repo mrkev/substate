@@ -1,9 +1,45 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
+import { twMerge } from "tailwind-merge";
 import { LinkedMap } from "../../../linked-state/src/LinkedMap";
 import { useLink } from "../../../linked-state/src/hooks";
+import { classOfKind, DebugOutReact, Header } from "./LinkedStateDebug";
+import { TxtButton } from "./TxtButton";
 
-export function LinkedMapTest({ map }: { map: LinkedMap<number, string> }) {
-  const lmap = useLink(map);
+export function LinkedMapTest({
+  map,
+  className,
+}: {
+  map: LinkedMap<number, string>;
+  className?: string;
+}) {
+  return (
+    <div className={twMerge("overflow-scroll", className)}>
+      <h2>LinkedArray Tester</h2>
+      <pre className="text-start text-sm">
+        <DebugOutMap map={map} pad={0} showUnknowns={true} />
+      </pre>
+    </div>
+  );
+}
+
+const TAB_SIZE = 2;
+
+function DebugOutMap({
+  map: linkedMap,
+  pad,
+  path = "",
+  showUnknowns,
+}: {
+  map: LinkedMap<number, any>;
+  pad: number;
+  path?: string;
+  showUnknowns: boolean;
+}) {
+  const lmap = useLink(linkedMap);
+
+  const body: Array<ReactNode> = [];
+  const entries = [...lmap().entries()];
+
   const [key, setKey] = useState(0);
 
   const handleAdd = () => {
@@ -19,35 +55,50 @@ export function LinkedMapTest({ map }: { map: LinkedMap<number, string> }) {
     lmap().clear();
   };
 
-  // Convert map to array for rendering
-  const entries = Array.from(lmap().entries());
+  for (let i = 0; i < entries.length; i++) {
+    const [key, val] = entries[i];
+    const baseline = pad + TAB_SIZE;
+
+    body.push(
+      <br key={`br-${key}`} />,
+      " ".repeat(baseline),
+      <span key={`span-${key}`} className={classOfKind("attr")}>
+        {String(key)}
+      </span>,
+      ": ",
+      <DebugOutReact
+        key={`elem-${key}`}
+        val={val}
+        pad={baseline}
+        path={`${path}/s${key}`}
+        showUnknowns={showUnknowns}
+      />,
+      " ",
+      <TxtButton
+        title="delete"
+        onClick={() => handleDelete(key)}
+        className="bg-transparent"
+        children="del."
+      />
+    );
+  }
+
+  body.push("\n", " ".repeat(pad), "}");
 
   return (
-    <div
-      style={{ fontFamily: "sans-serif", maxWidth: 400, margin: "1rem auto" }}
-    >
-      <h2>LinkedMap Tester</h2>
-      <div style={{ display: "flex", gap: "4px", marginBottom: "8px" }}>
-        <button onClick={handleAdd}>Add</button>
-        <button onClick={handleClear}>Clear</button>
-      </div>
-
-      <ul>
-        {entries.length === 0 ? (
-          <li style={{ color: "#888" }}>Map is empty</li>
-        ) : (
-          entries.map(([k, v]) => (
-            <li key={k}>
-              <b>{k}</b>: {v}{" "}
-              <button onClick={() => handleDelete(k)}>Delete</button>
-            </li>
-          ))
-        )}
-      </ul>
-
-      <div style={{ marginTop: "1rem", color: "#555" }}>
-        <small>Size: {lmap().size}</small>
-      </div>
-    </div>
+    <>
+      <Header obj={linkedMap} path={`${path}/${linkedMap._id}`} /> {"{"}
+      <br />
+      {" ".repeat(TAB_SIZE - 1)}
+      <TxtButton
+        title="add"
+        onClick={handleAdd}
+        className="bg-transparent"
+        children=" + "
+      />
+      <span className="text-gray-500">(len. {lmap().size})</span> {body}{" "}
+      {/*  */}
+      <TxtButton title="clear" onClick={handleClear} children="clear" />
+    </>
   );
 }

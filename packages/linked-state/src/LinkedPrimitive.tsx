@@ -1,11 +1,12 @@
 import { nanoid } from "nanoid";
-import { notify, Subbable } from "./Subbable";
+import { Contained } from "./Contained";
+import { mutationHashable, MutationHashable } from "./MutationHashable";
+import { Subbable } from "./Subbable";
 import {
   subbableContainer,
   SubbableContainer,
   UpdateToken,
 } from "./SubbableContainer";
-import { Contained } from "./Contained";
 
 export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
 export type StateChangeHandler<S> = (value: S) => void;
@@ -13,10 +14,17 @@ export type StateChangeHandler<S> = (value: S) => void;
 /**
  * LinkedPrimitive is a Subbable holding a single atomic value
  */
-export class LinkedPrimitive<S> implements Subbable, Contained {
+export class LinkedPrimitive<S>
+  implements Subbable, Contained, MutationHashable
+{
   readonly _id: string;
   private _value: Readonly<S>;
   readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
+
+  // MutationHashable
+  // Although linkedPrimitive can and usually works as normal state, we implement
+  // MutationHashable so it's easy to use with useLink like other LinkedState
+  _hash: number = 0;
 
   // Contained
   readonly _container = new Set<SubbableContainer>();
@@ -35,10 +43,13 @@ export class LinkedPrimitive<S> implements Subbable, Contained {
   set(value: Readonly<S>): void {
     // saveForHistory(this);
     this._value = value;
-    // TODO: when merging Subbable and Contained, put this in `notify`
-    notify(this, this);
-    // TODO: add hash to subbable to just do SubbableContainer._notifyChange(this, this);??
-    // we don't need to save the token, since primitvies, being leaves, will never be notified when a child changes
+
+    // TODO: this._value = value; don't notify?
+    // Now that LinkedState is a MutationHashable, call this instead of `notify` directly
+    mutationHashable.mutated(this, this);
+    // notify(this, this);
+
+    // We don't need to save the token, since primitvies, being leaves, will never be notified when a child changes
     const token = new UpdateToken(this);
     for (const container of this._container) {
       subbableContainer._childChanged(container, token);

@@ -67,9 +67,11 @@ function DebugOutSet({
         showUnknowns={showUnknowns}
       />,
       " ",
-      <TxtButton title="shift" onClick={() => handleDelete(elem)}>
-        -
-      </TxtButton>
+      <TxtButton
+        title="shift"
+        onClick={() => handleDelete(elem)}
+        children="del."
+      />
     );
     i++;
   }
@@ -84,15 +86,15 @@ function DebugOutSet({
       <br />
       {" ".repeat(TAB_SIZE - 1)}
       <TxtButton
-        title="unshift"
+        title="add"
         onClick={handleAdd}
         className="bg-transparent"
         children=" + "
       />
-      <span className="text-gray-500"> (len. {set().size})</span>
+      <span className="text-gray-500">(len. {set().size})</span>
       {result}
       {")"}{" "}
-      <TxtButton title="shift" onClick={handleClear}>
+      <TxtButton title="clear" onClick={handleClear}>
         clear
       </TxtButton>
     </>

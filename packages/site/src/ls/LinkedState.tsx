@@ -17,8 +17,10 @@ export function LinkedStateTest() {
   console.log("RUN THIS hi");
   return (
     <div className="grid grid-cols-4 gap-2">
-      <DebugContainer val={map}></DebugContainer>
-      <LinkedMapTest map={map} />
+      <LinkedMapTest
+        className="col-span-2 rounded-sm bg-gray-700/10 p-4"
+        map={map}
+      />
       <LinkedSetTest
         className="col-span-2 rounded-sm bg-gray-700/10 p-4"
         linkedSet={set}
@@ -27,8 +29,10 @@ export function LinkedStateTest() {
         className="col-span-2 rounded-sm bg-gray-700/10 p-4"
         linkedArray={array}
       />
-      <DebugPrimitive val={primitive}></DebugPrimitive>
-      <LinkedPrimitiveTester linkedPrimitive={primitive} />
+      <LinkedPrimitiveTester
+        className="col-span-2 rounded-sm bg-gray-700/10 p-4"
+        linkedPrimitive={primitive}
+      />
     </div>
   );
 }

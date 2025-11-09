@@ -9,7 +9,7 @@ import { mutationHashable } from "../../../linked-state/src/MutationHashable";
 import { exhaustive } from "../../../structured-state/src/assertions";
 
 const TAB_SIZE = 2;
-type DisplayState = "full" | "native" | "collapsed";
+export type DisplayState = "full" | "native" | "collapsed";
 type Debuggable =
   | LinkedPrimitive<unknown>
   | LinkedArray<unknown>
@@ -287,7 +287,7 @@ function DebugOutSet({
 }
 
 export function Header({
-  obj,
+  obj: objarg,
   path,
   showContainerId = false,
 }: {
@@ -295,6 +295,8 @@ export function Header({
   path?: string;
   showContainerId?: boolean;
 }) {
+  const obj = useLink(objarg)();
+
   const kindStr = (() => {
     if (obj instanceof LinkedMap) {
       return "lmap";
@@ -309,10 +311,7 @@ export function Header({
     }
   })();
 
-  const hashStr =
-    obj instanceof LinkedPrimitive
-      ? ""
-      : `.${mutationHashable.getMutationHash(obj)}`;
+  const hashStr = `.${mutationHashable.getMutationHash(obj)}`;
 
   const container = showContainerId
     ? ` -^ ${[...obj._container.values()].map((v) => v._id).join(",")}`
@@ -356,7 +355,7 @@ function DebugOutPrimitive({
   }
 }
 
-function DebugOutSimplePrm({ val }: { val: PrimitiveKind | undefined }) {
+export function DebugOutSimplePrm({ val }: { val: PrimitiveKind | undefined }) {
   switch (true) {
     case typeof val === "string":
       return <span className={classOfKind("string")}>&quot;{val}&quot;</span>;
@@ -369,7 +368,7 @@ function DebugOutSimplePrm({ val }: { val: PrimitiveKind | undefined }) {
   }
 }
 
-const classOfKind = (
+export const classOfKind = (
   kind: "string" | "kind" | "number" | "classname" | "hash" | "attr" | "prm"
 ): string => {
   switch (kind) {
