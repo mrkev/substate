@@ -2,18 +2,18 @@ import { describe, expect, it } from "vitest";
 import { LinkedSet } from "./LinkedSet";
 
 describe("LinkedSet", () => {
-  it(".of", () => {
+  it(".create", () => {
     const set = LinkedSet.create();
     expect(set).not.toBeNull();
   });
 
   it(".size", () => {
-    const set = LinkedSet.create(new Set(["foo", "bar", "foo"]));
+    const set = LinkedSet.create(["foo", "bar", "foo"]);
     expect(set.size).toEqual(2);
   });
 
   it(".has", () => {
-    const set = LinkedSet.create(new Set(["foo", "bar", "foo"]));
+    const set = LinkedSet.create(["foo", "bar", "foo"]);
     expect(set.has("foo")).toEqual(true);
     expect(set.has("bar")).toEqual(true);
     expect(set.has("baz")).toEqual(false);

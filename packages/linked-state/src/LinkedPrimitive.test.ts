@@ -4,6 +4,11 @@ import { LinkedPrimitive } from "./LinkedPrimitive";
 describe("LinkedPrimitive", () => {
   it(".of", () => {
     const prim = LinkedPrimitive.of(3);
+    expect(prim).not.toBeNull();
+  });
+
+  it(".get", () => {
+    const prim = LinkedPrimitive.of(3);
     expect(prim.get()).toEqual(3);
   });
 

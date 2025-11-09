@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 import { LinkedMap } from "./LinkedMap";
 
 describe("LinkedMap", () => {
-  it(".of", () => {
+  it(".create", () => {
     const map = LinkedMap.create();
     expect(map).not.toBeNull();
   });
 
   it(".get", () => {
-    const map = LinkedMap.create(new Map([["foo", "bar"]]));
+    const map = LinkedMap.create([["foo", "bar"]]);
     expect(map.get("foo")).toEqual("bar");
   });
 
