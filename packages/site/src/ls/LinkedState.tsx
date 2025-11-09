@@ -10,7 +10,7 @@ import { LinkedSetTest } from "./LinkedSetTest";
 const map = LinkedMap.create<number, string>();
 const set = LinkedSet.create<number>();
 const array = LinkedArray.create<number>();
-const primitive = LinkedPrimitive.of(0);
+const primitive = LinkedPrimitive.create(0);
 
 export function LinkedStateTest() {
   return (

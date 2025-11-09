@@ -36,7 +36,7 @@ export class LinkedPrimitive<S>
     // globalState.knownObjects.set(this._id, this);
   }
 
-  static of<T>(val: T) {
+  static create<T>(val: T) {
     return new this<T>(val, nanoid(5));
   }
 

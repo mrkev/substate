@@ -10,7 +10,7 @@ import { DynamicTestMap } from "./LinkedMapTest";
 
 const map = LinkedMap.create<number, LinkedArray<number>>();
 const linkedSet = LinkedSet.create<number>();
-const linkedPrimitive = LinkedPrimitive.of(0);
+const linkedPrimitive = LinkedPrimitive.create(0);
 
 export function LinkedStateNestedTest({ className }: { className?: string }) {
   const lmap = useLink(map);
