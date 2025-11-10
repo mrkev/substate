@@ -1,19 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { LinkedPrimitive } from "./LinkedPrimitive";
+import { LinkableValue } from "./LinkableValue";
 
-describe("LinkedPrimitive", () => {
+describe("LinkableValue", () => {
   it(".create", () => {
-    const prim = LinkedPrimitive.create(3);
+    const prim = LinkableValue.create(3);
     expect(prim).not.toBeNull();
   });
 
   it(".get", () => {
-    const prim = LinkedPrimitive.create(3);
+    const prim = LinkableValue.create(3);
     expect(prim.get()).toEqual(3);
   });
 
   it(".set", () => {
-    const prim = LinkedPrimitive.create("1");
+    const prim = LinkableValue.create("1");
     prim.set("2");
     expect(prim.get()).toEqual("2");
   });

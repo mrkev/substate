@@ -1,12 +1,17 @@
-export { LinkedArray } from "./LinkedArray";
-export { LinkedMap } from "./LinkedMap";
-export { LinkedPrimitive } from "./LinkedPrimitive";
-export { LinkedSet } from "./LinkedSet";
+import { LinkableArray } from "./LinkableArray";
+import { LinkableMap } from "./LinkableMap";
+import { LinkableSet } from "./LinkableSet";
+import { LinkableValue } from "./LinkableValue";
+
+export { LinkableArray as LinkableArray } from "./LinkableArray";
+export { LinkableMap as LinkableMap } from "./LinkableMap";
+export { LinkableValue as LinkablePrimitive } from "./LinkableValue";
+export { LinkableSet as LinkableSet } from "./LinkableSet";
 
 export {
   //
   useLink,
-  usePrimitive,
+  useLinkAsState,
 } from "./hooks";
 
 export {
@@ -15,3 +20,8 @@ export {
   useNewLinkedMap,
   useNewLinkedSet,
 } from "./useNew";
+
+export const lValue = LinkableValue.create.bind(LinkableValue);
+export const lArray = LinkableArray.create.bind(LinkableArray);
+export const lMap = LinkableMap.create.bind(LinkableMap);
+export const lSet = LinkableSet.create.bind(LinkableSet);

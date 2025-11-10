@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { LinkedSet } from "../../../linked-state/src/LinkedSet";
+import { LinkableSet } from "../../../linked-state/src/LinkableSet";
 import { useLink } from "../../../linked-state/src/hooks";
 import { DynamicTest, Header } from "./LinkedStateDebug";
 import { TxtButton } from "./TxtButton";
 
-export function LinkedSetTest({
+export function LinkableSetTest({
   linkedSet,
   className,
 }: {
-  linkedSet: LinkedSet<number>;
+  linkedSet: LinkableSet<number>;
   className?: string;
 }) {
   return (
@@ -25,36 +25,36 @@ export function LinkedSetTest({
 const TAB_SIZE = 2;
 
 function DebugOutSet({
-  set: linkedSet,
+  set,
   pad,
   path = "",
   showUnknowns,
 }: {
-  set: LinkedSet<any>;
+  set: LinkableSet<any>;
   pad: number;
   path?: string;
   showUnknowns: boolean;
 }) {
-  const set = useLink(linkedSet);
+  const lset = useLink(set);
   const [input, setInput] = useState(0);
 
   const handleAdd = () => {
-    set().add(input);
+    lset().add(input);
     setInput(input + 1);
   };
 
   const handleDelete = (value: number) => {
-    set().delete(value);
+    lset().delete(value);
   };
 
   const handleClear = () => {
-    set().clear();
+    lset().clear();
   };
 
   const result = [];
 
   let i = 0;
-  for (const elem of set()) {
+  for (const elem of lset()) {
     const baseline = pad + TAB_SIZE;
     result.push(
       <br key={`br-${i}`} />,
@@ -82,7 +82,7 @@ function DebugOutSet({
 
   return (
     <>
-      <Header obj={set()} /> {"("}
+      <Header obj={lset()} /> {"("}
       <br />
       {" ".repeat(TAB_SIZE - 1)}
       <TxtButton
@@ -91,7 +91,7 @@ function DebugOutSet({
         className="bg-transparent"
         children=" + "
       />
-      <span className="text-gray-500">(len. {set().size})</span>
+      <span className="text-gray-500">(len. {lset().size})</span>
       {result}
       {")"}{" "}
       <TxtButton title="clear" onClick={handleClear}>

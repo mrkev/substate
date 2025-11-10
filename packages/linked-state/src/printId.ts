@@ -1,18 +1,18 @@
-import { LinkedArray } from "./LinkedArray";
-import { LinkedMap } from "./LinkedMap";
-import { LinkedPrimitive } from "./LinkedPrimitive";
-import { LinkedSet } from "./LinkedSet";
+import { LinkableArray } from "./LinkableArray";
+import { LinkableMap } from "./LinkableMap";
+import { LinkableValue } from "./LinkableValue";
+import { LinkableSet } from "./LinkableSet";
 import { MutationHashable, mutationHashable } from "./MutationHashable";
 
 export function printId(obj: MutationHashable) {
   const kindStr = (() => {
-    if (obj instanceof LinkedMap) {
+    if (obj instanceof LinkableMap) {
       return "lmap";
-    } else if (obj instanceof LinkedArray) {
+    } else if (obj instanceof LinkableArray) {
       return "larr";
-    } else if (obj instanceof LinkedSet) {
+    } else if (obj instanceof LinkableSet) {
       return "lset";
-    } else if (obj instanceof LinkedPrimitive) {
+    } else if (obj instanceof LinkableValue) {
       return "lprm";
     } else {
       return "unknown";

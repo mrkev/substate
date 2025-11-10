@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-import type { LinkedPrimitive, StateDispath } from "./LinkedPrimitive";
+import type { LinkableValue, StateDispath } from "./LinkableValue";
 import { mutationHashable, MutationHashable } from "./MutationHashable";
 import { Subbable, subscribe } from "./Subbable";
 
-export function usePrimitive<S>(
-  linkedState: LinkedPrimitive<S>
+export function useLinkAsState<S>(
+  prim: LinkableValue<S>
 ): [S, StateDispath<S>] {
   // "use no memo" not needed afaik
 
   const externalStoreSub = useCallback(
     (onStoreChange: () => void) => {
-      return subscribe(linkedState, (target) => {
+      return subscribe(prim, (target) => {
         // console.log(
         //   "got notif",
         //   obj,
@@ -19,28 +19,28 @@ export function usePrimitive<S>(
         //   "notifying?",
         //   obj === target || recursiveChanges
         // );
-        if (linkedState === target) {
+        if (prim === target) {
           onStoreChange();
         }
       });
     },
-    [linkedState]
+    [prim]
   );
 
   const value = useSyncExternalStore(
     externalStoreSub,
-    useCallback(() => linkedState.get(), [linkedState])
+    useCallback(() => prim.get(), [prim])
   );
 
   const setter: StateDispath<S> = useCallback(
     (newVal) => {
       if (newVal instanceof Function) {
-        linkedState.set(newVal(linkedState.get()));
+        prim.set(newVal(prim.get()));
       } else {
-        linkedState.set(newVal);
+        prim.set(newVal);
       }
     },
-    [linkedState]
+    [prim]
   );
 
   return [value, setter];

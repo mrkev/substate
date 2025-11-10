@@ -1,15 +1,15 @@
 import { ReactNode, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { LinkedMap } from "../../../linked-state/src/LinkedMap";
+import { LinkableMap } from "../../../linked-state/src/LinkableMap";
 import { useLink } from "../../../linked-state/src/hooks";
 import { classOfKind, DynamicTest, Header } from "./LinkedStateDebug";
 import { TxtButton } from "./TxtButton";
 
-export function LinkedMapTest({
+export function LinkableMapTest({
   map,
   className,
 }: {
-  map: LinkedMap<number, string>;
+  map: LinkableMap<number, string>;
   className?: string;
 }) {
   const [key, setKey] = useState(0);
@@ -45,14 +45,14 @@ export function LinkedMapTest({
 const TAB_SIZE = 2;
 
 export function DynamicTestMap<T>({
-  map: linkedMap,
+  map,
   pad,
   path = "",
   showUnknowns,
   onAdd,
   renderValue,
 }: {
-  map: LinkedMap<number, T>;
+  map: LinkableMap<number, T>;
   pad: number;
   path?: string;
   showUnknowns: boolean;
@@ -65,7 +65,7 @@ export function DynamicTestMap<T>({
     showUnknowns?: boolean
   ) => React.ReactNode;
 }) {
-  const lmap = useLink(linkedMap);
+  const lmap = useLink(map);
   const handleDelete = (k: number) => lmap().delete(k);
   const handleClear = () => lmap().clear();
 
@@ -99,7 +99,7 @@ export function DynamicTestMap<T>({
 
   return (
     <>
-      <Header obj={linkedMap} path={`${path}/${linkedMap._id}`} /> {"{"}
+      <Header obj={map} path={`${path}/${map._id}`} /> {"{"}
       <br />
       {" ".repeat(TAB_SIZE - 1)}
       <TxtButton

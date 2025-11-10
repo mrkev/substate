@@ -1,20 +1,20 @@
 import stringify from "json-stringify-deterministic";
 import { ReactNode, useState } from "react";
-import { useLink, usePrimitive } from "../../../linked-state/src/hooks";
-import { LinkedArray } from "../../../linked-state/src/LinkedArray";
-import { LinkedMap } from "../../../linked-state/src/LinkedMap";
-import { LinkedPrimitive } from "../../../linked-state/src/LinkedPrimitive";
-import { LinkedSet } from "../../../linked-state/src/LinkedSet";
+import { useLink, useLinkAsState } from "../../../linked-state/src/hooks";
+import { LinkableArray } from "../../../linked-state/src/LinkableArray";
+import { LinkableMap } from "../../../linked-state/src/LinkableMap";
+import { LinkableValue } from "../../../linked-state/src/LinkableValue";
+import { LinkableSet } from "../../../linked-state/src/LinkableSet";
 import { mutationHashable } from "../../../linked-state/src/MutationHashable";
 import { exhaustive } from "../../../structured-state/src/assertions";
 
 const TAB_SIZE = 2;
 export type DisplayState = "full" | "native" | "collapsed";
 type Debuggable =
-  | LinkedPrimitive<unknown>
-  | LinkedArray<unknown>
-  | LinkedMap<unknown, unknown>
-  | LinkedSet<unknown>;
+  | LinkableValue<unknown>
+  | LinkableArray<unknown>
+  | LinkableMap<unknown, unknown>
+  | LinkableSet<unknown>;
 export type PrimitiveKind = number | string | boolean | null;
 
 export function LinkedStateDebug({
@@ -72,7 +72,7 @@ export function DynamicTest({
     return <DebugOutSimplePrm val={val} />;
   } else if (typeof val === "function") {
     return "(function)";
-  } else if (val instanceof LinkedArray) {
+  } else if (val instanceof LinkableArray) {
     return (
       <DebugOutArray
         arr={val}
@@ -81,7 +81,7 @@ export function DynamicTest({
         showUnknowns={showUnknowns}
       />
     );
-  } else if (val instanceof LinkedSet) {
+  } else if (val instanceof LinkableSet) {
     return (
       <DebugOutSet
         set={val}
@@ -90,9 +90,9 @@ export function DynamicTest({
         showUnknowns={showUnknowns}
       />
     );
-  } else if (val instanceof LinkedPrimitive) {
+  } else if (val instanceof LinkableValue) {
     return <DebugOutPrimitive obj={val} path={path} />;
-  } else if (val instanceof LinkedMap) {
+  } else if (val instanceof LinkableMap) {
     return (
       <DebugOutMap
         map={val}
@@ -118,7 +118,7 @@ function DebugOutMap({
   path = "",
   showUnknowns,
 }: {
-  map: LinkedMap<unknown, unknown>;
+  map: LinkableMap<unknown, unknown>;
   pad: number;
   path?: string;
   showUnknowns: boolean;
@@ -196,7 +196,7 @@ function DebugOutArray({
   path = "",
   showUnknowns,
 }: {
-  arr: LinkedArray<unknown>;
+  arr: LinkableArray<unknown>;
   pad: number;
   path?: string;
   showUnknowns: boolean;
@@ -243,7 +243,7 @@ function DebugOutSet({
   path = "",
   showUnknowns,
 }: {
-  set: LinkedSet<any>;
+  set: LinkableSet<any>;
   pad: number;
   path?: string;
   showUnknowns: boolean;
@@ -300,13 +300,13 @@ export function Header({
   const obj = useLink(objarg, true)();
 
   const kindStr = (() => {
-    if (obj instanceof LinkedMap) {
+    if (obj instanceof LinkableMap) {
       return "lmap";
-    } else if (obj instanceof LinkedArray) {
+    } else if (obj instanceof LinkableArray) {
       return "larr";
-    } else if (obj instanceof LinkedSet) {
+    } else if (obj instanceof LinkableSet) {
       return "lset";
-    } else if (obj instanceof LinkedPrimitive) {
+    } else if (obj instanceof LinkableValue) {
       return "lprm";
     } else {
       exhaustive(obj);
@@ -333,10 +333,10 @@ function DebugOutPrimitive({
   obj,
   path = "",
 }: {
-  obj: LinkedPrimitive<any>;
+  obj: LinkableValue<any>;
   path?: string;
 }) {
-  const [val] = usePrimitive(obj);
+  const [val] = useLinkAsState(obj);
   if (isPrimitiveKind(val)) {
     return (
       <>

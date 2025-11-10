@@ -1,7 +1,7 @@
-import { LinkedArray } from "./LinkedArray";
-import { LinkedMap } from "./LinkedMap";
-import { LinkedPrimitive } from "./LinkedPrimitive";
-import { LinkedSet } from "./LinkedSet";
+import { LinkableArray } from "./LinkableArray";
+import { LinkableMap } from "./LinkableMap";
+import { LinkableValue } from "./LinkableValue";
+import { LinkableSet } from "./LinkableSet";
 import { Subbable } from "./Subbable";
 
 export interface Contained {
@@ -11,14 +11,14 @@ export interface Contained {
 export function isContainable(
   val: unknown
 ): val is
-  | LinkedPrimitive<unknown>
-  | LinkedArray<unknown>
-  | LinkedSet<unknown>
-  | LinkedMap<unknown, unknown> {
+  | LinkableValue<unknown>
+  | LinkableArray<unknown>
+  | LinkableSet<unknown>
+  | LinkableMap<unknown, unknown> {
   return (
-    val instanceof LinkedPrimitive ||
-    val instanceof LinkedArray ||
-    val instanceof LinkedMap ||
-    val instanceof LinkedSet
+    val instanceof LinkableValue ||
+    val instanceof LinkableArray ||
+    val instanceof LinkableMap ||
+    val instanceof LinkableSet
   );
 }

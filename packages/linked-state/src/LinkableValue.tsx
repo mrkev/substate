@@ -11,19 +11,19 @@ import {
 export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
 export type StateChangeHandler<S> = (value: S) => void;
 
+// TODO: make this a condtainer? What's the use-case?
+
 /**
- * LinkedPrimitive is a Subbable holding a single atomic value
+ * LinkableValue is a Subbable holding a single atomic value
  */
-export class LinkedPrimitive<S>
-  implements Subbable, Contained, MutationHashable
-{
+export class LinkableValue<S> implements Subbable, Contained, MutationHashable {
   readonly _id: string;
   private _value: Readonly<S>;
   readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
 
   // MutationHashable
-  // Although linkedPrimitive can and usually works as normal state, we implement
-  // MutationHashable so it's easy to use with useLink like other LinkedState
+  // Although LinkableValue can and usually works as normal state, we implement
+  // MutationHashable so it's easy to use with useLink like other linked state
   _hash: number = 0;
 
   // Contained
@@ -45,7 +45,7 @@ export class LinkedPrimitive<S>
     this._value = value;
 
     // TODO: this._value = value; don't notify?
-    // Now that LinkedState is a MutationHashable, call this instead of `notify` directly
+    // Now that LinkableValue is a MutationHashable, call this instead of `notify` directly
     mutationHashable.mutated(this, this);
     // notify(this, this);
 

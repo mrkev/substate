@@ -14787,7 +14787,7 @@ class SubbableContainer {
     }
   }
 }
-let LinkedPrimitive$1 = class LinkedPrimitive {
+class LinkedPrimitive {
   _id;
   _value;
   _subscriptors = /* @__PURE__ */ new Set();
@@ -14826,7 +14826,7 @@ let LinkedPrimitive$1 = class LinkedPrimitive {
       _id: this._id
     };
   }
-};
+}
 class Struct2 {
   _id;
   _hash = 0;
@@ -14953,7 +14953,7 @@ class SUnion {
   }
 }
 function assertSPrimitive(value) {
-  if (!(value instanceof LinkedPrimitive$1)) {
+  if (!(value instanceof LinkedPrimitive)) {
     console.log("ERR:", value, "to be primitive");
     throw new Error("not an sprimitive");
   }
@@ -15004,7 +15004,7 @@ function exhaustive(x, msg) {
   throw new Error(msg ?? `Exhaustive violation, unexpected value ${x}`);
 }
 function isContainable$1(val) {
-  return val instanceof LinkedPrimitive$1 || val instanceof LinkedArray$1 || val instanceof Struct || val instanceof Struct2 || val instanceof Structured || val instanceof SSet;
+  return val instanceof LinkedPrimitive || val instanceof LinkedArray || val instanceof Struct || val instanceof Struct2 || val instanceof Structured || val instanceof SSet;
 }
 function assertArray(val) {
   if (!Array.isArray(val)) {
@@ -15298,7 +15298,7 @@ function initializeRef(json, metadata) {
 function initializePrimitiveRef(json, metadata) {
   const simple = nullthrows$1(metadata.knownSimples.get(json._id), `ref:${json._id}:${json.kind}: didn't find it pre-initialized nor in simples`);
   assertRefKind(simple, "prim");
-  const result = new LinkedPrimitive$1(simple._value, json._id);
+  const result = new LinkedPrimitive(simple._value, json._id);
   metadata.initializedNodes.set(result._id, result);
   return result;
 }
@@ -15308,11 +15308,11 @@ function assertRefKind(simple, kind) {
   }
 }
 function initializePrimitive(json, metadata) {
-  const found = find(json, metadata, LinkedPrimitive$1);
+  const found = find(json, metadata, LinkedPrimitive);
   if (found != null) {
     return found;
   }
-  const result = new LinkedPrimitive$1(json._value, json._id);
+  const result = new LinkedPrimitive(json._value, json._id);
   metadata.initializedNodes.set(result._id, result);
   return result;
 }
@@ -15581,7 +15581,7 @@ function isPrimitiveKind$2(val) {
   return typeof val === "number" || typeof val === "string" || typeof val === "boolean" || val === null;
 }
 function isStructuredKind(val) {
-  return val instanceof LinkedPrimitive$1 || val instanceof Struct || val instanceof Struct2 || val instanceof Structured || val instanceof SArray || val instanceof SSchemaArray || val instanceof SSet || val instanceof SUnion;
+  return val instanceof LinkedPrimitive || val instanceof Struct || val instanceof Struct2 || val instanceof Structured || val instanceof SArray || val instanceof SSchemaArray || val instanceof SSet || val instanceof SUnion;
 }
 function replaceSSet(json, set2, acc) {
   if (json._schema != Boolean(set2._schema != null)) {
@@ -15802,8 +15802,8 @@ class WeakRefMap {
 class GlobalState {
   HISTORY_RECORDING = false;
   knownObjects = new WeakRefMap(1e4);
-  history = new LinkedArray$1([], "$$history", true);
-  redoStack = new LinkedArray$1([], "$$redo", true);
+  history = new LinkedArray([], "$$history", true);
+  redoStack = new LinkedArray([], "$$redo", true);
   constructor() {
     setWindow("globalState", this);
   }
@@ -15931,7 +15931,7 @@ const history = {
   undo: popHistory,
   redo: forwardHistory
 };
-let LinkedArray$1 = class LinkedArray {
+class LinkedArray {
   _id;
   _array;
   _subscriptors = /* @__PURE__ */ new Set();
@@ -16155,11 +16155,11 @@ let LinkedArray$1 = class LinkedArray {
   flat(depth) {
     throw new Error("Method not implemented.");
   }
-};
-class SArray extends LinkedArray$1 {
+}
+class SArray extends LinkedArray {
   // readonly _differentiator = "sarray";
 }
-class SSchemaArray extends LinkedArray$1 {
+class SSchemaArray extends LinkedArray {
   _schema;
   // // TODO: do I need this? I think I was planning on using this in history, but since
   // // we just recreate the whole thing instead we don't need it anymore.
@@ -16187,7 +16187,7 @@ class SSchemaArray extends LinkedArray$1 {
     this._schema = schema;
   }
 }
-let LinkedMap$1 = class LinkedMap {
+class LinkedMap {
   // main
   _map;
   // SubbableContainer
@@ -16284,25 +16284,25 @@ let LinkedMap$1 = class LinkedMap {
   get [Symbol.toStringTag]() {
     return this.constructor.name;
   }
-};
-class SString extends LinkedPrimitive$1 {
+}
+class SString extends LinkedPrimitive {
   static create(val) {
-    return LinkedPrimitive$1.of(val);
+    return LinkedPrimitive.of(val);
   }
 }
-class SNumber extends LinkedPrimitive$1 {
+class SNumber extends LinkedPrimitive {
   static create(val) {
-    return LinkedPrimitive$1.of(val);
+    return LinkedPrimitive.of(val);
   }
 }
-class SBoolean extends LinkedPrimitive$1 {
+class SBoolean extends LinkedPrimitive {
   static create(val) {
-    return LinkedPrimitive$1.of(val);
+    return LinkedPrimitive.of(val);
   }
 }
-class SNil extends LinkedPrimitive$1 {
+class SNil extends LinkedPrimitive {
   static create(val) {
-    return LinkedPrimitive$1.of(val);
+    return LinkedPrimitive.of(val);
   }
 }
 class UNINITIALIZED_PRIMITIVE {
@@ -16328,7 +16328,7 @@ function nil() {
   return SNil.of(null);
 }
 function primitive$1(value) {
-  return LinkedPrimitive$1.of(value);
+  return LinkedPrimitive.of(value);
 }
 function arrayOf(schema, val) {
   return val == null ? new UNINITIALIZED_TYPED_ARRAY(schema) : new SSchemaArray(val, nanoid(5), schema);
@@ -16337,7 +16337,7 @@ function array$1(val) {
   return val == null ? new UNINITIALIZED_ARRAY() : new SArray(val, nanoid(5));
 }
 function map$2(initialValue) {
-  return LinkedMap$1.create(initialValue);
+  return LinkedMap.create(initialValue);
 }
 function set$1(initialValue) {
   return SSet._create(initialValue);
@@ -16377,7 +16377,7 @@ class Struct {
     for (const key in this) {
       let child = self[key];
       if (child instanceof UNINITIALIZED_PRIMITIVE) {
-        self[key] = LinkedPrimitive$1.of(args[key]);
+        self[key] = LinkedPrimitive.of(args[key]);
       }
       if (child instanceof UNINITIALIZED_ARRAY) {
         self[key] = new SArray(args[key], nanoid(5));
@@ -16526,7 +16526,7 @@ function autoSimplify(descriptor, acc) {
       serializable[key] = value;
     } else if (typeof value === "function") {
       throw new Error("cant simplify function");
-    } else if (value instanceof LinkedPrimitive$1) {
+    } else if (value instanceof LinkedPrimitive) {
       serializable[key] = simplifyPrimitive(value, acc);
     } else if (value instanceof SArray) {
       serializable[key] = simplifySimpleArray(value, acc);
@@ -16586,7 +16586,7 @@ function simplify$1(state, acc) {
     return state;
   } else if (typeof state === "function") {
     throw new Error("cant simplify function");
-  } else if (state instanceof LinkedPrimitive$1 || state instanceof SArray || state instanceof SSchemaArray || state instanceof Struct || state instanceof Struct2 || state instanceof Structured || state instanceof SSet || state instanceof SUnion) {
+  } else if (state instanceof LinkedPrimitive || state instanceof SArray || state instanceof SSchemaArray || state instanceof Struct || state instanceof Struct2 || state instanceof Structured || state instanceof SSet || state instanceof SUnion) {
     return simplifyStructuredKind(state, acc);
   } else if (typeof state === "object") {
     if (state.constructor !== Object && !Array.isArray(state)) {
@@ -16598,7 +16598,7 @@ function simplify$1(state, acc) {
   }
 }
 function simplifyStructuredKind(state, acc) {
-  if (state instanceof LinkedPrimitive$1) {
+  if (state instanceof LinkedPrimitive) {
     return simplifyPrimitive(state, acc);
   } else if (state instanceof SArray) {
     return simplifySimpleArray(state, acc);
@@ -16618,7 +16618,7 @@ function simplifyStructuredKind(state, acc) {
     exhaustive(state);
   }
 }
-function usePrimitive$1(linkedState) {
+function usePrimitive(linkedState) {
   const $ = compilerRuntimeExports.c(10);
   let t0;
   if ($[0] !== linkedState) {
@@ -16730,12 +16730,12 @@ function _temp$a() {
   return SSet._create();
 }
 function useNewLinkedMap() {
-  const [map2] = reactExports.useState(_temp2$5);
+  const [map2] = reactExports.useState(_temp2$6);
   useSubscribeToSubbableMutationHashable(map2);
   return map2;
 }
-function _temp2$5() {
-  return LinkedMap$1.create();
+function _temp2$6() {
+  return LinkedMap.create();
 }
 var defaults;
 var hasRequiredDefaults;
@@ -16865,7 +16865,7 @@ function debugOutHtml(val, pad = 0, showUnknowns = true) {
     return debugOutArray$1(val, pad, showUnknowns);
   } else if (val instanceof SSet) {
     return debugOutSet$1(val, pad, showUnknowns);
-  } else if (val instanceof LinkedPrimitive$1) {
+  } else if (val instanceof LinkedPrimitive) {
     return debugOutSPrimitive(val);
   } else if (val instanceof Struct) {
     return debugOutStruct$1(val, pad, showUnknowns);
@@ -16941,7 +16941,7 @@ function header$1(elem, showContainerId = false) {
       return "s_arr";
     } else if (elem instanceof SSet) {
       return "set";
-    } else if (elem instanceof LinkedPrimitive$1) {
+    } else if (elem instanceof LinkedPrimitive) {
       return "prm";
     } else if (elem instanceof Struct) {
       return "Sct";
@@ -16955,7 +16955,7 @@ function header$1(elem, showContainerId = false) {
       exhaustive(elem);
     }
   })();
-  const hashStr = elem instanceof LinkedPrimitive$1 ? "" : `.${MutationHashable.getMutationHash(elem)}`;
+  const hashStr = elem instanceof LinkedPrimitive ? "" : `.${MutationHashable.getMutationHash(elem)}`;
   const container = showContainerId ? ` -^ ${[...elem._container.values()].map((v) => v._id).join(",")}` : "";
   const kind = span("kind", kindStr);
   span("hash", hashStr);
@@ -17126,7 +17126,7 @@ function DebugOutReact$1(t0) {
             }
             return t3;
           } else {
-            if (val instanceof LinkedPrimitive$1) {
+            if (val instanceof LinkedPrimitive) {
               let t3;
               if ($[17] !== path || $[18] !== val) {
                 t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSPrimitive, { obj: val, path });
@@ -17514,7 +17514,7 @@ function Header$1(t0) {
           t2 = "set";
           break bb0;
         } else {
-          if (obj instanceof LinkedPrimitive$1) {
+          if (obj instanceof LinkedPrimitive) {
             t2 = "prm";
             break bb0;
           } else {
@@ -17548,7 +17548,7 @@ function Header$1(t0) {
   const kindStr = t2;
   let t3;
   if ($[0] !== obj) {
-    t3 = obj instanceof LinkedPrimitive$1 ? "" : `.${MutationHashable.getMutationHash(obj)}`;
+    t3 = obj instanceof LinkedPrimitive ? "" : `.${MutationHashable.getMutationHash(obj)}`;
     $[0] = obj;
     $[1] = t3;
   } else {
@@ -17557,7 +17557,7 @@ function Header$1(t0) {
   const hashStr = t3;
   let t4;
   if ($[2] !== obj._container || $[3] !== showContainerId) {
-    t4 = showContainerId ? ` -^ ${[...obj._container.values()].map(_temp2$4).join(",")}` : "";
+    t4 = showContainerId ? ` -^ ${[...obj._container.values()].map(_temp2$5).join(",")}` : "";
     $[2] = obj._container;
     $[3] = showContainerId;
     $[4] = t4;
@@ -17610,7 +17610,7 @@ function Header$1(t0) {
   }
   return t8;
 }
-function _temp2$4(v) {
+function _temp2$5(v) {
   return v._id;
 }
 function DebugOutSPrimitive(t0) {
@@ -17749,7 +17749,7 @@ function debugOut(val, pad = 0, showUnknowns = true) {
     return debugOutArray(val, pad, showUnknowns);
   } else if (val instanceof SSet) {
     return debugOutSet(val, pad, showUnknowns);
-  } else if (val instanceof LinkedPrimitive$1) {
+  } else if (val instanceof LinkedPrimitive) {
     return debugOutPrimitive(val);
   } else if (val instanceof Struct) {
     return debugOutStruct(val, pad, showUnknowns);
@@ -17823,7 +17823,7 @@ function header(elem, showContainerId = false) {
       return "s_arr";
     } else if (elem instanceof SSet) {
       return "set";
-    } else if (elem instanceof LinkedPrimitive$1) {
+    } else if (elem instanceof LinkedPrimitive) {
       return "prm";
     } else if (elem instanceof Struct) {
       return "Sct";
@@ -17837,7 +17837,7 @@ function header(elem, showContainerId = false) {
       exhaustive(elem);
     }
   })();
-  const hash = elem instanceof LinkedPrimitive$1 ? "" : `.${MutationHashable.getMutationHash(elem)}`;
+  const hash = elem instanceof LinkedPrimitive ? "" : `.${MutationHashable.getMutationHash(elem)}`;
   const container = showContainerId ? ` -^ ${[...elem._container.values()].map((v) => v._id).join(",")}` : "";
   return `(${kind}: ${elem._id}${hash}${container})`;
 }
@@ -17933,10 +17933,10 @@ const s = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   DirtyObserver,
   SArray,
   SBoolean,
-  SMap: LinkedMap$1,
+  SMap: LinkedMap,
   SNil,
   SNumber,
-  SPrimitive: LinkedPrimitive$1,
+  SPrimitive: LinkedPrimitive,
   SSchemaArray,
   SSet,
   SString,
@@ -17965,7 +17965,7 @@ const s = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   useDirtyTracker,
   useNewLinkedMap,
   useNewLinkedSet,
-  usePrimitive: usePrimitive$1,
+  usePrimitive,
   useSubscribeToSubbableMutationHashable
 }, Symbol.toStringTag, { value: "Module" }));
 const TAB_SIZE$4 = 2;
@@ -18278,7 +18278,7 @@ function JSONArray(t0) {
         }
         let t42;
         if ($[8] !== arr) {
-          t42 = arr.map(_temp2$3).join(", ");
+          t42 = arr.map(_temp2$4).join(", ");
           $[8] = arr;
           $[9] = t42;
         } else {
@@ -18357,7 +18357,7 @@ function JSONArray(t0) {
   }
   return t4;
 }
-function _temp2$3(x) {
+function _temp2$4(x) {
   return string(x);
 }
 function JSONPrimitive({
@@ -18648,7 +18648,7 @@ function TrackA(t0) {
     track,
     project: project2
   } = t0;
-  const [name, setName] = usePrimitive$1(track.name);
+  const [name, setName] = usePrimitive(track.name);
   const [edit, setEdit] = reactExports.useState(name);
   const clips = useContainer(track.clips);
   useContainer(track);
@@ -19102,14 +19102,14 @@ function SchedulerTest() {
   const $ = compilerRuntimeExports.c(1);
   let t0;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
-    t0 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp2$2, children: "test" });
+    t0 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp2$3, children: "test" });
     $[0] = t0;
   } else {
     t0 = $[0];
   }
   return t0;
 }
-async function _temp2$2() {
+async function _temp2$3() {
   const one = schedulerExports.unstable_scheduleCallback(schedulerExports.unstable_NormalPriority, function callbackFoo() {
     console.log("one");
   });
@@ -19182,7 +19182,7 @@ function App() {
   let t9;
   if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
     t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp$5, children: "undo" });
-    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp2$1, children: "redo" });
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp2$2, children: "redo" });
     t5 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {});
     t6 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp4, children: "Add Track" });
     t7 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp6, children: "Add 100" });
@@ -19289,12 +19289,12 @@ function _temp5() {
   }
 }
 function _temp4() {
-  return recordHistory("add track", _temp3);
+  return recordHistory("add track", _temp3$1);
 }
-function _temp3() {
+function _temp3$1() {
   project.addTrack("hello world");
 }
-function _temp2$1() {
+function _temp2$2() {
   return history.redo();
 }
 function _temp$5() {
@@ -19751,7 +19751,7 @@ const mutationHashable = {
     notify(mh, target);
   }
 };
-class LinkedMap2 {
+class LinkableMap {
   // main
   _map;
   // SubbableContainer
@@ -19768,17 +19768,14 @@ class LinkedMap2 {
   _getRaw() {
     return this._map;
   }
-  dupe() {
-    return new Map(this._map);
-  }
   constructor(initialValue, id) {
     this._id = id;
     this._map = initialValue;
     subbableContainer._containAll(this, this._map.keys());
     subbableContainer._containAll(this, this._map.values());
   }
-  static create(initialValue) {
-    return new this(initialValue ?? /* @__PURE__ */ new Map(), nanoid(5));
+  static create(initial) {
+    return new this(new Map(initial), nanoid(5));
   }
   map(callbackfn) {
     const mapped = [];
@@ -19852,13 +19849,13 @@ class LinkedMap2 {
     return this.constructor.name;
   }
 }
-class LinkedPrimitive2 {
+class LinkableValue {
   _id;
   _value;
   _subscriptors = /* @__PURE__ */ new Set();
   // MutationHashable
-  // Although linkedPrimitive can and usually works as normal state, we implement
-  // MutationHashable so it's easy to use with useLink like other LinkedState
+  // Although LinkableValue can and usually works as normal state, we implement
+  // MutationHashable so it's easy to use with useLink like other linked state
   _hash = 0;
   // Contained
   _container = /* @__PURE__ */ new Set();
@@ -19866,7 +19863,7 @@ class LinkedPrimitive2 {
     this._value = initialValue;
     this._id = id;
   }
-  static of(val) {
+  static create(val) {
     return new this(val, nanoid(5));
   }
   set(value) {
@@ -19894,7 +19891,7 @@ class LinkedPrimitive2 {
     };
   }
 }
-class LinkedSet {
+class LinkableSet {
   // main
   _set;
   // SubbableContainer
@@ -20047,7 +20044,7 @@ class LinkedSet {
   }
 }
 function isContainable(val) {
-  return val instanceof LinkedPrimitive2 || val instanceof LinkedArray2 || val instanceof LinkedMap2 || val instanceof LinkedSet;
+  return val instanceof LinkableValue || val instanceof LinkableArray || val instanceof LinkableMap || val instanceof LinkableSet;
 }
 class UpdateToken2 {
   constructor(target) {
@@ -20108,7 +20105,7 @@ const subbableContainer = {
     }
   }
 };
-class LinkedArray2 {
+class LinkableArray {
   // main
   _array;
   // Subbable
@@ -23282,40 +23279,40 @@ const getDefaultConfig = () => {
   };
 };
 const twMerge = /* @__PURE__ */ createTailwindMerge(getDefaultConfig);
-function usePrimitive(linkedState) {
+function useLinkAsState(prim) {
   const $ = compilerRuntimeExports.c(9);
   let t0;
-  if ($[0] !== linkedState) {
-    t0 = (onStoreChange) => subscribe(linkedState, (target) => {
-      if (linkedState === target) {
+  if ($[0] !== prim) {
+    t0 = (onStoreChange) => subscribe(prim, (target) => {
+      if (prim === target) {
         onStoreChange();
       }
     });
-    $[0] = linkedState;
+    $[0] = prim;
     $[1] = t0;
   } else {
     t0 = $[1];
   }
   const externalStoreSub = t0;
   let t1;
-  if ($[2] !== linkedState) {
-    t1 = () => linkedState.get();
-    $[2] = linkedState;
+  if ($[2] !== prim) {
+    t1 = () => prim.get();
+    $[2] = prim;
     $[3] = t1;
   } else {
     t1 = $[3];
   }
   const value = reactExports.useSyncExternalStore(externalStoreSub, t1);
   let t2;
-  if ($[4] !== linkedState) {
+  if ($[4] !== prim) {
     t2 = (newVal) => {
       if (newVal instanceof Function) {
-        linkedState.set(newVal(linkedState.get()));
+        prim.set(newVal(prim.get()));
       } else {
-        linkedState.set(newVal);
+        prim.set(newVal);
       }
     };
-    $[4] = linkedState;
+    $[4] = prim;
     $[5] = t2;
   } else {
     t2 = $[5];
@@ -23379,7 +23376,7 @@ function DynamicTest(t0) {
     if (typeof val === "function") {
       return "(function)";
     } else {
-      if (val instanceof LinkedArray2) {
+      if (val instanceof LinkableArray) {
         let t3;
         if ($[2] !== pad || $[3] !== path || $[4] !== showUnknowns || $[5] !== val) {
           t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutArray, { arr: val, pad, path, showUnknowns });
@@ -23393,7 +23390,7 @@ function DynamicTest(t0) {
         }
         return t3;
       } else {
-        if (val instanceof LinkedSet) {
+        if (val instanceof LinkableSet) {
           let t3;
           if ($[7] !== pad || $[8] !== path || $[9] !== showUnknowns || $[10] !== val) {
             t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSet$1, { set: val, pad, path, showUnknowns });
@@ -23407,7 +23404,7 @@ function DynamicTest(t0) {
           }
           return t3;
         } else {
-          if (val instanceof LinkedPrimitive2) {
+          if (val instanceof LinkableValue) {
             let t3;
             if ($[12] !== path || $[13] !== val) {
               t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutPrimitive$1, { obj: val, path });
@@ -23419,7 +23416,7 @@ function DynamicTest(t0) {
             }
             return t3;
           } else {
-            if (val instanceof LinkedMap2) {
+            if (val instanceof LinkableMap) {
               let t3;
               if ($[15] !== pad || $[16] !== path || $[17] !== showUnknowns || $[18] !== val) {
                 t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutMap, { map: val, pad, path, showUnknowns });
@@ -23717,19 +23714,19 @@ function Header(t0) {
     obj = t2();
     let t42;
     bb0: {
-      if (obj instanceof LinkedMap2) {
+      if (obj instanceof LinkableMap) {
         t42 = "lmap";
         break bb0;
       } else {
-        if (obj instanceof LinkedArray2) {
+        if (obj instanceof LinkableArray) {
           t42 = "larr";
           break bb0;
         } else {
-          if (obj instanceof LinkedSet) {
+          if (obj instanceof LinkableSet) {
             t42 = "lset";
             break bb0;
           } else {
-            if (obj instanceof LinkedPrimitive2) {
+            if (obj instanceof LinkableValue) {
               t42 = "lprm";
               break bb0;
             } else {
@@ -23811,7 +23808,7 @@ function DebugOutPrimitive$1(t0) {
     path: t1
   } = t0;
   const path = t1 === void 0 ? "" : t1;
-  const [val] = usePrimitive(obj);
+  const [val] = useLinkAsState(obj);
   if (isPrimitiveKind$1(val)) {
     const t2 = `${path}/${obj._id}`;
     let t3;
@@ -23962,7 +23959,7 @@ function TxtButton(t0) {
   return t3;
 }
 const TAB_SIZE$2 = 2;
-function LinkedArrayTest(t0) {
+function LinkableArrayTest(t0) {
   const $ = compilerRuntimeExports.c(8);
   const {
     linkedArray,
@@ -24008,13 +24005,13 @@ function LinkedArrayTest(t0) {
 function DynamicTestArray(t0) {
   const $ = compilerRuntimeExports.c(64);
   const {
-    arr: linkedArray,
+    arr,
     pad,
     path: t1,
     showUnknowns
   } = t0;
   const path = t1 === void 0 ? "" : t1;
-  const larr = useLink(linkedArray);
+  const larr = useLink(arr);
   const [input, setInput] = reactExports.useState(0);
   let t2;
   if ($[0] !== input || $[1] !== larr) {
@@ -24295,7 +24292,7 @@ function DynamicTestArray(t0) {
 function _temp$3(a, b) {
   return a - b;
 }
-function LinkedMapTest(t0) {
+function LinkableMapTest(t0) {
   const $ = compilerRuntimeExports.c(12);
   const {
     map: map2,
@@ -24360,7 +24357,7 @@ const TAB_SIZE$1 = 2;
 function DynamicTestMap(t0) {
   const $ = compilerRuntimeExports.c(32);
   const {
-    map: linkedMap,
+    map: map2,
     pad,
     path: t1,
     showUnknowns,
@@ -24368,7 +24365,7 @@ function DynamicTestMap(t0) {
     renderValue
   } = t0;
   const path = t1 === void 0 ? "" : t1;
-  const lmap = useLink(linkedMap);
+  const lmap = useLink(map2);
   let t2;
   if ($[0] !== lmap) {
     t2 = (k) => lmap().delete(k);
@@ -24415,11 +24412,11 @@ function DynamicTestMap(t0) {
   } else {
     body = $[10];
   }
-  const t4 = `${path}/${linkedMap._id}`;
+  const t4 = `${path}/${map2._id}`;
   let t5;
-  if ($[13] !== linkedMap || $[14] !== t4) {
-    t5 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: linkedMap, path: t4 });
-    $[13] = linkedMap;
+  if ($[13] !== map2 || $[14] !== t4) {
+    t5 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: map2, path: t4 });
+    $[13] = map2;
     $[14] = t4;
     $[15] = t5;
   } else {
@@ -24498,10 +24495,10 @@ function DynamicTestMap(t0) {
   }
   return t12;
 }
-function LinkedPrimitiveTester(t0) {
+function LinkablePrimitiveTest(t0) {
   const $ = compilerRuntimeExports.c(8);
   const {
-    linkedPrimitive,
+    prim,
     className
   } = t0;
   let t1;
@@ -24520,9 +24517,9 @@ function LinkedPrimitiveTester(t0) {
     t2 = $[2];
   }
   let t3;
-  if ($[3] !== linkedPrimitive) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutPrimitive, { obj: linkedPrimitive }) });
-    $[3] = linkedPrimitive;
+  if ($[3] !== prim) {
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutPrimitive, { prim }) });
+    $[3] = prim;
     $[4] = t3;
   } else {
     t3 = $[4];
@@ -24547,11 +24544,11 @@ function isPrimitiveKind(val) {
 function DebugOutPrimitive(t0) {
   const $ = compilerRuntimeExports.c(34);
   const {
-    obj,
+    prim,
     path: t1
   } = t0;
   const path = t1 === void 0 ? "" : t1;
-  const [value, setValue] = usePrimitive(obj);
+  const [value, setValue] = useLinkAsState(prim);
   let t2;
   if ($[0] !== setValue) {
     t2 = () => setValue(_temp$1);
@@ -24563,7 +24560,7 @@ function DebugOutPrimitive(t0) {
   const increment = t2;
   let t3;
   if ($[2] !== setValue) {
-    t3 = () => setValue(_temp2);
+    t3 = () => setValue(_temp2$1);
     $[2] = setValue;
     $[3] = t3;
   } else {
@@ -24589,11 +24586,11 @@ function DebugOutPrimitive(t0) {
   }
   const setRandom = t5;
   if (isPrimitiveKind(value)) {
-    const t6 = `${path}/${obj._id}`;
+    const t6 = `${path}/${prim._id}`;
     let t7;
-    if ($[8] !== obj || $[9] !== t6) {
-      t7 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj, path: t6 });
-      $[8] = obj;
+    if ($[8] !== prim || $[9] !== t6) {
+      t7 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: prim, path: t6 });
+      $[8] = prim;
       $[9] = t6;
       $[10] = t7;
     } else {
@@ -24666,11 +24663,11 @@ function DebugOutPrimitive(t0) {
     }
     return t13;
   } else {
-    const t6 = `${path}/${obj._id}`;
+    const t6 = `${path}/${prim._id}`;
     let t7;
-    if ($[28] !== obj || $[29] !== t6) {
-      t7 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj, path: t6 });
-      $[28] = obj;
+    if ($[28] !== prim || $[29] !== t6) {
+      t7 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: prim, path: t6 });
+      $[28] = prim;
       $[29] = t6;
       $[30] = t7;
     } else {
@@ -24693,13 +24690,13 @@ function DebugOutPrimitive(t0) {
     return t9;
   }
 }
-function _temp2(v_0) {
+function _temp2$1(v_0) {
   return v_0 - 1;
 }
 function _temp$1(v) {
   return v + 1;
 }
-function LinkedSetTest(t0) {
+function LinkableSetTest(t0) {
   const $ = compilerRuntimeExports.c(8);
   const {
     linkedSet,
@@ -24746,54 +24743,54 @@ const TAB_SIZE = 2;
 function DebugOutSet(t0) {
   const $ = compilerRuntimeExports.c(36);
   const {
-    set: linkedSet,
+    set: set2,
     pad,
     path: t1,
     showUnknowns
   } = t0;
   const path = t1 === void 0 ? "" : t1;
-  const set2 = useLink(linkedSet);
+  const lset = useLink(set2);
   const [input, setInput] = reactExports.useState(0);
   let t2;
-  if ($[0] !== input || $[1] !== set2) {
+  if ($[0] !== input || $[1] !== lset) {
     t2 = () => {
-      set2().add(input);
+      lset().add(input);
       setInput(input + 1);
     };
     $[0] = input;
-    $[1] = set2;
+    $[1] = lset;
     $[2] = t2;
   } else {
     t2 = $[2];
   }
   const handleAdd = t2;
   let t3;
-  if ($[3] !== set2) {
+  if ($[3] !== lset) {
     t3 = (value) => {
-      set2().delete(value);
+      lset().delete(value);
     };
-    $[3] = set2;
+    $[3] = lset;
     $[4] = t3;
   } else {
     t3 = $[4];
   }
   const handleDelete = t3;
   let t4;
-  if ($[5] !== set2) {
+  if ($[5] !== lset) {
     t4 = () => {
-      set2().clear();
+      lset().clear();
     };
-    $[5] = set2;
+    $[5] = lset;
     $[6] = t4;
   } else {
     t4 = $[6];
   }
   const handleClear = t4;
   let result;
-  if ($[7] !== handleDelete || $[8] !== pad || $[9] !== path || $[10] !== set2 || $[11] !== showUnknowns) {
+  if ($[7] !== handleDelete || $[8] !== lset || $[9] !== pad || $[10] !== path || $[11] !== showUnknowns) {
     result = [];
     let i = 0;
-    for (const elem of set2()) {
+    for (const elem of lset()) {
       const baseline = pad + TAB_SIZE;
       result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`), " ", /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "shift", onClick: () => handleDelete(elem), children: "del." }));
       i++;
@@ -24817,18 +24814,18 @@ function DebugOutSet(t0) {
       result.push(t52, t62);
     }
     $[7] = handleDelete;
-    $[8] = pad;
-    $[9] = path;
-    $[10] = set2;
+    $[8] = lset;
+    $[9] = pad;
+    $[10] = path;
     $[11] = showUnknowns;
     $[12] = result;
   } else {
     result = $[12];
   }
   let t5;
-  if ($[16] !== set2) {
-    t5 = set2();
-    $[16] = set2;
+  if ($[16] !== lset) {
+    t5 = lset();
+    $[16] = lset;
     $[17] = t5;
   } else {
     t5 = $[17];
@@ -24861,9 +24858,9 @@ function DebugOutSet(t0) {
     t9 = $[23];
   }
   let t10;
-  if ($[24] !== set2) {
-    t10 = set2();
-    $[24] = set2;
+  if ($[24] !== lset) {
+    t10 = lset();
+    $[24] = lset;
     $[25] = t10;
   } else {
     t10 = $[25];
@@ -24914,19 +24911,19 @@ function DebugOutSet(t0) {
   }
   return t13;
 }
-const map$1 = LinkedMap2.create();
-const set = LinkedSet.create();
-const array = LinkedArray2.create();
-const primitive = LinkedPrimitive2.of(0);
-function LinkedStateTest() {
+const map$1 = LinkableMap.create();
+const set = LinkableSet.create();
+const array = LinkableArray.create();
+const primitive = LinkableValue.create(0);
+function LinkableStateTest() {
   const $ = compilerRuntimeExports.c(1);
   let t0;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
-    t0 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-4 gap-2", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedMapTest, { className: "col-span-2 rounded-sm bg-gray-700/10 p-4", map: map$1 }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedSetTest, { className: "col-span-2 rounded-sm bg-gray-700/10 p-4", linkedSet: set }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedArrayTest, { className: "col-span-2 rounded-sm bg-gray-700/10 p-4", linkedArray: array }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedPrimitiveTester, { className: "col-span-2 rounded-sm bg-gray-700/10 p-4", linkedPrimitive: primitive })
+    t0 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 gap-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkableMapTest, { className: "rounded-sm bg-gray-700/10 p-4", map: map$1 }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkableSetTest, { className: "rounded-sm bg-gray-700/10 p-4", linkedSet: set }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkableArrayTest, { className: "rounded-sm bg-gray-700/10 p-4", linkedArray: array }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkablePrimitiveTest, { className: "rounded-sm bg-gray-700/10 p-4", prim: primitive })
     ] });
     $[0] = t0;
   } else {
@@ -24934,21 +24931,24 @@ function LinkedStateTest() {
   }
   return t0;
 }
-const map = LinkedMap2.create();
-LinkedSet.create();
-LinkedPrimitive2.of(0);
-function LinkedStateNestedTest(t0) {
-  const $ = compilerRuntimeExports.c(10);
+const lValue = LinkableValue.create.bind(LinkableValue);
+const lArray = LinkableArray.create.bind(LinkableArray);
+const lMap = LinkableMap.create.bind(LinkableMap);
+const lSet = LinkableSet.create.bind(LinkableSet);
+const map = lMap();
+lSet();
+lValue(0);
+const listState = lMap([["buy milk", lValue(true)], ["buy eggs", lValue(false)]]);
+function LinkableStateNested(t0) {
+  const $ = compilerRuntimeExports.c(13);
   const {
     className
   } = t0;
-  const lmap = useLink(map);
-  Array.from(lmap().entries());
   const [key, setKey] = reactExports.useState(0);
   let t1;
   if ($[0] !== key) {
     t1 = () => {
-      map.set(key, LinkedArray2.create([2]));
+      map.set(key, lArray([2]));
       setKey(key + 1);
     };
     $[0] = key;
@@ -24992,10 +24992,124 @@ function LinkedStateNestedTest(t0) {
   } else {
     t5 = $[9];
   }
-  return t5;
+  let t6;
+  if ($[10] === Symbol.for("react.memo_cache_sentinel")) {
+    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx(ListExample, {});
+    $[10] = t6;
+  } else {
+    t6 = $[10];
+  }
+  let t7;
+  if ($[11] !== t5) {
+    t7 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      t5,
+      t6
+    ] });
+    $[11] = t5;
+    $[12] = t7;
+  } else {
+    t7 = $[12];
+  }
+  return t7;
 }
 function _temp(val, key_0, pad, path, showUnknowns) {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTestArray, { arr: val, pad: pad + 2, path: `${path}/s${key_0}`, showUnknowns }, key_0);
+}
+function ListExample() {
+  const $ = compilerRuntimeExports.c(5);
+  const list = useLink(listState);
+  let t0;
+  if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
+    t0 = /* @__PURE__ */ jsxRuntimeExports.jsx(ListSummary, {});
+    $[0] = t0;
+  } else {
+    t0 = $[0];
+  }
+  let t1;
+  if ($[1] !== list) {
+    t1 = list().entries().map(_temp2).toArray();
+    $[1] = list;
+    $[2] = t1;
+  } else {
+    t1 = $[2];
+  }
+  let t2;
+  if ($[3] !== t1) {
+    t2 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      t0,
+      /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { children: t1 })
+    ] });
+    $[3] = t1;
+    $[4] = t2;
+  } else {
+    t2 = $[4];
+  }
+  return t2;
+}
+function _temp2(t0, i) {
+  const [name, doneState] = t0;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ListItem, { name, doneState }, i);
+}
+function ListSummary() {
+  const $ = compilerRuntimeExports.c(4);
+  const todoList = useLink(listState, true);
+  let t0;
+  if ($[0] !== todoList) {
+    t0 = todoList().entries().filter(_temp3).toArray();
+    $[0] = todoList;
+    $[1] = t0;
+  } else {
+    t0 = $[1];
+  }
+  const done_0 = t0;
+  let t1;
+  if ($[2] !== done_0.length) {
+    t1 = /* @__PURE__ */ jsxRuntimeExports.jsxs("i", { children: [
+      "Tasks done: ",
+      done_0.length
+    ] });
+    $[2] = done_0.length;
+    $[3] = t1;
+  } else {
+    t1 = $[3];
+  }
+  return t1;
+}
+function _temp3(t0) {
+  const [, done] = t0;
+  return done.get() == true;
+}
+function ListItem(t0) {
+  const $ = compilerRuntimeExports.c(6);
+  const {
+    name,
+    doneState
+  } = t0;
+  const done = useLink(doneState);
+  let t1;
+  if ($[0] !== done || $[1] !== doneState) {
+    t1 = done().get() ? "done" : /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => doneState.set(true), children: "mark done" });
+    $[0] = done;
+    $[1] = doneState;
+    $[2] = t1;
+  } else {
+    t1 = $[2];
+  }
+  let t2;
+  if ($[3] !== name || $[4] !== t1) {
+    t2 = /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+      name,
+      ":",
+      " ",
+      t1
+    ] });
+    $[3] = name;
+    $[4] = t1;
+    $[5] = t2;
+  } else {
+    t2 = $[5];
+  }
+  return t2;
 }
 ReactDOM.createRoot(document.getElementById("root")).render(/* @__PURE__ */ jsxRuntimeExports.jsx(React.StrictMode, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(
   HashRouter,
@@ -25012,8 +25126,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(/* @__PURE__ */ jsxR
       ] })
     ] }), children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/", element: /* @__PURE__ */ jsxRuntimeExports.jsx(App, {}) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/ls", element: /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedStateTest, {}) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/ls2", element: /* @__PURE__ */ jsxRuntimeExports.jsx(LinkedStateNestedTest, {}) })
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/ls", element: /* @__PURE__ */ jsxRuntimeExports.jsx(LinkableStateTest, {}) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/ls2", element: /* @__PURE__ */ jsxRuntimeExports.jsx(LinkableStateNested, {}) })
     ] }) })
   }
 ) }));

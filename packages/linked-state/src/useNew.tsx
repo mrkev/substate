@@ -1,26 +1,26 @@
 import { useState } from "react";
-import { LinkedArray } from "./LinkedArray";
-import { LinkedMap } from "./LinkedMap";
-import { LinkedSet } from "./LinkedSet";
+import { LinkableArray } from "./LinkableArray";
+import { LinkableMap } from "./LinkableMap";
+import { LinkableSet } from "./LinkableSet";
 import { useSubscribeToSubbableMutationHashable } from "./hooks";
 
 // TODO: rename to `useCreateAndLinkSet`, etc, and link? Or delete?
 
-export function useNewLinkedSet<S>(): LinkedSet<S> {
-  const [set] = useState<LinkedSet<S>>(() => LinkedSet.create<S>());
+export function useNewLinkedSet<S>(): LinkableSet<S> {
+  const [set] = useState<LinkableSet<S>>(() => LinkableSet.create<S>());
 
   // useSubscribeToSubbableMutationHashable(set);
   return set;
 }
 
-export function useNewLinkedMap<K, V>(): LinkedMap<K, V> {
-  const [map] = useState<LinkedMap<K, V>>(() => LinkedMap.create<K, V>());
+export function useNewLinkedMap<K, V>(): LinkableMap<K, V> {
+  const [map] = useState<LinkableMap<K, V>>(() => LinkableMap.create<K, V>());
   // useSubscribeToSubbableMutationHashable(map);
   return map;
 }
 
-export function useNewLinkedArray<S>(): LinkedArray<S> {
-  const [arr] = useState<LinkedArray<S>>(() => LinkedArray.create<S>());
+export function useNewLinkedArray<S>(): LinkableArray<S> {
+  const [arr] = useState<LinkableArray<S>>(() => LinkableArray.create<S>());
   // useSubscribeToSubbableMutationHashable(arr);
   return arr;
 }

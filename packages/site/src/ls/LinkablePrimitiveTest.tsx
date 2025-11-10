@@ -1,21 +1,21 @@
 import { twMerge } from "tailwind-merge";
-import { LinkedPrimitive } from "../../../linked-state/src/LinkedPrimitive";
-import { usePrimitive } from "../../../linked-state/src/hooks";
+import { LinkableValue } from "../../../linked-state/src/LinkableValue";
+import { useLinkAsState } from "../../../linked-state/src/hooks";
 import { DebugOutSimplePrm, Header } from "./LinkedStateDebug";
 import { TxtButton } from "./TxtButton";
 
-export function LinkedPrimitiveTester({
-  linkedPrimitive: linkedPrimitive,
+export function LinkablePrimitiveTest({
+  prim,
   className,
 }: {
-  linkedPrimitive: LinkedPrimitive<number>;
+  prim: LinkableValue<number>;
   className?: string;
 }) {
   return (
     <div className={twMerge("overflow-scroll", className)}>
       <h2>LinkedPrimitive Tester</h2>
       <pre className="text-start text-sm">
-        <DebugOutPrimitive obj={linkedPrimitive} />
+        <DebugOutPrimitive prim={prim} />
       </pre>
     </div>
   );
@@ -31,14 +31,14 @@ function isPrimitiveKind(val: unknown) {
 }
 
 function DebugOutPrimitive({
-  obj,
+  prim,
   path = "",
 }: {
-  obj: LinkedPrimitive<number>;
+  prim: LinkableValue<number>;
   path?: string;
 }) {
   // Hook it into React — updates automatically when the primitive changes
-  const [value, setValue] = usePrimitive(obj);
+  const [value, setValue] = useLinkAsState(prim);
 
   const increment = () => setValue((v) => v + 1);
   const decrement = () => setValue((v) => v - 1);
@@ -48,7 +48,7 @@ function DebugOutPrimitive({
   if (isPrimitiveKind(value)) {
     return (
       <>
-        <Header obj={obj} path={`${path}/${obj._id}`} />{" "}
+        <Header obj={prim} path={`${path}/${prim._id}`} />{" "}
         <TxtButton title="decrement" onClick={decrement} children="-" />{" "}
         <DebugOutSimplePrm val={value} />{" "}
         <TxtButton title="increment" onClick={increment} children="+" />{" "}
@@ -59,7 +59,7 @@ function DebugOutPrimitive({
   } else {
     return (
       <>
-        <Header obj={obj} path={`${path}/${obj._id}`} />{" "}
+        <Header obj={prim} path={`${path}/${prim._id}`} />{" "}
         {
           // todo
           String(value)

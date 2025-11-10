@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { useLink } from "../../../linked-state/src/hooks";
-import { LinkedArray } from "../../../linked-state/src/LinkedArray";
+import { LinkableArray } from "../../../linked-state/src/LinkableArray";
 import { DynamicTest, Header } from "./LinkedStateDebug";
 import { TxtButton } from "./TxtButton";
 
 const TAB_SIZE = 2;
 
-export function LinkedArrayTest({
+export function LinkableArrayTest({
   linkedArray,
   className,
 }: {
-  linkedArray: LinkedArray<number>;
+  linkedArray: LinkableArray<number>;
   className?: string;
 }) {
   return (
@@ -25,17 +25,17 @@ export function LinkedArrayTest({
 }
 
 export function DynamicTestArray({
-  arr: linkedArray,
+  arr,
   pad,
   path = "",
   showUnknowns,
 }: {
-  arr: LinkedArray<number>;
+  arr: LinkableArray<number>;
   pad: number;
   path?: string;
   showUnknowns?: boolean;
 }) {
-  const larr = useLink(linkedArray);
+  const larr = useLink(arr);
   const [input, setInput] = useState(0);
 
   const handleAdd = () => {

@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { Contained } from "./Contained";
-import { StateChangeHandler } from "./LinkedPrimitive";
+import { StateChangeHandler } from "./LinkableValue";
 import { mutationHashable, MutationHashable } from "./MutationHashable";
 import { Subbable } from "./Subbable";
 import {
@@ -9,7 +9,7 @@ import {
   UpdateToken,
 } from "./SubbableContainer";
 
-export class LinkedMap<K, V>
+export class LinkableMap<K, V>
   implements
     Map<K, V>,
     Subbable,
@@ -36,10 +36,6 @@ export class LinkedMap<K, V>
 
   _getRaw(): ReadonlyMap<K, V> {
     return this._map;
-  }
-
-  dupe(): ReadonlyMap<K, V> {
-    return new Map(this._map);
   }
 
   private constructor(initialValue: Map<K, V>, id: string) {

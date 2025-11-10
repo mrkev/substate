@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { Contained } from "./Contained";
-import { StateChangeHandler } from "./LinkedPrimitive";
+import { StateChangeHandler } from "./LinkableValue";
 import { MutationHashable } from "./MutationHashable";
 import { mutablearr } from "./nullthrows";
 import { Subbable } from "./Subbable";
@@ -27,7 +27,7 @@ export type ArrayWithoutIndexer<T> = Omit<
 >;
 
 // NOTE: don't use LinkedArray directly, use SArray
-export class LinkedArray<S>
+export class LinkableArray<S>
   implements
     ArrayWithoutIndexer<S>,
     Subbable,

@@ -1,4 +1,4 @@
-import type { StateChangeHandler } from "./LinkedPrimitive";
+import type { StateChangeHandler } from "./LinkableValue";
 import { printId } from "./printId";
 
 /* Subbables are objects one can subscribe to */
