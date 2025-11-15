@@ -23,7 +23,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
     "json-stringify-deterministic": "^1.0.12",
-    "linked-state": "workspace:*",
+    "@mrkev/linked-state": "workspace:*",
     "react-json-pretty": "^2.2.0",
     "react-json-tree": "^0.20.0",
     "react-json-view-lite": "^2.5.0",

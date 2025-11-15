@@ -19685,12 +19685,6 @@ function _temp10(t0) {
   const [id, value] = t0;
   return `${id}: ${JSON.stringify(JSON.parse(value), null, 2)}`;
 }
-function mutablearr(arr) {
-  return arr;
-}
-function mutableset(set2) {
-  return set2;
-}
 function subscribe(subbable, cb) {
   subbable._subscriptors.add(cb);
   return () => subbable._subscriptors.delete(cb);
@@ -19807,47 +19801,11 @@ class LinkableMap {
     return this.constructor.name;
   }
 }
-class LinkableValue {
-  _id;
-  _value;
-  _subscriptors = /* @__PURE__ */ new Set();
-  // MutationHashable
-  // Although LinkableValue can and usually works as normal state, we implement
-  // MutationHashable so it's easy to use with useLink like other linked state
-  _hash = 0;
-  // Contained
-  _container = /* @__PURE__ */ new Set();
-  constructor(initialValue, id) {
-    this._value = initialValue;
-    this._id = id;
-  }
-  static create(val) {
-    return new this(val, nanoid(5));
-  }
-  set(value) {
-    this._value = value;
-    mutationHashable.mutated(this, this);
-    const token = new UpdateToken2(this);
-    for (const container of this._container) {
-      subbableContainer._childChanged(container, token);
-    }
-  }
-  setDyn(cb) {
-    const newVal = cb(this.get());
-    this.set(newVal);
-  }
-  get() {
-    return this._value;
-  }
-  replace(value) {
-    this.set(value);
-  }
-  toJSON() {
-    return {
-      _value: this._value,
-      _id: this._id
-    };
-  }
+function mutablearr(arr) {
+  return arr;
+}
+function mutableset(set2) {
+  return set2;
 }
 class LinkableSet {
   // main
@@ -19999,6 +19957,48 @@ class LinkableSet {
       result.push(callbackfn(value));
     }
     return result;
+  }
+}
+class LinkableValue {
+  _id;
+  _value;
+  _subscriptors = /* @__PURE__ */ new Set();
+  // MutationHashable
+  // Although LinkableValue can and usually works as normal state, we implement
+  // MutationHashable so it's easy to use with useLink like other linked state
+  _hash = 0;
+  // Contained
+  _container = /* @__PURE__ */ new Set();
+  constructor(initialValue, id) {
+    this._value = initialValue;
+    this._id = id;
+  }
+  static create(val) {
+    return new this(val, nanoid(5));
+  }
+  set(value) {
+    this._value = value;
+    mutationHashable.mutated(this, this);
+    const token = new UpdateToken2(this);
+    for (const container of this._container) {
+      subbableContainer._childChanged(container, token);
+    }
+  }
+  setDyn(cb) {
+    const newVal = cb(this.get());
+    this.set(newVal);
+  }
+  get() {
+    return this._value;
+  }
+  replace(value) {
+    this.set(value);
+  }
+  toJSON() {
+    return {
+      _value: this._value,
+      _id: this._id
+    };
   }
 }
 function isContainable(val) {

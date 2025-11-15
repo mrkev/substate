@@ -7,6 +7,7 @@ import { LinkedMap } from "./state/LinkedMap";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { SSet } from "./state/LinkedSet";
 import { JSONValue } from "./lib/types";
+import * as foo from "@mrkev/linked-state";
 
 // todo? create -> of
 export class SString extends LinkedPrimitive<string> {

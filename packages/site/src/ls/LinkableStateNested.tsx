@@ -1,12 +1,7 @@
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
+import { lArray, lMap, lSet, lValue } from "../../../linked-state/index";
 import { useLink } from "../../../linked-state/src/hooks";
-import {
-  lArray as lArray,
-  lMap as lMap,
-  lSet as lSet,
-  lValue as lValue,
-} from "../../../linked-state/src/index";
 import { LinkableArray } from "../../../linked-state/src/LinkableArray";
 import { LinkableValue } from "../../../linked-state/src/LinkableValue";
 import { DynamicTestArray } from "./LinkableArrayTest";

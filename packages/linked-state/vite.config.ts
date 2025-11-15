@@ -9,11 +9,11 @@ export default defineConfig({
     minify: false,
     lib: {
       // Could also be a dictionary or array of multiple entry points
-      entry: resolve(__dirname, "src/index.ts"),
+      entry: resolve(__dirname, "index.ts"),
       name: "linked-state",
       formats: ["es"],
       // the proper extensions will be added
-      fileName: "linked-state",
+      fileName: "index",
     },
     rollupOptions: {
       // make sure to externalize deps that shouldn't be bundled

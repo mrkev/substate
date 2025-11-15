@@ -34,6 +34,7 @@
     "@types/react-dom": "^19.2.3",
     "vite": "^7.2.2",
     "vite-plugin-dts": "^4.5.4",
-    "vitest": "^4.0.9"
+    "vitest": "^4.0.9",
+    "@mrkev/linked-state": "workspace:*"
   }
 }

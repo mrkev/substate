@@ -5,8 +5,8 @@ import { LinkableArray } from "../../../linked-state/src/LinkableArray";
 import { LinkableMap } from "../../../linked-state/src/LinkableMap";
 import { LinkableValue } from "../../../linked-state/src/LinkableValue";
 import { LinkableSet } from "../../../linked-state/src/LinkableSet";
-import { mutationHashable } from "../../../linked-state/src/MutationHashable";
 import { exhaustive } from "../../../structured-state/src/assertions";
+import { mutationHashable } from "../../../linked-state/lib/MutationHashable";
 
 const TAB_SIZE = 2;
 export type DisplayState = "full" | "native" | "collapsed";

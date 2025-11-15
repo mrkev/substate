@@ -1,8 +1,7 @@
-import { useLink } from "../../../linked-state/src/hooks";
 import { LinkableArray } from "../../../linked-state/src/LinkableArray";
 import { LinkableMap } from "../../../linked-state/src/LinkableMap";
-import { LinkableValue } from "../../../linked-state/src/LinkableValue";
 import { LinkableSet } from "../../../linked-state/src/LinkableSet";
+import { LinkableValue } from "../../../linked-state/src/LinkableValue";
 import { LinkableArrayTest } from "./LinkableArrayTest";
 import { LinkableMapTest } from "./LinkableMapTest";
 import { LinkablePrimitiveTest } from "./LinkablePrimitiveTest";
