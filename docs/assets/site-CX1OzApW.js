@@ -32,15 +32,6 @@ function getDefaultExportFromCjs(x) {
 }
 var jsxRuntime = { exports: {} };
 var reactJsxRuntime_production = {};
-/**
- * @license React
- * react-jsx-runtime.production.js
- *
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
 var hasRequiredReactJsxRuntime_production;
 function requireReactJsxRuntime_production() {
   if (hasRequiredReactJsxRuntime_production) return reactJsxRuntime_production;
@@ -81,15 +72,6 @@ function requireJsxRuntime() {
 var jsxRuntimeExports = requireJsxRuntime();
 var react = { exports: {} };
 var react_production = {};
-/**
- * @license React
- * react.production.js
- *
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
 var hasRequiredReact_production;
 function requireReact_production() {
   if (hasRequiredReact_production) return react_production;
@@ -529,15 +511,6 @@ var client = { exports: {} };
 var reactDomClient_production = {};
 var scheduler$1 = { exports: {} };
 var scheduler_production$1 = {};
-/**
- * @license React
- * scheduler.production.js
- *
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
 var hasRequiredScheduler_production$1;
 function requireScheduler_production$1() {
   if (hasRequiredScheduler_production$1) return scheduler_production$1;
@@ -804,15 +777,6 @@ function requireScheduler$1() {
 }
 var reactDom = { exports: {} };
 var reactDom_production = {};
-/**
- * @license React
- * react-dom.production.js
- *
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
 var hasRequiredReactDom_production;
 function requireReactDom_production() {
   if (hasRequiredReactDom_production) return reactDom_production;
@@ -980,15 +944,6 @@ function requireReactDom() {
   }
   return reactDom.exports;
 }
-/**
- * @license React
- * react-dom-client.production.js
- *
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
 var hasRequiredReactDomClient_production;
 function requireReactDomClient_production() {
   if (hasRequiredReactDomClient_production) return reactDomClient_production;
@@ -12528,16 +12483,6 @@ function requireClient() {
 }
 var clientExports = requireClient();
 const ReactDOM = /* @__PURE__ */ getDefaultExportFromCjs(clientExports);
-/**
- * react-router v7.9.4
- *
- * Copyright (c) Remix Software Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE.md file in the root directory of this source tree.
- *
- * @license MIT
- */
 var PopStateEventType = "popstate";
 function createHashHistory(options = {}) {
   function createHashLocation(window2, globalHistory) {
@@ -13029,13 +12974,36 @@ function stripBasename(pathname, basename) {
   }
   return pathname.slice(startIndex) || "/";
 }
+var ABSOLUTE_URL_REGEX = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i;
+var isAbsoluteUrl = (url) => ABSOLUTE_URL_REGEX.test(url);
 function resolvePath(to, fromPathname = "/") {
   let {
     pathname: toPathname,
     search = "",
     hash = ""
   } = typeof to === "string" ? parsePath(to) : to;
-  let pathname = toPathname ? toPathname.startsWith("/") ? toPathname : resolvePathname(toPathname, fromPathname) : fromPathname;
+  let pathname;
+  if (toPathname) {
+    if (isAbsoluteUrl(toPathname)) {
+      pathname = toPathname;
+    } else {
+      if (toPathname.includes("//")) {
+        let oldPathname = toPathname;
+        toPathname = toPathname.replace(/\/\/+/g, "/");
+        warning(
+          false,
+          `Pathnames cannot have embedded double slashes - normalizing ${oldPathname} -> ${toPathname}`
+        );
+      }
+      if (toPathname.startsWith("/")) {
+        pathname = resolvePathname(toPathname.substring(1), "/");
+      } else {
+        pathname = resolvePathname(toPathname, fromPathname);
+      }
+    }
+  } else {
+    pathname = fromPathname;
+  }
   return {
     pathname,
     search: normalizeSearch(search),
@@ -13121,6 +13089,7 @@ var normalizeHash = (hash) => !hash || hash === "#" ? "" : hash.startsWith("#") 
 function isRouteErrorResponse(error) {
   return error != null && typeof error.status === "number" && typeof error.statusText === "string" && typeof error.internal === "boolean" && "data" in error;
 }
+Object.getOwnPropertyNames(Object.prototype).sort().join("\0");
 var validMutationMethodsArr = [
   "POST",
   "PUT",
@@ -13430,8 +13399,8 @@ var RenderErrorBoundary = class extends reactExports.Component {
     };
   }
   componentDidCatch(error, errorInfo) {
-    if (this.props.unstable_onError) {
-      this.props.unstable_onError(error, errorInfo);
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
     } else {
       console.error(
         "React Router caught the following error during render",
@@ -13509,6 +13478,13 @@ function _renderMatches(matches, parentMatches = [], dataRouterState = null, uns
       }
     }
   }
+  let onError = dataRouterState && unstable_onError ? (error, errorInfo) => {
+    unstable_onError(error, {
+      location: dataRouterState.location,
+      params: dataRouterState.matches?.[0]?.params ?? {},
+      errorInfo
+    });
+  } : void 0;
   return renderedMatches.reduceRight(
     (outlet, match, index) => {
       let error;
@@ -13569,7 +13545,7 @@ function _renderMatches(matches, parentMatches = [], dataRouterState = null, uns
           error,
           children: getChildren(),
           routeContext: { outlet: null, matches: matches2, isDataRoute: true },
-          unstable_onError
+          onError
         }
       ) : getChildren();
     },
@@ -14275,7 +14251,7 @@ var isBrowser = typeof window !== "undefined" && typeof window.document !== "und
 try {
   if (isBrowser) {
     window.__reactRouterVersion = // @ts-expect-error
-    "7.9.4";
+    "7.9.6";
   }
 } catch (e) {
 }
@@ -14640,15 +14616,6 @@ function useViewTransitionState(to, { relative } = {}) {
 }
 var compilerRuntime = { exports: {} };
 var reactCompilerRuntime_production = {};
-/**
- * @license React
- * react-compiler-runtime.production.js
- *
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
 var hasRequiredReactCompilerRuntime_production;
 function requireReactCompilerRuntime_production() {
   if (hasRequiredReactCompilerRuntime_production) return reactCompilerRuntime_production;
@@ -18815,15 +18782,6 @@ function _temp$7(clip, i) {
 }
 var scheduler = { exports: {} };
 var scheduler_production = {};
-/**
- * @license React
- * scheduler.production.js
- *
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
 var hasRequiredScheduler_production;
 function requireScheduler_production() {
   if (hasRequiredScheduler_production) return scheduler_production;
@@ -20053,7 +20011,6 @@ class UpdateToken2 {
 }
 const subbableContainer = {
   // abstract _replace(val: T): void;
-  // abstract _childChanged(child: Subbable): void;
   _contain(container, item) {
     if (isContainable(item)) {
       item._container.add(container);
@@ -20117,16 +20074,6 @@ class LinkableArray {
   _propagatedTokens = /* @__PURE__ */ new WeakSet();
   // Contained
   _container = /* @__PURE__ */ new Set();
-  /** See usage in SSchemaArray */
-  // protected _containedIds: WeakRefMap<any> | null = null;
-  // // NOTE: we want this here because we overwite it in SSchemaArray
-  // protected _contain(items: Array<S>) {
-  //   SubbableContainer._contain(this, items);
-  // }
-  // NOTE: we want this here because we overwite it in SSchemaArray
-  // protected _uncontain(item: S) {
-  //   SubbableContainer._uncontain(item);
-  // }
   _replace(cb) {
     subbableContainer._uncontainAll(this, this._array);
     this._array = mutablearr(cb(this._array));
@@ -20138,8 +20085,11 @@ class LinkableArray {
     this._array = initialValue;
     subbableContainer._containAll(this, this._array);
   }
+  static create(initialValue) {
+    return new this(initialValue ?? [], nanoid(5));
+  }
   mutate(mutator) {
-    const result = mutator(this._array);
+    const result = mutator();
     subbableContainer._notifyChange(this, this);
     return result;
   }
@@ -20149,9 +20099,6 @@ class LinkableArray {
   // me
   toJSON() {
     return this._array;
-  }
-  static create(initialValue) {
-    return new this(initialValue ?? [], nanoid(5));
   }
   // Array<S> interface
   get length() {
@@ -20176,8 +20123,8 @@ class LinkableArray {
     if (this.length < 1) {
       return;
     }
-    return this.mutate((rep) => {
-      const res = rep.pop();
+    return this.mutate(() => {
+      const res = this._array.pop();
       res != null && subbableContainer._uncontain(this, res);
       return res;
     });
@@ -20187,8 +20134,8 @@ class LinkableArray {
     if (this.length < 1) {
       return;
     }
-    return this.mutate((clone) => {
-      const res = clone.shift();
+    return this.mutate(() => {
+      const res = this._array.shift();
       res != null && subbableContainer._uncontain(this, res);
       return res;
     });
@@ -20198,9 +20145,9 @@ class LinkableArray {
     if (items.length < 1) {
       return this.length;
     }
-    subbableContainer._containAll(this, items);
-    return this.mutate((clone) => {
-      return clone.push(...items);
+    return this.mutate(() => {
+      subbableContainer._containAll(this, items);
+      return this._array.push(...items);
     });
   }
   // Array<S> interface, mutates
@@ -20209,28 +20156,28 @@ class LinkableArray {
       return this.length;
     }
     subbableContainer._containAll(this, items);
-    return this.mutate((clone) => {
-      return clone.unshift(...items);
+    return this.mutate(() => {
+      return this._array.unshift(...items);
     });
   }
   // Array<S> interface, mutates
   sort(compareFn) {
-    return this.mutate((raw) => {
-      raw.sort(compareFn);
+    return this.mutate(() => {
+      this._array.sort(compareFn);
       return this;
     });
   }
   // Array<S> interface, mutates
   reverse() {
-    return this.mutate((clone) => {
-      clone.reverse();
+    return this.mutate(() => {
+      this._array.reverse();
       return this;
     });
   }
   splice(start, deleteCount, ...items) {
     subbableContainer._containAll(this, items);
-    return this.mutate((_array) => {
-      const deleted = _array.splice(start, deleteCount, ...items);
+    return this.mutate(() => {
+      const deleted = this._array.splice(start, deleteCount, ...items);
       for (const elem of deleted) {
         subbableContainer._uncontain(this, elem);
       }
@@ -20241,16 +20188,16 @@ class LinkableArray {
   fill(value, start, end) {
     subbableContainer._containAll(this, [value]);
     console.warn("TODO: fill BREAKING: containment");
-    return this.mutate((_array) => {
-      _array.fill(value, start, end);
+    return this.mutate(() => {
+      this._array.fill(value, start, end);
       return this;
     });
   }
   // Array<S> interface, mutates
   copyWithin(target, start, end) {
-    return this.mutate((_array) => {
+    return this.mutate(() => {
       console.warn("TODO: copyWithin BREAKING: containment");
-      _array.copyWithin(target, start, end);
+      this._array.copyWithin(target, start, end);
       return this;
     });
   }
@@ -20283,16 +20230,16 @@ class LinkableArray {
     throw new Error("Method not implemented.");
   }
   lastIndexOf(searchElement, fromIndex) {
-    throw new Error("Method not implemented.");
+    return this._array.lastIndexOf(searchElement, fromIndex);
   }
   every(predicate, thisArg) {
     throw new Error("Method not implemented.");
   }
   some(predicate, thisArg) {
-    throw new Error("Method not implemented.");
+    return this._array.some(predicate, thisArg);
   }
   forEach(callbackfn, thisArg) {
-    throw new Error("Method not implemented.");
+    return this._array.forEach(callbackfn, thisArg);
   }
   filter(predicate, thisArg) {
     throw new Error("Method not implemented.");
@@ -20328,7 +20275,28 @@ class LinkableArray {
     throw new Error("Method not implemented.");
   }
 }
+const concatArrays = (array1, array2) => {
+  const combinedArray = new Array(array1.length + array2.length);
+  for (let i = 0; i < array1.length; i++) {
+    combinedArray[i] = array1[i];
+  }
+  for (let i = 0; i < array2.length; i++) {
+    combinedArray[array1.length + i] = array2[i];
+  }
+  return combinedArray;
+};
+const createClassValidatorObject = (classGroupId, validator) => ({
+  classGroupId,
+  validator
+});
+const createClassPartObject = (nextPart = /* @__PURE__ */ new Map(), validators = null, classGroupId) => ({
+  nextPart,
+  validators,
+  classGroupId
+});
 const CLASS_PART_SEPARATOR = "-";
+const EMPTY_CONFLICTS = [];
+const ARBITRARY_PROPERTY_PREFIX = "arbitrary..";
 const createClassGroupUtils = (config) => {
   const classMap = createClassMap(config);
   const {
@@ -20336,103 +20304,134 @@ const createClassGroupUtils = (config) => {
     conflictingClassGroupModifiers
   } = config;
   const getClassGroupId = (className) => {
-    const classParts = className.split(CLASS_PART_SEPARATOR);
-    if (classParts[0] === "" && classParts.length !== 1) {
-      classParts.shift();
+    if (className.startsWith("[") && className.endsWith("]")) {
+      return getGroupIdForArbitraryProperty(className);
     }
-    return getGroupRecursive(classParts, classMap) || getGroupIdForArbitraryProperty(className);
+    const classParts = className.split(CLASS_PART_SEPARATOR);
+    const startIndex = classParts[0] === "" && classParts.length > 1 ? 1 : 0;
+    return getGroupRecursive(classParts, startIndex, classMap);
   };
   const getConflictingClassGroupIds = (classGroupId, hasPostfixModifier) => {
-    const conflicts = conflictingClassGroups[classGroupId] || [];
-    if (hasPostfixModifier && conflictingClassGroupModifiers[classGroupId]) {
-      return [...conflicts, ...conflictingClassGroupModifiers[classGroupId]];
+    if (hasPostfixModifier) {
+      const modifierConflicts = conflictingClassGroupModifiers[classGroupId];
+      const baseConflicts = conflictingClassGroups[classGroupId];
+      if (modifierConflicts) {
+        if (baseConflicts) {
+          return concatArrays(baseConflicts, modifierConflicts);
+        }
+        return modifierConflicts;
+      }
+      return baseConflicts || EMPTY_CONFLICTS;
     }
-    return conflicts;
+    return conflictingClassGroups[classGroupId] || EMPTY_CONFLICTS;
   };
   return {
     getClassGroupId,
     getConflictingClassGroupIds
   };
 };
-const getGroupRecursive = (classParts, classPartObject) => {
-  if (classParts.length === 0) {
+const getGroupRecursive = (classParts, startIndex, classPartObject) => {
+  const classPathsLength = classParts.length - startIndex;
+  if (classPathsLength === 0) {
     return classPartObject.classGroupId;
   }
-  const currentClassPart = classParts[0];
+  const currentClassPart = classParts[startIndex];
   const nextClassPartObject = classPartObject.nextPart.get(currentClassPart);
-  const classGroupFromNextClassPart = nextClassPartObject ? getGroupRecursive(classParts.slice(1), nextClassPartObject) : void 0;
-  if (classGroupFromNextClassPart) {
-    return classGroupFromNextClassPart;
+  if (nextClassPartObject) {
+    const result = getGroupRecursive(classParts, startIndex + 1, nextClassPartObject);
+    if (result) return result;
   }
-  if (classPartObject.validators.length === 0) {
+  const validators = classPartObject.validators;
+  if (validators === null) {
     return void 0;
   }
-  const classRest = classParts.join(CLASS_PART_SEPARATOR);
-  return classPartObject.validators.find(({
-    validator
-  }) => validator(classRest))?.classGroupId;
-};
-const arbitraryPropertyRegex = /^\[(.+)\]$/;
-const getGroupIdForArbitraryProperty = (className) => {
-  if (arbitraryPropertyRegex.test(className)) {
-    const arbitraryPropertyClassName = arbitraryPropertyRegex.exec(className)[1];
-    const property = arbitraryPropertyClassName?.substring(0, arbitraryPropertyClassName.indexOf(":"));
-    if (property) {
-      return "arbitrary.." + property;
+  const classRest = startIndex === 0 ? classParts.join(CLASS_PART_SEPARATOR) : classParts.slice(startIndex).join(CLASS_PART_SEPARATOR);
+  const validatorsLength = validators.length;
+  for (let i = 0; i < validatorsLength; i++) {
+    const validatorObj = validators[i];
+    if (validatorObj.validator(classRest)) {
+      return validatorObj.classGroupId;
     }
   }
+  return void 0;
 };
+const getGroupIdForArbitraryProperty = (className) => className.slice(1, -1).indexOf(":") === -1 ? void 0 : (() => {
+  const content = className.slice(1, -1);
+  const colonIndex = content.indexOf(":");
+  const property = content.slice(0, colonIndex);
+  return property ? ARBITRARY_PROPERTY_PREFIX + property : void 0;
+})();
 const createClassMap = (config) => {
   const {
     theme,
     classGroups
   } = config;
-  const classMap = {
-    nextPart: /* @__PURE__ */ new Map(),
-    validators: []
-  };
+  return processClassGroups(classGroups, theme);
+};
+const processClassGroups = (classGroups, theme) => {
+  const classMap = createClassPartObject();
   for (const classGroupId in classGroups) {
-    processClassesRecursively(classGroups[classGroupId], classMap, classGroupId, theme);
+    const group = classGroups[classGroupId];
+    processClassesRecursively(group, classMap, classGroupId, theme);
   }
   return classMap;
 };
 const processClassesRecursively = (classGroup, classPartObject, classGroupId, theme) => {
-  classGroup.forEach((classDefinition) => {
-    if (typeof classDefinition === "string") {
-      const classPartObjectToEdit = classDefinition === "" ? classPartObject : getPart(classPartObject, classDefinition);
-      classPartObjectToEdit.classGroupId = classGroupId;
-      return;
-    }
-    if (typeof classDefinition === "function") {
-      if (isThemeGetter(classDefinition)) {
-        processClassesRecursively(classDefinition(theme), classPartObject, classGroupId, theme);
-        return;
-      }
-      classPartObject.validators.push({
-        validator: classDefinition,
-        classGroupId
-      });
-      return;
-    }
-    Object.entries(classDefinition).forEach(([key, classGroup2]) => {
-      processClassesRecursively(classGroup2, getPart(classPartObject, key), classGroupId, theme);
-    });
-  });
+  const len = classGroup.length;
+  for (let i = 0; i < len; i++) {
+    const classDefinition = classGroup[i];
+    processClassDefinition(classDefinition, classPartObject, classGroupId, theme);
+  }
+};
+const processClassDefinition = (classDefinition, classPartObject, classGroupId, theme) => {
+  if (typeof classDefinition === "string") {
+    processStringDefinition(classDefinition, classPartObject, classGroupId);
+    return;
+  }
+  if (typeof classDefinition === "function") {
+    processFunctionDefinition(classDefinition, classPartObject, classGroupId, theme);
+    return;
+  }
+  processObjectDefinition(classDefinition, classPartObject, classGroupId, theme);
+};
+const processStringDefinition = (classDefinition, classPartObject, classGroupId) => {
+  const classPartObjectToEdit = classDefinition === "" ? classPartObject : getPart(classPartObject, classDefinition);
+  classPartObjectToEdit.classGroupId = classGroupId;
+};
+const processFunctionDefinition = (classDefinition, classPartObject, classGroupId, theme) => {
+  if (isThemeGetter(classDefinition)) {
+    processClassesRecursively(classDefinition(theme), classPartObject, classGroupId, theme);
+    return;
+  }
+  if (classPartObject.validators === null) {
+    classPartObject.validators = [];
+  }
+  classPartObject.validators.push(createClassValidatorObject(classGroupId, classDefinition));
+};
+const processObjectDefinition = (classDefinition, classPartObject, classGroupId, theme) => {
+  const entries = Object.entries(classDefinition);
+  const len = entries.length;
+  for (let i = 0; i < len; i++) {
+    const [key, value] = entries[i];
+    processClassesRecursively(value, getPart(classPartObject, key), classGroupId, theme);
+  }
 };
 const getPart = (classPartObject, path) => {
-  let currentClassPartObject = classPartObject;
-  path.split(CLASS_PART_SEPARATOR).forEach((pathPart) => {
-    if (!currentClassPartObject.nextPart.has(pathPart)) {
-      currentClassPartObject.nextPart.set(pathPart, {
-        nextPart: /* @__PURE__ */ new Map(),
-        validators: []
-      });
+  let current = classPartObject;
+  const parts = path.split(CLASS_PART_SEPARATOR);
+  const len = parts.length;
+  for (let i = 0; i < len; i++) {
+    const part = parts[i];
+    let next = current.nextPart.get(part);
+    if (!next) {
+      next = createClassPartObject();
+      current.nextPart.set(part, next);
     }
-    currentClassPartObject = currentClassPartObject.nextPart.get(pathPart);
-  });
-  return currentClassPartObject;
+    current = next;
+  }
+  return current;
 };
-const isThemeGetter = (func) => func.isThemeGetter;
+const isThemeGetter = (func) => "isThemeGetter" in func && func.isThemeGetter === true;
 const createLruCache = (maxCacheSize) => {
   if (maxCacheSize < 1) {
     return {
@@ -20442,31 +20441,31 @@ const createLruCache = (maxCacheSize) => {
     };
   }
   let cacheSize = 0;
-  let cache = /* @__PURE__ */ new Map();
-  let previousCache = /* @__PURE__ */ new Map();
+  let cache = /* @__PURE__ */ Object.create(null);
+  let previousCache = /* @__PURE__ */ Object.create(null);
   const update = (key, value) => {
-    cache.set(key, value);
+    cache[key] = value;
     cacheSize++;
     if (cacheSize > maxCacheSize) {
       cacheSize = 0;
       previousCache = cache;
-      cache = /* @__PURE__ */ new Map();
+      cache = /* @__PURE__ */ Object.create(null);
     }
   };
   return {
     get(key) {
-      let value = cache.get(key);
+      let value = cache[key];
       if (value !== void 0) {
         return value;
       }
-      if ((value = previousCache.get(key)) !== void 0) {
+      if ((value = previousCache[key]) !== void 0) {
         update(key, value);
         return value;
       }
     },
     set(key, value) {
-      if (cache.has(key)) {
-        cache.set(key, value);
+      if (key in cache) {
+        cache[key] = value;
       } else {
         update(key, value);
       }
@@ -20475,7 +20474,14 @@ const createLruCache = (maxCacheSize) => {
 };
 const IMPORTANT_MODIFIER = "!";
 const MODIFIER_SEPARATOR = ":";
-const MODIFIER_SEPARATOR_LENGTH = MODIFIER_SEPARATOR.length;
+const EMPTY_MODIFIERS = [];
+const createResultObject = (modifiers, hasImportantModifier, baseClassName, maybePostfixModifierPosition, isExternal) => ({
+  modifiers,
+  hasImportantModifier,
+  baseClassName,
+  maybePostfixModifierPosition,
+  isExternal
+});
 const createParseClassName = (config) => {
   const {
     prefix,
@@ -20487,12 +20493,13 @@ const createParseClassName = (config) => {
     let parenDepth = 0;
     let modifierStart = 0;
     let postfixModifierPosition;
-    for (let index = 0; index < className.length; index++) {
-      let currentCharacter = className[index];
+    const len = className.length;
+    for (let index = 0; index < len; index++) {
+      const currentCharacter = className[index];
       if (bracketDepth === 0 && parenDepth === 0) {
         if (currentCharacter === MODIFIER_SEPARATOR) {
           modifiers.push(className.slice(modifierStart, index));
-          modifierStart = index + MODIFIER_SEPARATOR_LENGTH;
+          modifierStart = index + 1;
           continue;
         }
         if (currentCharacter === "/") {
@@ -20500,37 +20507,34 @@ const createParseClassName = (config) => {
           continue;
         }
       }
-      if (currentCharacter === "[") {
-        bracketDepth++;
-      } else if (currentCharacter === "]") {
-        bracketDepth--;
-      } else if (currentCharacter === "(") {
-        parenDepth++;
-      } else if (currentCharacter === ")") {
-        parenDepth--;
-      }
+      if (currentCharacter === "[") bracketDepth++;
+      else if (currentCharacter === "]") bracketDepth--;
+      else if (currentCharacter === "(") parenDepth++;
+      else if (currentCharacter === ")") parenDepth--;
     }
-    const baseClassNameWithImportantModifier = modifiers.length === 0 ? className : className.substring(modifierStart);
-    const baseClassName = stripImportantModifier(baseClassNameWithImportantModifier);
-    const hasImportantModifier = baseClassName !== baseClassNameWithImportantModifier;
+    const baseClassNameWithImportantModifier = modifiers.length === 0 ? className : className.slice(modifierStart);
+    let baseClassName = baseClassNameWithImportantModifier;
+    let hasImportantModifier = false;
+    if (baseClassNameWithImportantModifier.endsWith(IMPORTANT_MODIFIER)) {
+      baseClassName = baseClassNameWithImportantModifier.slice(0, -1);
+      hasImportantModifier = true;
+    } else if (
+      /**
+       * In Tailwind CSS v3 the important modifier was at the start of the base class name. This is still supported for legacy reasons.
+       * @see https://github.com/dcastil/tailwind-merge/issues/513#issuecomment-2614029864
+       */
+      baseClassNameWithImportantModifier.startsWith(IMPORTANT_MODIFIER)
+    ) {
+      baseClassName = baseClassNameWithImportantModifier.slice(1);
+      hasImportantModifier = true;
+    }
     const maybePostfixModifierPosition = postfixModifierPosition && postfixModifierPosition > modifierStart ? postfixModifierPosition - modifierStart : void 0;
-    return {
-      modifiers,
-      hasImportantModifier,
-      baseClassName,
-      maybePostfixModifierPosition
-    };
+    return createResultObject(modifiers, hasImportantModifier, baseClassName, maybePostfixModifierPosition);
   };
   if (prefix) {
     const fullPrefix = prefix + MODIFIER_SEPARATOR;
     const parseClassNameOriginal = parseClassName;
-    parseClassName = (className) => className.startsWith(fullPrefix) ? parseClassNameOriginal(className.substring(fullPrefix.length)) : {
-      isExternal: true,
-      modifiers: [],
-      hasImportantModifier: false,
-      baseClassName: className,
-      maybePostfixModifierPosition: void 0
-    };
+    parseClassName = (className) => className.startsWith(fullPrefix) ? parseClassNameOriginal(className.slice(fullPrefix.length)) : createResultObject(EMPTY_MODIFIERS, false, className, void 0, true);
   }
   if (experimentalParseClassName) {
     const parseClassNameOriginal = parseClassName;
@@ -20541,36 +20545,35 @@ const createParseClassName = (config) => {
   }
   return parseClassName;
 };
-const stripImportantModifier = (baseClassName) => {
-  if (baseClassName.endsWith(IMPORTANT_MODIFIER)) {
-    return baseClassName.substring(0, baseClassName.length - 1);
-  }
-  if (baseClassName.startsWith(IMPORTANT_MODIFIER)) {
-    return baseClassName.substring(1);
-  }
-  return baseClassName;
-};
 const createSortModifiers = (config) => {
-  const orderSensitiveModifiers = Object.fromEntries(config.orderSensitiveModifiers.map((modifier) => [modifier, true]));
-  const sortModifiers = (modifiers) => {
-    if (modifiers.length <= 1) {
-      return modifiers;
-    }
-    const sortedModifiers = [];
-    let unsortedModifiers = [];
-    modifiers.forEach((modifier) => {
-      const isPositionSensitive = modifier[0] === "[" || orderSensitiveModifiers[modifier];
-      if (isPositionSensitive) {
-        sortedModifiers.push(...unsortedModifiers.sort(), modifier);
-        unsortedModifiers = [];
+  const modifierWeights = /* @__PURE__ */ new Map();
+  config.orderSensitiveModifiers.forEach((mod, index) => {
+    modifierWeights.set(mod, 1e6 + index);
+  });
+  return (modifiers) => {
+    const result = [];
+    let currentSegment = [];
+    for (let i = 0; i < modifiers.length; i++) {
+      const modifier = modifiers[i];
+      const isArbitrary = modifier[0] === "[";
+      const isOrderSensitive = modifierWeights.has(modifier);
+      if (isArbitrary || isOrderSensitive) {
+        if (currentSegment.length > 0) {
+          currentSegment.sort();
+          result.push(...currentSegment);
+          currentSegment = [];
+        }
+        result.push(modifier);
       } else {
-        unsortedModifiers.push(modifier);
+        currentSegment.push(modifier);
       }
-    });
-    sortedModifiers.push(...unsortedModifiers.sort());
-    return sortedModifiers;
+    }
+    if (currentSegment.length > 0) {
+      currentSegment.sort();
+      result.push(...currentSegment);
+    }
+    return result;
   };
-  return sortModifiers;
 };
 const createConfigUtils = (config) => ({
   cache: createLruCache(config.cacheSize),
@@ -20616,10 +20619,10 @@ const mergeClassList = (classList, configUtils) => {
       }
       hasPostfixModifier = false;
     }
-    const variantModifier = sortModifiers(modifiers).join(":");
+    const variantModifier = modifiers.length === 0 ? "" : modifiers.length === 1 ? modifiers[0] : sortModifiers(modifiers).join(":");
     const modifierId = hasImportantModifier ? variantModifier + IMPORTANT_MODIFIER : variantModifier;
     const classId = modifierId + classGroupId;
-    if (classGroupsInConflict.includes(classId)) {
+    if (classGroupsInConflict.indexOf(classId) > -1) {
       continue;
     }
     classGroupsInConflict.push(classId);
@@ -20632,13 +20635,13 @@ const mergeClassList = (classList, configUtils) => {
   }
   return result;
 };
-function twJoin() {
+const twJoin = (...classLists) => {
   let index = 0;
   let argument;
   let resolvedValue;
   let string2 = "";
-  while (index < arguments.length) {
-    if (argument = arguments[index++]) {
+  while (index < classLists.length) {
+    if (argument = classLists[index++]) {
       if (resolvedValue = toValue(argument)) {
         string2 && (string2 += " ");
         string2 += resolvedValue;
@@ -20646,7 +20649,7 @@ function twJoin() {
     }
   }
   return string2;
-}
+};
 const toValue = (mix) => {
   if (typeof mix === "string") {
     return mix;
@@ -20663,20 +20666,20 @@ const toValue = (mix) => {
   }
   return string2;
 };
-function createTailwindMerge(createConfigFirst, ...createConfigRest) {
+const createTailwindMerge = (createConfigFirst, ...createConfigRest) => {
   let configUtils;
   let cacheGet;
   let cacheSet;
-  let functionToCall = initTailwindMerge;
-  function initTailwindMerge(classList) {
+  let functionToCall;
+  const initTailwindMerge = (classList) => {
     const config = createConfigRest.reduce((previousConfig, createConfigCurrent) => createConfigCurrent(previousConfig), createConfigFirst());
     configUtils = createConfigUtils(config);
     cacheGet = configUtils.cache.get;
     cacheSet = configUtils.cache.set;
     functionToCall = tailwindMerge;
     return tailwindMerge(classList);
-  }
-  function tailwindMerge(classList) {
+  };
+  const tailwindMerge = (classList) => {
     const cachedResult = cacheGet(classList);
     if (cachedResult) {
       return cachedResult;
@@ -20684,13 +20687,13 @@ function createTailwindMerge(createConfigFirst, ...createConfigRest) {
     const result = mergeClassList(classList, configUtils);
     cacheSet(classList, result);
     return result;
-  }
-  return function callTailwindMerge() {
-    return functionToCall(twJoin.apply(null, arguments));
   };
-}
+  functionToCall = initTailwindMerge;
+  return (...args) => functionToCall(twJoin(...args));
+};
+const fallbackThemeArr = [];
 const fromTheme = (key) => {
-  const themeGetter = (theme) => theme[key] || [];
+  const themeGetter = (theme) => theme[key] || fallbackThemeArr;
   themeGetter.isThemeGetter = true;
   return themeGetter;
 };
