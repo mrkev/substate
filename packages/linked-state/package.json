@@ -1,7 +1,7 @@
 {
-  "name": "linked-state",
-  "private": true,
-  "version": "0.0.0",
+  "name": "@mrkev/linked-state",
+  "private": false,
+  "version": "0.0.1",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/linked-state.umd.cjs",
