@@ -2,7 +2,7 @@ import { LinkableArray } from "./LinkableArray";
 import { LinkableMap } from "./LinkableMap";
 import { LinkableValue } from "./LinkableValue";
 import { LinkableSet } from "./LinkableSet";
-import { MutationHashable, mutationHashable } from "./MutationHashable";
+import { MutationHashable, mutationHashable } from "../lib/MutationHashable";
 
 export function printId(obj: MutationHashable) {
   const kindStr = (() => {

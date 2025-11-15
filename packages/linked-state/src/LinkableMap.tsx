@@ -1,13 +1,12 @@
 import { nanoid } from "nanoid";
-import { Contained } from "./Contained";
-import { StateChangeHandler } from "./LinkableValue";
-import { mutationHashable, MutationHashable } from "./MutationHashable";
-import { Subbable } from "./Subbable";
+import { Contained } from "../lib/Contained";
+import { mutationHashable, MutationHashable } from "../lib/MutationHashable";
+import { StateChangeHandler, Subbable } from "../lib/Subbable";
 import {
   subbableContainer,
   SubbableContainer,
   UpdateToken,
-} from "./SubbableContainer";
+} from "../lib/SubbableContainer";
 
 export class LinkableMap<K, V>
   implements

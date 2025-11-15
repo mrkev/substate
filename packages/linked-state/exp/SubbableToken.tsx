@@ -1,15 +1,14 @@
 import { nanoid } from "nanoid";
 import { useCallback, useSyncExternalStore } from "react";
-import { Contained } from "../src/Contained";
-import { StateChangeHandler } from "../src/LinkableValue";
-import { MutationHashable } from "../src/MutationHashable";
-import { Subbable, subscribe } from "../src/Subbable";
+import { Contained } from "../lib/Contained";
+import { MutationHashable } from "../lib/MutationHashable";
+import { StateChangeHandler, Subbable, subscribe } from "../lib/Subbable";
 import {
   IterableCollection,
   subbableContainer,
   SubbableContainer,
   UpdateToken,
-} from "../src/SubbableContainer";
+} from "../lib/SubbableContainer";
 
 class SubbableMark
   implements Subbable, SubbableContainer, MutationHashable, Contained

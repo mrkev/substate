@@ -1,7 +1,7 @@
-import { LinkableArray } from "./LinkableArray";
-import { LinkableMap } from "./LinkableMap";
-import { LinkableValue } from "./LinkableValue";
-import { LinkableSet } from "./LinkableSet";
+import { LinkableArray } from "../src/LinkableArray";
+import { LinkableMap } from "../src/LinkableMap";
+import { LinkableSet } from "../src/LinkableSet";
+import { LinkableValue } from "../src/LinkableValue";
 import { Subbable } from "./Subbable";
 
 export interface Contained {

@@ -1,14 +1,13 @@
 import { nanoid } from "nanoid";
-import { Contained } from "./Contained";
-import { StateChangeHandler } from "./LinkableValue";
-import { MutationHashable } from "./MutationHashable";
-import { mutableset } from "./nullthrows";
-import { Subbable } from "./Subbable";
+import { Contained } from "../lib/Contained";
+import { MutationHashable } from "../lib/MutationHashable";
+import { StateChangeHandler, Subbable } from "../lib/Subbable";
 import {
   subbableContainer,
   SubbableContainer,
   UpdateToken,
-} from "./SubbableContainer";
+} from "../lib/SubbableContainer";
+import { mutableset } from "./nullthrows";
 
 export class LinkableSet<S>
   implements Set<S>, Subbable, SubbableContainer, MutationHashable, Contained

@@ -1,9 +1,9 @@
-import type { StateChangeHandler } from "./LinkableValue";
-import { printId } from "./printId";
+// import { printId } from "./printId";
 
 /* Subbables are objects one can subscribe to */
 
 export type SubbableCallback = (changed: Subbable, notified: Subbable) => void;
+export type StateChangeHandler<S> = (value: S) => void;
 
 export interface Subbable {
   readonly _id: string;

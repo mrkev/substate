@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import type { LinkableValue, StateDispath } from "./LinkableValue";
-import { mutationHashable, MutationHashable } from "./MutationHashable";
-import { Subbable, subscribe } from "./Subbable";
+import { mutationHashable, MutationHashable } from "../lib/MutationHashable";
+import { Subbable, subscribe } from "../lib/Subbable";
 
 export function useLinkAsState<S>(
   prim: LinkableValue<S>

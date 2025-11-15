@@ -1,10 +1,9 @@
 import { nanoid } from "nanoid";
-import { Contained } from "./Contained";
-import { StateChangeHandler } from "./LinkableValue";
-import { MutationHashable } from "./MutationHashable";
+import { Contained } from "../lib/Contained";
+import { MutationHashable } from "../lib/MutationHashable";
+import { StateChangeHandler, Subbable } from "../lib/Subbable";
+import { subbableContainer, SubbableContainer } from "../lib/SubbableContainer";
 import { mutablearr } from "./nullthrows";
-import { Subbable } from "./Subbable";
-import { subbableContainer, SubbableContainer } from "./SubbableContainer";
 
 // .sort, .reverse, .fill, .copyWithin operate in place and return the array. SubbableArray
 // is not quite an array so the return types don't match.
