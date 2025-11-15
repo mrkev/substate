@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
 import { Contained } from "../lib/Contained";
 import { mutationHashable, MutationHashable } from "../lib/MutationHashable";
-import { StateChangeHandler, Subbable } from "../lib/Subbable";
+import { Subbable, SubbableCallback } from "../lib/Subbable";
 import {
   subbableContainer,
   SubbableContainer,
@@ -16,9 +16,11 @@ export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
  * LinkableValue is a Subbable holding a single atomic value
  */
 export class LinkableValue<S> implements Subbable, Contained, MutationHashable {
-  readonly _id: string;
   private _value: Readonly<S>;
-  readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
+
+  // Subbable
+  public readonly _id: string;
+  public readonly _subscriptors: Set<SubbableCallback> = new Set();
 
   // MutationHashable
   // Although LinkableValue can and usually works as normal state, we implement

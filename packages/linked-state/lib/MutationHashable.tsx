@@ -1,11 +1,11 @@
 import { Subbable, SubbableCallback, notify } from "./Subbable";
 
 export interface MutationHashable {
-  readonly _subscriptors: Set<SubbableCallback>;
   _hash: number;
 
   // Subbable
-  _id: string;
+  readonly _id: string;
+  readonly _subscriptors: Set<SubbableCallback>;
 }
 
 export const mutationHashable = {

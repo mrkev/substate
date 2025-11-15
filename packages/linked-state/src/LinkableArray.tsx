@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
 import { Contained } from "../lib/Contained";
 import { MutationHashable } from "../lib/MutationHashable";
-import { StateChangeHandler, Subbable } from "../lib/Subbable";
+import { Subbable, SubbableCallback } from "../lib/Subbable";
 import { subbableContainer, SubbableContainer } from "../lib/SubbableContainer";
 import { mutablearr } from "./nullthrows";
 
@@ -38,13 +38,13 @@ export class LinkableArray<S>
   protected _array: Array<S>;
 
   // Subbable
-  readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
+  readonly _id: string;
+  public readonly _subscriptors: Set<SubbableCallback> = new Set();
 
   // MutationHashable
   public _hash: number = 0;
 
   // SubbableContainer
-  readonly _id: string;
   readonly _propagatedTokens = new WeakSet();
 
   // Contained

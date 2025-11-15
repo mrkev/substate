@@ -1,10 +1,10 @@
 // import { printId } from "./printId";
 
-/* Subbables are objects one can subscribe to */
-
 export type SubbableCallback = (changed: Subbable, notified: Subbable) => void;
-export type StateChangeHandler<S> = (value: S) => void;
 
+/**
+ * Subbables are objects one can subscribe to
+ */
 export interface Subbable {
   readonly _id: string;
   readonly _subscriptors: Set<SubbableCallback>;
@@ -12,7 +12,7 @@ export interface Subbable {
 
 export function subscribe(
   subbable: Subbable,
-  cb: StateChangeHandler<Subbable>
+  cb: SubbableCallback
 ): () => void {
   subbable._subscriptors.add(cb);
   return () => subbable._subscriptors.delete(cb);
