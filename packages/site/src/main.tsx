@@ -4,8 +4,9 @@ import "react-json-pretty/themes/monikai.css";
 import "react-json-view-lite/dist/index.css";
 import { HashRouter, Outlet, Route, Routes } from "react-router-dom";
 import { App } from "./App.tsx";
-import { LinkableStateTest } from "./ls/LinkableStateTest.tsx";
-import { LinkableStateNested } from "./ls/LinkableStateNested.tsx";
+import { LinkableStateTest } from "./ls/LinkableStatePage.tsx";
+import { LinkableStateNested } from "./ls/LinkableStateNestedPage.tsx";
+import { MarkedStateTest } from "./marked/MarketPage.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -21,6 +22,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                 <a href="./#/">structured-state</a>
                 <a href="./#/ls">linked-state (simple)</a>
                 <a href="./#/ls2">linked-state (complex)</a>
+                <a href="./#/marked">marked</a>
               </nav>
               <main>
                 <Outlet /> {/* Renders the content of the nested route */}
@@ -33,6 +35,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="/" element={<App />} />
           <Route path="/ls" element={<LinkableStateTest />} />
           <Route path="/ls2" element={<LinkableStateNested />} />
+          <Route path="/marked" element={<MarkedStateTest />} />
         </Route>
       </Routes>
     </HashRouter>

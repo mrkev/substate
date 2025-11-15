@@ -21,17 +21,6 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true
   },
-  "files": [],
-  "include": [],
-
-  "references": [
-    { "path": "./packages/site/tsconfig.node.json" },
-    { "path": "./packages/site/tsconfig.src.json" },
-    { "path": "./packages/structured-state/tsconfig.src.json" },
-    { "path": "./packages/structured-state/tsconfig.node.json" },
-    { "path": "./packages/linked-state/tsconfig.src.json" },
-    { "path": "./packages/linked-state/tsconfig.node.json" },
-    { "path": "./packages/subbable-state/tsconfig.src.json" },
-    { "path": "./packages/subbable-state/tsconfig.node.json" }
-  ]
+  "include": ["src", "lib", "exp", "./index.ts"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }
