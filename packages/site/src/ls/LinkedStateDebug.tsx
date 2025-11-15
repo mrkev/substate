@@ -6,7 +6,6 @@ import { LinkableMap } from "../../../linked-state/src/LinkableMap";
 import { LinkableValue } from "../../../linked-state/src/LinkableValue";
 import { LinkableSet } from "../../../linked-state/src/LinkableSet";
 import { exhaustive } from "../../../structured-state/src/assertions";
-import { mutationHashable } from "../../../linked-state/lib/MutationHashable";
 
 const TAB_SIZE = 2;
 export type DisplayState = "full" | "native" | "collapsed";
@@ -313,7 +312,7 @@ export function Header({
     }
   })();
 
-  const hashStr = `.${mutationHashable.getMutationHash(obj)}`;
+  const hashStr = `.${obj._hash}`;
 
   const container = showContainerId
     ? ` -^ ${[...obj._container.values()].map((v) => v._id).join(",")}`

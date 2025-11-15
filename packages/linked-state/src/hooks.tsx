@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useSyncExternalStore } from "react";
+import { subbable, Subbable } from "../lib/Subbable";
 import type { LinkableValue, StateDispath } from "./LinkableValue";
-import { mutationHashable, MutationHashable } from "../lib/MutationHashable";
-import { Subbable, subscribe } from "../lib/Subbable";
 
 export function useLinkAsState<S>(
   prim: LinkableValue<S>
@@ -10,7 +9,7 @@ export function useLinkAsState<S>(
 
   const externalStoreSub = useCallback(
     (onStoreChange: () => void) => {
-      return subscribe(prim, (target) => {
+      return subbable.subscribe(prim, (target) => {
         // console.log(
         //   "got notif",
         //   obj,
@@ -46,7 +45,7 @@ export function useLinkAsState<S>(
   return [value, setter];
 }
 
-export function useLink<S extends Subbable & MutationHashable>(
+export function useLink<S extends Subbable>(
   obj: S,
   recursiveChanges: boolean = false
 ): () => S {
@@ -54,7 +53,7 @@ export function useLink<S extends Subbable & MutationHashable>(
   const _hash = useSyncExternalStore(
     useCallback(
       (onStoreChange) => {
-        return subscribe(obj, (target) => {
+        return subbable.subscribe(obj, (target) => {
           // console.log(
           //   "got notif",
           //   obj,
@@ -73,22 +72,4 @@ export function useLink<S extends Subbable & MutationHashable>(
     useCallback(() => obj._hash, [obj])
   );
   return () => obj;
-}
-
-// TODO: remove
-export function useSubscribeToSubbableMutationHashable<
-  T extends MutationHashable & Subbable
->(obj: T, cb?: () => void, recursiveChanges = false): T {
-  const [hash, setHash] = useState(() => mutationHashable.getMutationHash(obj));
-
-  useEffect(() => {
-    return subscribe(obj, (target) => {
-      // console.log("got notif", obj, "target is", target);
-      if (obj === target || recursiveChanges) {
-        setHash((prev) => (prev + 1) % Number.MAX_SAFE_INTEGER);
-        cb?.();
-      }
-    });
-  }, [cb, obj, recursiveChanges]);
-  return obj;
 }

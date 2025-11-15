@@ -1,7 +1,6 @@
 import { nanoid } from "nanoid";
 import { Contained } from "../lib/Contained";
-import { mutationHashable, MutationHashable } from "../lib/MutationHashable";
-import { Subbable, SubbableCallback } from "../lib/Subbable";
+import { subbable, Subbable, SubbableCallback } from "../lib/Subbable";
 import {
   subbableContainer,
   SubbableContainer,
@@ -9,12 +8,7 @@ import {
 } from "../lib/SubbableContainer";
 
 export class LinkableMap<K, V>
-  implements
-    Map<K, V>,
-    Subbable,
-    SubbableContainer,
-    MutationHashable,
-    Contained
+  implements Map<K, V>, Subbable, SubbableContainer, Contained
 {
   // main
   private _map: Map<K, V>;
@@ -32,7 +26,7 @@ export class LinkableMap<K, V>
 
   _setRaw(map: ReadonlyMap<K, V>) {
     this._map = new Map(map);
-    mutationHashable.mutated(this, this);
+    subbable.mutated(this, this);
   }
 
   _getRaw(): ReadonlyMap<K, V> {
@@ -70,7 +64,7 @@ export class LinkableMap<K, V>
     subbableContainer._uncontain(this, this._map.keys());
     subbableContainer._uncontain(this, this._map.values());
     this._map.clear();
-    mutationHashable.mutated(this, this);
+    subbable.mutated(this, this);
   }
 
   // Map<K, V> interface, mutates
@@ -81,7 +75,7 @@ export class LinkableMap<K, V>
     subbableContainer._uncontain(this, key);
     subbableContainer._uncontain(this, this._map.get(key));
     const result = this._map.delete(key);
-    mutationHashable.mutated(this, this);
+    subbable.mutated(this, this);
     return result;
   }
 
@@ -109,7 +103,7 @@ export class LinkableMap<K, V>
     subbableContainer._contain(this, value);
 
     this._map.set(key, value);
-    mutationHashable.mutated(this, this);
+    subbable.mutated(this, this);
     return this;
   }
 

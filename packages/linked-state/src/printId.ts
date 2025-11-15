@@ -1,10 +1,10 @@
+import { Subbable } from "../lib/Subbable";
 import { LinkableArray } from "./LinkableArray";
 import { LinkableMap } from "./LinkableMap";
-import { LinkableValue } from "./LinkableValue";
 import { LinkableSet } from "./LinkableSet";
-import { MutationHashable, mutationHashable } from "../lib/MutationHashable";
+import { LinkableValue } from "./LinkableValue";
 
-export function printId(obj: MutationHashable) {
+export function printId(obj: Subbable) {
   const kindStr = (() => {
     if (obj instanceof LinkableMap) {
       return "lmap";
@@ -19,7 +19,7 @@ export function printId(obj: MutationHashable) {
     }
   })();
 
-  const hashStr = `.${mutationHashable.getMutationHash(obj)}`;
+  const hashStr = `.${obj._hash}`;
 
   return `${obj.constructor.name}: ${obj._id}${hashStr}`;
   // return `${kindStr}: ${obj._id}${hashStr}`;

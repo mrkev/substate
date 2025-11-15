@@ -1,7 +1,6 @@
 import { nanoid } from "nanoid";
 import { Contained } from "../lib/Contained";
-import { mutationHashable, MutationHashable } from "../lib/MutationHashable";
-import { Subbable, SubbableCallback } from "../lib/Subbable";
+import { subbable, Subbable, SubbableCallback } from "../lib/Subbable";
 import {
   subbableContainer,
   SubbableContainer,
@@ -15,7 +14,7 @@ export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
 /**
  * LinkableValue is a Subbable holding a single atomic value
  */
-export class LinkableValue<S> implements Subbable, Contained, MutationHashable {
+export class LinkableValue<S> implements Subbable, Contained {
   private _value: Readonly<S>;
 
   // Subbable
@@ -46,9 +45,7 @@ export class LinkableValue<S> implements Subbable, Contained, MutationHashable {
     this._value = value;
 
     // TODO: this._value = value; don't notify?
-    // Now that LinkableValue is a MutationHashable, call this instead of `notify` directly
-    mutationHashable.mutated(this, this);
-    // notify(this, this);
+    subbable.mutated(this, this);
 
     // We don't need to save the token, since primitvies, being leaves, will never be notified when a child changes
     const token = new UpdateToken(this);

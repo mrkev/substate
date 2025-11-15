@@ -3,39 +3,40 @@
 export type SubbableCallback = (changed: Subbable, notified: Subbable) => void;
 
 /**
- * Subbables are objects one can subscribe to
+ * Subbables are objects one can subscribe to. All Subbables include:
+ * - an id to identify
+ * - a set of callbacks to be called on mutation
+ * - a hash to version
  */
 export interface Subbable {
   readonly _id: string;
   readonly _subscriptors: Set<SubbableCallback>;
+
+  _hash: number;
 }
 
-export function subscribe(
-  subbable: Subbable,
-  cb: SubbableCallback
-): () => void {
-  subbable._subscriptors.add(cb);
-  return () => subbable._subscriptors.delete(cb);
-}
+export const subbable = {
+  /**
+   * Records a callback, so that changes to "subbable" trigger a call of "callback"
+   */
+  subscribe(mh: Subbable, cb: SubbableCallback): () => void {
+    mh._subscriptors.add(cb);
+    return () => mh._subscriptors.delete(cb);
+  },
 
-export function notify(
-  // this changed, notify subscribers to this Subbable
-  subbable: Subbable,
-  // this is the recursive child that changed, subscribers can choose to
-  // act differently based on weather it was the object they're listening to
-  // that changed, or a recursive child
-  target: Subbable
-) {
-  // console.log(
-  //   "[notify]",
-  //   subbable._subscriptors.size,
-  //   "subs of",
-  //   `(${printId(subbable as any)})`,
-  //   "changed:",
-  //   `(${printId(target as any)})`
-  // );
+  /**
+   * @param mh what we're notifying of a change
+   * @param target what changed
+   *  this is the recursive child that changed, subscribers can choose to
+   *  act differently based on weather it was the object they're listening to
+   *  that changed, or a recursive child
+   */
+  mutated(mh: Subbable, target: Subbable) {
+    mh._hash = (mh._hash + 1) % Number.MAX_SAFE_INTEGER;
 
-  for (const cb of subbable._subscriptors) {
-    cb(target, subbable);
-  }
-}
+    // notify
+    for (const cb of mh._subscriptors) {
+      cb(target, mh);
+    }
+  },
+};

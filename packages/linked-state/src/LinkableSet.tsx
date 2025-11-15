@@ -1,6 +1,5 @@
 import { nanoid } from "nanoid";
 import { Contained } from "../lib/Contained";
-import { MutationHashable } from "../lib/MutationHashable";
 import { Subbable, SubbableCallback } from "../lib/Subbable";
 import {
   subbableContainer,
@@ -10,7 +9,7 @@ import {
 import { mutableset } from "./nullthrows";
 
 export class LinkableSet<S>
-  implements Set<S>, Subbable, SubbableContainer, MutationHashable, Contained
+  implements Set<S>, Subbable, SubbableContainer, Contained
 {
   // main
   private _set: ReadonlySet<S>;
