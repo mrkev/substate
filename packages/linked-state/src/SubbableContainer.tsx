@@ -11,6 +11,11 @@ export class UpdateToken {
   constructor(public readonly target: Subbable) {}
 }
 
+export type IterableCollection =
+  | Array<unknown>
+  | ReadonlySet<unknown>
+  | IterableIterator<unknown>;
+
 //  implements MutationHashable, Subbable, Contained
 export interface SubbableContainer {
   readonly _propagatedTokens: WeakSet<UpdateToken>;
@@ -28,7 +33,6 @@ export interface SubbableContainer {
 
 export const subbableContainer = {
   // abstract _replace(val: T): void;
-  // abstract _childChanged(child: Subbable): void;
 
   _contain(container: SubbableContainer, item: unknown) {
     if (isContainable(item)) {
@@ -36,10 +40,7 @@ export const subbableContainer = {
     }
   },
 
-  _containAll(
-    container: SubbableContainer,
-    items: Array<unknown> | ReadonlySet<unknown> | IterableIterator<unknown>
-  ) {
+  _containAll(container: SubbableContainer, items: IterableCollection) {
     for (const elem of items) {
       if (isContainable(elem)) {
         elem._container.add(container);
@@ -61,10 +62,7 @@ export const subbableContainer = {
     }
   },
 
-  _uncontainAll(
-    container: SubbableContainer,
-    items: Array<unknown> | ReadonlySet<unknown>
-  ) {
+  _uncontainAll(container: SubbableContainer, items: IterableCollection) {
     for (const item of items) {
       subbableContainer._uncontain(container, item);
     }

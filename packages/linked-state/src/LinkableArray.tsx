@@ -42,7 +42,7 @@ export class LinkableArray<S>
   readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
 
   // MutationHashable
-  _hash: number = 0;
+  public _hash: number = 0;
 
   // SubbableContainer
   readonly _id: string;
@@ -50,19 +50,6 @@ export class LinkableArray<S>
 
   // Contained
   readonly _container = new Set<SubbableContainer>();
-
-  /** See usage in SSchemaArray */
-  // protected _containedIds: WeakRefMap<any> | null = null;
-
-  // // NOTE: we want this here because we overwite it in SSchemaArray
-  // protected _contain(items: Array<S>) {
-  //   SubbableContainer._contain(this, items);
-  // }
-
-  // NOTE: we want this here because we overwite it in SSchemaArray
-  // protected _uncontain(item: S) {
-  //   SubbableContainer._uncontain(item);
-  // }
 
   _replace(cb: (arr: Array<S>) => ReadonlyArray<S>) {
     subbableContainer._uncontainAll(this, this._array);
@@ -80,9 +67,13 @@ export class LinkableArray<S>
     }
   }
 
-  private mutate<V>(mutator: (rep: Array<S>) => V): V {
+  public static create<T>(initialValue?: Array<T>) {
+    return new this(initialValue ?? [], nanoid(5));
+  }
+
+  private mutate<V>(mutator: () => V): V {
     // saveForHistory(this);
-    const result = mutator(this._array);
+    const result = mutator();
     subbableContainer._notifyChange(this, this);
     return result;
   }
@@ -94,10 +85,6 @@ export class LinkableArray<S>
   // me
   toJSON() {
     return this._array;
-  }
-
-  public static create<T>(initialValue?: Array<T>) {
-    return new this(initialValue ?? [], nanoid(5));
   }
 
   // Array<S> interface
@@ -129,8 +116,8 @@ export class LinkableArray<S>
       return;
     }
 
-    return this.mutate((rep) => {
-      const res = rep.pop();
+    return this.mutate(() => {
+      const res = this._array.pop();
       res != null && subbableContainer._uncontain(this, res);
       return res;
     });
@@ -142,8 +129,8 @@ export class LinkableArray<S>
       return;
     }
 
-    return this.mutate((clone) => {
-      const res = clone.shift();
+    return this.mutate(() => {
+      const res = this._array.shift();
       res != null && subbableContainer._uncontain(this, res);
       return res;
     });
@@ -154,10 +141,10 @@ export class LinkableArray<S>
     if (items.length < 1) {
       return this.length;
     }
-    subbableContainer._containAll(this, items);
 
-    return this.mutate((clone) => {
-      return clone.push(...items);
+    return this.mutate(() => {
+      subbableContainer._containAll(this, items);
+      return this._array.push(...items);
     });
   }
 
@@ -168,15 +155,15 @@ export class LinkableArray<S>
     }
     subbableContainer._containAll(this, items);
 
-    return this.mutate((clone) => {
-      return clone.unshift(...items);
+    return this.mutate(() => {
+      return this._array.unshift(...items);
     });
   }
 
   // Array<S> interface, mutates
   sort(compareFn?: (a: S, b: S) => number): this {
-    return this.mutate((raw) => {
-      raw.sort(compareFn);
+    return this.mutate(() => {
+      this._array.sort(compareFn);
       return this;
     });
   }
@@ -184,8 +171,8 @@ export class LinkableArray<S>
   // Array<S> interface, mutates
   reverse(): this {
     // TODO: if empty do nothing?
-    return this.mutate((clone) => {
-      clone.reverse();
+    return this.mutate(() => {
+      this._array.reverse();
       return this;
     });
   }
@@ -195,8 +182,8 @@ export class LinkableArray<S>
   splice(start: number, deleteCount: number, ...items: S[]): S[];
   splice(start: any, deleteCount?: any, ...items: any[]): S[] {
     subbableContainer._containAll(this, items);
-    return this.mutate((_array) => {
-      const deleted = _array.splice(start, deleteCount, ...items);
+    return this.mutate(() => {
+      const deleted = this._array.splice(start, deleteCount, ...items);
       for (const elem of deleted) {
         subbableContainer._uncontain(this, elem);
       }
@@ -208,17 +195,17 @@ export class LinkableArray<S>
   fill(value: S, start?: number, end?: number): this {
     subbableContainer._containAll(this, [value]);
     console.warn("TODO: fill BREAKING: containment");
-    return this.mutate((_array) => {
-      _array.fill(value, start, end);
+    return this.mutate(() => {
+      this._array.fill(value, start, end);
       return this;
     });
   }
 
   // Array<S> interface, mutates
   copyWithin(target: number, start: number, end?: number): this {
-    return this.mutate((_array) => {
+    return this.mutate(() => {
       console.warn("TODO: copyWithin BREAKING: containment");
-      _array.copyWithin(target, start, end);
+      this._array.copyWithin(target, start, end);
       return this;
     });
   }
@@ -267,8 +254,9 @@ export class LinkableArray<S>
   }
 
   lastIndexOf(searchElement: S, fromIndex?: number): number {
-    throw new Error("Method not implemented.");
+    return this._array.lastIndexOf(searchElement, fromIndex);
   }
+
   every<S>(
     predicate: (value: S, index: number, array: S[]) => value is S,
     thisArg?: any
@@ -280,17 +268,19 @@ export class LinkableArray<S>
   every(predicate: any, thisArg?: any): boolean {
     throw new Error("Method not implemented.");
   }
+
   some(
     predicate: (value: S, index: number, array: S[]) => unknown,
     thisArg?: any
   ): boolean {
-    throw new Error("Method not implemented.");
+    return this._array.some(predicate, thisArg);
   }
+
   forEach(
     callbackfn: (value: S, index: number, array: S[]) => void,
     thisArg?: any
   ): void {
-    throw new Error("Method not implemented.");
+    return this._array.forEach(callbackfn, thisArg);
   }
 
   filter<S>(
