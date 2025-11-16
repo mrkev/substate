@@ -15,14 +15,12 @@ export type IterableCollection =
   | ReadonlySet<unknown>
   | IterableIterator<unknown>;
 
-//  implements MutationHashable, Subbable, Contained
+//  implements Subbable, Contained
 export interface SubbableContainer {
   readonly _propagatedTokens: WeakSet<UpdateToken>;
 
   // Subbable
   readonly _id: string;
-
-  // MutationHashable
   readonly _subscriptors: Set<SubbableCallback>;
   _hash: number;
 

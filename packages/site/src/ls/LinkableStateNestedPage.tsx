@@ -6,14 +6,19 @@ import { LinkableArray } from "../../../linked-state/src/LinkableArray";
 import { LinkableValue } from "../../../linked-state/src/LinkableValue";
 import { DynamicTestArray } from "./LinkableArrayTest";
 import { DynamicTestMap } from "./LinkableMapTest";
+import { DebugOutBoolean } from "./LinkableValueTest";
 
 const map = lMap<number, LinkableArray<number>>();
 const set = lSet<number>();
 const primitive = lValue(0);
 
+const sharedBool = lValue(false);
+
 const listState = lMap([
   ["buy milk", lValue(true)],
   ["buy eggs", lValue(false)],
+  ["shared 1", sharedBool],
+  ["shared 2", sharedBool],
 ]);
 
 export function LinkableStateNested({ className }: { className?: string }) {
@@ -96,11 +101,12 @@ function ListItem({
   return (
     <li>
       {name}:{" "}
-      {done().get() ? (
+      {/* {done().get() ? (
         "done"
       ) : (
         <button onClick={() => doneState.set(true)}>mark done</button>
-      )}
+      )} */}
+      <DebugOutBoolean prim={doneState} />
     </li>
   );
 }

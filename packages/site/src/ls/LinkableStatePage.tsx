@@ -4,7 +4,7 @@ import { LinkableSet } from "../../../linked-state/src/LinkableSet";
 import { LinkableValue } from "../../../linked-state/src/LinkableValue";
 import { LinkableArrayTest } from "./LinkableArrayTest";
 import { LinkableMapTest } from "./LinkableMapTest";
-import { LinkablePrimitiveTest } from "./LinkablePrimitiveTest";
+import { LinkableValueTest } from "./LinkableValueTest";
 import { LinkableSetTest } from "./LinkableSetTest";
 
 const map = LinkableMap.create<number, string>();
@@ -24,7 +24,7 @@ export function LinkableStateTest() {
         className="rounded-sm bg-gray-700/10 p-4"
         linkedArray={array}
       />
-      <LinkablePrimitiveTest
+      <LinkableValueTest
         className="rounded-sm bg-gray-700/10 p-4"
         prim={primitive}
       />

@@ -7,8 +7,6 @@ import {
   UpdateToken,
 } from "../lib/SubbableContainer";
 
-export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
-
 // TODO: make this a condtainer? What's the use-case?
 
 /**

@@ -4,7 +4,7 @@ import { useLinkAsState } from "../../../linked-state/src/hooks";
 import { DebugOutSimplePrm, Header } from "./LinkedStateDebug";
 import { TxtButton } from "./TxtButton";
 
-export function LinkablePrimitiveTest({
+export function LinkableValueTest({
   prim,
   className,
 }: {
@@ -15,7 +15,7 @@ export function LinkablePrimitiveTest({
     <div className={twMerge("overflow-scroll", className)}>
       <h2>LinkedPrimitive Tester</h2>
       <pre className="text-start text-sm">
-        <DebugOutPrimitive prim={prim} />
+        <DebugOutNumber prim={prim} />
       </pre>
     </div>
   );
@@ -30,7 +30,7 @@ function isPrimitiveKind(val: unknown) {
   );
 }
 
-function DebugOutPrimitive({
+function DebugOutNumber({
   prim,
   path = "",
 }: {
@@ -67,4 +67,23 @@ function DebugOutPrimitive({
       </>
     );
   }
+}
+
+export function DebugOutBoolean({
+  prim,
+  path = "",
+}: {
+  prim: LinkableValue<boolean>;
+  path?: string;
+}) {
+  const [value, setValue] = useLinkAsState(prim);
+  const flip = () => setValue((v) => !v);
+
+  return (
+    <>
+      <Header obj={prim} path={`${path}/${prim._id}`} />{" "}
+      <DebugOutSimplePrm val={value} />{" "}
+      <TxtButton title="flip" onClick={flip} children="toggle" />
+    </>
+  );
 }

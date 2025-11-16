@@ -1,6 +1,8 @@
 import { useCallback, useSyncExternalStore } from "react";
 import { subbable, Subbable } from "../lib/Subbable";
-import type { LinkableValue, StateDispath } from "./LinkableValue";
+import type { LinkableValue } from "./LinkableValue";
+
+type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
 
 export function useLinkAsState<S>(
   prim: LinkableValue<S>
