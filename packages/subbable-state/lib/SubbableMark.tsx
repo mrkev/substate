@@ -1,8 +1,6 @@
 import { nanoid } from "nanoid";
-import { useCallback, useSyncExternalStore } from "react";
 import { Contained } from "./Contained";
-import { MutationHashable } from "./MutationHashable";
-import { StateChangeHandler, Subbable, subscribe } from "./Subbable";
+import { Subbable, SubbableCallback } from "./Subbable";
 import {
   IterableCollection,
   subbableContainer,
@@ -10,12 +8,10 @@ import {
   UpdateToken,
 } from "./SubbableContainer";
 
-export class SubbableMark
-  implements Subbable, SubbableContainer, MutationHashable, Contained
-{
+export class SubbableMark implements Subbable, SubbableContainer, Contained {
   // Subbable
   public readonly _id: string;
-  public readonly _subscriptors = new Set<StateChangeHandler<Subbable>>();
+  public readonly _subscriptors = new Set<SubbableCallback>();
 
   // SubbableContainer
   public readonly _propagatedTokens: WeakSet<UpdateToken> = new WeakSet();

@@ -1,5 +1,5 @@
 import { useCallback, useSyncExternalStore } from "react";
-import { subscribe } from "../lib/Subbable";
+import { subbable } from "../lib/Subbable";
 import { MarkedSubbable } from "../lib/SubbableMark";
 
 export function useLink<S extends MarkedSubbable>(
@@ -10,7 +10,7 @@ export function useLink<S extends MarkedSubbable>(
   const _hash = useSyncExternalStore(
     useCallback(
       (onStoreChange) => {
-        return subscribe(obj.$$token, (target) => {
+        return subbable.subscribe(obj.$$token, (target) => {
           // console.log(
           //   "got notif",
           //   obj,

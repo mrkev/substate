@@ -1,6 +1,5 @@
 import { isContainable } from "./Contained";
-import { mutationHashable } from "./MutationHashable";
-import { Subbable, SubbableCallback } from "./Subbable";
+import { subbable, Subbable, SubbableCallback } from "./Subbable";
 
 /**
  * A token is unique to an update (a call to _notifyChange). It serves two purposes:
@@ -16,21 +15,18 @@ export type IterableCollection =
   | ReadonlySet<unknown>
   | IterableIterator<unknown>;
 
-//  implements MutationHashable, Subbable, Contained
+//  implements Subbable, Contained
 export interface SubbableContainer {
   readonly _propagatedTokens: WeakSet<UpdateToken>;
 
   // Subbable
   readonly _id: string;
-
-  // MutationHashable
   readonly _subscriptors: Set<SubbableCallback>;
   _hash: number;
 
   // Contained
   readonly _container: Set<SubbableContainer>; // all containers can be contained
 }
-
 export const subbableContainer = {
   // abstract _replace(val: T): void;
 
@@ -75,7 +71,7 @@ export const subbableContainer = {
     const token = new UpdateToken(target);
     struct._propagatedTokens.add(token);
 
-    mutationHashable.mutated(struct, target);
+    subbable.mutated(struct, target);
     for (const container of struct._container) {
       subbableContainer._childChanged(container, token);
     }
@@ -91,7 +87,7 @@ export const subbableContainer = {
     }
     node._propagatedTokens.add(token);
 
-    mutationHashable.mutated(node, token.target);
+    subbable.mutated(node, token.target);
     for (const container of node._container) {
       subbableContainer._childChanged(container, token);
     }
