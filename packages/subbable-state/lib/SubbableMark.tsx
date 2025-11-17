@@ -20,21 +20,27 @@ export class SubbableMark implements Subbable, SubbableContainer, Contained {
   public _hash: number = 0;
 
   // Contained
-  public readonly _container = new Set<SubbableContainer>();
+  public readonly _container = new Set<MarkedSubbable>();
 
-  constructor(_id: string, contain: IterableCollection) {
+  constructor(
+    holder: MarkedSubbable,
+    _id: string,
+    contain: IterableCollection
+  ) {
     this._id = _id;
-    subbableContainer._containAll(this, contain);
+    subbableContainer._containAll(holder, contain);
     // getGlobalState().knownObjects.set(this._id, this);
   }
 
   public static create<T>(
+    holder: MarkedSubbable,
     initial?: (readonly T[] | null) | Iterable<T> | null | undefined
   ) {
-    return new this(nanoid(5), new Set(initial));
+    return new this(holder, nanoid(5), new Set(initial));
   }
 
   public mutate<V>(
+    struct: MarkedSubbable,
     mutator: (
       contain: (items: IterableCollection) => void,
       uncontain: (items: IterableCollection) => void
@@ -43,10 +49,10 @@ export class SubbableMark implements Subbable, SubbableContainer, Contained {
     // saveForHistory(this);
     console.log("mutating", this);
     const result = mutator(
-      (items) => subbableContainer._containAll(this, items),
-      (items) => subbableContainer._uncontainAll(this, items)
+      (items) => subbableContainer._containAll(struct, items),
+      (items) => subbableContainer._uncontainAll(struct, items)
     );
-    subbableContainer._notifyChange(this, this);
+    subbableContainer._notifyChange(struct, struct);
     return result;
   }
 }

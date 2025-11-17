@@ -6,7 +6,7 @@ import { HashRouter, Outlet, Route, Routes } from "react-router-dom";
 import { App } from "./App.tsx";
 import { LinkableStateTest } from "./ls/LinkableStatePage.tsx";
 import { LinkableStateNested } from "./ls/LinkableStateNestedPage.tsx";
-import { MarkedStateTest } from "./marked/MarketPage.tsx";
+import { MarkedStateTest } from "./marked/MarkedPage.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

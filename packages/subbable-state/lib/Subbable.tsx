@@ -1,6 +1,11 @@
 // import { printId } from "./printId";
 
-export type SubbableCallback = (changed: Subbable, notified: Subbable) => void;
+import { MarkedSubbable } from "./SubbableMark";
+
+export type SubbableCallback = (
+  changed: MarkedSubbable, // what changed
+  notified: MarkedSubbable // what we're notifying of a change
+) => void;
 
 /**
  * Subbables are objects one can subscribe to. All Subbables include:
@@ -19,9 +24,9 @@ export const subbable = {
   /**
    * Records a callback, so that changes to "subbable" trigger a call of "callback"
    */
-  subscribe(mh: Subbable, cb: SubbableCallback): () => void {
-    mh._subscriptors.add(cb);
-    return () => mh._subscriptors.delete(cb);
+  subscribe(mh: MarkedSubbable, cb: SubbableCallback): () => void {
+    mh.$$token._subscriptors.add(cb);
+    return () => mh.$$token._subscriptors.delete(cb);
   },
 
   /**
@@ -31,11 +36,11 @@ export const subbable = {
    *  act differently based on weather it was the object they're listening to
    *  that changed, or a recursive child
    */
-  mutated(mh: Subbable, target: Subbable) {
-    mh._hash = (mh._hash + 1) % Number.MAX_SAFE_INTEGER;
+  mutated(mh: MarkedSubbable, target: MarkedSubbable) {
+    mh.$$token._hash = (mh.$$token._hash + 1) % Number.MAX_SAFE_INTEGER;
 
     // notify
-    for (const cb of mh._subscriptors) {
+    for (const cb of mh.$$token._subscriptors) {
       cb(target, mh);
     }
   },

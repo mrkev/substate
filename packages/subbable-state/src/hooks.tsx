@@ -10,7 +10,7 @@ export function useLink<S extends MarkedSubbable>(
   const _hash = useSyncExternalStore(
     useCallback(
       (onStoreChange) => {
-        return subbable.subscribe(obj.$$token, (target) => {
+        return subbable.subscribe(obj, (target) => {
           // console.log(
           //   "got notif",
           //   obj,
@@ -19,7 +19,7 @@ export function useLink<S extends MarkedSubbable>(
           //   "notifying?",
           //   obj === target || recursiveChanges
           // );
-          if (obj.$$token === target || recursiveChanges) {
+          if (obj === target || recursiveChanges) {
             onStoreChange();
           }
         });

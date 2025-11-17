@@ -1,5 +1,6 @@
 import { isContainable } from "./Contained";
-import { subbable, Subbable, SubbableCallback } from "./Subbable";
+import { subbable, SubbableCallback } from "./Subbable";
+import { MarkedSubbable } from "./SubbableMark";
 
 /**
  * A token is unique to an update (a call to _notifyChange). It serves two purposes:
@@ -7,7 +8,7 @@ import { subbable, Subbable, SubbableCallback } from "./Subbable";
  * - it holds the target of the update, acting like an "event" in that sense: a record of the update
  */
 export class UpdateToken {
-  constructor(public readonly target: Subbable) {}
+  constructor(public readonly target: MarkedSubbable) {}
 }
 
 export type IterableCollection =
@@ -25,12 +26,12 @@ export interface SubbableContainer {
   _hash: number;
 
   // Contained
-  readonly _container: Set<SubbableContainer>; // all containers can be contained
+  readonly _container: Set<MarkedSubbable>; // all containers can be contained
 }
 export const subbableContainer = {
   // abstract _replace(val: T): void;
 
-  _containAll(container: SubbableContainer, items: IterableCollection) {
+  _containAll(container: MarkedSubbable, items: IterableCollection) {
     for (const elem of items) {
       if (!isContainable(elem)) {
         continue;
@@ -39,7 +40,7 @@ export const subbableContainer = {
     }
   },
 
-  _uncontainAll(container: SubbableContainer, items: IterableCollection) {
+  _uncontainAll(container: MarkedSubbable, items: IterableCollection) {
     for (const item of items) {
       if (!isContainable(item)) {
         continue;
@@ -67,12 +68,12 @@ export const subbableContainer = {
    * and about the change of a certain target
    */
   // TODO: take MarkedSubbable, not SubbableContainer
-  _notifyChange(struct: SubbableContainer, target: SubbableContainer) {
+  _notifyChange(struct: MarkedSubbable, target: MarkedSubbable) {
     const token = new UpdateToken(target);
-    struct._propagatedTokens.add(token);
+    struct.$$token._propagatedTokens.add(token);
 
     subbable.mutated(struct, target);
-    for (const container of struct._container) {
+    for (const container of struct.$$token._container) {
       subbableContainer._childChanged(container, token);
     }
 
@@ -80,15 +81,15 @@ export const subbableContainer = {
     // struct._propagatedTokens.delete(token)
   },
 
-  _childChanged(node: SubbableContainer, token: UpdateToken) {
-    if (node._propagatedTokens.has(token)) {
+  _childChanged(struct: MarkedSubbable, token: UpdateToken) {
+    if (struct.$$token._propagatedTokens.has(token)) {
       // we already processed this event. stop here to prevent loops
       return;
     }
-    node._propagatedTokens.add(token);
+    struct.$$token._propagatedTokens.add(token);
 
-    subbable.mutated(node, token.target);
-    for (const container of node._container) {
+    subbable.mutated(struct, token.target);
+    for (const container of struct.$$token._container) {
       subbableContainer._childChanged(container, token);
     }
 
