@@ -2,6 +2,7 @@ import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { MarkedSet, useLink } from "../../../subbable-state/index";
 import { DebugOutMarkedSet, DynamicTest } from "./MarkedSetTest";
+import { MarkedArrayTest } from "./MarkedArrayTest";
 
 const set = MarkedSet.create<MarkedSet<number>>([
   MarkedSet.create<number>([0]),
@@ -25,7 +26,6 @@ export function MarkedSetTest({
   markedSet: MarkedSet<MarkedSet<number>>;
   className?: string;
 }) {
-  const [input, setInput] = useState(0);
   const [next, setNext] = useState(0);
   const set = useLink(markedSet);
   function add() {
@@ -34,39 +34,42 @@ export function MarkedSetTest({
   }
 
   return (
-    <div className={twMerge("overflow-scroll", className)}>
-      <h2>markedSet Tester</h2>
-      <button onClick={add}>+</button>
-      <pre className="text-start text-sm">
-        {[...set()].map((x, i) => (
-          <div key={i}>{JSON.stringify([...x])}</div>
-        ))}
+    <>
+      <MarkedArrayTest />
+      <div className={twMerge("overflow-scroll", className)}>
+        <h2>markedSet Tester</h2>
+        <button onClick={add}>+</button>
+        <pre className="text-start text-sm">
+          {[...set()].map((x, i) => (
+            <div key={i}>{JSON.stringify([...x])}</div>
+          ))}
 
-        <DebugOutMarkedSet
-          set={set()}
-          pad={0}
-          showUnknowns={false}
-          handleAdd={add}
-          handleDelete={(x) => set().delete(x)}
-          renderValue={(
-            value: MarkedSet<number>,
-            key: string,
-            pad: number,
-            path: string,
-            showUnknowns?: boolean
-          ) => (
-            <DynamicTest
-              key={key}
-              val={value}
-              pad={pad}
-              path={path}
-              showUnknowns={showUnknowns}
-            />
-          )}
-        />
+          <DebugOutMarkedSet
+            set={set()}
+            pad={0}
+            showUnknowns={false}
+            handleAdd={add}
+            handleDelete={(x) => set().delete(x)}
+            renderValue={(
+              value: MarkedSet<number>,
+              key: string,
+              pad: number,
+              path: string,
+              showUnknowns?: boolean
+            ) => (
+              <DynamicTest
+                key={key}
+                val={value}
+                pad={pad}
+                path={path}
+                showUnknowns={showUnknowns}
+              />
+            )}
+          />
 
-        {/* <DebugOutSet set={markedSet} pad={0} showUnknowns={false} /> */}
-      </pre>
-    </div>
+          {/* <DebugOutSet set={markedSet} pad={0} showUnknowns={false} /> */}
+        </pre>
+      </div>
+    </>
   );
 }

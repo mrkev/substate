@@ -4,7 +4,7 @@ import { MarkedSubbable } from "../../../subbable-state/lib/SubbableMark";
 import { classOfKind, DebugOutSimplePrm } from "../ls/LinkedStateDebug";
 import { TxtButton } from "../ls/TxtButton";
 
-const TAB_SIZE = 2;
+export const TAB_SIZE = 2;
 
 export function DebugOutMarkedSet<T>({
   set,

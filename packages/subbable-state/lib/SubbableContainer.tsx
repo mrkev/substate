@@ -13,6 +13,7 @@ export class UpdateToken {
 
 export type IterableCollection =
   | Array<unknown>
+  | Iterable<unknown>
   | ReadonlySet<unknown>
   | IterableIterator<unknown>;
 
