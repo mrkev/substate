@@ -30,6 +30,7 @@ export function useLinkAsState<S>(
 
   const value = useSyncExternalStore(
     externalStoreSub,
+    useCallback(() => prim.get(), [prim]),
     useCallback(() => prim.get(), [prim])
   );
 
@@ -71,6 +72,7 @@ export function useLink<S extends Subbable>(
       },
       [obj, recursiveChanges]
     ),
+    useCallback(() => obj._hash, [obj]),
     useCallback(() => obj._hash, [obj])
   );
   return () => obj;
