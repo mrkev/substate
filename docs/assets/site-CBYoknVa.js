@@ -14636,12 +14636,12 @@ function requireCompilerRuntime() {
   return compilerRuntime.exports;
 }
 var compilerRuntimeExports = requireCompilerRuntime();
-const urlAlphabet = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
-let nanoid = (size = 21) => {
+const urlAlphabet$1 = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
+let nanoid$1 = (size = 21) => {
   let id = "";
   let bytes = crypto.getRandomValues(new Uint8Array(size |= 0));
   while (size--) {
-    id += urlAlphabet[bytes[size] & 63];
+    id += urlAlphabet$1[bytes[size] & 63];
   }
   return id;
 };
@@ -14665,13 +14665,13 @@ function mutableset$1(set2) {
 function setWindow(prop, value) {
   globalThis[prop] = value;
 }
-function subscribe$1(subbable, cb) {
-  subbable._subscriptors.add(cb);
-  return () => subbable._subscriptors.delete(cb);
+function subscribe(subbable2, cb) {
+  subbable2._subscriptors.add(cb);
+  return () => subbable2._subscriptors.delete(cb);
 }
-function notify$1(subbable, target) {
-  for (const cb of subbable._subscriptors) {
-    cb(target, subbable);
+function notify(subbable2, target) {
+  for (const cb of subbable2._subscriptors) {
+    cb(target, subbable2);
   }
 }
 class MutationHashable {
@@ -14682,11 +14682,11 @@ class MutationHashable {
   }
   static mutated(mh, target) {
     mh._hash = (mh._hash + 1) % Number.MAX_SAFE_INTEGER;
-    notify$1(mh, target);
+    notify(mh, target);
   }
 }
 const CONTAINER_IGNORE_KEYS = /* @__PURE__ */ new Set(["_id", "_hash", "_subscriptors", "_container", "_propagatedTokens"]);
-let UpdateToken$1 = class UpdateToken {
+let UpdateToken$3 = class UpdateToken {
   constructor(target) {
     this.target = target;
   }
@@ -14704,19 +14704,19 @@ class SubbableContainer {
   // abstract _replace(val: T): void;
   // abstract _childChanged(child: Subbable): void;
   static _contain(container, item) {
-    if (isContainable$1(item)) {
+    if (isContainable$3(item)) {
       item._container.add(container);
     }
   }
   static _containAll(container, items) {
     for (const elem of items) {
-      if (isContainable$1(elem)) {
+      if (isContainable$3(elem)) {
         elem._container.add(container);
       }
     }
   }
   static _uncontain(container, item) {
-    if (isContainable$1(item)) {
+    if (isContainable$3(item)) {
       if (!item._container.has(container)) {
         console.warn("_uncontain:", item._container, "does not contain", item);
       }
@@ -14736,7 +14736,7 @@ class SubbableContainer {
    * and about the change of a certain target
    */
   static _notifyChange(struct, target) {
-    const token = new UpdateToken$1(target);
+    const token = new UpdateToken$3(target);
     struct._propagatedTokens.add(token);
     MutationHashable.mutated(struct, target);
     for (const container of struct._container) {
@@ -14766,13 +14766,13 @@ class LinkedPrimitive {
     globalState.knownObjects.set(this._id, this);
   }
   static of(val) {
-    return new this(val, nanoid(5));
+    return new this(val, nanoid$1(5));
   }
   set(value) {
     saveForHistory(this);
     this._value = value;
-    notify$1(this, this);
-    const token = new UpdateToken$1(this);
+    notify(this, this);
+    const token = new UpdateToken$3(this);
     for (const container of this._container) {
       SubbableContainer._childChanged(container, token);
     }
@@ -14805,7 +14805,7 @@ class Struct2 {
   // create objects with `new XXX` and instead use `create()`? built-in create as a static prop
   // might be good too.
   constructor() {
-    this._id = nanoid(5);
+    this._id = nanoid$1(5);
   }
   _initConstructed(props) {
     const self = this;
@@ -14820,7 +14820,7 @@ class Struct2 {
     const self = this;
     for (const key in this) {
       const child = self[key];
-      if (isContainable$1(self[key])) {
+      if (isContainable$3(self[key])) {
         child._container = this;
       }
     }
@@ -14857,7 +14857,7 @@ class Structured {
     if (!Structured.IN_CREATE) {
       throw new Error(`Attempted to initialize a Structured object without using Structured.create`);
     }
-    this._id = nanoid(5);
+    this._id = nanoid$1(5);
   }
   static create(Klass, ...args) {
     Structured.IN_CREATE = true;
@@ -14897,13 +14897,13 @@ class SUnion {
     globalState.knownObjects.set(this._id, this);
   }
   static of(val) {
-    return new this(val, nanoid(5));
+    return new this(val, nanoid$1(5));
   }
   set(value) {
     saveForHistory(this);
     this._value = value;
-    notify$1(this, this);
-    const token = new UpdateToken$1(this);
+    notify(this, this);
+    const token = new UpdateToken$3(this);
     for (const container of this._container) {
       SubbableContainer._childChanged(container, token);
     }
@@ -14970,7 +14970,7 @@ function assertSUnion(value) {
 function exhaustive(x, msg) {
   throw new Error(msg ?? `Exhaustive violation, unexpected value ${x}`);
 }
-function isContainable$1(val) {
+function isContainable$3(val) {
   return val instanceof LinkedPrimitive || val instanceof LinkedArray || val instanceof Struct || val instanceof Struct2 || val instanceof Structured || val instanceof SSet;
 }
 function assertArray(val) {
@@ -15108,7 +15108,7 @@ class SSet extends SubbableContainer {
   }
   /** should only be used internally */
   static _create(initialValue, id, schema) {
-    return new this(initialValue instanceof Set ? initialValue : new Set(initialValue), id ?? nanoid(5), schema ?? null);
+    return new this(initialValue instanceof Set ? initialValue : new Set(initialValue), id ?? nanoid$1(5), schema ?? null);
   }
   mutate(mutator) {
     saveForHistory(this);
@@ -15817,7 +15817,7 @@ function pushHistory(name, objs) {
     const serialized = serialize(obj);
     entries.set(obj._id, serialized);
   }
-  const id = `h-${nanoid(4)}`;
+  const id = `h-${nanoid$1(4)}`;
   globalState.history.push({
     objects: entries,
     id,
@@ -15842,7 +15842,7 @@ function recordHistory(name, action) {
     if (recorded.size > 0) {
       globalState.history.push({
         objects: recorded,
-        id: `h-${nanoid(4)}`,
+        id: `h-${nanoid$1(4)}`,
         name
       });
     }
@@ -15853,7 +15853,7 @@ function recordHistory(name, action) {
 }
 function historyEntryOfObjectsEntryModifies(entry, globalState) {
   const newEntry = {
-    id: `h-${nanoid(4)}`,
+    id: `h-${nanoid$1(4)}`,
     objects: /* @__PURE__ */ new Map(),
     name: entry.name
   };
@@ -15943,7 +15943,7 @@ class LinkedArray {
     return this._array;
   }
   static create(initialValue) {
-    return new this(initialValue ?? [], nanoid(5));
+    return new this(initialValue ?? [], nanoid$1(5));
   }
   // Array<S> interface
   get length() {
@@ -16178,7 +16178,7 @@ class LinkedMap {
     SubbableContainer._containAll(this, this._map.values());
   }
   static create(initial) {
-    return new this(new Map(initial), nanoid(5));
+    return new this(new Map(initial), nanoid$1(5));
   }
   map(callbackfn) {
     const mapped = [];
@@ -16298,15 +16298,15 @@ function primitive$1(value) {
   return LinkedPrimitive.of(value);
 }
 function arrayOf(schema, val) {
-  return val == null ? new UNINITIALIZED_TYPED_ARRAY(schema) : new SSchemaArray(val, nanoid(5), schema);
+  return val == null ? new UNINITIALIZED_TYPED_ARRAY(schema) : new SSchemaArray(val, nanoid$1(5), schema);
 }
-function array$1(val) {
-  return val == null ? new UNINITIALIZED_ARRAY() : new SArray(val, nanoid(5));
+function array$2(val) {
+  return val == null ? new UNINITIALIZED_ARRAY() : new SArray(val, nanoid$1(5));
 }
 function map$2(initialValue) {
   return LinkedMap.create(initialValue);
 }
-function set$1(initialValue) {
+function set$2(initialValue) {
   return SSet._create(initialValue);
 }
 class Struct {
@@ -16322,7 +16322,7 @@ class Struct {
   // create objects with `new XXX` and instead use `create()`? built-in create as a static prop
   // might be good too.
   constructor(_props) {
-    this._id = nanoid(5);
+    this._id = nanoid$1(5);
   }
   _initConstructed(props) {
     const self = this;
@@ -16347,10 +16347,10 @@ class Struct {
         self[key] = LinkedPrimitive.of(args[key]);
       }
       if (child instanceof UNINITIALIZED_ARRAY) {
-        self[key] = new SArray(args[key], nanoid(5));
+        self[key] = new SArray(args[key], nanoid$1(5));
       }
       if (child instanceof UNINITIALIZED_TYPED_ARRAY) {
-        self[key] = new SSchemaArray(args[key], nanoid(5), child.schema);
+        self[key] = new SSchemaArray(args[key], nanoid$1(5), child.schema);
       }
       child = self[key];
       SubbableContainer._contain(this, child);
@@ -16599,7 +16599,7 @@ function usePrimitive(linkedState) {
   let t1;
   let t2;
   if ($[2] !== linkedState) {
-    t1 = () => subscribe$1(linkedState, (target) => {
+    t1 = () => subscribe(linkedState, (target) => {
       if (target === linkedState) {
         setState(() => linkedState.get());
       }
@@ -16658,9 +16658,9 @@ function useSubscribeToSubbableMutationHashable(obj, cb, t0) {
   const [, setHash] = reactExports.useState(t1);
   let t2;
   if ($[2] !== cb || $[3] !== obj || $[4] !== recursiveChanges || $[5] !== setHash) {
-    t2 = () => subscribe$1(obj, (target) => {
+    t2 = () => subscribe(obj, (target) => {
       if (obj === target || recursiveChanges) {
-        setHash(_temp$b);
+        setHash(_temp$e);
         cb?.();
       }
     });
@@ -16685,23 +16685,23 @@ function useSubscribeToSubbableMutationHashable(obj, cb, t0) {
   reactExports.useEffect(t2, t3);
   return obj;
 }
-function _temp$b(prev) {
+function _temp$e(prev) {
   return (prev + 1) % Number.MAX_SAFE_INTEGER;
 }
 function useNewLinkedSet() {
-  const [set2] = reactExports.useState(_temp$a);
+  const [set2] = reactExports.useState(_temp$d);
   useSubscribeToSubbableMutationHashable(set2);
   return set2;
 }
-function _temp$a() {
+function _temp$d() {
   return SSet._create();
 }
 function useNewLinkedMap() {
-  const [map2] = reactExports.useState(_temp2$6);
+  const [map2] = reactExports.useState(_temp2$9);
   useSubscribeToSubbableMutationHashable(map2);
   return map2;
 }
-function _temp2$6() {
+function _temp2$9() {
   return LinkedMap.create();
 }
 var defaults;
@@ -16810,7 +16810,7 @@ function requireLib() {
 }
 var libExports = requireLib();
 const stringify = /* @__PURE__ */ getDefaultExportFromCjs(libExports);
-function stringifyUnknown$3(val) {
+function stringifyUnknown$4(val) {
   const res = stringify(val, {
     space: " ",
     cycles: true
@@ -16846,7 +16846,7 @@ function debugOutHtml(val, pad = 0, showUnknowns = true) {
     return JSON.stringify(val);
   } else {
     if (showUnknowns) {
-      return `(unknown: ${stringifyUnknown$3(val)})`;
+      return `(unknown: ${stringifyUnknown$4(val)})`;
     } else {
       return `(unknown: ${val.constructor.name})`;
     }
@@ -17016,7 +17016,7 @@ function DebugOut(t0) {
   }
   return t4;
 }
-function stringifyUnknown$2(val) {
+function stringifyUnknown$3(val) {
   const res = stringify(val, {
     space: " ",
     cycles: true
@@ -17175,7 +17175,7 @@ function DebugOutReact$1(t0) {
                         if (showUnknowns) {
                           let t3;
                           if ($[42] !== val) {
-                            t3 = stringifyUnknown$2(val);
+                            t3 = stringifyUnknown$3(val);
                             $[42] = val;
                             $[43] = t3;
                           } else {
@@ -17204,7 +17204,7 @@ function DebugOutUnion({
 }) {
   return "union, todo";
 }
-const TAB_SIZE$5 = 2;
+const TAB_SIZE$6 = 2;
 function DebugOutStruct(t0) {
   const $ = compilerRuntimeExports.c(20);
   const {
@@ -17223,7 +17223,7 @@ function DebugOutStruct(t0) {
     const keys = Object.keys(struct);
     for (let i = 0; i < keys.length && showBody; i++) {
       const key = keys[i];
-      const baseline = pad + TAB_SIZE$5;
+      const baseline = pad + TAB_SIZE$6;
       if (struct instanceof Structured && CONTAINER_IGNORE_KEYS.has(key)) {
         continue;
       }
@@ -17260,7 +17260,7 @@ function DebugOutStruct(t0) {
   if ($[8] === Symbol.for("react.memo_cache_sentinel")) {
     t2 = classOfKind$2("classname");
     t3 = () => {
-      setDisplayState(_temp$9);
+      setDisplayState(_temp$c);
     };
     $[8] = t2;
     $[9] = t3;
@@ -17279,7 +17279,7 @@ function DebugOutStruct(t0) {
   let t5;
   if ($[12] !== path || $[13] !== showHeader || $[14] !== struct) {
     t5 = showHeader && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: struct, path: `${path}/${struct._id}` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj: struct, path: `${path}/${struct._id}` }),
       " "
     ] });
     $[12] = path;
@@ -17306,7 +17306,7 @@ function DebugOutStruct(t0) {
   }
   return t6;
 }
-function _temp$9(prev) {
+function _temp$c(prev) {
   switch (prev) {
     case "full": {
       return "native";
@@ -17335,7 +17335,7 @@ function DebugOutArray$1(t0) {
   if ($[0] !== arr || $[1] !== pad || $[2] !== path || $[3] !== showUnknowns) {
     result = [];
     for (let i = 0; i < arr.length; i++) {
-      const baseline = pad + TAB_SIZE$5;
+      const baseline = pad + TAB_SIZE$6;
       const elem = arr.at(i);
       result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`));
     }
@@ -17367,7 +17367,7 @@ function DebugOutArray$1(t0) {
   }
   let t2;
   if ($[8] !== arr) {
-    t2 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: arr });
+    t2 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj: arr });
     $[8] = arr;
     $[9] = t2;
   } else {
@@ -17404,7 +17404,7 @@ function DebugOutSet$2(t0) {
     result = [];
     let i = 0;
     for (const elem of set2) {
-      const baseline = pad + TAB_SIZE$5;
+      const baseline = pad + TAB_SIZE$6;
       result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`));
       i++;
     }
@@ -17436,7 +17436,7 @@ function DebugOutSet$2(t0) {
   }
   let t2;
   if ($[8] !== set2) {
-    t2 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: set2 });
+    t2 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj: set2 });
     $[8] = set2;
     $[9] = t2;
   } else {
@@ -17459,7 +17459,7 @@ function DebugOutSet$2(t0) {
   }
   return t3;
 }
-function Header$1(t0) {
+function Header$2(t0) {
   const $ = compilerRuntimeExports.c(15);
   const {
     obj,
@@ -17524,7 +17524,7 @@ function Header$1(t0) {
   const hashStr = t3;
   let t4;
   if ($[2] !== obj._container || $[3] !== showContainerId) {
-    t4 = showContainerId ? ` -^ ${[...obj._container.values()].map(_temp2$5).join(",")}` : "";
+    t4 = showContainerId ? ` -^ ${[...obj._container.values()].map(_temp2$8).join(",")}` : "";
     $[2] = obj._container;
     $[3] = showContainerId;
     $[4] = t4;
@@ -17577,7 +17577,7 @@ function Header$1(t0) {
   }
   return t8;
 }
-function _temp2$5(v) {
+function _temp2$8(v) {
   return v._id;
 }
 function DebugOutSPrimitive(t0) {
@@ -17603,7 +17603,7 @@ function DebugOutSPrimitive(t0) {
     const t3 = `${path}/${obj._id}`;
     let t4;
     if ($[3] !== obj || $[4] !== t3) {
-      t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj, path: t3 });
+      t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj, path: t3 });
       $[3] = obj;
       $[4] = t3;
       $[5] = t4;
@@ -17636,7 +17636,7 @@ function DebugOutSPrimitive(t0) {
     const t3 = `${path}/${obj._id}`;
     let t4;
     if ($[11] !== obj || $[12] !== t3) {
-      t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj, path: t3 });
+      t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj, path: t3 });
       $[11] = obj;
       $[12] = t3;
       $[13] = t4;
@@ -17694,7 +17694,7 @@ const classOfKind$2 = (kind) => {
       exhaustive(kind);
   }
 };
-function stringifyUnknown$1(val) {
+function stringifyUnknown$2(val) {
   const res = stringify(val, {
     space: " ",
     cycles: true
@@ -17730,7 +17730,7 @@ function debugOut(val, pad = 0, showUnknowns = true) {
     return JSON.stringify(val);
   } else {
     if (showUnknowns) {
-      return `(unknown: ${stringifyUnknown$1(val)})`;
+      return `(unknown: ${stringifyUnknown$2(val)})`;
     } else {
       return `(unknown: ${val.constructor.name})`;
     }
@@ -17910,7 +17910,7 @@ const s = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   Struct,
   Struct2,
   Structured,
-  array: array$1,
+  array: array$2,
   arrayOf,
   boolean,
   construct,
@@ -17925,7 +17925,7 @@ const s = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   number,
   primitive: primitive$1,
   serialize,
-  set: set$1,
+  set: set$2,
   simplify,
   string: string$1,
   useContainer,
@@ -17935,7 +17935,7 @@ const s = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   usePrimitive,
   useSubscribeToSubbableMutationHashable
 }, Symbol.toStringTag, { value: "Module" }));
-const TAB_SIZE$4 = 2;
+const TAB_SIZE$5 = 2;
 function JSONView(t0) {
   const $ = compilerRuntimeExports.c(9);
   const {
@@ -18063,7 +18063,7 @@ function Collapser(t0) {
   let t3;
   if ($[2] !== setDisplay) {
     t3 = () => {
-      setDisplay(_temp$8);
+      setDisplay(_temp$b);
     };
     $[2] = setDisplay;
     $[3] = t3;
@@ -18085,7 +18085,7 @@ function Collapser(t0) {
   }
   return t5;
 }
-function _temp$8(prev) {
+function _temp$b(prev) {
   switch (prev) {
     case "full": {
       return "summary";
@@ -18148,7 +18148,7 @@ function JSONRecord(t0) {
     }
     for (let i = 0; i < keys.length && displayState === "full"; i++) {
       const key = keys[i];
-      const baseline = pad + TAB_SIZE$4;
+      const baseline = pad + TAB_SIZE$5;
       const val = record[key];
       body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$1("attr"), children: key }, `span-${key}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val, pad: baseline, path: `${path}/${key}`, showUnknowns }, `elem-${key}`));
     }
@@ -18245,7 +18245,7 @@ function JSONArray(t0) {
         }
         let t42;
         if ($[8] !== arr) {
-          t42 = arr.map(_temp2$4).join(", ");
+          t42 = arr.map(_temp2$7).join(", ");
           $[8] = arr;
           $[9] = t42;
         } else {
@@ -18266,7 +18266,7 @@ function JSONArray(t0) {
         body.push(t5);
       }
       for (let i = 0; i < arr.length && displayState === "full"; i++) {
-        const baseline = pad + TAB_SIZE$4;
+        const baseline = pad + TAB_SIZE$5;
         const elem = arr[i];
         body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`));
       }
@@ -18324,7 +18324,7 @@ function JSONArray(t0) {
   }
   return t4;
 }
-function _temp2$4(x) {
+function _temp2$7(x) {
   return string(x);
 }
 function JSONPrimitive({
@@ -18448,7 +18448,7 @@ class Project extends Structured {
     this.tracks = tracks;
     this.markers = markers;
     this.solodTracks = solodTracks;
-    this.randomNumbers = set$1();
+    this.randomNumbers = set$2();
   }
   randomNumbers;
   autoSimplify() {
@@ -18471,7 +18471,7 @@ class Project extends Structured {
     return Structured.create(Project, init.string(auto.name), init.schemaArray(auto.tracks, [AudioTrack]), init.array(auto.markers), init.set(auto.solodTracks, AudioTrack));
   }
   static of(name, tracks, markers) {
-    return Structured.create(Project, string$1(name), arrayOf([AudioTrack], tracks), array$1(markers), set$1());
+    return Structured.create(Project, string$1(name), arrayOf([AudioTrack], tracks), array$2(markers), set$2());
   }
   addTrack(name) {
     const track = AudioTrack.of(name, []);
@@ -18755,7 +18755,7 @@ function TrackA(t0) {
   }
   let t15;
   if ($[31] !== clips) {
-    t15 = clips.map(_temp$7);
+    t15 = clips.map(_temp$a);
     $[31] = clips;
     $[32] = t15;
   } else {
@@ -18777,7 +18777,7 @@ function TrackA(t0) {
   }
   return t16;
 }
-function _temp$7(clip, i) {
+function _temp$a(clip, i) {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ClipA, { clip }, i);
 }
 var scheduler = { exports: {} };
@@ -19060,18 +19060,18 @@ function SchedulerTest() {
   const $ = compilerRuntimeExports.c(1);
   let t0;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
-    t0 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp2$3, children: "test" });
+    t0 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp2$6, children: "test" });
     $[0] = t0;
   } else {
     t0 = $[0];
   }
   return t0;
 }
-async function _temp2$3() {
+async function _temp2$6() {
   const one = schedulerExports.unstable_scheduleCallback(schedulerExports.unstable_NormalPriority, function callbackFoo() {
     console.log("one");
   });
-  const pr = new Promise(_temp$6);
+  const pr = new Promise(_temp$9);
   schedulerExports.unstable_scheduleCallback(schedulerExports.unstable_NormalPriority, function callbackFoo() {
     performance.mark("three");
     console.log("three");
@@ -19081,7 +19081,7 @@ async function _temp2$3() {
   performance.mark("two done");
   console.log("two done");
 }
-function _temp$6(res) {
+function _temp$9(res) {
   try {
     schedulerExports.unstable_scheduleCallback(schedulerExports.unstable_NormalPriority, function callbackFoo() {
       performance.mark("two");
@@ -19139,8 +19139,8 @@ function App() {
   let t8;
   let t9;
   if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp$5, children: "undo" });
-    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp2$2, children: "redo" });
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp$8, children: "undo" });
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp2$5, children: "redo" });
     t5 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {});
     t6 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp4, children: "Add Track" });
     t7 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp6, children: "Add 100" });
@@ -19247,15 +19247,15 @@ function _temp5() {
   }
 }
 function _temp4() {
-  return recordHistory("add track", _temp3$1);
+  return recordHistory("add track", _temp3$3);
 }
-function _temp3$1() {
+function _temp3$3() {
   project.addTrack("hello world");
 }
-function _temp2$2() {
+function _temp2$5() {
   return history.redo();
 }
-function _temp$5() {
+function _temp$8() {
   return history.undo();
 }
 function UProject(t0) {
@@ -19685,37 +19685,42 @@ function _temp10(t0) {
   const [id, value] = t0;
   return `${id}: ${JSON.stringify(JSON.parse(value), null, 2)}`;
 }
-function subscribe(subbable, cb) {
-  subbable._subscriptors.add(cb);
-  return () => subbable._subscriptors.delete(cb);
-}
-function notify(subbable, target) {
-  for (const cb of subbable._subscriptors) {
-    cb(target, subbable);
-  }
-}
-const mutationHashable = {
-  getMutationHash(mh) {
-    return mh._hash;
+const subbable$2 = {
+  /**
+   * Records a callback, so that changes to "subbable" trigger a call of "callback"
+   */
+  subscribe(mh, cb) {
+    mh._subscriptors.add(cb);
+    return () => mh._subscriptors.delete(cb);
   },
+  /**
+   * @param mh what we're notifying of a change
+   * @param target what changed
+   *  this is the recursive child that changed, subscribers can choose to
+   *  act differently based on weather it was the object they're listening to
+   *  that changed, or a recursive child
+   */
   mutated(mh, target) {
     mh._hash = (mh._hash + 1) % Number.MAX_SAFE_INTEGER;
-    notify(mh, target);
+    for (const cb of mh._subscriptors) {
+      cb(target, mh);
+    }
   }
 };
 class LinkableMap {
   // main
   _map;
-  // SubbableContainer
+  // Subbable
   _id;
+  _subscriptors = /* @__PURE__ */ new Set();
+  // SubbableContainer
   _container = /* @__PURE__ */ new Set();
   _propagatedTokens = /* @__PURE__ */ new WeakSet();
   // MutationHashable
-  _subscriptors = /* @__PURE__ */ new Set();
   _hash = 0;
   _setRaw(map2) {
     this._map = new Map(map2);
-    mutationHashable.mutated(this, this);
+    subbable$2.mutated(this, this);
   }
   _getRaw() {
     return this._map;
@@ -19723,11 +19728,11 @@ class LinkableMap {
   constructor(initialValue, id) {
     this._id = id;
     this._map = initialValue;
-    subbableContainer._containAll(this, this._map.keys());
-    subbableContainer._containAll(this, this._map.values());
+    subbableContainer$2._containAll(this, this._map.keys());
+    subbableContainer$2._containAll(this, this._map.values());
   }
   static create(initial) {
-    return new this(new Map(initial), nanoid(5));
+    return new this(new Map(initial), nanoid$1(5));
   }
   map(callbackfn) {
     const mapped = [];
@@ -19740,20 +19745,20 @@ class LinkableMap {
   //////////// Map interface
   // Map<K, V> interface, mutates
   clear() {
-    subbableContainer._uncontain(this, this._map.keys());
-    subbableContainer._uncontain(this, this._map.values());
+    subbableContainer$2._uncontain(this, this._map.keys());
+    subbableContainer$2._uncontain(this, this._map.values());
     this._map.clear();
-    mutationHashable.mutated(this, this);
+    subbable$2.mutated(this, this);
   }
   // Map<K, V> interface, mutates
   delete(key) {
     if (!this._map.has(key)) {
       return false;
     }
-    subbableContainer._uncontain(this, key);
-    subbableContainer._uncontain(this, this._map.get(key));
+    subbableContainer$2._uncontain(this, key);
+    subbableContainer$2._uncontain(this, this._map.get(key));
     const result = this._map.delete(key);
-    mutationHashable.mutated(this, this);
+    subbable$2.mutated(this, this);
     return result;
   }
   // Map<K, V> interface
@@ -19770,10 +19775,10 @@ class LinkableMap {
   }
   // Map<K, V> interface, mutates
   set(key, value) {
-    subbableContainer._contain(this, key);
-    subbableContainer._contain(this, value);
+    subbableContainer$2._contain(this, key);
+    subbableContainer$2._contain(this, value);
     this._map.set(key, value);
-    mutationHashable.mutated(this, this);
+    subbable$2.mutated(this, this);
     return this;
   }
   // Map<K, V> interface
@@ -19810,29 +19815,30 @@ function mutableset(set2) {
 class LinkableSet {
   // main
   _set;
-  // SubbableContainer
+  // Subbable
   _id;
+  _subscriptors = /* @__PURE__ */ new Set();
+  // SubbableContainer
   _container = /* @__PURE__ */ new Set();
   _propagatedTokens = /* @__PURE__ */ new WeakSet();
   // MutationHashable
-  _subscriptors = /* @__PURE__ */ new Set();
   _hash = 0;
   constructor(_set, _id) {
     this._id = _id;
     this._set = _set;
-    subbableContainer._containAll(this, this._set);
+    subbableContainer$2._containAll(this, this._set);
   }
   _getRaw() {
     return this._set;
   }
   _setRaw(set2) {
-    subbableContainer._uncontainAll(this, this._set);
+    subbableContainer$2._uncontainAll(this, this._set);
     this._set = set2;
-    subbableContainer._containAll(this, set2);
-    subbableContainer._notifyChange(this, this);
+    subbableContainer$2._containAll(this, set2);
+    subbableContainer$2._notifyChange(this, this);
   }
   static create(initial) {
-    return new this(new Set(initial), nanoid(5));
+    return new this(new Set(initial), nanoid$1(5));
   }
   /** should only be used internally */
   // public static _create<T>(
@@ -19848,14 +19854,14 @@ class LinkableSet {
   // }
   mutate(mutator) {
     const result = mutator(mutableset(this._set));
-    subbableContainer._notifyChange(this, this);
+    subbableContainer$2._notifyChange(this, this);
     return result;
   }
   _replace(cb) {
-    subbableContainer._uncontainAll(this, this._set);
+    subbableContainer$2._uncontainAll(this, this._set);
     this._set = cb(mutableset(this._set));
-    subbableContainer._containAll(this, this._set);
-    subbableContainer._notifyChange(this, this);
+    subbableContainer$2._containAll(this, this._set);
+    subbableContainer$2._notifyChange(this, this);
   }
   // In some future, create a set that does several operations at once
   // set(mutator: (clone: Set<S>) => V): V {
@@ -19866,7 +19872,7 @@ class LinkableSet {
       return this;
     }
     return this.mutate((clone) => {
-      subbableContainer._containAll(this, [value]);
+      subbableContainer$2._containAll(this, [value]);
       clone.add(value);
       return this;
     });
@@ -19874,7 +19880,7 @@ class LinkableSet {
   // Set<S> interface, mutates
   clear() {
     for (const elem of this._set) {
-      subbableContainer._uncontain(this, elem);
+      subbableContainer$2._uncontain(this, elem);
     }
     this.mutate(() => {
     });
@@ -19886,7 +19892,7 @@ class LinkableSet {
       return false;
     }
     return this.mutate((raw) => {
-      subbableContainer._uncontain(this, value);
+      subbableContainer$2._uncontain(this, value);
       return raw.delete(value);
     });
   }
@@ -19960,8 +19966,9 @@ class LinkableSet {
   }
 }
 class LinkableValue {
-  _id;
   _value;
+  // Subbable
+  _id;
   _subscriptors = /* @__PURE__ */ new Set();
   // MutationHashable
   // Although LinkableValue can and usually works as normal state, we implement
@@ -19974,14 +19981,14 @@ class LinkableValue {
     this._id = id;
   }
   static create(val) {
-    return new this(val, nanoid(5));
+    return new this(val, nanoid$1(5));
   }
   set(value) {
     this._value = value;
-    mutationHashable.mutated(this, this);
-    const token = new UpdateToken2(this);
+    subbable$2.mutated(this, this);
+    const token = new UpdateToken$2(this);
     for (const container of this._container) {
-      subbableContainer._childChanged(container, token);
+      subbableContainer$2._childChanged(container, token);
     }
   }
   setDyn(cb) {
@@ -20001,30 +20008,30 @@ class LinkableValue {
     };
   }
 }
-function isContainable(val) {
+function isContainable$2(val) {
   return val instanceof LinkableValue || val instanceof LinkableArray || val instanceof LinkableMap || val instanceof LinkableSet;
 }
-class UpdateToken2 {
+let UpdateToken$2 = class UpdateToken2 {
   constructor(target) {
     this.target = target;
   }
-}
-const subbableContainer = {
+};
+const subbableContainer$2 = {
   // abstract _replace(val: T): void;
   _contain(container, item) {
-    if (isContainable(item)) {
+    if (isContainable$2(item)) {
       item._container.add(container);
     }
   },
   _containAll(container, items) {
     for (const elem of items) {
-      if (isContainable(elem)) {
+      if (isContainable$2(elem)) {
         elem._container.add(container);
       }
     }
   },
   _uncontain(container, item) {
-    if (isContainable(item)) {
+    if (isContainable$2(item)) {
       if (!item._container.has(container)) {
         console.warn("_uncontain:", item._container, "does not contain", item);
       }
@@ -20036,7 +20043,7 @@ const subbableContainer = {
   },
   _uncontainAll(container, items) {
     for (const item of items) {
-      subbableContainer._uncontain(container, item);
+      subbableContainer$2._uncontain(container, item);
     }
   },
   /**
@@ -20044,11 +20051,11 @@ const subbableContainer = {
    * and about the change of a certain target
    */
   _notifyChange(struct, target) {
-    const token = new UpdateToken2(target);
+    const token = new UpdateToken$2(target);
     struct._propagatedTokens.add(token);
-    mutationHashable.mutated(struct, target);
+    subbable$2.mutated(struct, target);
     for (const container of struct._container) {
-      subbableContainer._childChanged(container, token);
+      subbableContainer$2._childChanged(container, token);
     }
   },
   _childChanged(node, token) {
@@ -20056,9 +20063,9 @@ const subbableContainer = {
       return;
     }
     node._propagatedTokens.add(token);
-    mutationHashable.mutated(node, token.target);
+    subbable$2.mutated(node, token.target);
     for (const container of node._container) {
-      subbableContainer._childChanged(container, token);
+      subbableContainer$2._childChanged(container, token);
     }
   }
 };
@@ -20066,31 +20073,31 @@ class LinkableArray {
   // main
   _array;
   // Subbable
+  _id;
   _subscriptors = /* @__PURE__ */ new Set();
   // MutationHashable
   _hash = 0;
   // SubbableContainer
-  _id;
   _propagatedTokens = /* @__PURE__ */ new WeakSet();
   // Contained
   _container = /* @__PURE__ */ new Set();
   _replace(cb) {
-    subbableContainer._uncontainAll(this, this._array);
+    subbableContainer$2._uncontainAll(this, this._array);
     this._array = mutablearr(cb(this._array));
-    subbableContainer._containAll(this, this._array);
-    subbableContainer._notifyChange(this, this);
+    subbableContainer$2._containAll(this, this._array);
+    subbableContainer$2._notifyChange(this, this);
   }
   constructor(initialValue, id, anonymous = false) {
     this._id = id;
     this._array = initialValue;
-    subbableContainer._containAll(this, this._array);
+    subbableContainer$2._containAll(this, this._array);
   }
   static create(initialValue) {
-    return new this(initialValue ?? [], nanoid(5));
+    return new this(initialValue ?? [], nanoid$1(5));
   }
   mutate(mutator) {
     const result = mutator();
-    subbableContainer._notifyChange(this, this);
+    subbableContainer$2._notifyChange(this, this);
     return result;
   }
   _getRaw() {
@@ -20125,7 +20132,7 @@ class LinkableArray {
     }
     return this.mutate(() => {
       const res = this._array.pop();
-      res != null && subbableContainer._uncontain(this, res);
+      res != null && subbableContainer$2._uncontain(this, res);
       return res;
     });
   }
@@ -20136,7 +20143,7 @@ class LinkableArray {
     }
     return this.mutate(() => {
       const res = this._array.shift();
-      res != null && subbableContainer._uncontain(this, res);
+      res != null && subbableContainer$2._uncontain(this, res);
       return res;
     });
   }
@@ -20146,7 +20153,7 @@ class LinkableArray {
       return this.length;
     }
     return this.mutate(() => {
-      subbableContainer._containAll(this, items);
+      subbableContainer$2._containAll(this, items);
       return this._array.push(...items);
     });
   }
@@ -20155,7 +20162,7 @@ class LinkableArray {
     if (items.length < 1) {
       return this.length;
     }
-    subbableContainer._containAll(this, items);
+    subbableContainer$2._containAll(this, items);
     return this.mutate(() => {
       return this._array.unshift(...items);
     });
@@ -20175,18 +20182,18 @@ class LinkableArray {
     });
   }
   splice(start, deleteCount, ...items) {
-    subbableContainer._containAll(this, items);
+    subbableContainer$2._containAll(this, items);
     return this.mutate(() => {
       const deleted = this._array.splice(start, deleteCount, ...items);
       for (const elem of deleted) {
-        subbableContainer._uncontain(this, elem);
+        subbableContainer$2._uncontain(this, elem);
       }
       return deleted;
     });
   }
   // Array<S> interface, mutates
   fill(value, start, end) {
-    subbableContainer._containAll(this, [value]);
+    subbableContainer$2._containAll(this, [value]);
     console.warn("TODO: fill BREAKING: containment");
     return this.mutate(() => {
       this._array.fill(value, start, end);
@@ -23283,10 +23290,10 @@ const getDefaultConfig = () => {
 };
 const twMerge = /* @__PURE__ */ createTailwindMerge(getDefaultConfig);
 function useLinkAsState(prim) {
-  const $ = compilerRuntimeExports.c(9);
+  const $ = compilerRuntimeExports.c(11);
   let t0;
   if ($[0] !== prim) {
-    t0 = (onStoreChange) => subscribe(prim, (target) => {
+    t0 = (onStoreChange) => subbable$2.subscribe(prim, (target) => {
       if (prim === target) {
         onStoreChange();
       }
@@ -23305,46 +23312,54 @@ function useLinkAsState(prim) {
   } else {
     t1 = $[3];
   }
-  const value = reactExports.useSyncExternalStore(externalStoreSub, t1);
   let t2;
   if ($[4] !== prim) {
-    t2 = (newVal) => {
+    t2 = () => prim.get();
+    $[4] = prim;
+    $[5] = t2;
+  } else {
+    t2 = $[5];
+  }
+  const value = reactExports.useSyncExternalStore(externalStoreSub, t1, t2);
+  let t3;
+  if ($[6] !== prim) {
+    t3 = (newVal) => {
       if (newVal instanceof Function) {
         prim.set(newVal(prim.get()));
       } else {
         prim.set(newVal);
       }
     };
-    $[4] = prim;
-    $[5] = t2;
+    $[6] = prim;
+    $[7] = t3;
   } else {
-    t2 = $[5];
+    t3 = $[7];
   }
-  const setter = t2;
-  let t3;
-  if ($[6] !== setter || $[7] !== value) {
-    t3 = [value, setter];
-    $[6] = setter;
-    $[7] = value;
-    $[8] = t3;
+  const setter = t3;
+  let t4;
+  if ($[8] !== setter || $[9] !== value) {
+    t4 = [value, setter];
+    $[8] = setter;
+    $[9] = value;
+    $[10] = t4;
   } else {
-    t3 = $[8];
+    t4 = $[10];
   }
-  return t3;
+  return t4;
 }
-function useLink(obj, recursiveChanges = false) {
+function useLink$2(obj, recursiveChanges = false) {
   "use no memo";
   reactExports.useSyncExternalStore(reactExports.useCallback((onStoreChange) => {
-    return subscribe(obj, (target) => {
+    return subbable$2.subscribe(obj, (target) => {
       if (obj === target || recursiveChanges) {
         onStoreChange();
       }
     });
-  }, [obj, recursiveChanges]), reactExports.useCallback(() => obj._hash, [obj]));
+  }, [obj, recursiveChanges]), reactExports.useCallback(() => obj._hash, [obj]), reactExports.useCallback(() => obj._hash, [obj]));
   return () => obj;
 }
-const TAB_SIZE$3 = 2;
-function stringifyUnknown(val) {
+const TAB_SIZE$4 = 2;
+function stringifyUnknown$1(val) {
   const res = stringify(val, {
     space: " ",
     cycles: true
@@ -23355,7 +23370,7 @@ function stringifyUnknown(val) {
     return res;
   }
 }
-function DynamicTest(t0) {
+function DynamicTest$1(t0) {
   const $ = compilerRuntimeExports.c(24);
   const {
     val,
@@ -23410,7 +23425,7 @@ function DynamicTest(t0) {
           if (val instanceof LinkableValue) {
             let t3;
             if ($[12] !== path || $[13] !== val) {
-              t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutPrimitive$1, { obj: val, path });
+              t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutPrimitive, { obj: val, path });
               $[12] = path;
               $[13] = val;
               $[14] = t3;
@@ -23447,7 +23462,7 @@ function DynamicTest(t0) {
                 if (showUnknowns) {
                   let t3;
                   if ($[22] !== val) {
-                    t3 = stringifyUnknown(val);
+                    t3 = stringifyUnknown$1(val);
                     $[22] = val;
                     $[23] = t3;
                   } else {
@@ -23474,7 +23489,7 @@ function DebugOutMap(t0) {
     showUnknowns
   } = t0;
   const path = t1 === void 0 ? "" : t1;
-  const map2 = useLink(linkedMap);
+  const map2 = useLink$2(linkedMap);
   console.log("RENDER", map2);
   const [displayState] = reactExports.useState("full");
   const showHeader = displayState === "full";
@@ -23493,8 +23508,8 @@ function DebugOutMap(t0) {
     const entries = t22;
     for (let i = 0; i < entries.length && showBody; i++) {
       const [key, val] = entries[i];
-      const baseline = pad + TAB_SIZE$3;
-      body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind("attr"), children: String(key) }, `span-${key}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest, { val, pad: baseline, path: `${path}/${key}`, showUnknowns }, `elem-${key}`));
+      const baseline = pad + TAB_SIZE$4;
+      body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind("attr"), children: String(key) }, `span-${key}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest$1, { val, pad: baseline, path: `${path}/${key}`, showUnknowns }, `elem-${key}`));
     }
     if (!showBody) {
       body.push("...", "}");
@@ -23521,7 +23536,7 @@ function DebugOutMap(t0) {
   let t2;
   if ($[10] !== linkedMap || $[11] !== path || $[12] !== showHeader) {
     t2 = showHeader && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: linkedMap, path: `${path}/${linkedMap._id}` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: linkedMap, path: `${path}/${linkedMap._id}` }),
       " "
     ] });
     $[10] = linkedMap;
@@ -23554,14 +23569,14 @@ function DebugOutArray(t0) {
     showUnknowns
   } = t0;
   const path = t1 === void 0 ? "" : t1;
-  const arr = useLink(linkedArray);
+  const arr = useLink$2(linkedArray);
   let result;
   if ($[0] !== arr || $[1] !== pad || $[2] !== path || $[3] !== showUnknowns) {
     result = [];
     for (let i = 0; i < arr().length; i++) {
-      const baseline = pad + TAB_SIZE$3;
+      const baseline = pad + TAB_SIZE$4;
       const elem = arr().at(i);
-      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`));
+      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest$1, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`));
     }
     if (result.length > 0) {
       let t22;
@@ -23599,7 +23614,7 @@ function DebugOutArray(t0) {
   }
   let t3;
   if ($[10] !== t2) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: t2 });
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: t2 });
     $[10] = t2;
     $[11] = t3;
   } else {
@@ -23631,14 +23646,14 @@ function DebugOutSet$1(t0) {
     showUnknowns
   } = t0;
   const path = t1 === void 0 ? "" : t1;
-  const set2 = useLink(linkedSet);
+  const set2 = useLink$2(linkedSet);
   let result;
   if ($[0] !== pad || $[1] !== path || $[2] !== set2 || $[3] !== showUnknowns) {
     result = [];
     let i = 0;
     for (const elem of set2()) {
-      const baseline = pad + TAB_SIZE$3;
-      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`));
+      const baseline = pad + TAB_SIZE$4;
+      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest$1, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`));
       i++;
     }
     if (result.length > 0) {
@@ -23677,7 +23692,7 @@ function DebugOutSet$1(t0) {
   }
   let t3;
   if ($[10] !== t2) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: t2 });
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: t2 });
     $[10] = t2;
     $[11] = t3;
   } else {
@@ -23700,7 +23715,7 @@ function DebugOutSet$1(t0) {
   }
   return t4;
 }
-function Header(t0) {
+function Header$1(t0) {
   const $ = compilerRuntimeExports.c(16);
   const {
     obj: objarg,
@@ -23708,7 +23723,7 @@ function Header(t0) {
     showContainerId: t1
   } = t0;
   const showContainerId = t1 === void 0 ? false : t1;
-  const t2 = useLink(objarg, true);
+  const t2 = useLink$2(objarg, true);
   let hashStr;
   let kindStr;
   let obj;
@@ -23741,8 +23756,8 @@ function Header(t0) {
       t42 = void 0;
     }
     kindStr = t42;
-    hashStr = `.${mutationHashable.getMutationHash(obj)}`;
-    t3 = showContainerId ? ` -^ ${[...obj._container.values()].map(_temp$4).join(",")}` : "";
+    hashStr = `.${obj._hash}`;
+    t3 = showContainerId ? ` -^ ${[...obj._container.values()].map(_temp$7).join(",")}` : "";
     $[0] = showContainerId;
     $[1] = t2;
     $[2] = hashStr;
@@ -23801,10 +23816,10 @@ function Header(t0) {
   }
   return t7;
 }
-function _temp$4(v) {
+function _temp$7(v) {
   return v._id;
 }
-function DebugOutPrimitive$1(t0) {
+function DebugOutPrimitive(t0) {
   const $ = compilerRuntimeExports.c(14);
   const {
     obj,
@@ -23816,7 +23831,7 @@ function DebugOutPrimitive$1(t0) {
     const t2 = `${path}/${obj._id}`;
     let t3;
     if ($[0] !== obj || $[1] !== t2) {
-      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj, path: t2 });
+      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj, path: t2 });
       $[0] = obj;
       $[1] = t2;
       $[2] = t3;
@@ -23849,7 +23864,7 @@ function DebugOutPrimitive$1(t0) {
     const t2 = `${path}/${obj._id}`;
     let t3;
     if ($[8] !== obj || $[9] !== t2) {
-      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj, path: t2 });
+      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj, path: t2 });
       $[8] = obj;
       $[9] = t2;
       $[10] = t3;
@@ -23961,7 +23976,7 @@ function TxtButton(t0) {
   }
   return t3;
 }
-const TAB_SIZE$2 = 2;
+const TAB_SIZE$3 = 2;
 function LinkableArrayTest(t0) {
   const $ = compilerRuntimeExports.c(8);
   const {
@@ -24014,7 +24029,7 @@ function DynamicTestArray(t0) {
     showUnknowns
   } = t0;
   const path = t1 === void 0 ? "" : t1;
-  const larr = useLink(arr);
+  const larr = useLink$2(arr);
   const [input, setInput] = reactExports.useState(0);
   let t2;
   if ($[0] !== input || $[1] !== larr) {
@@ -24078,7 +24093,7 @@ function DynamicTestArray(t0) {
   let t7;
   if ($[12] !== larr) {
     t7 = () => {
-      larr().sort(_temp$3);
+      larr().sort(_temp$6);
     };
     $[12] = larr;
     $[13] = t7;
@@ -24112,9 +24127,9 @@ function DynamicTestArray(t0) {
   if ($[18] !== handleRemove || $[19] !== larr || $[20] !== pad || $[21] !== path || $[22] !== showUnknowns) {
     result = [];
     for (let i = 0; i < larr().length; i++) {
-      const baseline = pad + TAB_SIZE$2;
+      const baseline = pad + TAB_SIZE$3;
       const elem = larr().at(i);
-      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`), " ", /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "delete", onClick: () => elem != null && handleRemove(elem), children: "del." }, `del-${i}`));
+      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest$1, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`), " ", /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "delete", onClick: () => elem != null && handleRemove(elem), children: "del." }, `del-${i}`));
     }
     if (result.length > -1) {
       let t102;
@@ -24153,7 +24168,7 @@ function DynamicTestArray(t0) {
   }
   let t11;
   if ($[29] !== t10) {
-    t11 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: t10 });
+    t11 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: t10 });
     $[29] = t10;
     $[30] = t11;
   } else {
@@ -24168,7 +24183,7 @@ function DynamicTestArray(t0) {
   }
   let t13;
   if ($[32] !== pad) {
-    t13 = " ".repeat(TAB_SIZE$2 + pad);
+    t13 = " ".repeat(TAB_SIZE$3 + pad);
     $[32] = pad;
     $[33] = t13;
   } else {
@@ -24292,7 +24307,7 @@ function DynamicTestArray(t0) {
   }
   return t23;
 }
-function _temp$3(a, b) {
+function _temp$6(a, b) {
   return a - b;
 }
 function LinkableMapTest(t0) {
@@ -24332,7 +24347,7 @@ function LinkableMapTest(t0) {
   }
   let t4;
   if ($[6] !== handleAdd || $[7] !== map2) {
-    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTestMap, { map: map2, pad: 0, showUnknowns: true, onAdd: handleAdd, renderValue: _temp$2 }) });
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTestMap, { map: map2, pad: 0, showUnknowns: true, onAdd: handleAdd, renderValue: _temp$5 }) });
     $[6] = handleAdd;
     $[7] = map2;
     $[8] = t4;
@@ -24353,10 +24368,10 @@ function LinkableMapTest(t0) {
   }
   return t5;
 }
-function _temp$2(val, key_0, pad, path, showUnknowns) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest, { val, pad, path: `${path}/s${key_0}`, showUnknowns }, key_0);
+function _temp$5(val, key_0, pad, path, showUnknowns) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest$1, { val, pad, path: `${path}/s${key_0}`, showUnknowns }, key_0);
 }
-const TAB_SIZE$1 = 2;
+const TAB_SIZE$2 = 2;
 function DynamicTestMap(t0) {
   const $ = compilerRuntimeExports.c(32);
   const {
@@ -24368,7 +24383,7 @@ function DynamicTestMap(t0) {
     renderValue
   } = t0;
   const path = t1 === void 0 ? "" : t1;
-  const lmap = useLink(map2);
+  const lmap = useLink$2(map2);
   let t2;
   if ($[0] !== lmap) {
     t2 = (k) => lmap().delete(k);
@@ -24393,7 +24408,7 @@ function DynamicTestMap(t0) {
     body = [];
     for (let i = 0; i < entries.length; i++) {
       const [key, val] = entries[i];
-      const baseline = pad + TAB_SIZE$1;
+      const baseline = pad + TAB_SIZE$2;
       body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind("attr"), children: String(key) }, `span-${key}`), ": ", renderValue(val, `elem-${key}`, pad, path, showUnknowns), " ", /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "delete", onClick: () => handleDelete(key), className: "bg-transparent", children: "del." }, `del-${key}`));
     }
     let t42;
@@ -24418,7 +24433,7 @@ function DynamicTestMap(t0) {
   const t4 = `${path}/${map2._id}`;
   let t5;
   if ($[13] !== map2 || $[14] !== t4) {
-    t5 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: map2, path: t4 });
+    t5 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: map2, path: t4 });
     $[13] = map2;
     $[14] = t4;
     $[15] = t5;
@@ -24429,7 +24444,7 @@ function DynamicTestMap(t0) {
   let t7;
   if ($[16] === Symbol.for("react.memo_cache_sentinel")) {
     t6 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {});
-    t7 = " ".repeat(TAB_SIZE$1 - 1);
+    t7 = " ".repeat(TAB_SIZE$2 - 1);
     $[16] = t6;
     $[17] = t7;
   } else {
@@ -24498,7 +24513,7 @@ function DynamicTestMap(t0) {
   }
   return t12;
 }
-function LinkablePrimitiveTest(t0) {
+function LinkableValueTest(t0) {
   const $ = compilerRuntimeExports.c(8);
   const {
     prim,
@@ -24521,7 +24536,7 @@ function LinkablePrimitiveTest(t0) {
   }
   let t3;
   if ($[3] !== prim) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutPrimitive, { prim }) });
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutNumber, { prim }) });
     $[3] = prim;
     $[4] = t3;
   } else {
@@ -24544,7 +24559,7 @@ function LinkablePrimitiveTest(t0) {
 function isPrimitiveKind(val) {
   return typeof val === "number" || typeof val === "string" || typeof val === "boolean" || val === null;
 }
-function DebugOutPrimitive(t0) {
+function DebugOutNumber(t0) {
   const $ = compilerRuntimeExports.c(34);
   const {
     prim,
@@ -24554,7 +24569,7 @@ function DebugOutPrimitive(t0) {
   const [value, setValue] = useLinkAsState(prim);
   let t2;
   if ($[0] !== setValue) {
-    t2 = () => setValue(_temp$1);
+    t2 = () => setValue(_temp$4);
     $[0] = setValue;
     $[1] = t2;
   } else {
@@ -24563,7 +24578,7 @@ function DebugOutPrimitive(t0) {
   const increment = t2;
   let t3;
   if ($[2] !== setValue) {
-    t3 = () => setValue(_temp2$1);
+    t3 = () => setValue(_temp2$4);
     $[2] = setValue;
     $[3] = t3;
   } else {
@@ -24592,7 +24607,7 @@ function DebugOutPrimitive(t0) {
     const t6 = `${path}/${prim._id}`;
     let t7;
     if ($[8] !== prim || $[9] !== t6) {
-      t7 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: prim, path: t6 });
+      t7 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: prim, path: t6 });
       $[8] = prim;
       $[9] = t6;
       $[10] = t7;
@@ -24669,7 +24684,7 @@ function DebugOutPrimitive(t0) {
     const t6 = `${path}/${prim._id}`;
     let t7;
     if ($[28] !== prim || $[29] !== t6) {
-      t7 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: prim, path: t6 });
+      t7 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: prim, path: t6 });
       $[28] = prim;
       $[29] = t6;
       $[30] = t7;
@@ -24693,11 +24708,75 @@ function DebugOutPrimitive(t0) {
     return t9;
   }
 }
-function _temp2$1(v_0) {
+function _temp2$4(v_0) {
   return v_0 - 1;
 }
-function _temp$1(v) {
+function _temp$4(v) {
   return v + 1;
+}
+function DebugOutBoolean(t0) {
+  const $ = compilerRuntimeExports.c(13);
+  const {
+    prim,
+    path: t1
+  } = t0;
+  const path = t1 === void 0 ? "" : t1;
+  const [value, setValue] = useLinkAsState(prim);
+  let t2;
+  if ($[0] !== setValue) {
+    t2 = () => setValue(_temp3$2);
+    $[0] = setValue;
+    $[1] = t2;
+  } else {
+    t2 = $[1];
+  }
+  const flip = t2;
+  const t3 = `${path}/${prim._id}`;
+  let t4;
+  if ($[2] !== prim || $[3] !== t3) {
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: prim, path: t3 });
+    $[2] = prim;
+    $[3] = t3;
+    $[4] = t4;
+  } else {
+    t4 = $[4];
+  }
+  let t5;
+  if ($[5] !== value) {
+    t5 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm, { val: value });
+    $[5] = value;
+    $[6] = t5;
+  } else {
+    t5 = $[6];
+  }
+  let t6;
+  if ($[7] !== flip) {
+    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "flip", onClick: flip, children: "toggle" });
+    $[7] = flip;
+    $[8] = t6;
+  } else {
+    t6 = $[8];
+  }
+  let t7;
+  if ($[9] !== t4 || $[10] !== t5 || $[11] !== t6) {
+    t7 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      t4,
+      " ",
+      t5,
+      " ",
+      t6
+    ] });
+    $[9] = t4;
+    $[10] = t5;
+    $[11] = t6;
+    $[12] = t7;
+  } else {
+    t7 = $[12];
+  }
+  return t7;
+}
+function _temp3$2(v) {
+  return !v;
 }
 function LinkableSetTest(t0) {
   const $ = compilerRuntimeExports.c(8);
@@ -24742,7 +24821,7 @@ function LinkableSetTest(t0) {
   }
   return t4;
 }
-const TAB_SIZE = 2;
+const TAB_SIZE$1 = 2;
 function DebugOutSet(t0) {
   const $ = compilerRuntimeExports.c(36);
   const {
@@ -24752,7 +24831,7 @@ function DebugOutSet(t0) {
     showUnknowns
   } = t0;
   const path = t1 === void 0 ? "" : t1;
-  const lset = useLink(set2);
+  const lset = useLink$2(set2);
   const [input, setInput] = reactExports.useState(0);
   let t2;
   if ($[0] !== input || $[1] !== lset) {
@@ -24794,8 +24873,8 @@ function DebugOutSet(t0) {
     result = [];
     let i = 0;
     for (const elem of lset()) {
-      const baseline = pad + TAB_SIZE;
-      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`), " ", /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "shift", onClick: () => handleDelete(elem), children: "del." }));
+      const baseline = pad + TAB_SIZE$1;
+      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest$1, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`), " ", /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "shift", onClick: () => handleDelete(elem), children: "del." }));
       i++;
     }
     if (result.length > -1) {
@@ -24835,7 +24914,7 @@ function DebugOutSet(t0) {
   }
   let t6;
   if ($[18] !== t5) {
-    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: t5 });
+    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: t5 });
     $[18] = t5;
     $[19] = t6;
   } else {
@@ -24845,7 +24924,7 @@ function DebugOutSet(t0) {
   let t8;
   if ($[20] === Symbol.for("react.memo_cache_sentinel")) {
     t7 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {});
-    t8 = " ".repeat(TAB_SIZE - 1);
+    t8 = " ".repeat(TAB_SIZE$1 - 1);
     $[20] = t7;
     $[21] = t8;
   } else {
@@ -24915,8 +24994,8 @@ function DebugOutSet(t0) {
   return t13;
 }
 const map$1 = LinkableMap.create();
-const set = LinkableSet.create();
-const array = LinkableArray.create();
+const set$1 = LinkableSet.create();
+const array$1 = LinkableArray.create();
 const primitive = LinkableValue.create(0);
 function LinkableStateTest() {
   const $ = compilerRuntimeExports.c(1);
@@ -24924,9 +25003,9 @@ function LinkableStateTest() {
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
     t0 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 gap-2", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(LinkableMapTest, { className: "rounded-sm bg-gray-700/10 p-4", map: map$1 }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkableSetTest, { className: "rounded-sm bg-gray-700/10 p-4", linkedSet: set }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkableArrayTest, { className: "rounded-sm bg-gray-700/10 p-4", linkedArray: array }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkablePrimitiveTest, { className: "rounded-sm bg-gray-700/10 p-4", prim: primitive })
+      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkableSetTest, { className: "rounded-sm bg-gray-700/10 p-4", linkedSet: set$1 }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkableArrayTest, { className: "rounded-sm bg-gray-700/10 p-4", linkedArray: array$1 }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(LinkableValueTest, { className: "rounded-sm bg-gray-700/10 p-4", prim: primitive })
     ] });
     $[0] = t0;
   } else {
@@ -24941,7 +25020,8 @@ const lSet = LinkableSet.create.bind(LinkableSet);
 const map = lMap();
 lSet();
 lValue(0);
-const listState = lMap([["buy milk", lValue(true)], ["buy eggs", lValue(false)]]);
+const sharedBool = lValue(false);
+const listState = lMap([["buy milk", lValue(true)], ["buy eggs", lValue(false)], ["shared 1", sharedBool], ["shared 2", sharedBool]]);
 function LinkableStateNested(t0) {
   const $ = compilerRuntimeExports.c(13);
   const {
@@ -24977,7 +25057,7 @@ function LinkableStateNested(t0) {
   }
   let t4;
   if ($[5] !== handleAdd) {
-    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTestMap, { map, pad: 0, showUnknowns: true, onAdd: handleAdd, renderValue: _temp }) });
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTestMap, { map, pad: 0, showUnknowns: true, onAdd: handleAdd, renderValue: _temp$3 }) });
     $[5] = handleAdd;
     $[6] = t4;
   } else {
@@ -25015,12 +25095,12 @@ function LinkableStateNested(t0) {
   }
   return t7;
 }
-function _temp(val, key_0, pad, path, showUnknowns) {
+function _temp$3(val, key_0, pad, path, showUnknowns) {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTestArray, { arr: val, pad: pad + 2, path: `${path}/s${key_0}`, showUnknowns }, key_0);
 }
 function ListExample() {
   const $ = compilerRuntimeExports.c(5);
-  const list = useLink(listState);
+  const list = useLink$2(listState);
   let t0;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
     t0 = /* @__PURE__ */ jsxRuntimeExports.jsx(ListSummary, {});
@@ -25030,7 +25110,7 @@ function ListExample() {
   }
   let t1;
   if ($[1] !== list) {
-    t1 = list().entries().map(_temp2).toArray();
+    t1 = list().entries().map(_temp2$3).toArray();
     $[1] = list;
     $[2] = t1;
   } else {
@@ -25049,16 +25129,16 @@ function ListExample() {
   }
   return t2;
 }
-function _temp2(t0, i) {
+function _temp2$3(t0, i) {
   const [name, doneState] = t0;
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ListItem, { name, doneState }, i);
 }
 function ListSummary() {
   const $ = compilerRuntimeExports.c(4);
-  const todoList = useLink(listState, true);
+  const todoList = useLink$2(listState, true);
   let t0;
   if ($[0] !== todoList) {
-    t0 = todoList().entries().filter(_temp3).toArray();
+    t0 = todoList().entries().filter(_temp3$1).toArray();
     $[0] = todoList;
     $[1] = t0;
   } else {
@@ -25078,41 +25158,1287 @@ function ListSummary() {
   }
   return t1;
 }
-function _temp3(t0) {
+function _temp3$1(t0) {
   const [, done] = t0;
   return done.get() == true;
 }
 function ListItem(t0) {
-  const $ = compilerRuntimeExports.c(6);
+  const $ = compilerRuntimeExports.c(5);
   const {
     name,
     doneState
   } = t0;
-  const done = useLink(doneState);
+  useLink$2(doneState);
   let t1;
-  if ($[0] !== done || $[1] !== doneState) {
-    t1 = done().get() ? "done" : /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => doneState.set(true), children: "mark done" });
-    $[0] = done;
-    $[1] = doneState;
-    $[2] = t1;
+  if ($[0] !== doneState) {
+    t1 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutBoolean, { prim: doneState });
+    $[0] = doneState;
+    $[1] = t1;
   } else {
-    t1 = $[2];
+    t1 = $[1];
   }
   let t2;
-  if ($[3] !== name || $[4] !== t1) {
+  if ($[2] !== name || $[3] !== t1) {
     t2 = /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
       name,
       ":",
       " ",
       t1
     ] });
-    $[3] = name;
-    $[4] = t1;
-    $[5] = t2;
+    $[2] = name;
+    $[3] = t1;
+    $[4] = t2;
   } else {
-    t2 = $[5];
+    t2 = $[4];
   }
   return t2;
+}
+function isContainable$1(value) {
+  return typeof value === "object" && value !== null && "$$token" in value && value.$$token instanceof SubbableMark$1;
+}
+const subbable$1 = {
+  /**
+   * Records a callback, so that changes to "subbable" trigger a call of "callback"
+   */
+  subscribe(mh, cb) {
+    mh.$$token._subscriptors.add(cb);
+    return () => mh.$$token._subscriptors.delete(cb);
+  },
+  /**
+   * @param mh what we're notifying of a change
+   * @param target what changed
+   *  this is the recursive child that changed, subscribers can choose to
+   *  act differently based on weather it was the object they're listening to
+   *  that changed, or a recursive child
+   */
+  mutated(mh, target) {
+    mh.$$token._hash = (mh.$$token._hash + 1) % Number.MAX_SAFE_INTEGER;
+    for (const cb of mh.$$token._subscriptors) {
+      cb(target, mh);
+    }
+  }
+};
+let UpdateToken$1 = class UpdateToken3 {
+  constructor(target) {
+    this.target = target;
+  }
+};
+const subbableContainer$1 = {
+  // abstract _replace(val: T): void;
+  _containAll(container, items) {
+    for (const elem of items) {
+      if (!isContainable$1(elem)) {
+        continue;
+      }
+      elem.$$token._container.add(container);
+    }
+  },
+  _uncontainAll(container, items) {
+    for (const item of items) {
+      if (!isContainable$1(item)) {
+        continue;
+      }
+      if (!item.$$token._container.has(container)) {
+        console.warn("_uncontain:", item.$$token._container, "does not contain", item);
+      }
+      item.$$token._container.delete(container);
+      if ("_destroy" in item) {
+        item._destroy();
+      }
+    }
+  },
+  /**
+   * Creates a change notification to be propagated, starting at this object,
+   * and about the change of a certain target
+   */
+  // TODO: take MarkedSubbable, not SubbableContainer
+  _notifyChange(struct, target) {
+    const token = new UpdateToken$1(target);
+    struct.$$token._propagatedTokens.add(token);
+    subbable$1.mutated(struct, target);
+    for (const container of struct.$$token._container) {
+      subbableContainer$1._childChanged(container, token);
+    }
+  },
+  _childChanged(struct, token) {
+    if (struct.$$token._propagatedTokens.has(token)) {
+      return;
+    }
+    struct.$$token._propagatedTokens.add(token);
+    subbable$1.mutated(struct, token.target);
+    for (const container of struct.$$token._container) {
+      subbableContainer$1._childChanged(container, token);
+    }
+  }
+};
+let SubbableMark$1 = class SubbableMark {
+  // Subbable
+  _id;
+  _subscriptors = /* @__PURE__ */ new Set();
+  // SubbableContainer
+  _propagatedTokens = /* @__PURE__ */ new WeakSet();
+  // MutationHashable
+  _hash = 0;
+  // Contained
+  _container = /* @__PURE__ */ new Set();
+  constructor(holder, _id, contain) {
+    this._id = _id;
+    subbableContainer$1._containAll(holder, contain);
+  }
+  static create(holder, initial) {
+    return new this(holder, nanoid$1(5), new Set(initial));
+  }
+  mutate(struct, mutator) {
+    console.log("mutating", this);
+    const result = mutator((items) => subbableContainer$1._containAll(struct, items), (items) => subbableContainer$1._uncontainAll(struct, items));
+    subbableContainer$1._notifyChange(struct, struct);
+    return result;
+  }
+};
+let MarkedSet$1 = class MarkedSet extends Set {
+  $$token;
+  constructor(_set, _id) {
+    super();
+    this.$$token = new SubbableMark$1(this, _id, this);
+    for (const elem of _set) {
+      this.add(elem);
+    }
+  }
+  static create(initial) {
+    return new this(new Set(initial), nanoid$1(5));
+  }
+  // Set<S> interface, mutates
+  add(value) {
+    if (this.has(value)) {
+      return this;
+    }
+    return this.$$token.mutate(this, (contain) => {
+      contain([value]);
+      super.add(value);
+      return this;
+    });
+  }
+  // Set<S> interface, mutates
+  delete(value) {
+    if (!this.has(value)) {
+      return false;
+    }
+    return this.$$token.mutate(this, (_, uncontain) => {
+      uncontain([value]);
+      return super.delete(value);
+    });
+  }
+  // Set<S> interface, mutates
+  clear() {
+    this.$$token.mutate(this, (_, uncontain) => {
+      uncontain(this);
+      for (const elem of this) {
+        super.delete(elem);
+      }
+    });
+  }
+  // non-standard //
+  replace(set2) {
+    this.$$token.mutate(this, (contain, uncontain) => {
+      uncontain(this);
+      for (const elem of this) {
+        super.delete(elem);
+      }
+      contain(set2);
+      for (const elem of set2) {
+        super.add(elem);
+      }
+    });
+  }
+  map(callbackfn) {
+    const result = [];
+    for (const value of this.values()) {
+      result.push(callbackfn(value));
+    }
+    return result;
+  }
+};
+let MarkedArray$1 = class MarkedArray extends Array {
+  $$token;
+  constructor(_array, _id) {
+    super(..._array);
+    subbableContainer$1._containAll(this, _array);
+    this.$$token = new SubbableMark$1(this, _id, this);
+  }
+  static create(initialValue) {
+    return new this(initialValue ?? [], nanoid$1(5));
+  }
+  // Array<S> interface, mutates
+  pop() {
+    if (super.length < 1) {
+      return;
+    }
+    return this.$$token.mutate(this, (_, uncontain) => {
+      const res = super.pop();
+      res != null && uncontain([res]);
+      return res;
+    });
+  }
+  // Array<S> interface, mutates
+  shift() {
+    if (super.length < 1) {
+      return;
+    }
+    return this.$$token.mutate(this, (_, uncontain) => {
+      const res = super.shift();
+      res != null && uncontain([res]);
+      return res;
+    });
+  }
+  // Array<S> interface, mutates
+  push(...items) {
+    if (items.length < 1) {
+      return super.length;
+    }
+    return this.$$token.mutate(this, (contain) => {
+      contain(items);
+      return super.push(...items);
+    });
+  }
+  // Array<S> interface, mutates
+  unshift(...items) {
+    if (items.length < 1) {
+      return super.length;
+    }
+    return this.$$token.mutate(this, (contain) => {
+      contain(items);
+      return super.unshift(...items);
+    });
+  }
+  // Array<S> interface, mutates
+  sort(compareFn) {
+    return this.$$token.mutate(this, () => {
+      super.sort(compareFn);
+      return this;
+    });
+  }
+  // Array<S> interface, mutates
+  reverse() {
+    return this.$$token.mutate(this, () => {
+      super.reverse();
+      return this;
+    });
+  }
+  splice(start, deleteCount, ...items) {
+    return this.$$token.mutate(this, (contain, uncontain) => {
+      contain(items);
+      const deleted = super.splice(start, deleteCount, ...items);
+      uncontain(deleted);
+      return deleted;
+    });
+  }
+  // Array<S> interface, mutates
+  fill(value, start, end) {
+    console.warn("TODO: TEST CONTAINMENT MarkedArray.fill");
+    return this.$$token.mutate(this, (contain) => {
+      contain([value]);
+      super.fill(value, start, end);
+      return this;
+    });
+  }
+  // Array<S> interface, mutates
+  copyWithin(target, start, end) {
+    return this.$$token.mutate(this, () => {
+      console.warn("TODO: copyWithin BREAKING: containment");
+      super.copyWithin(target, start, end);
+      return this;
+    });
+  }
+  // not in standard arrays
+  remove(searchElement) {
+    const index = this.indexOf(searchElement);
+    if (index === -1) {
+      return null;
+    }
+    return this.splice(index, 1)[0];
+  }
+};
+function useLink$1(obj, recursiveChanges = false) {
+  "use no memo";
+  reactExports.useSyncExternalStore(reactExports.useCallback((onStoreChange) => {
+    return subbable$1.subscribe(obj, (target) => {
+      if (obj === target || recursiveChanges) {
+        onStoreChange();
+      }
+    });
+  }, [obj, recursiveChanges]), reactExports.useCallback(() => obj.$$token._hash, [obj]));
+  return () => obj;
+}
+const TAB_SIZE = 2;
+function DebugOutMarkedSet(t0) {
+  const $ = compilerRuntimeExports.c(32);
+  const {
+    set: set2,
+    pad,
+    path: t1,
+    showUnknowns,
+    handleAdd,
+    handleDelete,
+    renderValue
+  } = t0;
+  const path = t1 === void 0 ? "" : t1;
+  const lset = useLink$1(set2);
+  let t2;
+  if ($[0] !== lset) {
+    t2 = () => {
+      lset().clear();
+    };
+    $[0] = lset;
+    $[1] = t2;
+  } else {
+    t2 = $[1];
+  }
+  const handleClear = t2;
+  let result;
+  if ($[2] !== handleDelete || $[3] !== lset || $[4] !== pad || $[5] !== path || $[6] !== renderValue || $[7] !== showUnknowns) {
+    result = [];
+    let i = 0;
+    for (const value of lset()) {
+      const baseline = pad + TAB_SIZE;
+      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), renderValue(value, `elem-${i}`, baseline, `${path}/${i}-s`, showUnknowns), " ", handleDelete && /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "shift", onClick: () => handleDelete(value), children: "del." }));
+      i++;
+    }
+    if (result.length > -1) {
+      let t32;
+      if ($[9] === Symbol.for("react.memo_cache_sentinel")) {
+        t32 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, "brend");
+        $[9] = t32;
+      } else {
+        t32 = $[9];
+      }
+      let t42;
+      if ($[10] !== pad) {
+        t42 = " ".repeat(pad);
+        $[10] = pad;
+        $[11] = t42;
+      } else {
+        t42 = $[11];
+      }
+      result.push(t32, t42);
+    }
+    $[2] = handleDelete;
+    $[3] = lset;
+    $[4] = pad;
+    $[5] = path;
+    $[6] = renderValue;
+    $[7] = showUnknowns;
+    $[8] = result;
+  } else {
+    result = $[8];
+  }
+  let t3;
+  if ($[12] !== lset) {
+    t3 = lset();
+    $[12] = lset;
+    $[13] = t3;
+  } else {
+    t3 = $[13];
+  }
+  let t4;
+  if ($[14] !== t3) {
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: t3 });
+    $[14] = t3;
+    $[15] = t4;
+  } else {
+    t4 = $[15];
+  }
+  let t5;
+  let t6;
+  if ($[16] === Symbol.for("react.memo_cache_sentinel")) {
+    t5 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {});
+    t6 = " ".repeat(TAB_SIZE - 1);
+    $[16] = t5;
+    $[17] = t6;
+  } else {
+    t5 = $[16];
+    t6 = $[17];
+  }
+  let t7;
+  if ($[18] !== handleAdd) {
+    t7 = handleAdd && /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "add", onClick: handleAdd, className: "bg-transparent", children: " + " });
+    $[18] = handleAdd;
+    $[19] = t7;
+  } else {
+    t7 = $[19];
+  }
+  let t8;
+  if ($[20] !== lset) {
+    t8 = lset();
+    $[20] = lset;
+    $[21] = t8;
+  } else {
+    t8 = $[21];
+  }
+  let t9;
+  if ($[22] !== t8.size) {
+    t9 = /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-gray-500", children: [
+      "(len. ",
+      t8.size,
+      ")"
+    ] });
+    $[22] = t8.size;
+    $[23] = t9;
+  } else {
+    t9 = $[23];
+  }
+  let t10;
+  if ($[24] !== handleClear) {
+    t10 = /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "clear", onClick: handleClear, children: "clear" });
+    $[24] = handleClear;
+    $[25] = t10;
+  } else {
+    t10 = $[25];
+  }
+  let t11;
+  if ($[26] !== result || $[27] !== t10 || $[28] !== t4 || $[29] !== t7 || $[30] !== t9) {
+    t11 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      t4,
+      " ",
+      "(",
+      t5,
+      t6,
+      t7,
+      t9,
+      result,
+      ")",
+      " ",
+      t10
+    ] });
+    $[26] = result;
+    $[27] = t10;
+    $[28] = t4;
+    $[29] = t7;
+    $[30] = t9;
+    $[31] = t11;
+  } else {
+    t11 = $[31];
+  }
+  return t11;
+}
+function Header(t0) {
+  const $ = compilerRuntimeExports.c(16);
+  const {
+    obj: objarg,
+    path,
+    showContainerId: t1
+  } = t0;
+  const showContainerId = t1 === void 0 ? false : t1;
+  const t2 = useLink$1(objarg, true);
+  let hashStr;
+  let kindStr;
+  let obj;
+  let t3;
+  if ($[0] !== showContainerId || $[1] !== t2) {
+    obj = t2();
+    kindStr = obj.constructor.name;
+    hashStr = `.${obj.$$token._hash}`;
+    t3 = showContainerId ? ` -^ ${[...obj.$$token._container.values()].map(_temp$2).join(",")}` : "";
+    $[0] = showContainerId;
+    $[1] = t2;
+    $[2] = hashStr;
+    $[3] = kindStr;
+    $[4] = obj;
+    $[5] = t3;
+  } else {
+    hashStr = $[2];
+    kindStr = $[3];
+    obj = $[4];
+    t3 = $[5];
+  }
+  const container = t3;
+  classOfKind("hash");
+  let t4;
+  if ($[6] === Symbol.for("react.memo_cache_sentinel")) {
+    t4 = classOfKind("kind");
+    $[6] = t4;
+  } else {
+    t4 = $[6];
+  }
+  let t5;
+  if ($[7] === Symbol.for("react.memo_cache_sentinel")) {
+    t5 = classOfKind("kind");
+    $[7] = t5;
+  } else {
+    t5 = $[7];
+  }
+  let t6;
+  if ($[8] !== kindStr) {
+    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: t5, children: kindStr });
+    $[8] = kindStr;
+    $[9] = t6;
+  } else {
+    t6 = $[9];
+  }
+  let t7;
+  if ($[10] !== container || $[11] !== hashStr || $[12] !== obj.$$token._id || $[13] !== path || $[14] !== t6) {
+    t7 = /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: t4, title: path, children: [
+      "(",
+      t6,
+      ": ",
+      obj.$$token._id,
+      hashStr,
+      container,
+      ")"
+    ] });
+    $[10] = container;
+    $[11] = hashStr;
+    $[12] = obj.$$token._id;
+    $[13] = path;
+    $[14] = t6;
+    $[15] = t7;
+  } else {
+    t7 = $[15];
+  }
+  return t7;
+}
+function _temp$2(v) {
+  return v.$$token._id;
+}
+function DynamicTest(t0) {
+  const $ = compilerRuntimeExports.c(11);
+  const {
+    val,
+    pad,
+    path: t1,
+    showUnknowns: t2
+  } = t0;
+  const path = t1 === void 0 ? "" : t1;
+  const showUnknowns = t2 === void 0 ? true : t2;
+  if (typeof val === "string" || typeof val === "number" || typeof val === "boolean" || val == null) {
+    let t3;
+    if ($[0] !== val) {
+      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm, { val });
+      $[0] = val;
+      $[1] = t3;
+    } else {
+      t3 = $[1];
+    }
+    return t3;
+  } else {
+    if (typeof val === "function") {
+      return "(function)";
+    } else {
+      if (val instanceof MarkedSet$1) {
+        let t3;
+        if ($[2] !== pad || $[3] !== path || $[4] !== showUnknowns || $[5] !== val) {
+          t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutMarkedSet, { set: val, pad, path, showUnknowns, renderValue: _temp2$2 });
+          $[2] = pad;
+          $[3] = path;
+          $[4] = showUnknowns;
+          $[5] = val;
+          $[6] = t3;
+        } else {
+          t3 = $[6];
+        }
+        return t3;
+      } else {
+        if (Array.isArray(val)) {
+          let t3;
+          if ($[7] !== val) {
+            t3 = JSON.stringify(val);
+            $[7] = val;
+            $[8] = t3;
+          } else {
+            t3 = $[8];
+          }
+          return t3;
+        } else {
+          if (showUnknowns) {
+            let t3;
+            if ($[9] !== val) {
+              t3 = stringifyUnknown(val);
+              $[9] = val;
+              $[10] = t3;
+            } else {
+              t3 = $[10];
+            }
+            return `(unknown: ${t3})`;
+          } else {
+            return `(unknown: ${val.constructor.name})`;
+          }
+        }
+      }
+    }
+  }
+}
+function _temp2$2(value, key, pad_0, path_0, showUnknowns_0) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest, { val: value, pad: pad_0, path: path_0, showUnknowns: showUnknowns_0 }, key);
+}
+function stringifyUnknown(val) {
+  const res = stringify(val, {
+    space: " ",
+    cycles: true
+  });
+  if (res === "{\n}") {
+    return "{}";
+  } else {
+    return res;
+  }
+}
+const urlAlphabet = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
+let nanoid = (size = 21) => {
+  let id = "";
+  let bytes = crypto.getRandomValues(new Uint8Array(size |= 0));
+  while (size--) {
+    id += urlAlphabet[bytes[size] & 63];
+  }
+  return id;
+};
+function isContainable(value) {
+  return typeof value === "object" && value !== null && "$$token" in value && value.$$token instanceof SubbableMark2;
+}
+const subbable = {
+  /**
+   * Records a callback, so that changes to "subbable" trigger a call of "callback"
+   */
+  subscribe(mh, cb) {
+    mh.$$token._subscriptors.add(cb);
+    return () => mh.$$token._subscriptors.delete(cb);
+  },
+  /**
+   * @param mh what we're notifying of a change
+   * @param target what changed
+   *  this is the recursive child that changed, subscribers can choose to
+   *  act differently based on weather it was the object they're listening to
+   *  that changed, or a recursive child
+   */
+  mutated(mh, target) {
+    mh.$$token._hash = (mh.$$token._hash + 1) % Number.MAX_SAFE_INTEGER;
+    for (const cb of mh.$$token._subscriptors) {
+      cb(target, mh);
+    }
+  }
+};
+class UpdateToken4 {
+  constructor(target) {
+    this.target = target;
+  }
+}
+const subbableContainer = {
+  // abstract _replace(val: T): void;
+  _containAll(container, items) {
+    for (const elem of items) {
+      if (!isContainable(elem)) {
+        continue;
+      }
+      elem.$$token._container.add(container);
+    }
+  },
+  _uncontainAll(container, items) {
+    for (const item of items) {
+      if (!isContainable(item)) {
+        continue;
+      }
+      if (!item.$$token._container.has(container)) {
+        console.warn("_uncontain:", item.$$token._container, "does not contain", item);
+      }
+      item.$$token._container.delete(container);
+      if ("_destroy" in item) {
+        item._destroy();
+      }
+    }
+  },
+  /**
+   * Creates a change notification to be propagated, starting at this object,
+   * and about the change of a certain target
+   */
+  // TODO: take MarkedSubbable, not SubbableContainer
+  _notifyChange(struct, target) {
+    const token = new UpdateToken4(target);
+    struct.$$token._propagatedTokens.add(token);
+    subbable.mutated(struct, target);
+    for (const container of struct.$$token._container) {
+      subbableContainer._childChanged(container, token);
+    }
+  },
+  _childChanged(struct, token) {
+    if (struct.$$token._propagatedTokens.has(token)) {
+      return;
+    }
+    struct.$$token._propagatedTokens.add(token);
+    subbable.mutated(struct, token.target);
+    for (const container of struct.$$token._container) {
+      subbableContainer._childChanged(container, token);
+    }
+  }
+};
+class SubbableMark2 {
+  // Subbable
+  _id;
+  _subscriptors = /* @__PURE__ */ new Set();
+  // SubbableContainer
+  _propagatedTokens = /* @__PURE__ */ new WeakSet();
+  // MutationHashable
+  _hash = 0;
+  // Contained
+  _container = /* @__PURE__ */ new Set();
+  constructor(holder, _id, contain) {
+    this._id = _id;
+    subbableContainer._containAll(holder, contain);
+  }
+  static create(holder, initial) {
+    return new this(holder, nanoid(5), new Set(initial));
+  }
+  mutate(struct, mutator) {
+    console.log("mutating", this);
+    const result = mutator((items) => subbableContainer._containAll(struct, items), (items) => subbableContainer._uncontainAll(struct, items));
+    subbableContainer._notifyChange(struct, struct);
+    return result;
+  }
+}
+class MarkedSet2 extends Set {
+  $$token;
+  constructor(_set, _id) {
+    super();
+    this.$$token = new SubbableMark2(this, _id, this);
+    for (const elem of _set) {
+      this.add(elem);
+    }
+  }
+  static create(initial) {
+    return new this(new Set(initial), nanoid(5));
+  }
+  // Set<S> interface, mutates
+  add(value) {
+    if (this.has(value)) {
+      return this;
+    }
+    return this.$$token.mutate(this, (contain) => {
+      contain([value]);
+      super.add(value);
+      return this;
+    });
+  }
+  // Set<S> interface, mutates
+  delete(value) {
+    if (!this.has(value)) {
+      return false;
+    }
+    return this.$$token.mutate(this, (_, uncontain) => {
+      uncontain([value]);
+      return super.delete(value);
+    });
+  }
+  // Set<S> interface, mutates
+  clear() {
+    this.$$token.mutate(this, (_, uncontain) => {
+      uncontain(this);
+      for (const elem of this) {
+        super.delete(elem);
+      }
+    });
+  }
+  // non-standard //
+  replace(set2) {
+    this.$$token.mutate(this, (contain, uncontain) => {
+      uncontain(this);
+      for (const elem of this) {
+        super.delete(elem);
+      }
+      contain(set2);
+      for (const elem of set2) {
+        super.add(elem);
+      }
+    });
+  }
+  map(callbackfn) {
+    const result = [];
+    for (const value of this.values()) {
+      result.push(callbackfn(value));
+    }
+    return result;
+  }
+}
+class MarkedArray2 extends Array {
+  $$token;
+  constructor(_array, _id) {
+    super(..._array);
+    subbableContainer._containAll(this, _array);
+    this.$$token = new SubbableMark2(this, _id, this);
+  }
+  static create(initialValue) {
+    return new this(initialValue ?? [], nanoid(5));
+  }
+  // Array<S> interface, mutates
+  pop() {
+    if (super.length < 1) {
+      return;
+    }
+    return this.$$token.mutate(this, (_, uncontain) => {
+      const res = super.pop();
+      res != null && uncontain([res]);
+      return res;
+    });
+  }
+  // Array<S> interface, mutates
+  shift() {
+    if (super.length < 1) {
+      return;
+    }
+    return this.$$token.mutate(this, (_, uncontain) => {
+      const res = super.shift();
+      res != null && uncontain([res]);
+      return res;
+    });
+  }
+  // Array<S> interface, mutates
+  push(...items) {
+    if (items.length < 1) {
+      return super.length;
+    }
+    return this.$$token.mutate(this, (contain) => {
+      contain(items);
+      return super.push(...items);
+    });
+  }
+  // Array<S> interface, mutates
+  unshift(...items) {
+    if (items.length < 1) {
+      return super.length;
+    }
+    return this.$$token.mutate(this, (contain) => {
+      contain(items);
+      return super.unshift(...items);
+    });
+  }
+  // Array<S> interface, mutates
+  sort(compareFn) {
+    return this.$$token.mutate(this, () => {
+      super.sort(compareFn);
+      return this;
+    });
+  }
+  // Array<S> interface, mutates
+  reverse() {
+    return this.$$token.mutate(this, () => {
+      super.reverse();
+      return this;
+    });
+  }
+  splice(start, deleteCount, ...items) {
+    return this.$$token.mutate(this, (contain, uncontain) => {
+      contain(items);
+      const deleted = super.splice(start, deleteCount, ...items);
+      uncontain(deleted);
+      return deleted;
+    });
+  }
+  // Array<S> interface, mutates
+  fill(value, start, end) {
+    console.warn("TODO: TEST CONTAINMENT MarkedArray.fill");
+    return this.$$token.mutate(this, (contain) => {
+      contain([value]);
+      super.fill(value, start, end);
+      return this;
+    });
+  }
+  // Array<S> interface, mutates
+  copyWithin(target, start, end) {
+    return this.$$token.mutate(this, () => {
+      console.warn("TODO: copyWithin BREAKING: containment");
+      super.copyWithin(target, start, end);
+      return this;
+    });
+  }
+  // not in standard arrays
+  remove(searchElement) {
+    const index = this.indexOf(searchElement);
+    if (index === -1) {
+      return null;
+    }
+    return this.splice(index, 1)[0];
+  }
+}
+function useLink(obj, recursiveChanges = false) {
+  "use no memo";
+  reactExports.useSyncExternalStore(reactExports.useCallback((onStoreChange) => {
+    return subbable.subscribe(obj, (target) => {
+      if (obj === target || recursiveChanges) {
+        onStoreChange();
+      }
+    });
+  }, [obj, recursiveChanges]), reactExports.useCallback(() => obj.$$token._hash, [obj]));
+  return () => obj;
+}
+MarkedSet2.create.bind(MarkedSet2);
+MarkedArray2.create.bind(MarkedArray2);
+function MarkedCollection(t0) {
+  const $ = compilerRuntimeExports.c(30);
+  const {
+    set: set2,
+    pad,
+    showUnknowns,
+    handleAdd,
+    handleClear,
+    handleDelete,
+    renderValue,
+    getLen,
+    delimiters: t1
+  } = t0;
+  const [open, close] = t1;
+  const lset = useLink(set2);
+  let result;
+  if ($[0] !== handleDelete || $[1] !== lset || $[2] !== pad || $[3] !== renderValue || $[4] !== showUnknowns) {
+    result = [];
+    let i = 0;
+    for (const value of lset()) {
+      const baseline = pad + TAB_SIZE;
+      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(React.Fragment, { children: renderValue(value, baseline, showUnknowns) }, `elem-${i}`), " ", handleDelete && /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "shift", onClick: () => handleDelete(value), children: "del." }));
+      i++;
+    }
+    if (result.length > -1) {
+      let t22;
+      if ($[6] === Symbol.for("react.memo_cache_sentinel")) {
+        t22 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, "brend");
+        $[6] = t22;
+      } else {
+        t22 = $[6];
+      }
+      let t32;
+      if ($[7] !== pad) {
+        t32 = " ".repeat(pad);
+        $[7] = pad;
+        $[8] = t32;
+      } else {
+        t32 = $[8];
+      }
+      result.push(t22, t32);
+    }
+    $[0] = handleDelete;
+    $[1] = lset;
+    $[2] = pad;
+    $[3] = renderValue;
+    $[4] = showUnknowns;
+    $[5] = result;
+  } else {
+    result = $[5];
+  }
+  let t2;
+  if ($[9] !== lset) {
+    t2 = lset();
+    $[9] = lset;
+    $[10] = t2;
+  } else {
+    t2 = $[10];
+  }
+  let t3;
+  if ($[11] !== t2) {
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { obj: t2 });
+    $[11] = t2;
+    $[12] = t3;
+  } else {
+    t3 = $[12];
+  }
+  let t4;
+  let t5;
+  if ($[13] === Symbol.for("react.memo_cache_sentinel")) {
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {});
+    t5 = " ".repeat(TAB_SIZE - 1);
+    $[13] = t4;
+    $[14] = t5;
+  } else {
+    t4 = $[13];
+    t5 = $[14];
+  }
+  let t6;
+  if ($[15] !== handleAdd) {
+    t6 = handleAdd && /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "add", onClick: handleAdd, className: "bg-transparent", children: " + " });
+    $[15] = handleAdd;
+    $[16] = t6;
+  } else {
+    t6 = $[16];
+  }
+  let t7;
+  if ($[17] !== getLen || $[18] !== lset) {
+    t7 = getLen && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-gray-500", children: [
+      "(len. ",
+      getLen(lset()),
+      ")"
+    ] });
+    $[17] = getLen;
+    $[18] = lset;
+    $[19] = t7;
+  } else {
+    t7 = $[19];
+  }
+  let t8;
+  if ($[20] !== handleClear) {
+    t8 = handleClear && /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "clear", onClick: handleClear, children: "clear" });
+    $[20] = handleClear;
+    $[21] = t8;
+  } else {
+    t8 = $[21];
+  }
+  let t9;
+  if ($[22] !== close || $[23] !== open || $[24] !== result || $[25] !== t3 || $[26] !== t6 || $[27] !== t7 || $[28] !== t8) {
+    t9 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      t3,
+      " ",
+      open,
+      t4,
+      t5,
+      t6,
+      t7,
+      result,
+      close,
+      " ",
+      t8
+    ] });
+    $[22] = close;
+    $[23] = open;
+    $[24] = result;
+    $[25] = t3;
+    $[26] = t6;
+    $[27] = t7;
+    $[28] = t8;
+    $[29] = t9;
+  } else {
+    t9 = $[29];
+  }
+  return t9;
+}
+const array = MarkedArray$1.create();
+function MarkedArrayTest(t0) {
+  const $ = compilerRuntimeExports.c(21);
+  const {
+    className
+  } = t0;
+  const larr = useLink$1(array);
+  const [input, setInput] = reactExports.useState(0);
+  let t1;
+  if ($[0] !== input || $[1] !== larr) {
+    t1 = function add2() {
+      larr().push(input);
+      setInput(_temp$1);
+    };
+    $[0] = input;
+    $[1] = larr;
+    $[2] = t1;
+  } else {
+    t1 = $[2];
+  }
+  const add = t1;
+  let t2;
+  if ($[3] !== larr) {
+    t2 = function del2(v) {
+      larr().remove(v);
+    };
+    $[3] = larr;
+    $[4] = t2;
+  } else {
+    t2 = $[4];
+  }
+  const del = t2;
+  let t3;
+  if ($[5] !== className) {
+    t3 = twMerge("overflow-scroll", className);
+    $[5] = className;
+    $[6] = t3;
+  } else {
+    t3 = $[6];
+  }
+  let t4;
+  if ($[7] === Symbol.for("react.memo_cache_sentinel")) {
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { children: "marked array Tester" });
+    $[7] = t4;
+  } else {
+    t4 = $[7];
+  }
+  let t5;
+  if ($[8] !== add) {
+    t5 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: add, children: "+" });
+    $[8] = add;
+    $[9] = t5;
+  } else {
+    t5 = $[9];
+  }
+  let t6;
+  if ($[10] === Symbol.for("react.memo_cache_sentinel")) {
+    t6 = ["[", "]"];
+    $[10] = t6;
+  } else {
+    t6 = $[10];
+  }
+  let t7;
+  if ($[11] !== larr) {
+    t7 = larr();
+    $[11] = larr;
+    $[12] = t7;
+  } else {
+    t7 = $[12];
+  }
+  let t8;
+  if ($[13] !== add || $[14] !== del || $[15] !== t7) {
+    t8 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(MarkedCollection, { delimiters: t6, set: t7, pad: 0, showUnknowns: false, handleAdd: add, handleDelete: del, renderValue: _temp2$1 }) });
+    $[13] = add;
+    $[14] = del;
+    $[15] = t7;
+    $[16] = t8;
+  } else {
+    t8 = $[16];
+  }
+  let t9;
+  if ($[17] !== t3 || $[18] !== t5 || $[19] !== t8) {
+    t9 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: t3, children: [
+      t4,
+      t5,
+      t8
+    ] });
+    $[17] = t3;
+    $[18] = t5;
+    $[19] = t8;
+    $[20] = t9;
+  } else {
+    t9 = $[20];
+  }
+  return t9;
+}
+function _temp2$1(v_0, pad, showUnknowns) {
+  return `${v_0}`;
+}
+function _temp$1(prev) {
+  return prev + 1;
+}
+const set = MarkedSet$1.create([MarkedSet$1.create([0])]);
+function MarkedStateTest() {
+  const $ = compilerRuntimeExports.c(1);
+  let t0;
+  if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
+    t0 = /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 gap-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(MarkedSetTest, { className: "rounded-sm bg-gray-700/10 p-4", markedSet: set }) });
+    $[0] = t0;
+  } else {
+    t0 = $[0];
+  }
+  return t0;
+}
+function MarkedSetTest(t0) {
+  const $ = compilerRuntimeExports.c(25);
+  const {
+    markedSet,
+    className
+  } = t0;
+  const [, setNext] = reactExports.useState(0);
+  const set2 = useLink$1(markedSet);
+  let t1;
+  if ($[0] !== set2) {
+    t1 = function add2() {
+      set2().add(MarkedSet$1.create([0]));
+      setNext(_temp);
+    };
+    $[0] = set2;
+    $[1] = t1;
+  } else {
+    t1 = $[1];
+  }
+  const add = t1;
+  let t2;
+  if ($[2] === Symbol.for("react.memo_cache_sentinel")) {
+    t2 = /* @__PURE__ */ jsxRuntimeExports.jsx(MarkedArrayTest, {});
+    $[2] = t2;
+  } else {
+    t2 = $[2];
+  }
+  let t3;
+  if ($[3] !== className) {
+    t3 = twMerge("overflow-scroll", className);
+    $[3] = className;
+    $[4] = t3;
+  } else {
+    t3 = $[4];
+  }
+  let t4;
+  if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { children: "markedSet Tester" });
+    $[5] = t4;
+  } else {
+    t4 = $[5];
+  }
+  let t5;
+  if ($[6] !== add) {
+    t5 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: add, children: "+" });
+    $[6] = add;
+    $[7] = t5;
+  } else {
+    t5 = $[7];
+  }
+  let t6;
+  if ($[8] !== set2) {
+    t6 = [...set2()].map(_temp2);
+    $[8] = set2;
+    $[9] = t6;
+  } else {
+    t6 = $[9];
+  }
+  let t7;
+  if ($[10] !== set2) {
+    t7 = set2();
+    $[10] = set2;
+    $[11] = t7;
+  } else {
+    t7 = $[11];
+  }
+  let t8;
+  if ($[12] !== set2) {
+    t8 = (x_0) => set2().delete(x_0);
+    $[12] = set2;
+    $[13] = t8;
+  } else {
+    t8 = $[13];
+  }
+  let t9;
+  if ($[14] !== add || $[15] !== t7 || $[16] !== t8) {
+    t9 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutMarkedSet, { set: t7, pad: 0, showUnknowns: false, handleAdd: add, handleDelete: t8, renderValue: _temp3 });
+    $[14] = add;
+    $[15] = t7;
+    $[16] = t8;
+    $[17] = t9;
+  } else {
+    t9 = $[17];
+  }
+  let t10;
+  if ($[18] !== t6 || $[19] !== t9) {
+    t10 = /* @__PURE__ */ jsxRuntimeExports.jsxs("pre", { className: "text-start text-sm", children: [
+      t6,
+      t9
+    ] });
+    $[18] = t6;
+    $[19] = t9;
+    $[20] = t10;
+  } else {
+    t10 = $[20];
+  }
+  let t11;
+  if ($[21] !== t10 || $[22] !== t3 || $[23] !== t5) {
+    t11 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      t2,
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: t3, children: [
+        t4,
+        t5,
+        t10
+      ] })
+    ] });
+    $[21] = t10;
+    $[22] = t3;
+    $[23] = t5;
+    $[24] = t11;
+  } else {
+    t11 = $[24];
+  }
+  return t11;
+}
+function _temp3(value, key, pad, path, showUnknowns) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest, { val: value, pad, path, showUnknowns }, key);
+}
+function _temp2(x, i) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: JSON.stringify([...x]) }, i);
+}
+function _temp(prev) {
+  return prev + 1;
 }
 ReactDOM.createRoot(document.getElementById("root")).render(/* @__PURE__ */ jsxRuntimeExports.jsx(React.StrictMode, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(
   HashRouter,
@@ -25121,7 +26447,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(/* @__PURE__ */ jsxR
       /* @__PURE__ */ jsxRuntimeExports.jsxs("nav", { className: "flex flex-row gap-2 justify-center", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "./#/", children: "structured-state" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "./#/ls", children: "linked-state (simple)" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "./#/ls2", children: "linked-state (complex)" })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "./#/ls2", children: "linked-state (complex)" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "./#/marked", children: "marked" })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(Outlet, {}),
@@ -25130,7 +26457,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(/* @__PURE__ */ jsxR
     ] }), children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/", element: /* @__PURE__ */ jsxRuntimeExports.jsx(App, {}) }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/ls", element: /* @__PURE__ */ jsxRuntimeExports.jsx(LinkableStateTest, {}) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/ls2", element: /* @__PURE__ */ jsxRuntimeExports.jsx(LinkableStateNested, {}) })
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/ls2", element: /* @__PURE__ */ jsxRuntimeExports.jsx(LinkableStateNested, {}) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: "/marked", element: /* @__PURE__ */ jsxRuntimeExports.jsx(MarkedStateTest, {}) })
     ] }) })
   }
 ) }));
