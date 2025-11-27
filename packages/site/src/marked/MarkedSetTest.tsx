@@ -111,18 +111,18 @@ export function Header({
     // }
   })();
 
-  const hashStr = `.${obj.$$token._hash}`;
+  const hashStr = `.${obj.$$mark._hash}`;
 
   const container = showContainerId
-    ? ` -^ ${[...obj.$$token._container.values()]
-        .map((v) => v.$$token._id)
+    ? ` -^ ${[...obj.$$mark._container.values()]
+        .map((v) => v.$$mark._id)
         .join(",")}`
     : "";
 
   const hash = <span className={classOfKind("hash")}>{hashStr}</span>;
   return (
     <span className={classOfKind("kind")} title={path}>
-      (<span className={classOfKind("kind")}>{kindStr}</span>: {obj.$$token._id}
+      (<span className={classOfKind("kind")}>{kindStr}</span>: {obj.$$mark._id}
       {hashStr}
       {container})
     </span>

@@ -26,7 +26,8 @@ export function useLink<S extends MarkedSubbable>(
       },
       [obj, recursiveChanges]
     ),
-    useCallback(() => obj.$$token._hash, [obj])
+    useCallback(() => obj.$$mark._hash, [obj]),
+    useCallback(() => obj.$$mark._hash, [obj])
   );
   return () => obj;
 }

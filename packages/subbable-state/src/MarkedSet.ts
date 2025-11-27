@@ -4,14 +4,14 @@ import { MarkedSubbable, SubbableMark } from "../lib/SubbableMark";
 // A Subbable set that works via a $$token (vs implementing
 // everything that makes a subbable itself)
 export class MarkedSet<S> extends Set<S> implements MarkedSubbable {
-  public readonly $$token: SubbableMark;
+  public readonly $$mark: SubbableMark;
 
   private constructor(_set: Set<S>, _id: string) {
     // calling this with _set as arg calls .add on all elements,
     // but we override .add, and we need $$token to be set before we call .add.
     // let's just call .add ourselves after $$token is set.
     super();
-    this.$$token = new SubbableMark(this, _id, this);
+    this.$$mark = new SubbableMark(this, _id, this);
     for (const elem of _set) {
       this.add(elem);
     }
@@ -28,7 +28,7 @@ export class MarkedSet<S> extends Set<S> implements MarkedSubbable {
     if (this.has(value)) {
       return this;
     }
-    return this.$$token.mutate(this, (contain) => {
+    return this.$$mark.mutate(this, (contain) => {
       contain([value]);
       super.add(value);
       return this;
@@ -41,7 +41,7 @@ export class MarkedSet<S> extends Set<S> implements MarkedSubbable {
       return false;
     }
 
-    return this.$$token.mutate(this, (_, uncontain) => {
+    return this.$$mark.mutate(this, (_, uncontain) => {
       // NOTE: We have confirmed above the set has this value, so it will be removed
       uncontain([value]);
       return super.delete(value);
@@ -50,7 +50,7 @@ export class MarkedSet<S> extends Set<S> implements MarkedSubbable {
 
   // Set<S> interface, mutates
   override clear(): void {
-    this.$$token.mutate(this, (_, uncontain) => {
+    this.$$mark.mutate(this, (_, uncontain) => {
       uncontain(this);
       for (const elem of this) {
         super.delete(elem);
@@ -61,7 +61,7 @@ export class MarkedSet<S> extends Set<S> implements MarkedSubbable {
   // non-standard //
 
   public replace(set: Set<S>) {
-    this.$$token.mutate(this, (contain, uncontain) => {
+    this.$$mark.mutate(this, (contain, uncontain) => {
       uncontain(this);
       for (const elem of this) {
         super.delete(elem);

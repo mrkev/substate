@@ -1,13 +1,13 @@
-## LinkableState
+## MarkedState
 
 React-compatible (incl. React Compiler) state-management library for React. **Prioritizes efficiency.**
 
 There's 4 primitives:
 
-- **LinkableValue**
-- **LinkableArray**
-- **LinkableMap**
-- **LinkableSet**
+- **MarkedValue**
+- **MarkedArray**
+- **MarkedMap**
+- **MarkedSet**
 
 There's 3 key features:
 
@@ -15,12 +15,12 @@ There's 3 key features:
 - These state objects can be nested inside one another. When linking, you can listen to _shallow_ or _deep_ updates.
 - This is all React Compiler compatible.
 
-## LinkableValue
+## MarkedValue
 
-Wraps a value to make it linkable:
+Wraps a value to make it marked:
 
 ```typescript
-// creates a linkable value from this number
+// creates a marked value from this number
 const countState = lValue(0);
 
 count.get(); // reads the value
@@ -55,7 +55,7 @@ window.addEventListener("keydown", function () {
 });
 ```
 
-## LinkableArray
+## MarkedArray
 
 Creates a linkable Array-like:
 
@@ -68,7 +68,7 @@ datesState.map((date) => {});
 // etc...
 ```
 
-## LinkableMap
+## MarkedMap
 
 Creates a linkable Map:
 
@@ -84,7 +84,7 @@ taskState.has("buy tortillas"); // false
 // etc...
 ```
 
-## LinkableSet
+## MarkedSet
 
 Creates a linkable Set:
 
@@ -99,7 +99,7 @@ visitorsState.size; // 2
 
 ## Nested Structures
 
-Linkables are nestable. This allows you to mutate your application state,
+Markeds are nestable. This allows you to mutate your application state,
 but still trigger state updates where you need them
 
 Example:
@@ -150,7 +150,7 @@ function ListItem({
   doneState,
 }: {
   name: string;
-  doneState: LinkableValue<boolean>;
+  doneState: MarkedValue<boolean>;
 }) {
   const done = useLink(doneState);
 

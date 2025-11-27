@@ -58,7 +58,7 @@ export class SubbableMark implements Subbable, SubbableContainer, Contained {
 }
 
 export interface MarkedSubbable {
-  $$token: SubbableMark;
+  $$mark: SubbableMark;
 }
 
 // type Constructor<T = any> = new (...args: any[]) => T;

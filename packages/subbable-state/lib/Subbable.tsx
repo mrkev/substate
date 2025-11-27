@@ -25,8 +25,8 @@ export const subbable = {
    * Records a callback, so that changes to "subbable" trigger a call of "callback"
    */
   subscribe(mh: MarkedSubbable, cb: SubbableCallback): () => void {
-    mh.$$token._subscriptors.add(cb);
-    return () => mh.$$token._subscriptors.delete(cb);
+    mh.$$mark._subscriptors.add(cb);
+    return () => mh.$$mark._subscriptors.delete(cb);
   },
 
   /**
@@ -37,10 +37,10 @@ export const subbable = {
    *  that changed, or a recursive child
    */
   mutated(mh: MarkedSubbable, target: MarkedSubbable) {
-    mh.$$token._hash = (mh.$$token._hash + 1) % Number.MAX_SAFE_INTEGER;
+    mh.$$mark._hash = (mh.$$mark._hash + 1) % Number.MAX_SAFE_INTEGER;
 
     // notify
-    for (const cb of mh.$$token._subscriptors) {
+    for (const cb of mh.$$mark._subscriptors) {
       cb(target, mh);
     }
   },

@@ -37,7 +37,7 @@ export const subbableContainer = {
       if (!isContainable(elem)) {
         continue;
       }
-      elem.$$token._container.add(container);
+      elem.$$mark._container.add(container);
     }
   },
 
@@ -47,16 +47,16 @@ export const subbableContainer = {
         continue;
       }
 
-      if (!item.$$token._container.has(container)) {
+      if (!item.$$mark._container.has(container)) {
         console.warn(
           "_uncontain:",
-          item.$$token._container,
+          item.$$mark._container,
           "does not contain",
           item
         );
       }
 
-      item.$$token._container.delete(container);
+      item.$$mark._container.delete(container);
       // TODO: safety
       if ("_destroy" in item) {
         (item as any)._destroy();
@@ -71,10 +71,10 @@ export const subbableContainer = {
   // TODO: take MarkedSubbable, not SubbableContainer
   _notifyChange(struct: MarkedSubbable, target: MarkedSubbable) {
     const token = new UpdateToken(target);
-    struct.$$token._propagatedTokens.add(token);
+    struct.$$mark._propagatedTokens.add(token);
 
     subbable.mutated(struct, target);
-    for (const container of struct.$$token._container) {
+    for (const container of struct.$$mark._container) {
       subbableContainer._childChanged(container, token);
     }
 
@@ -83,14 +83,14 @@ export const subbableContainer = {
   },
 
   _childChanged(struct: MarkedSubbable, token: UpdateToken) {
-    if (struct.$$token._propagatedTokens.has(token)) {
+    if (struct.$$mark._propagatedTokens.has(token)) {
       // we already processed this event. stop here to prevent loops
       return;
     }
-    struct.$$token._propagatedTokens.add(token);
+    struct.$$mark._propagatedTokens.add(token);
 
     subbable.mutated(struct, token.target);
-    for (const container of struct.$$token._container) {
+    for (const container of struct.$$mark._container) {
       subbableContainer._childChanged(container, token);
     }
 

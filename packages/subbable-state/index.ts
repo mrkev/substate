@@ -1,8 +1,8 @@
-import { MarkedSet } from "./src/MarkedSet";
 import { MarkedArray } from "./src/MarkedArray";
+import { MarkedSet } from "./src/MarkedSet";
 
-export { MarkedSet } from "./src/MarkedSet";
 export { MarkedArray } from "./src/MarkedArray";
+export { MarkedSet } from "./src/MarkedSet";
 
 export {
   //
