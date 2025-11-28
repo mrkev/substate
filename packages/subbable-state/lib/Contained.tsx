@@ -8,7 +8,7 @@ export function isContainable(value: unknown): value is MarkedSubbable {
   return (
     typeof value === "object" &&
     value !== null &&
-    "$$token" in value &&
-    value.$$token instanceof SubbableMark
+    "$$mark" in value &&
+    value.$$mark instanceof SubbableMark
   );
 }

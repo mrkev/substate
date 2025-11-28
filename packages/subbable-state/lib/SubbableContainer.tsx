@@ -1,5 +1,4 @@
 import { isContainable } from "./Contained";
-import { pdb } from "./debug";
 import { subbable, SubbableCallback } from "./Subbable";
 import { MarkedSubbable } from "./SubbableMark";
 
@@ -35,13 +34,10 @@ export const subbableContainer = {
   // abstract _replace(val: T): void;
 
   _containAll(container: MarkedSubbable, items: IterableCollection) {
-    console.log("HERE", container);
-    console.log("HERE", pdb(container), items);
     for (const elem of items) {
       if (!isContainable(elem)) {
         continue;
       }
-      console.log(pdb(container), "->", pdb(elem));
       elem.$$mark._container.add(container);
     }
   },
@@ -76,13 +72,6 @@ export const subbableContainer = {
   _notifyChange(struct: MarkedSubbable, target: MarkedSubbable) {
     const token = new UpdateToken(target);
     struct.$$mark._propagatedTokens.add(token);
-
-    console.log(
-      "_notifyChange",
-      pdb(struct),
-      "container",
-      struct.$$mark._container
-    );
 
     subbable.mutated(struct, target);
     for (const container of struct.$$mark._container) {

@@ -198,6 +198,9 @@ importers:
 
   packages/subbable-state:
     dependencies:
+      json-stringify-deterministic:
+        specifier: ^1.0.12
+        version: 1.0.12
       nanoid:
         specifier: ^5.1.6
         version: 5.1.6

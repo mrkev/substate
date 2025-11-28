@@ -8,8 +8,10 @@ export { MarkedMap } from "./src/MarkedMap";
 export { MarkedSet } from "./src/MarkedSet";
 export { MarkedValue } from "./src/MarkedValue";
 
-export type { MarkedSubbable } from "./lib/SubbableMark";
 export { SubbableMark } from "./lib/SubbableMark";
+export type { MarkedSubbable } from "./lib/SubbableMark";
+
+export { DebugTree } from "./debug/DebugTree";
 
 export {
   //

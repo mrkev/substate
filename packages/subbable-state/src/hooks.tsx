@@ -11,14 +11,14 @@ export function useLink<S extends MarkedSubbable>(
     useCallback(
       (onStoreChange) => {
         return subbable.subscribe(obj, (target) => {
-          console.log(
-            "got notif",
-            obj,
-            "target is",
-            target,
-            "notifying?",
-            obj === target || recursiveChanges
-          );
+          // console.log(
+          //   "got notif",
+          //   obj,
+          //   "target is",
+          //   target,
+          //   "notifying?",
+          //   obj === target || recursiveChanges
+          // );
           if (obj === target || recursiveChanges) {
             onStoreChange();
           }

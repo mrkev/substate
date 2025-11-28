@@ -3,9 +3,10 @@ import { nullthrows, setWindow } from "../../../linked-state/src/nullthrows";
 import { useLink } from "../../../subbable-state/index";
 import { UtilityToggle } from "../UtilityToggle";
 import { MAudioClip, MAudioTrack, MProject } from "./MProject";
+import { MProjectDebug } from "./MProjectDebug";
 
 const project = MProject.of(
-  "untitled track",
+  "untitled project",
   [
     MAudioTrack.of("track 1", [MAudioClip.of(0, 4)]),
     MAudioTrack.of("track 2", []),
@@ -47,7 +48,7 @@ export function MarkedProjectTest() {
           fontFamily: "monospace",
         }}
       >
-        {/* <ProjectDebug project={project} /> */}
+        <MProjectDebug project={project} />
 
         <fieldset
           style={{
@@ -90,7 +91,7 @@ function UProject({ project }: { project: MProject }) {
           <button
             onClick={() => {
               recordHistory("add marker", () => {
-                markers().push([0, "foo"]);
+                markers().set(Math.random(), "foo");
                 console.log("pushed");
               });
             }}
@@ -98,14 +99,12 @@ function UProject({ project }: { project: MProject }) {
             +
           </button>
           <br />
-          {markers()
-            .map(String)
-            .map((x, i) => (
-              <span key={i}>
-                {x}
-                <br />
-              </span>
-            ))}
+          {markers().map((val, key) => (
+            <span key={key}>
+              {key}: {val}
+              <br />
+            </span>
+          ))}
         </div>
       </div>
       <div className="p-1 flex flex-col gap-2">
@@ -201,38 +200,6 @@ function UProject({ project }: { project: MProject }) {
 //         );
 //       })}
 //     </ul>
-//   );
-// }
-
-// function ProjectDebug({ project }: { project: Project }) {
-//   const [tab, setTab] = useState<"struct" | "serialized">("struct");
-//   return (
-//     <div style={{ flex: "1 1 1px" }}>
-//       <UtilityToggle
-//         toggled={tab === "struct"}
-//         onToggle={() => setTab("struct")}
-//       >
-//         struct
-//       </UtilityToggle>
-//       <UtilityToggle
-//         toggled={tab === "serialized"}
-//         onToggle={() => setTab("serialized")}
-//       >
-//         serialized
-//       </UtilityToggle>
-//       {tab === "struct" && <s.DebugOut val={project}></s.DebugOut>}
-//       {tab === "serialized" && (
-//         <div
-//           style={{
-//             overflow: "scroll",
-//             textAlign: "left",
-//             fontFamily: "monospace",
-//           }}
-//         >
-//           <JSONView json={JSON.parse(serialize(project))} />
-//         </div>
-//       )}
-//     </div>
 //   );
 // }
 

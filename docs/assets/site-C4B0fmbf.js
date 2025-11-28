@@ -14967,7 +14967,7 @@ function assertSUnion(value) {
     throw new Error("not a SUnion");
   }
 }
-function exhaustive(x, msg) {
+function exhaustive$1(x, msg) {
   throw new Error(msg ?? `Exhaustive violation, unexpected value ${x}`);
 }
 function isContainable$3(val) {
@@ -15259,7 +15259,7 @@ function initializeRef(json, metadata) {
     case "union":
       throw new Error("unimplemented ref of kind " + json.kind);
     default:
-      exhaustive(json.kind);
+      exhaustive$1(json.kind);
   }
 }
 function initializePrimitiveRef(json, metadata) {
@@ -15438,7 +15438,7 @@ function initialize(json, spec, metadata) {
       return initializeRef(json, metadata);
     }
     default:
-      exhaustive(json, "invalid $$ type");
+      exhaustive$1(json, "invalid $$ type");
   }
 }
 class InitializationMetadata {
@@ -15544,7 +15544,7 @@ function replaceSimpleArray(json, arr) {
     return json._value;
   });
 }
-function isPrimitiveKind$2(val) {
+function isPrimitiveKind$3(val) {
   return typeof val === "number" || typeof val === "string" || typeof val === "boolean" || val === null;
 }
 function isStructuredKind(val) {
@@ -15648,7 +15648,7 @@ function replace(json, obj, acc) {
         return replace(simple, obj, acc);
       }
       default:
-        exhaustive(json, "invalid $$ type");
+        exhaustive$1(json, "invalid $$ type");
     }
   } catch (e) {
     console.log("error with replace", json);
@@ -15667,7 +15667,7 @@ function replacePrimitive(json, obj, acc) {
       return;
     }
     default:
-      exhaustive(json);
+      exhaustive$1(json);
   }
 }
 function replaceStruct(json, obj) {
@@ -16510,7 +16510,7 @@ function autoSimplify(descriptor, acc) {
     } else if (value instanceof SUnion) {
       serializable[key] = simplifyUnion(value, acc);
     } else {
-      exhaustive(value);
+      exhaustive$1(value);
     }
   }
   return serializable;
@@ -16561,7 +16561,7 @@ function simplify$1(state, acc) {
     }
     return state;
   } else {
-    exhaustive(state);
+    exhaustive$1(state);
   }
 }
 function simplifyStructuredKind(state, acc) {
@@ -16582,7 +16582,7 @@ function simplifyStructuredKind(state, acc) {
   } else if (state instanceof SUnion) {
     return simplifyUnion(state, acc);
   } else {
-    exhaustive(state);
+    exhaustive$1(state);
   }
 }
 function usePrimitive(linkedState) {
@@ -16660,7 +16660,7 @@ function useSubscribeToSubbableMutationHashable(obj, cb, t0) {
   if ($[2] !== cb || $[3] !== obj || $[4] !== recursiveChanges || $[5] !== setHash) {
     t2 = () => subscribe(obj, (target) => {
       if (obj === target || recursiveChanges) {
-        setHash(_temp$f);
+        setHash(_temp$g);
         cb?.();
       }
     });
@@ -16685,44 +16685,44 @@ function useSubscribeToSubbableMutationHashable(obj, cb, t0) {
   reactExports.useEffect(t2, t3);
   return obj;
 }
-function _temp$f(prev) {
+function _temp$g(prev) {
   return (prev + 1) % Number.MAX_SAFE_INTEGER;
 }
 function useNewLinkedSet() {
-  const [set2] = reactExports.useState(_temp$e);
+  const [set2] = reactExports.useState(_temp$f);
   useSubscribeToSubbableMutationHashable(set2);
   return set2;
 }
-function _temp$e() {
+function _temp$f() {
   return SSet._create();
 }
 function useNewLinkedMap() {
-  const [map2] = reactExports.useState(_temp2$a);
+  const [map2] = reactExports.useState(_temp2$b);
   useSubscribeToSubbableMutationHashable(map2);
   return map2;
 }
-function _temp2$a() {
+function _temp2$b() {
   return LinkedMap.create();
 }
-var defaults;
-var hasRequiredDefaults;
-function requireDefaults() {
-  if (hasRequiredDefaults) return defaults;
-  hasRequiredDefaults = 1;
-  defaults = {
+var defaults$1;
+var hasRequiredDefaults$1;
+function requireDefaults$1() {
+  if (hasRequiredDefaults$1) return defaults$1;
+  hasRequiredDefaults$1 = 1;
+  defaults$1 = {
     space: "",
     cycles: false,
     replacer: (k, v) => v,
     stringify: JSON.stringify
   };
-  return defaults;
+  return defaults$1;
 }
-var util;
-var hasRequiredUtil;
-function requireUtil() {
-  if (hasRequiredUtil) return util;
-  hasRequiredUtil = 1;
-  util = {
+var util$1;
+var hasRequiredUtil$1;
+function requireUtil$1() {
+  if (hasRequiredUtil$1) return util$1;
+  hasRequiredUtil$1 = 1;
+  util$1 = {
     isArray: Array.isArray,
     assign: Object.assign,
     isObject: (v) => typeof v === "object",
@@ -16731,21 +16731,21 @@ function requireUtil() {
     isRegex: (v) => v instanceof RegExp,
     keys: Object.keys
   };
-  return util;
+  return util$1;
 }
-var lib;
-var hasRequiredLib;
-function requireLib() {
-  if (hasRequiredLib) return lib;
-  hasRequiredLib = 1;
-  const DEFAULTS = requireDefaults();
-  const isFunction = requireUtil().isFunction;
-  const isBoolean = requireUtil().isBoolean;
-  const isObject = requireUtil().isObject;
-  const isArray = requireUtil().isArray;
-  const isRegex = requireUtil().isRegex;
-  const assign = requireUtil().assign;
-  const keys = requireUtil().keys;
+var lib$1;
+var hasRequiredLib$1;
+function requireLib$1() {
+  if (hasRequiredLib$1) return lib$1;
+  hasRequiredLib$1 = 1;
+  const DEFAULTS = requireDefaults$1();
+  const isFunction = requireUtil$1().isFunction;
+  const isBoolean = requireUtil$1().isBoolean;
+  const isObject = requireUtil$1().isObject;
+  const isArray = requireUtil$1().isArray;
+  const isRegex = requireUtil$1().isRegex;
+  const assign = requireUtil$1().assign;
+  const keys = requireUtil$1().keys;
   function serialize2(obj) {
     if (obj === null || obj === void 0) return obj;
     if (isRegex(obj)) return obj.toString();
@@ -16805,12 +16805,12 @@ function requireLib() {
       }
     }({ "": obj }, "", obj, 0);
   }
-  lib = stringifyDeterministic;
-  return lib;
+  lib$1 = stringifyDeterministic;
+  return lib$1;
 }
-var libExports = requireLib();
+var libExports = requireLib$1();
 const stringify = /* @__PURE__ */ getDefaultExportFromCjs(libExports);
-function stringifyUnknown$4(val) {
+function stringifyUnknown$5(val) {
   const res = stringify(val, {
     space: " ",
     cycles: true
@@ -16846,7 +16846,7 @@ function debugOutHtml(val, pad = 0, showUnknowns = true) {
     return JSON.stringify(val);
   } else {
     if (showUnknowns) {
-      return `(unknown: ${stringifyUnknown$4(val)})`;
+      return `(unknown: ${stringifyUnknown$5(val)})`;
     } else {
       return `(unknown: ${val.constructor.name})`;
     }
@@ -16919,7 +16919,7 @@ function header$1(elem, showContainerId = false) {
     } else if (elem instanceof SUnion) {
       return "uni";
     } else {
-      exhaustive(elem);
+      exhaustive$1(elem);
     }
   })();
   const hashStr = elem instanceof LinkedPrimitive ? "" : `.${MutationHashable.getMutationHash(elem)}`;
@@ -16930,7 +16930,7 @@ function header$1(elem, showContainerId = false) {
 }
 function debugOutSPrimitive(obj) {
   const val = obj.get();
-  if (isPrimitiveKind$2(val)) {
+  if (isPrimitiveKind$3(val)) {
     return `${header$1(obj)} ${debugOutPrm(val)}`;
   } else {
     return `${header$1(obj)} ${val}`;
@@ -16962,7 +16962,7 @@ function span(kind, value) {
       case "kind":
         return "comment";
       default:
-        exhaustive(kind);
+        exhaustive$1(kind);
     }
   })();
   return `<span class="hljs-${classOfKind2}">${value}</span>`;
@@ -16998,7 +16998,7 @@ function DebugOut(t0) {
   }
   let t3;
   if ($[3] !== showUnknowns || $[4] !== val) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { style: t2, children: /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val, pad: 0, path: "ROOT", showUnknowns }) });
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { style: t2, children: /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$2, { val, pad: 0, path: "ROOT", showUnknowns }) });
     $[3] = showUnknowns;
     $[4] = val;
     $[5] = t3;
@@ -17016,7 +17016,7 @@ function DebugOut(t0) {
   }
   return t4;
 }
-function stringifyUnknown$3(val) {
+function stringifyUnknown$4(val) {
   const res = stringify(val, {
     space: " ",
     cycles: true
@@ -17027,7 +17027,7 @@ function stringifyUnknown$3(val) {
     return res;
   }
 }
-function DebugOutReact$1(t0) {
+function DebugOutReact$2(t0) {
   const $ = compilerRuntimeExports.c(44);
   const {
     val,
@@ -17040,7 +17040,7 @@ function DebugOutReact$1(t0) {
   if (typeof val === "string" || typeof val === "number" || typeof val === "boolean" || val == null) {
     let t3;
     if ($[0] !== val) {
-      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm$1, { val });
+      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm$2, { val });
       $[0] = val;
       $[1] = t3;
     } else {
@@ -17175,7 +17175,7 @@ function DebugOutReact$1(t0) {
                         if (showUnknowns) {
                           let t3;
                           if ($[42] !== val) {
-                            t3 = stringifyUnknown$3(val);
+                            t3 = stringifyUnknown$4(val);
                             $[42] = val;
                             $[43] = t3;
                           } else {
@@ -17204,7 +17204,7 @@ function DebugOutUnion({
 }) {
   return "union, todo";
 }
-const TAB_SIZE$6 = 2;
+const TAB_SIZE$7 = 2;
 function DebugOutStruct(t0) {
   const $ = compilerRuntimeExports.c(20);
   const {
@@ -17223,7 +17223,7 @@ function DebugOutStruct(t0) {
     const keys = Object.keys(struct);
     for (let i = 0; i < keys.length && showBody; i++) {
       const key = keys[i];
-      const baseline = pad + TAB_SIZE$6;
+      const baseline = pad + TAB_SIZE$7;
       if (struct instanceof Structured && CONTAINER_IGNORE_KEYS.has(key)) {
         continue;
       }
@@ -17231,7 +17231,7 @@ function DebugOutStruct(t0) {
         continue;
       }
       const val = struct[key];
-      body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$2("attr"), children: key }, `span-${key}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val, pad: baseline, path: `${path}/${key}`, showUnknowns }, `elem-${key}`));
+      body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$3("attr"), children: key }, `span-${key}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$2, { val, pad: baseline, path: `${path}/${key}`, showUnknowns }, `elem-${key}`));
     }
     if (!showBody) {
       body.push("...", "}");
@@ -17258,9 +17258,9 @@ function DebugOutStruct(t0) {
   let t2;
   let t3;
   if ($[8] === Symbol.for("react.memo_cache_sentinel")) {
-    t2 = classOfKind$2("classname");
+    t2 = classOfKind$3("classname");
     t3 = () => {
-      setDisplayState(_temp$d);
+      setDisplayState(_temp$e);
     };
     $[8] = t2;
     $[9] = t3;
@@ -17279,7 +17279,7 @@ function DebugOutStruct(t0) {
   let t5;
   if ($[12] !== path || $[13] !== showHeader || $[14] !== struct) {
     t5 = showHeader && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj: struct, path: `${path}/${struct._id}` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Header$3, { obj: struct, path: `${path}/${struct._id}` }),
       " "
     ] });
     $[12] = path;
@@ -17306,7 +17306,7 @@ function DebugOutStruct(t0) {
   }
   return t6;
 }
-function _temp$d(prev) {
+function _temp$e(prev) {
   switch (prev) {
     case "full": {
       return "native";
@@ -17318,7 +17318,7 @@ function _temp$d(prev) {
       return "full";
     }
     default: {
-      exhaustive(prev);
+      exhaustive$1(prev);
     }
   }
 }
@@ -17335,9 +17335,9 @@ function DebugOutArray$1(t0) {
   if ($[0] !== arr || $[1] !== pad || $[2] !== path || $[3] !== showUnknowns) {
     result = [];
     for (let i = 0; i < arr.length; i++) {
-      const baseline = pad + TAB_SIZE$6;
+      const baseline = pad + TAB_SIZE$7;
       const elem = arr.at(i);
-      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`));
+      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$2, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`));
     }
     if (result.length > 0) {
       let t22;
@@ -17367,7 +17367,7 @@ function DebugOutArray$1(t0) {
   }
   let t2;
   if ($[8] !== arr) {
-    t2 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj: arr });
+    t2 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$3, { obj: arr });
     $[8] = arr;
     $[9] = t2;
   } else {
@@ -17404,8 +17404,8 @@ function DebugOutSet$2(t0) {
     result = [];
     let i = 0;
     for (const elem of set2) {
-      const baseline = pad + TAB_SIZE$6;
-      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`));
+      const baseline = pad + TAB_SIZE$7;
+      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$2, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`));
       i++;
     }
     if (result.length > 0) {
@@ -17436,7 +17436,7 @@ function DebugOutSet$2(t0) {
   }
   let t2;
   if ($[8] !== set2) {
-    t2 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj: set2 });
+    t2 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$3, { obj: set2 });
     $[8] = set2;
     $[9] = t2;
   } else {
@@ -17459,7 +17459,7 @@ function DebugOutSet$2(t0) {
   }
   return t3;
 }
-function Header$2(t0) {
+function Header$3(t0) {
   const $ = compilerRuntimeExports.c(15);
   const {
     obj,
@@ -17501,7 +17501,7 @@ function Header$2(t0) {
                     t2 = "uni";
                     break bb0;
                   } else {
-                    exhaustive(obj);
+                    exhaustive$1(obj);
                   }
                 }
               }
@@ -17524,7 +17524,7 @@ function Header$2(t0) {
   const hashStr = t3;
   let t4;
   if ($[2] !== obj._container || $[3] !== showContainerId) {
-    t4 = showContainerId ? ` -^ ${[...obj._container.values()].map(_temp2$9).join(",")}` : "";
+    t4 = showContainerId ? ` -^ ${[...obj._container.values()].map(_temp2$a).join(",")}` : "";
     $[2] = obj._container;
     $[3] = showContainerId;
     $[4] = t4;
@@ -17532,17 +17532,17 @@ function Header$2(t0) {
     t4 = $[4];
   }
   const container = t4;
-  classOfKind$2("hash");
+  classOfKind$3("hash");
   let t5;
   if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
-    t5 = classOfKind$2("kind");
+    t5 = classOfKind$3("kind");
     $[5] = t5;
   } else {
     t5 = $[5];
   }
   let t6;
   if ($[6] === Symbol.for("react.memo_cache_sentinel")) {
-    t6 = classOfKind$2("kind");
+    t6 = classOfKind$3("kind");
     $[6] = t6;
   } else {
     t6 = $[6];
@@ -17577,7 +17577,7 @@ function Header$2(t0) {
   }
   return t8;
 }
-function _temp2$9(v) {
+function _temp2$a(v) {
   return v._id;
 }
 function DebugOutSPrimitive(t0) {
@@ -17591,7 +17591,7 @@ function DebugOutSPrimitive(t0) {
   let val;
   if ($[0] !== obj) {
     val = obj.get();
-    t2 = isPrimitiveKind$2(val);
+    t2 = isPrimitiveKind$3(val);
     $[0] = obj;
     $[1] = t2;
     $[2] = val;
@@ -17603,7 +17603,7 @@ function DebugOutSPrimitive(t0) {
     const t3 = `${path}/${obj._id}`;
     let t4;
     if ($[3] !== obj || $[4] !== t3) {
-      t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj, path: t3 });
+      t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$3, { obj, path: t3 });
       $[3] = obj;
       $[4] = t3;
       $[5] = t4;
@@ -17612,7 +17612,7 @@ function DebugOutSPrimitive(t0) {
     }
     let t5;
     if ($[6] !== val) {
-      t5 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm$1, { val });
+      t5 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm$2, { val });
       $[6] = val;
       $[7] = t5;
     } else {
@@ -17636,7 +17636,7 @@ function DebugOutSPrimitive(t0) {
     const t3 = `${path}/${obj._id}`;
     let t4;
     if ($[11] !== obj || $[12] !== t3) {
-      t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj, path: t3 });
+      t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$3, { obj, path: t3 });
       $[11] = obj;
       $[12] = t3;
       $[13] = t4;
@@ -17660,23 +17660,23 @@ function DebugOutSPrimitive(t0) {
     return t6;
   }
 }
-function DebugOutSimplePrm$1({
+function DebugOutSimplePrm$2({
   val
 }) {
   switch (true) {
     case typeof val === "string":
-      return /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: classOfKind$2("string"), children: [
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: classOfKind$3("string"), children: [
         '"',
         val,
         '"'
       ] });
     case typeof val === "number":
-      return /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$2("number"), children: String(val) });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$3("number"), children: String(val) });
     default:
       return String(val);
   }
 }
-const classOfKind$2 = (kind) => {
+const classOfKind$3 = (kind) => {
   switch (kind) {
     case "attr":
       return "hljs-attr";
@@ -17691,10 +17691,10 @@ const classOfKind$2 = (kind) => {
     case "kind":
       return "hljs-comment";
     default:
-      exhaustive(kind);
+      exhaustive$1(kind);
   }
 };
-function stringifyUnknown$2(val) {
+function stringifyUnknown$3(val) {
   const res = stringify(val, {
     space: " ",
     cycles: true
@@ -17730,7 +17730,7 @@ function debugOut(val, pad = 0, showUnknowns = true) {
     return JSON.stringify(val);
   } else {
     if (showUnknowns) {
-      return `(unknown: ${stringifyUnknown$2(val)})`;
+      return `(unknown: ${stringifyUnknown$3(val)})`;
     } else {
       return `(unknown: ${val.constructor.name})`;
     }
@@ -17801,7 +17801,7 @@ function header(elem, showContainerId = false) {
     } else if (elem instanceof SUnion) {
       return "uni";
     } else {
-      exhaustive(elem);
+      exhaustive$1(elem);
     }
   })();
   const hash = elem instanceof LinkedPrimitive ? "" : `.${MutationHashable.getMutationHash(elem)}`;
@@ -17935,7 +17935,7 @@ const s = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   usePrimitive,
   useSubscribeToSubbableMutationHashable
 }, Symbol.toStringTag, { value: "Module" }));
-const TAB_SIZE$5 = 2;
+const TAB_SIZE$6 = 2;
 function JSONView(t0) {
   const $ = compilerRuntimeExports.c(9);
   const {
@@ -17969,7 +17969,7 @@ function JSONView(t0) {
   }
   let t4;
   if ($[3] !== json || $[4] !== showUnknowns) {
-    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { style: t3, children: /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val: json, pad: 0, path: "ROOT", showUnknowns }) });
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { style: t3, children: /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val: json, pad: 0, path: "ROOT", showUnknowns }) });
     $[3] = json;
     $[4] = showUnknowns;
     $[5] = t4;
@@ -17987,7 +17987,7 @@ function JSONView(t0) {
   }
   return t5;
 }
-function DebugOutReact(t0) {
+function DebugOutReact$1(t0) {
   const $ = compilerRuntimeExports.c(11);
   const {
     val,
@@ -18049,7 +18049,7 @@ function Collapser(t0) {
   let t1;
   let t2;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
-    t1 = classOfKind$1("classname");
+    t1 = classOfKind$2("classname");
     t2 = {
       userSelect: "none",
       cursor: "pointer"
@@ -18063,7 +18063,7 @@ function Collapser(t0) {
   let t3;
   if ($[2] !== setDisplay) {
     t3 = () => {
-      setDisplay(_temp$c);
+      setDisplay(_temp$d);
     };
     $[2] = setDisplay;
     $[3] = t3;
@@ -18085,7 +18085,7 @@ function Collapser(t0) {
   }
   return t5;
 }
-function _temp$c(prev) {
+function _temp$d(prev) {
   switch (prev) {
     case "full": {
       return "summary";
@@ -18097,7 +18097,7 @@ function _temp$c(prev) {
       return "full";
     }
     default: {
-      exhaustive(prev);
+      exhaustive$1(prev);
     }
   }
 }
@@ -18126,7 +18126,7 @@ function JSONRecord(t0) {
     if (displayState === "summary") {
       let t32;
       if ($[8] === Symbol.for("react.memo_cache_sentinel")) {
-        t32 = classOfKind$1("prm");
+        t32 = classOfKind$2("prm");
         $[8] = t32;
       } else {
         t32 = $[8];
@@ -18148,9 +18148,9 @@ function JSONRecord(t0) {
     }
     for (let i = 0; i < keys.length && displayState === "full"; i++) {
       const key = keys[i];
-      const baseline = pad + TAB_SIZE$5;
+      const baseline = pad + TAB_SIZE$6;
       const val = record[key];
-      body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$1("attr"), children: key }, `span-${key}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val, pad: baseline, path: `${path}/${key}`, showUnknowns }, `elem-${key}`));
+      body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$2("attr"), children: key }, `span-${key}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val, pad: baseline, path: `${path}/${key}`, showUnknowns }, `elem-${key}`));
     }
     if (displayState === "collapsed") {
       body.push("...", "}");
@@ -18238,14 +18238,14 @@ function JSONArray(t0) {
       if (displayState === "summary") {
         let t32;
         if ($[7] === Symbol.for("react.memo_cache_sentinel")) {
-          t32 = classOfKind$1("prm");
+          t32 = classOfKind$2("prm");
           $[7] = t32;
         } else {
           t32 = $[7];
         }
         let t42;
         if ($[8] !== arr) {
-          t42 = arr.map(_temp2$8).join(", ");
+          t42 = arr.map(_temp2$9).join(", ");
           $[8] = arr;
           $[9] = t42;
         } else {
@@ -18266,9 +18266,9 @@ function JSONArray(t0) {
         body.push(t5);
       }
       for (let i = 0; i < arr.length && displayState === "full"; i++) {
-        const baseline = pad + TAB_SIZE$5;
+        const baseline = pad + TAB_SIZE$6;
         const elem = arr[i];
-        body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`));
+        body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`));
       }
       if (displayState === "collapsed") {
         body.push("...", "");
@@ -18324,7 +18324,7 @@ function JSONArray(t0) {
   }
   return t4;
 }
-function _temp2$8(x) {
+function _temp2$9(x) {
   return string(x);
 }
 function JSONPrimitive({
@@ -18332,18 +18332,18 @@ function JSONPrimitive({
 }) {
   switch (true) {
     case typeof val === "string":
-      return /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: classOfKind$1("string"), children: [
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: classOfKind$2("string"), children: [
         '"',
         val,
         '"'
       ] });
     case typeof val === "number":
-      return /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$1("number"), children: String(val) });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$2("number"), children: String(val) });
     default:
       return String(val);
   }
 }
-const classOfKind$1 = (kind) => {
+const classOfKind$2 = (kind) => {
   switch (kind) {
     case "attr":
       return "hljs-attr";
@@ -18358,7 +18358,7 @@ const classOfKind$1 = (kind) => {
     case "kind":
       return "hljs-comment";
     default:
-      exhaustive(kind);
+      exhaustive$1(kind);
   }
 };
 class TimelineT extends Structured {
@@ -18755,7 +18755,7 @@ function TrackA$1(t0) {
   }
   let t15;
   if ($[31] !== clips) {
-    t15 = clips.map(_temp$b);
+    t15 = clips.map(_temp$c);
     $[31] = clips;
     $[32] = t15;
   } else {
@@ -18777,7 +18777,7 @@ function TrackA$1(t0) {
   }
   return t16;
 }
-function _temp$b(clip, i) {
+function _temp$c(clip, i) {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ClipA$1, { clip }, i);
 }
 var scheduler = { exports: {} };
@@ -19060,18 +19060,18 @@ function SchedulerTest() {
   const $ = compilerRuntimeExports.c(1);
   let t0;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
-    t0 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp2$7, children: "test" });
+    t0 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp2$8, children: "test" });
     $[0] = t0;
   } else {
     t0 = $[0];
   }
   return t0;
 }
-async function _temp2$7() {
+async function _temp2$8() {
   const one = schedulerExports.unstable_scheduleCallback(schedulerExports.unstable_NormalPriority, function callbackFoo() {
     console.log("one");
   });
-  const pr = new Promise(_temp$a);
+  const pr = new Promise(_temp$b);
   schedulerExports.unstable_scheduleCallback(schedulerExports.unstable_NormalPriority, function callbackFoo() {
     performance.mark("three");
     console.log("three");
@@ -19081,7 +19081,7 @@ async function _temp2$7() {
   performance.mark("two done");
   console.log("two done");
 }
-function _temp$a(res) {
+function _temp$b(res) {
   try {
     schedulerExports.unstable_scheduleCallback(schedulerExports.unstable_NormalPriority, function callbackFoo() {
       performance.mark("two");
@@ -19139,8 +19139,8 @@ function App() {
   let t8;
   let t9;
   if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp$9, children: "undo" });
-    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp2$6, children: "redo" });
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp$a, children: "undo" });
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp2$7, children: "redo" });
     t5 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {});
     t6 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp4, children: "Add Track" });
     t7 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp6, children: "Add 100" });
@@ -19252,10 +19252,10 @@ function _temp4() {
 function _temp3$3() {
   project$1.addTrack("hello world");
 }
-function _temp2$6() {
+function _temp2$7() {
   return history.redo();
 }
-function _temp$9() {
+function _temp$a() {
   return history.undo();
 }
 function UProject$1(t0) {
@@ -23371,8 +23371,8 @@ const lValue = LinkableValue.create.bind(LinkableValue);
 const lArray = LinkableArray.create.bind(LinkableArray);
 const lMap = LinkableMap.create.bind(LinkableMap);
 const lSet = LinkableSet.create.bind(LinkableSet);
-const TAB_SIZE$4 = 2;
-function stringifyUnknown$1(val) {
+const TAB_SIZE$5 = 2;
+function stringifyUnknown$2(val) {
   const res = stringify(val, {
     space: " ",
     cycles: true
@@ -23396,7 +23396,7 @@ function DynamicTest$1(t0) {
   if (typeof val === "string" || typeof val === "number" || typeof val === "boolean" || val == null) {
     let t3;
     if ($[0] !== val) {
-      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm, { val });
+      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm$1, { val });
       $[0] = val;
       $[1] = t3;
     } else {
@@ -23475,7 +23475,7 @@ function DynamicTest$1(t0) {
                 if (showUnknowns) {
                   let t3;
                   if ($[22] !== val) {
-                    t3 = stringifyUnknown$1(val);
+                    t3 = stringifyUnknown$2(val);
                     $[22] = val;
                     $[23] = t3;
                   } else {
@@ -23521,8 +23521,8 @@ function DebugOutMap(t0) {
     const entries = t22;
     for (let i = 0; i < entries.length && showBody; i++) {
       const [key, val] = entries[i];
-      const baseline = pad + TAB_SIZE$4;
-      body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind("attr"), children: String(key) }, `span-${key}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest$1, { val, pad: baseline, path: `${path}/${key}`, showUnknowns }, `elem-${key}`));
+      const baseline = pad + TAB_SIZE$5;
+      body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$1("attr"), children: String(key) }, `span-${key}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest$1, { val, pad: baseline, path: `${path}/${key}`, showUnknowns }, `elem-${key}`));
     }
     if (!showBody) {
       body.push("...", "}");
@@ -23549,7 +23549,7 @@ function DebugOutMap(t0) {
   let t2;
   if ($[10] !== linkedMap || $[11] !== path || $[12] !== showHeader) {
     t2 = showHeader && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: linkedMap, path: `${path}/${linkedMap._id}` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj: linkedMap, path: `${path}/${linkedMap._id}` }),
       " "
     ] });
     $[10] = linkedMap;
@@ -23587,7 +23587,7 @@ function DebugOutArray(t0) {
   if ($[0] !== arr || $[1] !== pad || $[2] !== path || $[3] !== showUnknowns) {
     result = [];
     for (let i = 0; i < arr().length; i++) {
-      const baseline = pad + TAB_SIZE$4;
+      const baseline = pad + TAB_SIZE$5;
       const elem = arr().at(i);
       result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest$1, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`));
     }
@@ -23627,7 +23627,7 @@ function DebugOutArray(t0) {
   }
   let t3;
   if ($[10] !== t2) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: t2 });
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj: t2 });
     $[10] = t2;
     $[11] = t3;
   } else {
@@ -23665,7 +23665,7 @@ function DebugOutSet$1(t0) {
     result = [];
     let i = 0;
     for (const elem of set2()) {
-      const baseline = pad + TAB_SIZE$4;
+      const baseline = pad + TAB_SIZE$5;
       result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest$1, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`));
       i++;
     }
@@ -23705,7 +23705,7 @@ function DebugOutSet$1(t0) {
   }
   let t3;
   if ($[10] !== t2) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: t2 });
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj: t2 });
     $[10] = t2;
     $[11] = t3;
   } else {
@@ -23728,7 +23728,7 @@ function DebugOutSet$1(t0) {
   }
   return t4;
 }
-function Header$1(t0) {
+function Header$2(t0) {
   const $ = compilerRuntimeExports.c(16);
   const {
     obj: objarg,
@@ -23761,7 +23761,7 @@ function Header$1(t0) {
               t42 = "lprm";
               break bb0;
             } else {
-              exhaustive(obj);
+              exhaustive$1(obj);
             }
           }
         }
@@ -23770,7 +23770,7 @@ function Header$1(t0) {
     }
     kindStr = t42;
     hashStr = `.${obj._hash}`;
-    t3 = showContainerId ? ` -^ ${[...obj._container.values()].map(_temp$8).join(",")}` : "";
+    t3 = showContainerId ? ` -^ ${[...obj._container.values()].map(_temp$9).join(",")}` : "";
     $[0] = showContainerId;
     $[1] = t2;
     $[2] = hashStr;
@@ -23784,17 +23784,17 @@ function Header$1(t0) {
     t3 = $[5];
   }
   const container = t3;
-  classOfKind("hash");
+  classOfKind$1("hash");
   let t4;
   if ($[6] === Symbol.for("react.memo_cache_sentinel")) {
-    t4 = classOfKind("kind");
+    t4 = classOfKind$1("kind");
     $[6] = t4;
   } else {
     t4 = $[6];
   }
   let t5;
   if ($[7] === Symbol.for("react.memo_cache_sentinel")) {
-    t5 = classOfKind("kind");
+    t5 = classOfKind$1("kind");
     $[7] = t5;
   } else {
     t5 = $[7];
@@ -23829,7 +23829,7 @@ function Header$1(t0) {
   }
   return t7;
 }
-function _temp$8(v) {
+function _temp$9(v) {
   return v._id;
 }
 function DebugOutPrimitive(t0) {
@@ -23840,11 +23840,11 @@ function DebugOutPrimitive(t0) {
   } = t0;
   const path = t1 === void 0 ? "" : t1;
   const [val] = useLinkAsState(obj);
-  if (isPrimitiveKind$1(val)) {
+  if (isPrimitiveKind$2(val)) {
     const t2 = `${path}/${obj._id}`;
     let t3;
     if ($[0] !== obj || $[1] !== t2) {
-      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj, path: t2 });
+      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj, path: t2 });
       $[0] = obj;
       $[1] = t2;
       $[2] = t3;
@@ -23853,7 +23853,7 @@ function DebugOutPrimitive(t0) {
     }
     let t4;
     if ($[3] !== val) {
-      t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm, { val });
+      t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm$1, { val });
       $[3] = val;
       $[4] = t4;
     } else {
@@ -23877,7 +23877,7 @@ function DebugOutPrimitive(t0) {
     const t2 = `${path}/${obj._id}`;
     let t3;
     if ($[8] !== obj || $[9] !== t2) {
-      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj, path: t2 });
+      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj, path: t2 });
       $[8] = obj;
       $[9] = t2;
       $[10] = t3;
@@ -23901,23 +23901,23 @@ function DebugOutPrimitive(t0) {
     return t5;
   }
 }
-function DebugOutSimplePrm({
+function DebugOutSimplePrm$1({
   val
 }) {
   switch (true) {
     case typeof val === "string":
-      return /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: classOfKind("string"), children: [
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: classOfKind$1("string"), children: [
         '"',
         val,
         '"'
       ] });
     case typeof val === "number":
-      return /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind("number"), children: String(val) });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$1("number"), children: String(val) });
     default:
       return String(val);
   }
 }
-const classOfKind = (kind) => {
+const classOfKind$1 = (kind) => {
   switch (kind) {
     case "attr":
       return "hljs-attr";
@@ -23932,10 +23932,10 @@ const classOfKind = (kind) => {
     case "kind":
       return "hljs-comment";
     default:
-      exhaustive(kind);
+      exhaustive$1(kind);
   }
 };
-function isPrimitiveKind$1(val) {
+function isPrimitiveKind$2(val) {
   return typeof val === "number" || typeof val === "string" || typeof val === "boolean" || val === null;
 }
 function TxtButton(t0) {
@@ -23989,7 +23989,7 @@ function TxtButton(t0) {
   }
   return t3;
 }
-const TAB_SIZE$3 = 2;
+const TAB_SIZE$4 = 2;
 function LinkableArrayTest(t0) {
   const $ = compilerRuntimeExports.c(8);
   const {
@@ -24106,7 +24106,7 @@ function DynamicTestArray(t0) {
   let t7;
   if ($[12] !== larr) {
     t7 = () => {
-      larr().sort(_temp$7);
+      larr().sort(_temp$8);
     };
     $[12] = larr;
     $[13] = t7;
@@ -24140,7 +24140,7 @@ function DynamicTestArray(t0) {
   if ($[18] !== handleRemove || $[19] !== larr || $[20] !== pad || $[21] !== path || $[22] !== showUnknowns) {
     result = [];
     for (let i = 0; i < larr().length; i++) {
-      const baseline = pad + TAB_SIZE$3;
+      const baseline = pad + TAB_SIZE$4;
       const elem = larr().at(i);
       result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest$1, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`), " ", /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "delete", onClick: () => elem != null && handleRemove(elem), children: "del." }, `del-${i}`));
     }
@@ -24181,7 +24181,7 @@ function DynamicTestArray(t0) {
   }
   let t11;
   if ($[29] !== t10) {
-    t11 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: t10 });
+    t11 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj: t10 });
     $[29] = t10;
     $[30] = t11;
   } else {
@@ -24196,7 +24196,7 @@ function DynamicTestArray(t0) {
   }
   let t13;
   if ($[32] !== pad) {
-    t13 = " ".repeat(TAB_SIZE$3 + pad);
+    t13 = " ".repeat(TAB_SIZE$4 + pad);
     $[32] = pad;
     $[33] = t13;
   } else {
@@ -24320,7 +24320,7 @@ function DynamicTestArray(t0) {
   }
   return t23;
 }
-function _temp$7(a, b) {
+function _temp$8(a, b) {
   return a - b;
 }
 function LinkableMapTest(t0) {
@@ -24360,7 +24360,7 @@ function LinkableMapTest(t0) {
   }
   let t4;
   if ($[6] !== handleAdd || $[7] !== map2) {
-    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTestMap, { map: map2, pad: 0, showUnknowns: true, onAdd: handleAdd, renderValue: _temp$6 }) });
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTestMap, { map: map2, pad: 0, showUnknowns: true, onAdd: handleAdd, renderValue: _temp$7 }) });
     $[6] = handleAdd;
     $[7] = map2;
     $[8] = t4;
@@ -24381,10 +24381,10 @@ function LinkableMapTest(t0) {
   }
   return t5;
 }
-function _temp$6(val, key_0, pad, path, showUnknowns) {
+function _temp$7(val, key_0, pad, path, showUnknowns) {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest$1, { val, pad, path: `${path}/s${key_0}`, showUnknowns }, key_0);
 }
-const TAB_SIZE$2 = 2;
+const TAB_SIZE$3 = 2;
 function DynamicTestMap(t0) {
   const $ = compilerRuntimeExports.c(32);
   const {
@@ -24421,8 +24421,8 @@ function DynamicTestMap(t0) {
     body = [];
     for (let i = 0; i < entries.length; i++) {
       const [key, val] = entries[i];
-      const baseline = pad + TAB_SIZE$2;
-      body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind("attr"), children: String(key) }, `span-${key}`), ": ", renderValue(val, `elem-${key}`, pad, path, showUnknowns), " ", /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "delete", onClick: () => handleDelete(key), className: "bg-transparent", children: "del." }, `del-${key}`));
+      const baseline = pad + TAB_SIZE$3;
+      body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$1("attr"), children: String(key) }, `span-${key}`), ": ", renderValue(val, `elem-${key}`, pad, path, showUnknowns), " ", /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "delete", onClick: () => handleDelete(key), className: "bg-transparent", children: "del." }, `del-${key}`));
     }
     let t42;
     if ($[11] !== pad) {
@@ -24446,7 +24446,7 @@ function DynamicTestMap(t0) {
   const t4 = `${path}/${map2._id}`;
   let t5;
   if ($[13] !== map2 || $[14] !== t4) {
-    t5 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: map2, path: t4 });
+    t5 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj: map2, path: t4 });
     $[13] = map2;
     $[14] = t4;
     $[15] = t5;
@@ -24457,7 +24457,7 @@ function DynamicTestMap(t0) {
   let t7;
   if ($[16] === Symbol.for("react.memo_cache_sentinel")) {
     t6 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {});
-    t7 = " ".repeat(TAB_SIZE$2 - 1);
+    t7 = " ".repeat(TAB_SIZE$3 - 1);
     $[16] = t6;
     $[17] = t7;
   } else {
@@ -24569,7 +24569,7 @@ function LinkableValueTest(t0) {
   }
   return t4;
 }
-function isPrimitiveKind(val) {
+function isPrimitiveKind$1(val) {
   return typeof val === "number" || typeof val === "string" || typeof val === "boolean" || val === null;
 }
 function DebugOutNumber(t0) {
@@ -24582,7 +24582,7 @@ function DebugOutNumber(t0) {
   const [value, setValue] = useLinkAsState(prim);
   let t2;
   if ($[0] !== setValue) {
-    t2 = () => setValue(_temp$5);
+    t2 = () => setValue(_temp$6);
     $[0] = setValue;
     $[1] = t2;
   } else {
@@ -24591,7 +24591,7 @@ function DebugOutNumber(t0) {
   const increment = t2;
   let t3;
   if ($[2] !== setValue) {
-    t3 = () => setValue(_temp2$5);
+    t3 = () => setValue(_temp2$6);
     $[2] = setValue;
     $[3] = t3;
   } else {
@@ -24616,11 +24616,11 @@ function DebugOutNumber(t0) {
     t5 = $[7];
   }
   const setRandom = t5;
-  if (isPrimitiveKind(value)) {
+  if (isPrimitiveKind$1(value)) {
     const t6 = `${path}/${prim._id}`;
     let t7;
     if ($[8] !== prim || $[9] !== t6) {
-      t7 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: prim, path: t6 });
+      t7 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj: prim, path: t6 });
       $[8] = prim;
       $[9] = t6;
       $[10] = t7;
@@ -24637,7 +24637,7 @@ function DebugOutNumber(t0) {
     }
     let t9;
     if ($[13] !== value) {
-      t9 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm, { val: value });
+      t9 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm$1, { val: value });
       $[13] = value;
       $[14] = t9;
     } else {
@@ -24697,7 +24697,7 @@ function DebugOutNumber(t0) {
     const t6 = `${path}/${prim._id}`;
     let t7;
     if ($[28] !== prim || $[29] !== t6) {
-      t7 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: prim, path: t6 });
+      t7 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj: prim, path: t6 });
       $[28] = prim;
       $[29] = t6;
       $[30] = t7;
@@ -24721,10 +24721,10 @@ function DebugOutNumber(t0) {
     return t9;
   }
 }
-function _temp2$5(v_0) {
+function _temp2$6(v_0) {
   return v_0 - 1;
 }
-function _temp$5(v) {
+function _temp$6(v) {
   return v + 1;
 }
 function DebugOutBoolean(t0) {
@@ -24747,7 +24747,7 @@ function DebugOutBoolean(t0) {
   const t3 = `${path}/${prim._id}`;
   let t4;
   if ($[2] !== prim || $[3] !== t3) {
-    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: prim, path: t3 });
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj: prim, path: t3 });
     $[2] = prim;
     $[3] = t3;
     $[4] = t4;
@@ -24756,7 +24756,7 @@ function DebugOutBoolean(t0) {
   }
   let t5;
   if ($[5] !== value) {
-    t5 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm, { val: value });
+    t5 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm$1, { val: value });
     $[5] = value;
     $[6] = t5;
   } else {
@@ -24831,7 +24831,7 @@ function LinkableStateNested(t0) {
   }
   let t4;
   if ($[5] !== handleAdd) {
-    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTestMap, { map: map$1, pad: 0, showUnknowns: true, onAdd: handleAdd, renderValue: _temp$4 }) });
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTestMap, { map: map$1, pad: 0, showUnknowns: true, onAdd: handleAdd, renderValue: _temp$5 }) });
     $[5] = handleAdd;
     $[6] = t4;
   } else {
@@ -24869,7 +24869,7 @@ function LinkableStateNested(t0) {
   }
   return t7;
 }
-function _temp$4(val, key_0, pad, path, showUnknowns) {
+function _temp$5(val, key_0, pad, path, showUnknowns) {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTestArray, { arr: val, pad: pad + 2, path: `${path}/s${key_0}`, showUnknowns }, key_0);
 }
 function ListExample() {
@@ -24884,7 +24884,7 @@ function ListExample() {
   }
   let t1;
   if ($[1] !== list) {
-    t1 = list().entries().map(_temp2$4).toArray();
+    t1 = list().entries().map(_temp2$5).toArray();
     $[1] = list;
     $[2] = t1;
   } else {
@@ -24903,7 +24903,7 @@ function ListExample() {
   }
   return t2;
 }
-function _temp2$4(t0, i) {
+function _temp2$5(t0, i) {
   const [name, doneState] = t0;
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ListItem, { name, doneState }, i);
 }
@@ -25010,7 +25010,7 @@ function LinkableSetTest(t0) {
   }
   return t4;
 }
-const TAB_SIZE$1 = 2;
+const TAB_SIZE$2 = 2;
 function DebugOutSet(t0) {
   const $ = compilerRuntimeExports.c(36);
   const {
@@ -25062,7 +25062,7 @@ function DebugOutSet(t0) {
     result = [];
     let i = 0;
     for (const elem of lset()) {
-      const baseline = pad + TAB_SIZE$1;
+      const baseline = pad + TAB_SIZE$2;
       result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest$1, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`), " ", /* @__PURE__ */ jsxRuntimeExports.jsx(TxtButton, { title: "shift", onClick: () => handleDelete(elem), children: "del." }));
       i++;
     }
@@ -25103,7 +25103,7 @@ function DebugOutSet(t0) {
   }
   let t6;
   if ($[18] !== t5) {
-    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: t5 });
+    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$2, { obj: t5 });
     $[18] = t5;
     $[19] = t6;
   } else {
@@ -25113,7 +25113,7 @@ function DebugOutSet(t0) {
   let t8;
   if ($[20] === Symbol.for("react.memo_cache_sentinel")) {
     t7 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {});
-    t8 = " ".repeat(TAB_SIZE$1 - 1);
+    t8 = " ".repeat(TAB_SIZE$2 - 1);
     $[20] = t7;
     $[21] = t8;
   } else {
@@ -25228,10 +25228,7 @@ let SubbableMark$1 = class SubbableMark {
   }
 };
 function isContainable$1(value) {
-  return typeof value === "object" && value !== null && "$$token" in value && value.$$token instanceof SubbableMark$1;
-}
-function pdb$1(marked) {
-  return `${marked.constructor.name}.${marked.$$mark._id}`;
+  return typeof value === "object" && value !== null && "$$mark" in value && value.$$mark instanceof SubbableMark$1;
 }
 const subbable$1 = {
   /**
@@ -25263,13 +25260,10 @@ let UpdateToken$1 = class UpdateToken3 {
 const subbableContainer$1 = {
   // abstract _replace(val: T): void;
   _containAll(container, items) {
-    console.log("HERE", container);
-    console.log("HERE", pdb$1(container), items);
     for (const elem of items) {
       if (!isContainable$1(elem)) {
         continue;
       }
-      console.log(pdb$1(container), "->", pdb$1(elem));
       elem.$$mark._container.add(container);
     }
   },
@@ -25294,7 +25288,6 @@ const subbableContainer$1 = {
   _notifyChange(struct, target) {
     const token = new UpdateToken$1(target);
     struct.$$mark._propagatedTokens.add(token);
-    console.log("_notifyChange", pdb$1(struct), "container", struct.$$mark._container);
     subbable$1.mutated(struct, target);
     for (const container of struct.$$mark._container) {
       subbableContainer$1._childChanged(container, token);
@@ -25314,7 +25307,6 @@ const subbableContainer$1 = {
 let MarkedArray$1 = class MarkedArray extends Array {
   $$mark;
   constructor(_array, _id) {
-    console.log("here");
     super(..._array);
     this.$$mark = new SubbableMark$1(_id);
     subbableContainer$1._containAll(this, _array);
@@ -25478,6 +25470,9 @@ let MarkedMap$1 = class MarkedMap extends Map {
     return mapped;
   }
 };
+function pdb$1(marked) {
+  return `${marked.constructor.name}.${marked.$$mark._id}`;
+}
 let MarkedSet$1 = class MarkedSet extends Set {
   $$mark;
   constructor(_set, _id) {
@@ -25571,11 +25566,613 @@ let MarkedValue$1 = class MarkedValue {
     this.set(value);
   }
 };
+function exhaustive(x, msg) {
+  throw new Error(`Exhaustive violation, unexpected value ${x}`);
+}
+function isPrimitiveKind(val) {
+  return typeof val === "number" || typeof val === "string" || typeof val === "boolean" || val == null;
+}
+const TAB_SIZE$1 = 2;
+function DebugTree(t0) {
+  const $ = compilerRuntimeExports.c(9);
+  const {
+    val,
+    showUnknowns,
+    style
+  } = t0;
+  let t1;
+  if ($[0] !== style) {
+    t1 = {
+      overflow: "scroll",
+      ...style
+    };
+    $[0] = style;
+    $[1] = t1;
+  } else {
+    t1 = $[1];
+  }
+  let t2;
+  if ($[2] === Symbol.for("react.memo_cache_sentinel")) {
+    t2 = {
+      textAlign: "left",
+      width: 300,
+      fontSize: 12
+    };
+    $[2] = t2;
+  } else {
+    t2 = $[2];
+  }
+  let t3;
+  if ($[3] !== showUnknowns || $[4] !== val) {
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { style: t2, children: /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val, pad: 0, path: "ROOT", showUnknowns }) });
+    $[3] = showUnknowns;
+    $[4] = val;
+    $[5] = t3;
+  } else {
+    t3 = $[5];
+  }
+  let t4;
+  if ($[6] !== t1 || $[7] !== t3) {
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: t1, children: t3 });
+    $[6] = t1;
+    $[7] = t3;
+    $[8] = t4;
+  } else {
+    t4 = $[8];
+  }
+  return t4;
+}
+function DebugOutReact(t0) {
+  const $ = compilerRuntimeExports.c(24);
+  const {
+    val,
+    pad,
+    path: t1,
+    showUnknowns: t2
+  } = t0;
+  const path = t1 === void 0 ? "" : t1;
+  const showUnknowns = t2 === void 0 ? true : t2;
+  console.log("VAL", val, isContainable$1(val));
+  if (isPrimitiveKind(val)) {
+    let t3;
+    if ($[0] !== val) {
+      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm, { val });
+      $[0] = val;
+      $[1] = t3;
+    } else {
+      t3 = $[1];
+    }
+    return t3;
+  } else {
+    if (typeof val === "function") {
+      return "(function)";
+    } else {
+      if (val instanceof MarkedArray$1) {
+        let t3;
+        if ($[2] !== pad || $[3] !== path || $[4] !== showUnknowns || $[5] !== val) {
+          t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(TreeMarkedArray, { arr: val, pad, path, showUnknowns });
+          $[2] = pad;
+          $[3] = path;
+          $[4] = showUnknowns;
+          $[5] = val;
+          $[6] = t3;
+        } else {
+          t3 = $[6];
+        }
+        return t3;
+      } else {
+        if (val instanceof MarkedSet$1) {
+          let t3;
+          if ($[7] !== pad || $[8] !== path || $[9] !== showUnknowns || $[10] !== val) {
+            t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(TreeMarkedSet, { set: val, pad, path, showUnknowns });
+            $[7] = pad;
+            $[8] = path;
+            $[9] = showUnknowns;
+            $[10] = val;
+            $[11] = t3;
+          } else {
+            t3 = $[11];
+          }
+          return t3;
+        } else {
+          if (val instanceof MarkedMap$1) {
+            return;
+          } else {
+            if (val instanceof MarkedValue$1) {
+              let t3;
+              if ($[12] !== path || $[13] !== val) {
+                t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(TreeMarkedValue, { obj: val, path });
+                $[12] = path;
+                $[13] = val;
+                $[14] = t3;
+              } else {
+                t3 = $[14];
+              }
+              return t3;
+            } else {
+              if (isContainable$1(val)) {
+                let t3;
+                if ($[15] !== pad || $[16] !== path || $[17] !== showUnknowns || $[18] !== val) {
+                  t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(TreeMarkedSubbable, { struct: val, pad, path, showUnknowns });
+                  $[15] = pad;
+                  $[16] = path;
+                  $[17] = showUnknowns;
+                  $[18] = val;
+                  $[19] = t3;
+                } else {
+                  t3 = $[19];
+                }
+                return t3;
+              } else {
+                if (Array.isArray(val)) {
+                  let t3;
+                  if ($[20] !== val) {
+                    t3 = JSON.stringify(val);
+                    $[20] = val;
+                    $[21] = t3;
+                  } else {
+                    t3 = $[21];
+                  }
+                  return t3;
+                } else {
+                  if (showUnknowns) {
+                    let t3;
+                    if ($[22] !== val) {
+                      t3 = stringifyUnknown$1(val);
+                      $[22] = val;
+                      $[23] = t3;
+                    } else {
+                      t3 = $[23];
+                    }
+                    return `(unknown: ${t3})`;
+                  } else {
+                    return `(unknown: ${val.constructor.name})`;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+function TreeMarkedSubbable(t0) {
+  const $ = compilerRuntimeExports.c(22);
+  const {
+    struct,
+    pad,
+    path: t1,
+    showUnknowns
+  } = t0;
+  const path = t1 === void 0 ? "" : t1;
+  const [displayState, setDisplayState] = reactExports.useState("full");
+  const showBody = displayState === "full";
+  let body;
+  if ($[0] !== pad || $[1] !== path || $[2] !== showBody || $[3] !== showUnknowns || $[4] !== struct) {
+    body = ["{"];
+    let t22;
+    if ($[6] !== struct) {
+      t22 = Object.keys(struct);
+      $[6] = struct;
+      $[7] = t22;
+    } else {
+      t22 = $[7];
+    }
+    const keys = t22;
+    for (let i = 0; i < keys.length && showBody; i++) {
+      const key = keys[i];
+      const baseline = pad + TAB_SIZE$1;
+      if (key === "$$mark") {
+        continue;
+      }
+      const val = struct[key];
+      body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind("attr"), children: key }, `span-${key}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val, pad: baseline, path: `${path}/${key}`, showUnknowns }, `elem-${key}`));
+    }
+    if (!showBody) {
+      body.push("...", "}");
+    } else {
+      let t32;
+      if ($[8] !== pad) {
+        t32 = " ".repeat(pad);
+        $[8] = pad;
+        $[9] = t32;
+      } else {
+        t32 = $[9];
+      }
+      body.push("\n", t32, "}");
+    }
+    $[0] = pad;
+    $[1] = path;
+    $[2] = showBody;
+    $[3] = showUnknowns;
+    $[4] = struct;
+    $[5] = body;
+  } else {
+    body = $[5];
+  }
+  const t2 = `${path}/${struct.$$mark._id}`;
+  let t3;
+  if ($[10] !== struct || $[11] !== t2) {
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: struct, path: t2 });
+    $[10] = struct;
+    $[11] = t2;
+    $[12] = t3;
+  } else {
+    t3 = $[12];
+  }
+  let t4;
+  let t5;
+  let t6;
+  if ($[13] === Symbol.for("react.memo_cache_sentinel")) {
+    t4 = {
+      cursor: "pointer"
+    };
+    t5 = classOfKind("classname");
+    t6 = () => {
+      setDisplayState(_temp$4);
+    };
+    $[13] = t4;
+    $[14] = t5;
+    $[15] = t6;
+  } else {
+    t4 = $[13];
+    t5 = $[14];
+    t6 = $[15];
+  }
+  let t7;
+  if ($[16] !== struct.constructor.name) {
+    t7 = /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: t4, className: t5, onClick: t6, children: struct.constructor.name });
+    $[16] = struct.constructor.name;
+    $[17] = t7;
+  } else {
+    t7 = $[17];
+  }
+  let t8;
+  if ($[18] !== body || $[19] !== t3 || $[20] !== t7) {
+    t8 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      t3,
+      " ",
+      t7,
+      " ",
+      body
+    ] });
+    $[18] = body;
+    $[19] = t3;
+    $[20] = t7;
+    $[21] = t8;
+  } else {
+    t8 = $[21];
+  }
+  return t8;
+}
+function _temp$4(prev) {
+  switch (prev) {
+    case "full": {
+      return "collapsed";
+    }
+    case "collapsed": {
+      return "full";
+    }
+    default: {
+      exhaustive(prev);
+    }
+  }
+}
+function TreeMarkedArray(t0) {
+  const $ = compilerRuntimeExports.c(13);
+  const {
+    arr,
+    pad,
+    path: t1,
+    showUnknowns
+  } = t0;
+  const path = t1 === void 0 ? "" : t1;
+  let result;
+  if ($[0] !== arr || $[1] !== pad || $[2] !== path || $[3] !== showUnknowns) {
+    result = [];
+    for (let i = 0; i < arr.length; i++) {
+      const baseline = pad + TAB_SIZE$1;
+      const elem = arr.at(i);
+      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`));
+    }
+    if (result.length > 0) {
+      let t22;
+      if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
+        t22 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, "brend");
+        $[5] = t22;
+      } else {
+        t22 = $[5];
+      }
+      let t32;
+      if ($[6] !== pad) {
+        t32 = " ".repeat(pad);
+        $[6] = pad;
+        $[7] = t32;
+      } else {
+        t32 = $[7];
+      }
+      result.push(t22, t32);
+    }
+    $[0] = arr;
+    $[1] = pad;
+    $[2] = path;
+    $[3] = showUnknowns;
+    $[4] = result;
+  } else {
+    result = $[4];
+  }
+  let t2;
+  if ($[8] !== arr) {
+    t2 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: arr });
+    $[8] = arr;
+    $[9] = t2;
+  } else {
+    t2 = $[9];
+  }
+  let t3;
+  if ($[10] !== result || $[11] !== t2) {
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      t2,
+      " ",
+      "[",
+      result,
+      "]"
+    ] });
+    $[10] = result;
+    $[11] = t2;
+    $[12] = t3;
+  } else {
+    t3 = $[12];
+  }
+  return t3;
+}
+function TreeMarkedSet(t0) {
+  const $ = compilerRuntimeExports.c(13);
+  const {
+    set: set2,
+    pad,
+    path: t1,
+    showUnknowns
+  } = t0;
+  const path = t1 === void 0 ? "" : t1;
+  let result;
+  if ($[0] !== pad || $[1] !== path || $[2] !== set2 || $[3] !== showUnknowns) {
+    result = [];
+    let i = 0;
+    for (const elem of set2) {
+      const baseline = pad + TAB_SIZE$1;
+      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`));
+      i++;
+    }
+    if (result.length > 0) {
+      let t22;
+      if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
+        t22 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, "brend");
+        $[5] = t22;
+      } else {
+        t22 = $[5];
+      }
+      let t32;
+      if ($[6] !== pad) {
+        t32 = " ".repeat(pad);
+        $[6] = pad;
+        $[7] = t32;
+      } else {
+        t32 = $[7];
+      }
+      result.push(t22, t32);
+    }
+    $[0] = pad;
+    $[1] = path;
+    $[2] = set2;
+    $[3] = showUnknowns;
+    $[4] = result;
+  } else {
+    result = $[4];
+  }
+  let t2;
+  if ($[8] !== set2) {
+    t2 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj: set2 });
+    $[8] = set2;
+    $[9] = t2;
+  } else {
+    t2 = $[9];
+  }
+  let t3;
+  if ($[10] !== result || $[11] !== t2) {
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      t2,
+      " ",
+      "(",
+      result,
+      ")"
+    ] });
+    $[10] = result;
+    $[11] = t2;
+    $[12] = t3;
+  } else {
+    t3 = $[12];
+  }
+  return t3;
+}
+function TreeMarkedValue(t0) {
+  const $ = compilerRuntimeExports.c(17);
+  const {
+    obj,
+    path: t1
+  } = t0;
+  const path = t1 === void 0 ? "" : t1;
+  let t2;
+  let val;
+  if ($[0] !== obj) {
+    val = obj.get();
+    t2 = isPrimitiveKind(val);
+    $[0] = obj;
+    $[1] = t2;
+    $[2] = val;
+  } else {
+    t2 = $[1];
+    val = $[2];
+  }
+  if (t2) {
+    const t3 = `${path}/${obj.$$mark._id}`;
+    let t4;
+    if ($[3] !== obj || $[4] !== t3) {
+      t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj, path: t3 });
+      $[3] = obj;
+      $[4] = t3;
+      $[5] = t4;
+    } else {
+      t4 = $[5];
+    }
+    let t5;
+    if ($[6] !== val) {
+      t5 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm, { val });
+      $[6] = val;
+      $[7] = t5;
+    } else {
+      t5 = $[7];
+    }
+    let t6;
+    if ($[8] !== t4 || $[9] !== t5) {
+      t6 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        t4,
+        " ",
+        t5
+      ] });
+      $[8] = t4;
+      $[9] = t5;
+      $[10] = t6;
+    } else {
+      t6 = $[10];
+    }
+    return t6;
+  } else {
+    const t3 = `${path}/${obj.$$mark._id}`;
+    let t4;
+    if ($[11] !== obj || $[12] !== t3) {
+      t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(Header$1, { obj, path: t3 });
+      $[11] = obj;
+      $[12] = t3;
+      $[13] = t4;
+    } else {
+      t4 = $[13];
+    }
+    const t5 = String(val);
+    let t6;
+    if ($[14] !== t4 || $[15] !== t5) {
+      t6 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        t4,
+        " ",
+        t5
+      ] });
+      $[14] = t4;
+      $[15] = t5;
+      $[16] = t6;
+    } else {
+      t6 = $[16];
+    }
+    return t6;
+  }
+}
+function Header$1(t0) {
+  const $ = compilerRuntimeExports.c(9);
+  const {
+    obj,
+    path,
+    showContainerId: t1
+  } = t0;
+  const showContainerId = t1 === void 0 ? false : t1;
+  let t2;
+  if ($[0] !== obj.$$mark._container || $[1] !== showContainerId) {
+    t2 = showContainerId ? ` -^ ${[...obj.$$mark._container.values()].map(_temp2$4).join(",")}` : "";
+    $[0] = obj.$$mark._container;
+    $[1] = showContainerId;
+    $[2] = t2;
+  } else {
+    t2 = $[2];
+  }
+  const container = t2;
+  let t3;
+  if ($[3] === Symbol.for("react.memo_cache_sentinel")) {
+    t3 = classOfKind("kind");
+    $[3] = t3;
+  } else {
+    t3 = $[3];
+  }
+  let t4;
+  if ($[4] !== container || $[5] !== obj.$$mark._hash || $[6] !== obj.$$mark._id || $[7] !== path) {
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: t3, title: path, children: [
+      "(",
+      obj.$$mark._id,
+      ".",
+      obj.$$mark._hash,
+      container,
+      ")"
+    ] });
+    $[4] = container;
+    $[5] = obj.$$mark._hash;
+    $[6] = obj.$$mark._id;
+    $[7] = path;
+    $[8] = t4;
+  } else {
+    t4 = $[8];
+  }
+  return t4;
+}
+function _temp2$4(v) {
+  return v.$$mark._id;
+}
+function DebugOutSimplePrm({
+  val
+}) {
+  switch (true) {
+    case typeof val === "string":
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: classOfKind("string"), children: [
+        '"',
+        val,
+        '"'
+      ] });
+    case typeof val === "number":
+      return /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind("number"), children: String(val) });
+    default:
+      return String(val);
+  }
+}
+const classOfKind = (kind) => {
+  switch (kind) {
+    case "attr":
+      return "hljs-attr";
+    case "number":
+    case "hash":
+      return "hljs-number";
+    case "string":
+      return "hljs-string";
+    case "classname":
+      return "hljs-title class_";
+    case "prm":
+    case "kind":
+      return "hljs-comment";
+    default:
+      exhaustive(kind);
+  }
+};
+function stringifyUnknown$1(val) {
+  const res = stringify(val, {
+    space: " ",
+    cycles: true
+  });
+  if (res === "{\n}") {
+    return "{}";
+  } else {
+    return res;
+  }
+}
 function useLink$1(obj, recursiveChanges = false) {
   "use no memo";
   reactExports.useSyncExternalStore(reactExports.useCallback((onStoreChange) => {
     return subbable$1.subscribe(obj, (target) => {
-      console.log("got notif", obj, "target is", target, "notifying?", obj === target || recursiveChanges);
       if (obj === target || recursiveChanges) {
         onStoreChange();
       }
@@ -25769,17 +26366,17 @@ function Header(t0) {
     t3 = $[5];
   }
   const container = t3;
-  classOfKind("hash");
+  classOfKind$1("hash");
   let t4;
   if ($[6] === Symbol.for("react.memo_cache_sentinel")) {
-    t4 = classOfKind("kind");
+    t4 = classOfKind$1("kind");
     $[6] = t4;
   } else {
     t4 = $[6];
   }
   let t5;
   if ($[7] === Symbol.for("react.memo_cache_sentinel")) {
-    t5 = classOfKind("kind");
+    t5 = classOfKind$1("kind");
     $[7] = t5;
   } else {
     t5 = $[7];
@@ -25830,7 +26427,7 @@ function DynamicTest(t0) {
   if (typeof val === "string" || typeof val === "number" || typeof val === "boolean" || val == null) {
     let t3;
     if ($[0] !== val) {
-      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm, { val });
+      t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm$1, { val });
       $[0] = val;
       $[1] = t3;
     } else {
@@ -25933,10 +26530,7 @@ class SubbableMark2 {
   }
 }
 function isContainable(value) {
-  return typeof value === "object" && value !== null && "$$token" in value && value.$$token instanceof SubbableMark2;
-}
-function pdb(marked) {
-  return `${marked.constructor.name}.${marked.$$mark._id}`;
+  return typeof value === "object" && value !== null && "$$mark" in value && value.$$mark instanceof SubbableMark2;
 }
 const subbable = {
   /**
@@ -25968,13 +26562,10 @@ class UpdateToken4 {
 const subbableContainer = {
   // abstract _replace(val: T): void;
   _containAll(container, items) {
-    console.log("HERE", container);
-    console.log("HERE", pdb(container), items);
     for (const elem of items) {
       if (!isContainable(elem)) {
         continue;
       }
-      console.log(pdb(container), "->", pdb(elem));
       elem.$$mark._container.add(container);
     }
   },
@@ -25999,7 +26590,6 @@ const subbableContainer = {
   _notifyChange(struct, target) {
     const token = new UpdateToken4(target);
     struct.$$mark._propagatedTokens.add(token);
-    console.log("_notifyChange", pdb(struct), "container", struct.$$mark._container);
     subbable.mutated(struct, target);
     for (const container of struct.$$mark._container) {
       subbableContainer._childChanged(container, token);
@@ -26019,7 +26609,6 @@ const subbableContainer = {
 class MarkedArray2 extends Array {
   $$mark;
   constructor(_array, _id) {
-    console.log("here");
     super(..._array);
     this.$$mark = new SubbableMark2(_id);
     subbableContainer._containAll(this, _array);
@@ -26183,6 +26772,9 @@ class MarkedMap2 extends Map {
     return mapped;
   }
 }
+function pdb(marked) {
+  return `${marked.constructor.name}.${marked.$$mark._id}`;
+}
 class MarkedSet2 extends Set {
   $$mark;
   constructor(_set, _id) {
@@ -26276,11 +26868,125 @@ class MarkedValue2 {
     this.set(value);
   }
 }
+var defaults;
+var hasRequiredDefaults;
+function requireDefaults() {
+  if (hasRequiredDefaults) return defaults;
+  hasRequiredDefaults = 1;
+  defaults = {
+    space: "",
+    cycles: false,
+    replacer: (k, v) => v,
+    stringify: JSON.stringify
+  };
+  return defaults;
+}
+var util;
+var hasRequiredUtil;
+function requireUtil() {
+  if (hasRequiredUtil) return util;
+  hasRequiredUtil = 1;
+  util = {
+    isArray: Array.isArray,
+    assign: Object.assign,
+    isObject: (v) => typeof v === "object",
+    isFunction: (v) => typeof v === "function",
+    isBoolean: (v) => typeof v === "boolean",
+    isRegex: (v) => v instanceof RegExp,
+    keys: Object.keys
+  };
+  return util;
+}
+var lib;
+var hasRequiredLib;
+function requireLib() {
+  if (hasRequiredLib) return lib;
+  hasRequiredLib = 1;
+  const DEFAULTS = requireDefaults();
+  const isFunction = requireUtil().isFunction;
+  const isBoolean = requireUtil().isBoolean;
+  const isObject = requireUtil().isObject;
+  const isArray = requireUtil().isArray;
+  const isRegex = requireUtil().isRegex;
+  const assign = requireUtil().assign;
+  const keys = requireUtil().keys;
+  function serialize2(obj) {
+    if (obj === null || obj === void 0) return obj;
+    if (isRegex(obj)) return obj.toString();
+    return obj.toJSON ? obj.toJSON() : obj;
+  }
+  function stringifyDeterministic(obj, opts) {
+    opts = opts || assign({}, DEFAULTS);
+    if (isFunction(opts)) opts = {
+      compare: opts
+    };
+    const space = opts.space || DEFAULTS.space;
+    const cycles = isBoolean(opts.cycles) ? opts.cycles : DEFAULTS.cycles;
+    const replacer = opts.replacer || DEFAULTS.replacer;
+    const stringify2 = opts.stringify || DEFAULTS.stringify;
+    const compare = opts.compare && /* @__PURE__ */ function(f) {
+      return function(node) {
+        return function(a, b) {
+          const aobj = {
+            key: a,
+            value: node[a]
+          };
+          const bobj = {
+            key: b,
+            value: node[b]
+          };
+          return f(aobj, bobj);
+        };
+      };
+    }(opts.compare);
+    if (!cycles) stringify2(obj);
+    const seen = [];
+    return function _deterministic(parent, key, node, level) {
+      const indent = space ? "\n" + new Array(level + 1).join(space) : "";
+      const colonSeparator = space ? ": " : ":";
+      node = serialize2(node);
+      node = replacer.call(parent, key, node);
+      if (node === void 0) return;
+      if (!isObject(node) || node === null) return stringify2(node);
+      if (isArray(node)) {
+        const out = [];
+        for (let i = 0; i < node.length; i++) {
+          const item = _deterministic(node, i, node[i], level + 1) || stringify2(null);
+          out.push(indent + space + item);
+        }
+        return "[" + out.join(",") + indent + "]";
+      } else {
+        if (cycles) {
+          if (seen.indexOf(node) !== -1) {
+            return stringify2("[Circular]");
+          } else {
+            seen.push(node);
+          }
+        }
+        const nodeKeys = keys(node).sort(compare && compare(node));
+        const out = [];
+        for (let i = 0; i < nodeKeys.length; i++) {
+          const key2 = nodeKeys[i];
+          const value = _deterministic(node, key2, node[key2], level + 1);
+          if (!value) continue;
+          const keyValue = stringify2(key2) + colonSeparator + value;
+          out.push(indent + space + keyValue);
+        }
+        seen.splice(seen.indexOf(node), 1);
+        return "{" + out.join(",") + indent + "}";
+      }
+    }({
+      "": obj
+    }, "", obj, 0);
+  }
+  lib = stringifyDeterministic;
+  return lib;
+}
+requireLib();
 function useLink(obj, recursiveChanges = false) {
   "use no memo";
   reactExports.useSyncExternalStore(reactExports.useCallback((onStoreChange) => {
     return subbable.subscribe(obj, (target) => {
-      console.log("got notif", obj, "target is", target, "notifying?", obj === target || recursiveChanges);
       if (obj === target || recursiveChanges) {
         onStoreChange();
       }
@@ -26651,10 +27357,8 @@ class MProject {
     this.tracks = tracks;
     this.markers = markers;
     this.solodTracks = solodTracks;
-    console.log("CONSTRUCTING MProject");
     this.$$mark.register(this, [name, tracks, markers, solodTracks]);
     this.randomNumbers = mSet();
-    console.log("CONSTRUCTED MProject");
   }
   $$mark = SubbableMark$1.create();
   randomNumbers;
@@ -26673,9 +27377,7 @@ class MAudioTrack {
   constructor(name, clips) {
     this.name = name;
     this.clips = clips;
-    console.log("CONSTRUCTING MAudioTrack");
     this.$$mark.register(this, [name]);
-    console.log("CONSTRUCTED MAudioTrack");
   }
   $$mark = SubbableMark$1.create();
   static of(name, clips) {
@@ -26686,9 +27388,7 @@ class MAudioClip {
   constructor(timelineStart, timelineLength) {
     this.timelineStart = timelineStart;
     this.timelineLength = timelineLength;
-    console.log("CONSTRUCTING MAudioClip");
     this.$$mark.register(this, [timelineStart, timelineLength]);
-    console.log("CONSTRUCTED MAudioClip");
   }
   $$mark = SubbableMark$1.create();
   static of(timelineStart, timelineLength) {
@@ -26699,9 +27399,7 @@ class MTime {
   constructor(t, u) {
     this.t = t;
     this.u = u;
-    console.log("CONSTRUCTING MTime");
     this.$$mark.register(this);
-    console.log("CONSTRUCTED MTime");
   }
   $$mark = SubbableMark$1.create();
   set(t, u) {
@@ -26716,7 +27414,93 @@ class MTime {
 function time(t, u) {
   return new MTime(t, u);
 }
-const project = MProject.of("untitled track", [MAudioTrack.of("track 1", [MAudioClip.of(0, 4)]), MAudioTrack.of("track 2", [])], [[0, "foo"], [1, "bar"]]);
+function MProjectDebug(t0) {
+  const $ = compilerRuntimeExports.c(17);
+  const {
+    project: project2
+  } = t0;
+  const [tab, setTab] = reactExports.useState("struct");
+  let t1;
+  if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
+    t1 = {
+      flex: "1 1 1px"
+    };
+    $[0] = t1;
+  } else {
+    t1 = $[0];
+  }
+  const t2 = tab === "struct";
+  let t3;
+  if ($[1] === Symbol.for("react.memo_cache_sentinel")) {
+    t3 = () => setTab("struct");
+    $[1] = t3;
+  } else {
+    t3 = $[1];
+  }
+  let t4;
+  if ($[2] !== t2) {
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(UtilityToggle, { toggled: t2, onToggle: t3, children: "struct" });
+    $[2] = t2;
+    $[3] = t4;
+  } else {
+    t4 = $[3];
+  }
+  const t5 = tab === "serialized";
+  let t6;
+  if ($[4] === Symbol.for("react.memo_cache_sentinel")) {
+    t6 = () => setTab("serialized");
+    $[4] = t6;
+  } else {
+    t6 = $[4];
+  }
+  let t7;
+  if ($[5] !== t5) {
+    t7 = /* @__PURE__ */ jsxRuntimeExports.jsx(UtilityToggle, { toggled: t5, onToggle: t6, children: "serialized" });
+    $[5] = t5;
+    $[6] = t7;
+  } else {
+    t7 = $[6];
+  }
+  let t8;
+  if ($[7] !== project2 || $[8] !== tab) {
+    t8 = tab === "struct" && /* @__PURE__ */ jsxRuntimeExports.jsx(DebugTree, { val: project2 });
+    $[7] = project2;
+    $[8] = tab;
+    $[9] = t8;
+  } else {
+    t8 = $[9];
+  }
+  let t9;
+  if ($[10] !== tab) {
+    t9 = tab === "serialized" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+      overflow: "scroll",
+      textAlign: "left",
+      fontFamily: "monospace"
+    }, children: "not implemented" });
+    $[10] = tab;
+    $[11] = t9;
+  } else {
+    t9 = $[11];
+  }
+  let t10;
+  if ($[12] !== t4 || $[13] !== t7 || $[14] !== t8 || $[15] !== t9) {
+    t10 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: t1, children: [
+      t4,
+      t7,
+      t8,
+      t9
+    ] });
+    $[12] = t4;
+    $[13] = t7;
+    $[14] = t8;
+    $[15] = t9;
+    $[16] = t10;
+  } else {
+    t10 = $[16];
+  }
+  return t10;
+}
+const project = MProject.of("untitled project", [MAudioTrack.of("track 1", [MAudioClip.of(0, 4)]), MAudioTrack.of("track 2", [])], [[0, "foo"], [1, "bar"]]);
 setWindow("project", project);
 function recordHistory(name, cb) {
   return cb();
@@ -26725,20 +27509,23 @@ function MarkedProjectTest() {
   const $ = compilerRuntimeExports.c(1);
   let t0;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
-    t0 = /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+    t0 = /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
       display: "flex",
       flexDirection: "row",
       flexGrow: 1,
       gap: 8,
       fontFamily: "monospace"
-    }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("fieldset", { style: {
-      border: "none",
-      background: "#181818",
-      alignSelf: "flex-start"
     }, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("legend", { children: "Project" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(UProject, { project })
-    ] }) }) });
+      /* @__PURE__ */ jsxRuntimeExports.jsx(MProjectDebug, { project }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("fieldset", { style: {
+        border: "none",
+        background: "#181818",
+        alignSelf: "flex-start"
+      }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("legend", { children: "Project" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(UProject, { project })
+      ] })
+    ] }) });
     $[0] = t0;
   } else {
     t0 = $[0];

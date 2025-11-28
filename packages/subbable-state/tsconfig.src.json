@@ -21,6 +21,6 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true
   },
-  "include": ["src", "lib", "exp", "./index.ts"],
+  "include": ["src", "lib", "debug", "./index.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

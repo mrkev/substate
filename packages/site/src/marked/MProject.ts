@@ -1,9 +1,11 @@
+import { MarkedMap } from "../../../subbable-state/dist";
 import {
   MarkedArray,
   MarkedSet,
   MarkedSubbable,
   MarkedValue,
   mArray,
+  mMap,
   mSet,
   mValue,
   SubbableMark,
@@ -19,21 +21,19 @@ export class MProject implements MarkedSubbable {
   constructor(
     public readonly name: MarkedValue<string>,
     readonly tracks: MarkedArray<MAudioTrack>,
-    readonly markers: MarkedArray<Marker>,
+    readonly markers: MarkedMap<number, string>,
     readonly solodTracks: MarkedSet<MAudioTrack>
   ) {
-    console.log("CONSTRUCTING MProject");
     this.$$mark.register(this, [name, tracks, markers, solodTracks]);
 
     // TODO: it's bc it's unintialized.
     // [["foo", 3]] // why does this print as unknown when empty?
     // NOTE: we don't initialize this, it's always a new set
     this.randomNumbers = mSet();
-    console.log("CONSTRUCTED MProject");
   }
 
   static of(name: string, tracks: MAudioTrack[], markers: Marker[]) {
-    return new MProject(mValue(name), mArray(tracks), mArray(markers), mSet());
+    return new MProject(mValue(name), mArray(tracks), mMap(markers), mSet());
   }
 
   addTrack(name: string) {
@@ -53,9 +53,7 @@ export class MAudioTrack implements MarkedSubbable {
     public readonly name: MarkedValue<string>,
     public readonly clips: MarkedArray<MAudioClip>
   ) {
-    console.log("CONSTRUCTING MAudioTrack");
     this.$$mark.register(this, [name]);
-    console.log("CONSTRUCTED MAudioTrack");
   }
 
   static of(name: string, clips: MAudioClip[]) {
@@ -71,9 +69,7 @@ export class MAudioClip implements MarkedSubbable {
     readonly timelineStart: MTime,
     readonly timelineLength: MTime
   ) {
-    console.log("CONSTRUCTING MAudioClip");
     this.$$mark.register(this, [timelineStart, timelineLength]);
-    console.log("CONSTRUCTED MAudioClip");
   }
 
   static of(timelineStart: number, timelineLength: number) {
@@ -94,9 +90,7 @@ export class MTime implements MarkedSubbable {
     public t: number,
     public u: TimeUnit
   ) {
-    console.log("CONSTRUCTING MTime");
     this.$$mark.register(this);
-    console.log("CONSTRUCTED MTime");
   }
 
   public set(t: number, u?: TimeUnit) {

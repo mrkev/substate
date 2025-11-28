@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { MarkedSet, useLink } from "../../../subbable-state/index";
-import { DebugOutMarkedSet, DynamicTest } from "./MarkedSetTest";
 import { MarkedArrayTest } from "./MarkedArrayTest";
-
-const set = MarkedSet.create<MarkedSet<number>>([
-  MarkedSet.create<number>([0]),
-]);
+import { DebugOutMarkedSet, DynamicTest } from "./MarkedSetTest";
 
 export function MarkedStateTest() {
+  const [set] = useState(() => {
+    return MarkedSet.create<MarkedSet<number>>([MarkedSet.create<number>([0])]);
+  });
+
   return (
     <div className="grid grid-cols-2 gap-2">
       <MarkedSetTest

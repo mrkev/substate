@@ -7,7 +7,6 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
 
   private constructor(_array: Iterable<S>, _id: string) {
     // apparently, unlike with MarkedSet, I can just pass the values to the constructor here?
-    console.log("here");
     super(..._array);
     this.$$mark = new SubbableMark(_id);
     subbableContainer._containAll(this, _array);
