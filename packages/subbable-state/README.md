@@ -20,7 +20,7 @@ There's 3 key features:
 Wraps a value to make it marked:
 
 ```typescript
-// creates a marked value from this number
+// creates a linkable value from this number
 const countState = lValue(0);
 
 count.get(); // reads the value
