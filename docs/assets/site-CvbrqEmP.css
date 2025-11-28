@@ -13,6 +13,7 @@
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     --color-gray-500: oklch(55.1% .027 264.364);
     --color-gray-700: oklch(37.3% .034 259.733);
+    --color-gray-800: oklch(27.8% .033 256.848);
     --spacing: .25rem;
     --text-sm: .875rem;
     --text-sm--line-height: calc(1.25 / .875);
@@ -326,6 +327,10 @@
     display: grid;
   }
 
+  .w-full {
+    width: 100%;
+  }
+
   .grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -346,6 +351,10 @@
     gap: calc(var(--spacing) * 2);
   }
 
+  .self-start {
+    align-self: flex-start;
+  }
+
   .overflow-scroll {
     overflow: scroll;
   }
@@ -359,6 +368,10 @@
     border-width: 1px;
   }
 
+  .border-gray-700 {
+    border-color: var(--color-gray-700);
+  }
+
   .bg-gray-700\/10 {
     background-color: #3641531a;
   }
@@ -369,8 +382,20 @@
     }
   }
 
+  .bg-gray-800 {
+    background-color: var(--color-gray-800);
+  }
+
   .bg-transparent {
     background-color: #0000;
+  }
+
+  .p-1 {
+    padding: calc(var(--spacing) * 1);
+  }
+
+  .p-2 {
+    padding: calc(var(--spacing) * 2);
   }
 
   .p-4 {

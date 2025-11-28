@@ -9,8 +9,8 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
     // apparently, unlike with MarkedSet, I can just pass the values to the constructor here?
     console.log("here");
     super(..._array);
+    this.$$mark = new SubbableMark(_id);
     subbableContainer._containAll(this, _array);
-    this.$$mark = new SubbableMark(this, _id, this);
   }
 
   public static create<T>(

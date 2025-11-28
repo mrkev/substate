@@ -1,16 +1,18 @@
 import { nanoid } from "nanoid";
+import { subbableContainer } from "../lib/SubbableContainer";
 import { MarkedSubbable, SubbableMark } from "../lib/SubbableMark";
 
 /**
- * MarkedValue is a MarkedSubbable holding a single atomic value
+ * MarkedValue is a MarkedSubbable holding a single atomic value. It's
+ * the simplest subbable container.
  */
 export class MarkedValue<S> implements MarkedSubbable {
   readonly $$mark: SubbableMark;
   private _value: Readonly<S>;
 
   private constructor(initialValue: S, id: string) {
-    // Note: made this a subbable container.
-    this.$$mark = new SubbableMark(this, id, [initialValue]);
+    this.$$mark = new SubbableMark(id);
+    subbableContainer._containAll(this, [initialValue]);
     this._value = initialValue;
   }
 

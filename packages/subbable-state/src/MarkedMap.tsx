@@ -7,8 +7,10 @@ export class MarkedMap<K, V> extends Map<K, V> implements MarkedSubbable {
 
   private constructor(initialValue: Map<K, V>, id: string) {
     super();
-    this.$$mark = new SubbableMark(this, id, this);
-    this.replace(initialValue);
+    this.$$mark = new SubbableMark(id);
+    for (const [key, value] of initialValue) {
+      this.set(key, value);
+    }
   }
 
   public static create<K, V>(

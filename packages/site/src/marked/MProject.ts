@@ -1,34 +1,39 @@
 import {
   MarkedArray,
   MarkedSet,
+  MarkedSubbable,
   MarkedValue,
   mArray,
   mSet,
   mValue,
-} from "../../../subbable-state";
-import {
-  MarkedSubbable,
   SubbableMark,
-} from "../../../subbable-state/lib/SubbableMark";
+} from "../../../subbable-state/index";
+
+type Marker = readonly [number, string];
 
 export class MProject implements MarkedSubbable {
-  readonly $$mark: SubbableMark;
+  readonly $$mark = SubbableMark.create();
+
   readonly randomNumbers: MarkedSet<number>;
 
   constructor(
-    public readonly name: MarkedValue<string>, // readonly markers: SArray<Marker>, // readonly solodTracks: MarkedSet<AudioTrack>
-    readonly tracks: MarkedArray<MAudioTrack>
+    public readonly name: MarkedValue<string>,
+    readonly tracks: MarkedArray<MAudioTrack>,
+    readonly markers: MarkedArray<Marker>,
+    readonly solodTracks: MarkedSet<MAudioTrack>
   ) {
-    this.$$mark = SubbableMark.create(this, [name, tracks]);
+    console.log("CONSTRUCTING MProject");
+    this.$$mark.register(this, [name, tracks, markers, solodTracks]);
 
     // TODO: it's bc it's unintialized.
     // [["foo", 3]] // why does this print as unknown when empty?
     // NOTE: we don't initialize this, it's always a new set
     this.randomNumbers = mSet();
+    console.log("CONSTRUCTED MProject");
   }
 
-  static of(name: string, tracks: MAudioTrack[]) {
-    return new MProject(mValue(name), mArray(tracks));
+  static of(name: string, tracks: MAudioTrack[], markers: Marker[]) {
+    return new MProject(mValue(name), mArray(tracks), mArray(markers), mSet());
   }
 
   addTrack(name: string) {
@@ -42,12 +47,15 @@ export class MProject implements MarkedSubbable {
 }
 
 export class MAudioTrack implements MarkedSubbable {
-  readonly $$mark: SubbableMark;
+  readonly $$mark = SubbableMark.create();
+
   constructor(
     public readonly name: MarkedValue<string>,
     public readonly clips: MarkedArray<MAudioClip>
   ) {
-    this.$$mark = SubbableMark.create(this, [name]);
+    console.log("CONSTRUCTING MAudioTrack");
+    this.$$mark.register(this, [name]);
+    console.log("CONSTRUCTED MAudioTrack");
   }
 
   static of(name: string, clips: MAudioClip[]) {
@@ -56,13 +64,16 @@ export class MAudioTrack implements MarkedSubbable {
 }
 
 export class MAudioClip implements MarkedSubbable {
-  readonly $$mark: SubbableMark;
+  readonly $$mark = SubbableMark.create();
+
   constructor(
     //
     readonly timelineStart: MTime,
     readonly timelineLength: MTime
   ) {
-    this.$$mark = SubbableMark.create(this);
+    console.log("CONSTRUCTING MAudioClip");
+    this.$$mark.register(this, [timelineStart, timelineLength]);
+    console.log("CONSTRUCTED MAudioClip");
   }
 
   static of(timelineStart: number, timelineLength: number) {
@@ -76,14 +87,16 @@ export class MAudioClip implements MarkedSubbable {
 type TimeUnit = "pulses" | "seconds" | "bars";
 
 export class MTime implements MarkedSubbable {
-  readonly $$mark: SubbableMark;
+  readonly $$mark = SubbableMark.create();
 
   constructor(
     // time and unit
     public t: number,
     public u: TimeUnit
   ) {
-    this.$$mark = SubbableMark.create(this);
+    console.log("CONSTRUCTING MTime");
+    this.$$mark.register(this);
+    console.log("CONSTRUCTED MTime");
   }
 
   public set(t: number, u?: TimeUnit) {

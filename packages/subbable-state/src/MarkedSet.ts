@@ -1,5 +1,6 @@
 import { nanoid } from "nanoid";
 import { MarkedSubbable, SubbableMark } from "../lib/SubbableMark";
+import { pdb } from "../lib/debug";
 
 // A Subbable set that works via a $$token (vs implementing
 // everything that makes a subbable itself)
@@ -11,8 +12,9 @@ export class MarkedSet<S> extends Set<S> implements MarkedSubbable {
     // but we override .add, and we need $$token to be set before we call .add.
     // let's just call .add ourselves after $$token is set.
     super();
-    this.$$mark = new SubbableMark(this, _id, this);
+    this.$$mark = new SubbableMark(_id);
     for (const elem of _set) {
+      console.log("SET", pdb(this), "contain", elem);
       this.add(elem);
     }
   }

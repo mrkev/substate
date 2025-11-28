@@ -22,21 +22,20 @@ export class SubbableMark implements Subbable, SubbableContainer, Contained {
   // Contained
   public readonly _container = new Set<MarkedSubbable>();
 
-  constructor(
-    holder: MarkedSubbable,
-    _id: string,
-    contain: IterableCollection
-  ) {
+  constructor(_id: string) {
     this._id = _id;
-    subbableContainer._containAll(holder, contain);
     // getGlobalState().knownObjects.set(this._id, this);
   }
 
-  public static create<T>(
+  public static create() {
+    return new SubbableMark(nanoid(5));
+  }
+
+  public register<T>(
     holder: MarkedSubbable,
     contain?: (readonly T[] | null) | Iterable<T> | null | undefined
   ) {
-    return new this(holder, nanoid(5), new Set(contain));
+    subbableContainer._containAll(holder, new Set(contain));
   }
 
   public mutate<V>(
@@ -47,7 +46,6 @@ export class SubbableMark implements Subbable, SubbableContainer, Contained {
     ) => V
   ): V {
     // saveForHistory(this);
-    console.log("mutating", this);
     const result = mutator(
       (items) => subbableContainer._containAll(struct, items),
       (items) => subbableContainer._uncontainAll(struct, items)
