@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { nullthrows, setWindow } from "../../../linked-state/src/nullthrows";
-import { useLink } from "../../../subbable-state/index";
+import {
+  MarkedSerializable,
+  SerializationMark,
+  Simplified,
+  consolidateMarks,
+  constructSimplified,
+  simplifyMarkedObject,
+} from "@mrkev/marked-serializable";
+import { useLink } from "@mrkev/subbable-state";
 import { UtilityToggle } from "../UtilityToggle";
 import {
   MAudioClip,
@@ -11,13 +19,6 @@ import { MAudioTrack, serialization_maudiotrack } from "./MAudioTrack";
 import { MProject, serialization_mproject } from "./MProject";
 import { MProjectDebug } from "./MProjectDebug";
 import { serialization_mtime } from "./MTime";
-import { constructSimplified } from "./serialization/construct";
-import {
-  consolidateMarks,
-  MarkedSerializable,
-  SerializationMark,
-} from "./serialization/MarkedSerializable";
-import { Simplified, simplifyMarkedObject } from "./serialization/simplify";
 
 const project = MProject.of(
   "untitled project",

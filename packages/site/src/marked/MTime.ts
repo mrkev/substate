@@ -1,8 +1,8 @@
-import { MarkedSubbable, SubbableMark } from "../../../subbable-state/index";
+import { MarkedSubbable, SubbableMark } from "@mrkev/subbable-state";
 import {
   MarkedSerializable,
   SerializationMark,
-} from "./serialization/MarkedSerializable";
+} from "@mrkev/marked-serializable";
 
 type TimeUnit = "pulses" | "seconds" | "bars";
 

@@ -1,10 +1,10 @@
-import { exhaustive } from "../../../../structured-state/src/assertions";
+import { exhaustive } from "./exhaustive";
 import {
   MarkedArray,
   MarkedMap,
   MarkedSet,
   MarkedValue,
-} from "../../../../subbable-state/index";
+} from "@mrkev/subbable-state";
 import { isSerializable, MarkedSerializable } from "./MarkedSerializable";
 
 export type Primitive = number | string | boolean | null;

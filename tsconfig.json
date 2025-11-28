@@ -32,6 +32,8 @@
     { "path": "./packages/linked-state/tsconfig.src.json" },
     { "path": "./packages/linked-state/tsconfig.node.json" },
     { "path": "./packages/subbable-state/tsconfig.src.json" },
-    { "path": "./packages/subbable-state/tsconfig.node.json" }
+    { "path": "./packages/subbable-state/tsconfig.node.json" },
+    { "path": "./packages/marked-serializable/tsconfig.src.json" },
+    { "path": "./packages/marked-serializable/tsconfig.node.json" }
   ]
 }

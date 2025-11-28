@@ -1,9 +1,9 @@
-import { MarkedSubbable, SubbableMark } from "../../../subbable-state/index";
-import { MTime } from "./MTime";
 import {
   MarkedSerializable,
   SerializationMark,
-} from "./serialization/MarkedSerializable";
+} from "@mrkev/marked-serializable";
+import { MarkedSubbable, SubbableMark } from "@mrkev/subbable-state";
+import { MTime } from "./MTime";
 
 export class MAudioClip
   implements

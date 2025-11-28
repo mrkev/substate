@@ -3,10 +3,10 @@ import {
   MarkedMap,
   MarkedSet,
   MarkedValue,
-} from "../../../../subbable-state/index";
-import { exhaustive } from "../../../../subbable-state/src/exhaustive";
-import { nullthrows } from "../../util";
+} from "@mrkev/subbable-state";
+import { exhaustive } from "./exhaustive";
 import { MarkedSerializable, SerializationIndex } from "./MarkedSerializable";
+import { nullthrows } from "./nullthrows";
 import {
   isPrimitive,
   isSimplified,

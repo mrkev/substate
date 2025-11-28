@@ -1,16 +1,16 @@
 import {
+  MarkedSerializable,
+  SerializationMark,
+} from "@mrkev/marked-serializable";
+import {
   MarkedArray,
   MarkedSubbable,
   MarkedValue,
   mArray,
   mValue,
   SubbableMark,
-} from "../../../subbable-state/index";
+} from "@mrkev/subbable-state";
 import { MAudioClip } from "./MAudioClip";
-import {
-  MarkedSerializable,
-  SerializationMark,
-} from "./serialization/MarkedSerializable";
 
 export class MAudioTrack
   implements

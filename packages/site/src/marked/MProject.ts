@@ -1,4 +1,8 @@
 import {
+  MarkedSerializable,
+  SerializationMark,
+} from "@mrkev/marked-serializable";
+import {
   MarkedArray,
   MarkedMap,
   MarkedSet,
@@ -9,12 +13,8 @@ import {
   mSet,
   mValue,
   SubbableMark,
-} from "../../../subbable-state/index";
+} from "@mrkev/subbable-state";
 import { MAudioTrack } from "./MAudioTrack";
-import {
-  MarkedSerializable,
-  SerializationMark,
-} from "./serialization/MarkedSerializable";
 
 type Marker = readonly [number, string];
 
