@@ -1,6 +1,6 @@
-import { MarkedMap } from "../../../subbable-state/dist";
 import {
   MarkedArray,
+  MarkedMap,
   MarkedSet,
   MarkedSubbable,
   MarkedValue,
@@ -10,6 +10,7 @@ import {
   mValue,
   SubbableMark,
 } from "../../../subbable-state/index";
+import { MAudioTrack } from "./MAudioTrack";
 
 type Marker = readonly [number, string];
 
@@ -44,65 +45,4 @@ export class MProject implements MarkedSubbable {
   clear() {
     while (this.tracks.pop());
   }
-}
-
-export class MAudioTrack implements MarkedSubbable {
-  readonly $$mark = SubbableMark.create();
-
-  constructor(
-    public readonly name: MarkedValue<string>,
-    public readonly clips: MarkedArray<MAudioClip>
-  ) {
-    this.$$mark.register(this, [name]);
-  }
-
-  static of(name: string, clips: MAudioClip[]) {
-    return new MAudioTrack(mValue(name), mArray(clips));
-  }
-}
-
-export class MAudioClip implements MarkedSubbable {
-  readonly $$mark = SubbableMark.create();
-
-  constructor(
-    //
-    readonly timelineStart: MTime,
-    readonly timelineLength: MTime
-  ) {
-    this.$$mark.register(this, [timelineStart, timelineLength]);
-  }
-
-  static of(timelineStart: number, timelineLength: number) {
-    return new MAudioClip(
-      time(timelineStart, "seconds"),
-      time(timelineLength, "seconds")
-    );
-  }
-}
-
-type TimeUnit = "pulses" | "seconds" | "bars";
-
-export class MTime implements MarkedSubbable {
-  readonly $$mark = SubbableMark.create();
-
-  constructor(
-    // time and unit
-    public t: number,
-    public u: TimeUnit
-  ) {
-    this.$$mark.register(this);
-  }
-
-  public set(t: number, u?: TimeUnit) {
-    this.$$mark.mutate(this, () => {
-      this.t = Math.max(t, 0);
-      if (u != null) {
-        this.u = u;
-      }
-    });
-  }
-}
-
-export function time(t: number, u: "pulses" | "seconds") {
-  return new MTime(t, u);
 }

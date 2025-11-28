@@ -1,7 +1,7 @@
 import stringify from "json-stringify-deterministic";
 import { ReactNode, useState } from "react";
 import { isContainable } from "../lib/Contained";
-import { MarkedSubbable } from "../lib/SubbableMark";
+import { MarkedSubbable, SubbableMark } from "../lib/SubbableMark";
 import { exhaustive } from "../src/exhaustive";
 import { useLink } from "../src/hooks";
 import { MarkedArray } from "../src/MarkedArray";

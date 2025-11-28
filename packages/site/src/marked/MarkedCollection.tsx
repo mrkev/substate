@@ -1,6 +1,5 @@
 import React from "react";
-import { useLink } from "../../../subbable-state";
-import { MarkedSubbable } from "../../../subbable-state/lib/SubbableMark";
+import { useLink, MarkedSubbable } from "../../../subbable-state/index";
 import { TxtButton } from "../ls/TxtButton";
 import { TAB_SIZE, Header } from "./MarkedSetTest";
 

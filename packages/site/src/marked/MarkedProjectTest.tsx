@@ -2,8 +2,22 @@ import { useState } from "react";
 import { nullthrows, setWindow } from "../../../linked-state/src/nullthrows";
 import { useLink } from "../../../subbable-state/index";
 import { UtilityToggle } from "../UtilityToggle";
-import { MAudioClip, MAudioTrack, MProject } from "./MProject";
+import {
+  MAudioClip,
+  serialization_maudioclip as MAudioClip_serializationMark,
+  serialization_maudioclip,
+} from "./MAudioClip";
+import { MAudioTrack } from "./MAudioTrack";
+import { MProject } from "./MProject";
 import { MProjectDebug } from "./MProjectDebug";
+import { serialization_mtime } from "./MTime";
+import { constructSimplified } from "./serialization/construct";
+import {
+  consolidateMarks,
+  MarkedSerializable,
+  SerializationMark,
+} from "./serialization/MarkedSerializable";
+import { Simplified, simplifyMarkedObject } from "./serialization/simplify";
 
 const project = MProject.of(
   "untitled project",
@@ -23,22 +37,43 @@ function recordHistory(name: string, cb: () => void) {
   return cb();
 }
 
+function serialize(x: MarkedSerializable<any>) {
+  return simplifyMarkedObject(x);
+}
+function construct(x: Simplified["any"], index: SerializationMark<any, any>) {
+  return constructSimplified(x, serializationIndex);
+}
+
+const serializationIndex = consolidateMarks([
+  serialization_mtime,
+  serialization_maudioclip,
+]);
+
 export function MarkedProjectTest() {
   // const [projectDirtyState, markProjectClean] = useDirtyTracker(project);
 
   return (
     <>
-      {/* <div>
+      <div>
         <button
           onClick={() => {
-            recordHistory("clear", () => {
-              project.clear();
-            });
+            const serialized = serialize(project.tracks[0].clips[0]);
+            console.log("serialized", JSON.parse(JSON.stringify(serialized)));
+            const constructed = construct(
+              serialized,
+              MAudioClip_serializationMark
+            );
+            console.log(
+              "og vs constructed",
+              project.tracks[0].clips[0],
+              constructed
+            );
+            // setProject(constructed as any);
           }}
         >
-          remove all
+          construct test
         </button>
-      </div> */}
+      </div>
       <div
         style={{
           display: "flex",
