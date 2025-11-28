@@ -25298,6 +25298,7 @@ const subbableContainer$1 = {
 let MarkedArray$1 = class MarkedArray extends Array {
   $$mark;
   constructor(_array, _id) {
+    console.log("here");
     super(..._array);
     subbableContainer$1._containAll(this, _array);
     this.$$mark = new SubbableMark$1(this, _id, this);
@@ -25362,6 +25363,9 @@ let MarkedArray$1 = class MarkedArray extends Array {
       super.reverse();
       return this;
     });
+  }
+  static get [Symbol.species]() {
+    return Array;
   }
   splice(start, deleteCount, ...items) {
     return this.$$mark.mutate(this, (contain, uncontain) => {
@@ -25887,6 +25891,7 @@ const subbableContainer = {
 class MarkedArray2 extends Array {
   $$mark;
   constructor(_array, _id) {
+    console.log("here");
     super(..._array);
     subbableContainer._containAll(this, _array);
     this.$$mark = new SubbableMark2(this, _id, this);
@@ -25951,6 +25956,9 @@ class MarkedArray2 extends Array {
       super.reverse();
       return this;
     });
+  }
+  static get [Symbol.species]() {
+    return Array;
   }
   splice(start, deleteCount, ...items) {
     return this.$$mark.mutate(this, (contain, uncontain) => {
@@ -26108,6 +26116,34 @@ class MarkedSet2 extends Set {
     return result;
   }
 }
+class MarkedValue {
+  $$mark;
+  _value;
+  constructor(initialValue, id) {
+    this.$$mark = new SubbableMark2(this, id, [initialValue]);
+    this._value = initialValue;
+  }
+  static create(val) {
+    return new this(val, nanoid(5));
+  }
+  set(value) {
+    return this.$$mark.mutate(this, (contain, uncontain) => {
+      uncontain([value]);
+      contain([value]);
+      this._value = value;
+    });
+  }
+  setDyn(cb) {
+    const newVal = cb(this.get());
+    this.set(newVal);
+  }
+  get() {
+    return this._value;
+  }
+  replace(value) {
+    this.set(value);
+  }
+}
 function useLink(obj, recursiveChanges = false) {
   "use no memo";
   reactExports.useSyncExternalStore(reactExports.useCallback((onStoreChange) => {
@@ -26121,7 +26157,8 @@ function useLink(obj, recursiveChanges = false) {
 }
 MarkedSet2.create.bind(MarkedSet2);
 MarkedArray2.create.bind(MarkedArray2);
-MarkedArray2.create.bind(MarkedMap);
+MarkedMap.create.bind(MarkedMap);
+MarkedValue.create.bind(MarkedValue);
 function MarkedCollection(t0) {
   const $ = compilerRuntimeExports.c(30);
   const {
@@ -26259,7 +26296,7 @@ function MarkedCollection(t0) {
 }
 const array = MarkedArray$1.create();
 function MarkedArrayTest(t0) {
-  const $ = compilerRuntimeExports.c(21);
+  const $ = compilerRuntimeExports.c(17);
   const {
     className
   } = t0;
@@ -26299,59 +26336,39 @@ function MarkedArrayTest(t0) {
   }
   let t4;
   if ($[7] === Symbol.for("react.memo_cache_sentinel")) {
-    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { children: "marked array Tester" });
+    t4 = ["[", "]"];
     $[7] = t4;
   } else {
     t4 = $[7];
   }
   let t5;
-  if ($[8] !== add) {
-    t5 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: add, children: "+" });
-    $[8] = add;
+  if ($[8] !== larr) {
+    t5 = larr();
+    $[8] = larr;
     $[9] = t5;
   } else {
     t5 = $[9];
   }
   let t6;
-  if ($[10] === Symbol.for("react.memo_cache_sentinel")) {
-    t6 = ["[", "]"];
-    $[10] = t6;
+  if ($[10] !== add || $[11] !== del || $[12] !== t5) {
+    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(MarkedCollection, { delimiters: t4, set: t5, pad: 0, showUnknowns: false, handleAdd: add, handleDelete: del, renderValue: _temp2$1 }) });
+    $[10] = add;
+    $[11] = del;
+    $[12] = t5;
+    $[13] = t6;
   } else {
-    t6 = $[10];
+    t6 = $[13];
   }
   let t7;
-  if ($[11] !== larr) {
-    t7 = larr();
-    $[11] = larr;
-    $[12] = t7;
+  if ($[14] !== t3 || $[15] !== t6) {
+    t7 = /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: t3, children: t6 });
+    $[14] = t3;
+    $[15] = t6;
+    $[16] = t7;
   } else {
-    t7 = $[12];
+    t7 = $[16];
   }
-  let t8;
-  if ($[13] !== add || $[14] !== del || $[15] !== t7) {
-    t8 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(MarkedCollection, { delimiters: t6, set: t7, pad: 0, showUnknowns: false, handleAdd: add, handleDelete: del, renderValue: _temp2$1 }) });
-    $[13] = add;
-    $[14] = del;
-    $[15] = t7;
-    $[16] = t8;
-  } else {
-    t8 = $[16];
-  }
-  let t9;
-  if ($[17] !== t3 || $[18] !== t5 || $[19] !== t8) {
-    t9 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: t3, children: [
-      t4,
-      t5,
-      t8
-    ] });
-    $[17] = t3;
-    $[18] = t5;
-    $[19] = t8;
-    $[20] = t9;
-  } else {
-    t9 = $[20];
-  }
-  return t9;
+  return t7;
 }
 function _temp2$1(v_0, pad, showUnknowns) {
   return `${v_0}`;

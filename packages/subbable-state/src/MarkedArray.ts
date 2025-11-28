@@ -7,6 +7,7 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
 
   private constructor(_array: Iterable<S>, _id: string) {
     // apparently, unlike with MarkedSet, I can just pass the values to the constructor here?
+    console.log("here");
     super(..._array);
     subbableContainer._containAll(this, _array);
     this.$$mark = new SubbableMark(this, _id, this);
@@ -84,6 +85,10 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
       super.reverse();
       return this;
     });
+  }
+
+  static override get [Symbol.species]() {
+    return Array; // Force splice to return a standard Array
   }
 
   // Array<S> interface, mutates
