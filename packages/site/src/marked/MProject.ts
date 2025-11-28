@@ -11,11 +11,18 @@ import {
   SubbableMark,
 } from "../../../subbable-state/index";
 import { MAudioTrack } from "./MAudioTrack";
+import {
+  MarkedSerializable,
+  SerializationMark,
+} from "./serialization/MarkedSerializable";
 
 type Marker = readonly [number, string];
 
-export class MProject implements MarkedSubbable {
+export class MProject
+  implements MarkedSubbable, MarkedSerializable<typeof serialization_mproject>
+{
   readonly $$mark = SubbableMark.create();
+  readonly $$serialization = serialization_mproject;
 
   readonly randomNumbers: MarkedSet<number>;
 
@@ -46,3 +53,26 @@ export class MProject implements MarkedSubbable {
     while (this.tracks.pop());
   }
 }
+
+type SMProject = {
+  readonly name: MarkedValue<string>;
+  readonly tracks: MarkedArray<MAudioTrack>;
+  readonly markers: MarkedMap<number, string>;
+  readonly solodTracks: MarkedSet<MAudioTrack>;
+};
+
+export const serialization_mproject: SerializationMark<SMProject, MProject> =
+  SerializationMark.create({
+    kind: "mproject",
+    construct({ name, tracks, markers, solodTracks }) {
+      return new MProject(name, tracks, markers, solodTracks);
+    },
+    simplify(mproject: MProject) {
+      return {
+        name: mproject.name,
+        tracks: mproject.tracks,
+        markers: mproject.markers,
+        solodTracks: mproject.solodTracks,
+      };
+    },
+  });

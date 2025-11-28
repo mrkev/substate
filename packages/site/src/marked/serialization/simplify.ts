@@ -1,7 +1,21 @@
 import { exhaustive } from "../../../../structured-state/src/assertions";
+import {
+  MarkedArray,
+  MarkedMap,
+  MarkedSet,
+  MarkedValue,
+} from "../../../../subbable-state/index";
 import { isSerializable, MarkedSerializable } from "./MarkedSerializable";
 
 export type Primitive = number | string | boolean | null;
+
+export type Simplifiable =
+  | Primitive
+  | MarkedSerializable<any>
+  | MarkedArray<any>
+  | MarkedSet<any>
+  | MarkedMap<any, any>
+  | MarkedValue<any>;
 
 export type Simplified = {
   any: Simplified[Exclude<keyof Simplified, "any">];
@@ -28,12 +42,12 @@ type SimplifiedMarkedValue = Readonly<{
 
 type SimplifiedMarkedArray = Readonly<{
   $$: "arr";
-  value: readonly (Simplified["any"] | Primitive)[];
+  entries: readonly (Simplified["any"] | Primitive)[];
 }>;
 
 type SimplifiedMarkedSet = Readonly<{
   $$: "set";
-  value: readonly (Simplified["any"] | Primitive)[];
+  entries: readonly (Simplified["any"] | Primitive)[];
 }>;
 
 type SimplifiedMarkedMap = Readonly<{
@@ -62,12 +76,34 @@ export function isPrimitive(val: unknown) {
 
 ////////////
 
-export type Descriptor = Record<string, Primitive | MarkedSerializable<any>>;
+function simplify(value: Simplifiable): Simplified["any"] | Primitive {
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean" ||
+    value == null
+  ) {
+    return value;
+  } else if (typeof value === "function") {
+    throw new Error("cant simplify function");
+  } else if (isSerializable(value)) {
+    return simplifyMarkedObject(value);
+  } else if (value instanceof MarkedArray) {
+    return simplifyMarkedArray(value);
+  } else if (value instanceof MarkedMap) {
+    return simplifyMarkedMap(value);
+  } else if (value instanceof MarkedSet) {
+    return simplifyMarkedSet(value);
+  } else if (value instanceof MarkedValue) {
+    return simplifyMarkedValue(value);
+  } else {
+    exhaustive(value);
+  }
+}
 
-export function simplifyMarkedObject<
-  D extends Descriptor,
-  C extends MarkedSerializable<any>
->(obj: C): Simplified["any"] {
+export function simplifyMarkedObject<C extends MarkedSerializable<any>>(
+  obj: C
+): Simplified["any"] {
   const serializable: SimplifiedObj["entries"] = {};
 
   // serialization mark always applies to self
@@ -75,26 +111,41 @@ export function simplifyMarkedObject<
 
   for (const entry of Object.entries(description)) {
     const key = entry[0] as string;
-    const value = entry[1] as Primitive | MarkedSerializable<any>;
-    if (
-      typeof value === "string" ||
-      typeof value === "number" ||
-      typeof value === "boolean" ||
-      value == null
-    ) {
-      serializable[key] = value;
-    } else if (typeof value === "function") {
-      throw new Error("cant simplify function");
-    } else if (isSerializable(value)) {
-      serializable[key] = simplifyMarkedObject(value);
-    } else {
-      exhaustive(value);
-    }
+    const value = entry[1] as Simplifiable;
+    serializable[key] = simplify(value);
   }
 
   return {
     $$: "obj",
     kind: obj.$$serialization.kind,
     entries: serializable,
+  };
+}
+
+export function simplifyMarkedValue(obj: MarkedValue<any>): Simplified["val"] {
+  return {
+    $$: "val",
+    value: simplify(obj.get() as any), // todo
+  };
+}
+
+export function simplifyMarkedArray(arr: MarkedArray<any>): Simplified["arr"] {
+  return {
+    $$: "arr",
+    entries: arr.map((x) => simplify(x)),
+  };
+}
+
+export function simplifyMarkedMap(map: MarkedMap<any, any>): Simplified["map"] {
+  return {
+    $$: "map",
+    entries: map.map((value, key) => [simplify(key), simplify(value)]),
+  };
+}
+
+export function simplifyMarkedSet(map: MarkedSet<any>): Simplified["set"] {
+  return {
+    $$: "set",
+    entries: map.map((value) => simplify(value)),
   };
 }

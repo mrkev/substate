@@ -7,8 +7,8 @@ import {
   serialization_maudioclip as MAudioClip_serializationMark,
   serialization_maudioclip,
 } from "./MAudioClip";
-import { MAudioTrack } from "./MAudioTrack";
-import { MProject } from "./MProject";
+import { MAudioTrack, serialization_maudiotrack } from "./MAudioTrack";
+import { MProject, serialization_mproject } from "./MProject";
 import { MProjectDebug } from "./MProjectDebug";
 import { serialization_mtime } from "./MTime";
 import { constructSimplified } from "./serialization/construct";
@@ -47,6 +47,8 @@ function construct(x: Simplified["any"], index: SerializationMark<any, any>) {
 const serializationIndex = consolidateMarks([
   serialization_mtime,
   serialization_maudioclip,
+  serialization_maudiotrack,
+  serialization_mproject,
 ]);
 
 export function MarkedProjectTest() {
@@ -57,17 +59,13 @@ export function MarkedProjectTest() {
       <div>
         <button
           onClick={() => {
-            const serialized = serialize(project.tracks[0].clips[0]);
+            const serialized = serialize(project);
             console.log("serialized", JSON.parse(JSON.stringify(serialized)));
             const constructed = construct(
               serialized,
               MAudioClip_serializationMark
             );
-            console.log(
-              "og vs constructed",
-              project.tracks[0].clips[0],
-              constructed
-            );
+            console.log("og vs constructed", project, constructed);
             // setProject(constructed as any);
           }}
         >

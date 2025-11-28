@@ -1,5 +1,6 @@
-import { Descriptor } from "./simplify";
+import { Simplifiable } from "./simplify";
 
+type Descriptor = Record<string, Simplifiable>;
 export interface MarkedSerializable<M extends SerializationMark<any, any>> {
   readonly $$serialization: M;
 }

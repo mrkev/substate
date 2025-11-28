@@ -137,7 +137,7 @@ function TreeMarkedSubbable({
   for (let i = 0; i < keys.length && showBody; i++) {
     const key = keys[i];
     const baseline = pad + TAB_SIZE;
-    if (key === "$$mark") {
+    if (key === "$$mark" || key === "$$serialization") {
       continue;
     }
 

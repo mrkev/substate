@@ -7,11 +7,18 @@ import {
   SubbableMark,
 } from "../../../subbable-state/index";
 import { MAudioClip } from "./MAudioClip";
+import {
+  MarkedSerializable,
+  SerializationMark,
+} from "./serialization/MarkedSerializable";
 
-export class MAudioTrack implements MarkedSubbable {
-  // , MarkedSerializable<Descriptor, MAudioTrack>
+export class MAudioTrack
+  implements
+    MarkedSubbable,
+    MarkedSerializable<typeof serialization_maudiotrack>
+{
   readonly $$mark = SubbableMark.create();
-  // readonly $$serialization = serialization;
+  readonly $$serialization = serialization_maudiotrack;
 
   constructor(
     public readonly name: MarkedValue<string>,
@@ -32,13 +39,18 @@ type Descriptor = {
   clips: MarkedArray<MAudioClip>;
 };
 
-// const serialization: SerializationMark<Descriptor, MAudioTrack> =
-//   SerializationMark.create({
-//     construct(track) {
-//       return {
-//         name: track.name,
-//         clips: track.clips,
-//       };
-//     },
-//     simplify() {},
-//   });
+export const serialization_maudiotrack: SerializationMark<
+  Descriptor,
+  MAudioTrack
+> = SerializationMark.create({
+  kind: "maudiotrack",
+  construct({ name, clips }) {
+    return new MAudioTrack(name, clips);
+  },
+  simplify(track) {
+    return {
+      name: track.name,
+      clips: track.clips,
+    };
+  },
+});
