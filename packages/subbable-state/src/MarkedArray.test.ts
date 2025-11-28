@@ -24,4 +24,10 @@ describe("MarkedArray", () => {
     arr.push("2");
     expect(arr.indexOf("2")).toBeGreaterThan(-1);
   });
+
+  it(".pop", () => {
+    const arr = MarkedArray.create([1, 2, 3]);
+    expect(arr.pop()).toBe(3);
+    expect(arr.length).toBe(2);
+  });
 });

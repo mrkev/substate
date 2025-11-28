@@ -21,7 +21,7 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
 
   // Array<S> interface, mutates
   override pop(): S | undefined {
-    if (super.length < 1) {
+    if (this.length < 1) {
       return;
     }
 

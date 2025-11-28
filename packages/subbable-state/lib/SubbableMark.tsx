@@ -34,9 +34,9 @@ export class SubbableMark implements Subbable, SubbableContainer, Contained {
 
   public static create<T>(
     holder: MarkedSubbable,
-    initial?: (readonly T[] | null) | Iterable<T> | null | undefined
+    contain?: (readonly T[] | null) | Iterable<T> | null | undefined
   ) {
-    return new this(holder, nanoid(5), new Set(initial));
+    return new this(holder, nanoid(5), new Set(contain));
   }
 
   public mutate<V>(
