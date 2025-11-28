@@ -14645,7 +14645,7 @@ let nanoid$1 = (size = 21) => {
   }
   return id;
 };
-function nullthrows$1(val, message) {
+function nullthrows$2(val, message) {
   if (val == null) {
     throw new Error(message || `Expected ${val} to be non nil.`);
   }
@@ -15043,7 +15043,7 @@ class OrderedMap {
     const self = this;
     return function* () {
       for (const key of self._order) {
-        yield [key, nullthrows$1(self._map.get(key))];
+        yield [key, nullthrows$2(self._map.get(key))];
       }
       return void 0;
     }();
@@ -15055,7 +15055,7 @@ class OrderedMap {
     const self = this;
     return function* () {
       for (const key of self._order) {
-        yield nullthrows$1(self._map.get(key));
+        yield nullthrows$2(self._map.get(key));
       }
       return void 0;
     }();
@@ -15073,8 +15073,8 @@ class OrderedMap {
       this._order.sort();
     } else {
       this._order.sort((a, b) => {
-        const aval = nullthrows$1(this._map.get(a));
-        const bval = nullthrows$1(this._map.get(b));
+        const aval = nullthrows$2(this._map.get(a));
+        const bval = nullthrows$2(this._map.get(b));
         return compareFn([a, aval], [b, bval]);
       });
     }
@@ -15263,7 +15263,7 @@ function initializeRef(json, metadata) {
   }
 }
 function initializePrimitiveRef(json, metadata) {
-  const simple = nullthrows$1(metadata.knownSimples.get(json._id), `ref:${json._id}:${json.kind}: didn't find it pre-initialized nor in simples`);
+  const simple = nullthrows$2(metadata.knownSimples.get(json._id), `ref:${json._id}:${json.kind}: didn't find it pre-initialized nor in simples`);
   assertRefKind(simple, "prim");
   const result = new LinkedPrimitive(simple._value, json._id);
   metadata.initializedNodes.set(result._id, result);
@@ -15497,7 +15497,7 @@ function replaceSchemaArray(json, arr, acc) {
     }
     const arrIndex = /* @__PURE__ */ new Map();
     for (let i = raw.length - 1; i >= 0; i--) {
-      const struct = nullthrows$1(raw.at(i));
+      const struct = nullthrows$2(raw.at(i));
       if (jsonIndex.has(struct._id)) {
         arrIndex.set(struct._id, struct);
       } else {
@@ -15570,7 +15570,7 @@ function replaceSSet(json, set2, acc) {
   };
   const prepare = (elem) => {
     if (isSimplified(elem)) {
-      const initialized = initialize(elem, nullthrows$1(set2._schema, "set holds structured state, but defines no schema"), acc);
+      const initialized = initialize(elem, nullthrows$2(set2._schema, "set holds structured state, but defines no schema"), acc);
       return initialized;
     } else {
       return elem;
@@ -15644,7 +15644,7 @@ function replace(json, obj, acc) {
         return replaceSUnion(json, obj);
       }
       case "ref": {
-        const simple = nullthrows$1(acc.knownSimples.get(json._id), "ref not found");
+        const simple = nullthrows$2(acc.knownSimples.get(json._id), "ref not found");
         return replace(simple, obj, acc);
       }
       default:
@@ -15662,7 +15662,7 @@ function replacePrimitive(json, obj, acc) {
       return;
     }
     case "ref": {
-      const prim = nullthrows$1(acc.knownSimples.get(json._id), "ref not found");
+      const prim = nullthrows$2(acc.knownSimples.get(json._id), "ref not found");
       obj.replace(prim._value);
       return;
     }
@@ -15858,7 +15858,7 @@ function historyEntryOfObjectsEntryModifies(entry, globalState) {
     name: entry.name
   };
   for (const [id] of entry.objects) {
-    const object = nullthrows$1(globalState.knownObjects.get(id), `no known object with ${id} found`);
+    const object = nullthrows$2(globalState.knownObjects.get(id), `no known object with ${id} found`);
     newEntry.objects.set(id, serialize(object));
   }
   return newEntry;
@@ -15872,7 +15872,7 @@ function popHistory() {
   const redo = historyEntryOfObjectsEntryModifies(prevState, globalState);
   globalState.redoStack.push(redo);
   for (const [id, serialized] of [...prevState.objects.entries()].reverse()) {
-    const object = nullthrows$1(globalState.knownObjects.get(id), `no known object with ${id} found`);
+    const object = nullthrows$2(globalState.knownObjects.get(id), `no known object with ${id} found`);
     const json = JSON.parse(serialized);
     replacePackage(json, object);
   }
@@ -15886,7 +15886,7 @@ function forwardHistory() {
   const redo = historyEntryOfObjectsEntryModifies(next, globalState);
   globalState.history.push(redo);
   for (const [id, serialized] of [...next.objects.entries()].reverse()) {
-    const object = nullthrows$1(globalState.knownObjects.get(id), `no known object with ${id} found`);
+    const object = nullthrows$2(globalState.knownObjects.get(id), `no known object with ${id} found`);
     const json = JSON.parse(serialized);
     replacePackage(json, object);
   }
@@ -19094,7 +19094,7 @@ function _temp$9(res) {
     console.error(e);
   }
 }
-function nullthrows(val, message) {
+function nullthrows$1(val, message) {
   if (val == null) {
     throw new Error(`Expected ${val} to be non nil.`);
   }
@@ -19340,9 +19340,9 @@ function UProject(t0) {
   if ($[13] !== project2.tracks) {
     t7 = /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "button", value: "move clip and change time", onClick: () => {
       history.record("move clip", () => {
-        const track0 = nullthrows(project2.tracks.at(0));
-        const track1 = nullthrows(project2.tracks.at(1));
-        const clip = nullthrows(track0.clips.at(0));
+        const track0 = nullthrows$1(project2.tracks.at(0));
+        const track1 = nullthrows$1(project2.tracks.at(1));
+        const clip = nullthrows$1(track0.clips.at(0));
         clip.timelineStart.set(4);
         track0.clips.remove(clip);
         track1.clips.push(clip);
@@ -25193,84 +25193,6 @@ function ListItem(t0) {
   }
   return t2;
 }
-function isContainable$1(value) {
-  return typeof value === "object" && value !== null && "$$token" in value && value.$$token instanceof SubbableMark$1;
-}
-const subbable$1 = {
-  /**
-   * Records a callback, so that changes to "subbable" trigger a call of "callback"
-   */
-  subscribe(mh, cb) {
-    mh.$$token._subscriptors.add(cb);
-    return () => mh.$$token._subscriptors.delete(cb);
-  },
-  /**
-   * @param mh what we're notifying of a change
-   * @param target what changed
-   *  this is the recursive child that changed, subscribers can choose to
-   *  act differently based on weather it was the object they're listening to
-   *  that changed, or a recursive child
-   */
-  mutated(mh, target) {
-    mh.$$token._hash = (mh.$$token._hash + 1) % Number.MAX_SAFE_INTEGER;
-    for (const cb of mh.$$token._subscriptors) {
-      cb(target, mh);
-    }
-  }
-};
-let UpdateToken$1 = class UpdateToken3 {
-  constructor(target) {
-    this.target = target;
-  }
-};
-const subbableContainer$1 = {
-  // abstract _replace(val: T): void;
-  _containAll(container, items) {
-    for (const elem of items) {
-      if (!isContainable$1(elem)) {
-        continue;
-      }
-      elem.$$token._container.add(container);
-    }
-  },
-  _uncontainAll(container, items) {
-    for (const item of items) {
-      if (!isContainable$1(item)) {
-        continue;
-      }
-      if (!item.$$token._container.has(container)) {
-        console.warn("_uncontain:", item.$$token._container, "does not contain", item);
-      }
-      item.$$token._container.delete(container);
-      if ("_destroy" in item) {
-        item._destroy();
-      }
-    }
-  },
-  /**
-   * Creates a change notification to be propagated, starting at this object,
-   * and about the change of a certain target
-   */
-  // TODO: take MarkedSubbable, not SubbableContainer
-  _notifyChange(struct, target) {
-    const token = new UpdateToken$1(target);
-    struct.$$token._propagatedTokens.add(token);
-    subbable$1.mutated(struct, target);
-    for (const container of struct.$$token._container) {
-      subbableContainer$1._childChanged(container, token);
-    }
-  },
-  _childChanged(struct, token) {
-    if (struct.$$token._propagatedTokens.has(token)) {
-      return;
-    }
-    struct.$$token._propagatedTokens.add(token);
-    subbable$1.mutated(struct, token.target);
-    for (const container of struct.$$token._container) {
-      subbableContainer$1._childChanged(container, token);
-    }
-  }
-};
 let SubbableMark$1 = class SubbableMark {
   // Subbable
   _id;
@@ -25295,11 +25217,182 @@ let SubbableMark$1 = class SubbableMark {
     return result;
   }
 };
+function isContainable$1(value) {
+  return typeof value === "object" && value !== null && "$$token" in value && value.$$token instanceof SubbableMark$1;
+}
+const subbable$1 = {
+  /**
+   * Records a callback, so that changes to "subbable" trigger a call of "callback"
+   */
+  subscribe(mh, cb) {
+    mh.$$mark._subscriptors.add(cb);
+    return () => mh.$$mark._subscriptors.delete(cb);
+  },
+  /**
+   * @param mh what we're notifying of a change
+   * @param target what changed
+   *  this is the recursive child that changed, subscribers can choose to
+   *  act differently based on weather it was the object they're listening to
+   *  that changed, or a recursive child
+   */
+  mutated(mh, target) {
+    mh.$$mark._hash = (mh.$$mark._hash + 1) % Number.MAX_SAFE_INTEGER;
+    for (const cb of mh.$$mark._subscriptors) {
+      cb(target, mh);
+    }
+  }
+};
+let UpdateToken$1 = class UpdateToken3 {
+  constructor(target) {
+    this.target = target;
+  }
+};
+const subbableContainer$1 = {
+  // abstract _replace(val: T): void;
+  _containAll(container, items) {
+    for (const elem of items) {
+      if (!isContainable$1(elem)) {
+        continue;
+      }
+      elem.$$mark._container.add(container);
+    }
+  },
+  _uncontainAll(container, items) {
+    for (const item of items) {
+      if (!isContainable$1(item)) {
+        continue;
+      }
+      if (!item.$$mark._container.has(container)) {
+        console.warn("_uncontain:", item.$$mark._container, "does not contain", item);
+      }
+      item.$$mark._container.delete(container);
+      if ("_destroy" in item) {
+        item._destroy();
+      }
+    }
+  },
+  /**
+   * Creates a change notification to be propagated, starting at this object,
+   * and about the change of a certain target
+   */
+  // TODO: take MarkedSubbable, not SubbableContainer
+  _notifyChange(struct, target) {
+    const token = new UpdateToken$1(target);
+    struct.$$mark._propagatedTokens.add(token);
+    subbable$1.mutated(struct, target);
+    for (const container of struct.$$mark._container) {
+      subbableContainer$1._childChanged(container, token);
+    }
+  },
+  _childChanged(struct, token) {
+    if (struct.$$mark._propagatedTokens.has(token)) {
+      return;
+    }
+    struct.$$mark._propagatedTokens.add(token);
+    subbable$1.mutated(struct, token.target);
+    for (const container of struct.$$mark._container) {
+      subbableContainer$1._childChanged(container, token);
+    }
+  }
+};
+let MarkedArray$1 = class MarkedArray extends Array {
+  $$mark;
+  constructor(_array, _id) {
+    super(..._array);
+    subbableContainer$1._containAll(this, _array);
+    this.$$mark = new SubbableMark$1(this, _id, this);
+  }
+  static create(initialValue) {
+    return new this(initialValue ?? [], nanoid$1(5));
+  }
+  // Array<S> interface, mutates
+  pop() {
+    if (super.length < 1) {
+      return;
+    }
+    return this.$$mark.mutate(this, (_, uncontain) => {
+      const res = super.pop();
+      res != null && uncontain([res]);
+      return res;
+    });
+  }
+  // Array<S> interface, mutates
+  shift() {
+    if (super.length < 1) {
+      return;
+    }
+    return this.$$mark.mutate(this, (_, uncontain) => {
+      const res = super.shift();
+      res != null && uncontain([res]);
+      return res;
+    });
+  }
+  // Array<S> interface, mutates
+  push(...items) {
+    if (items.length < 1) {
+      return super.length;
+    }
+    return this.$$mark.mutate(this, (contain) => {
+      contain(items);
+      return super.push(...items);
+    });
+  }
+  // Array<S> interface, mutates
+  unshift(...items) {
+    if (items.length < 1) {
+      return super.length;
+    }
+    return this.$$mark.mutate(this, (contain) => {
+      contain(items);
+      return super.unshift(...items);
+    });
+  }
+  // Array<S> interface, mutates
+  sort(compareFn) {
+    if (this.length === 0) return this;
+    return this.$$mark.mutate(this, () => {
+      super.sort(compareFn);
+      return this;
+    });
+  }
+  // Array<S> interface, mutates
+  reverse() {
+    if (this.length === 0) return this;
+    return this.$$mark.mutate(this, () => {
+      super.reverse();
+      return this;
+    });
+  }
+  splice(start, deleteCount, ...items) {
+    return this.$$mark.mutate(this, (contain, uncontain) => {
+      contain(items);
+      const deleted = super.splice(start, deleteCount, ...items);
+      uncontain(deleted);
+      return deleted;
+    });
+  }
+  // Array<S> interface, mutates
+  fill(value, start, end) {
+    throw new Error("unimplemented");
+  }
+  // Array<S> interface, mutates
+  copyWithin(target, start, end) {
+    throw new Error("unimplemented");
+  }
+  // not in standard arrays
+  remove(searchElement) {
+    const index = this.indexOf(searchElement);
+    if (index === -1) {
+      return null;
+    }
+    return this.splice(index, 1)[0];
+  }
+};
 let MarkedSet$1 = class MarkedSet extends Set {
-  $$token;
+  $$mark;
   constructor(_set, _id) {
     super();
-    this.$$token = new SubbableMark$1(this, _id, this);
+    this.$$mark = new SubbableMark$1(this, _id, this);
     for (const elem of _set) {
       this.add(elem);
     }
@@ -25312,7 +25405,7 @@ let MarkedSet$1 = class MarkedSet extends Set {
     if (this.has(value)) {
       return this;
     }
-    return this.$$token.mutate(this, (contain) => {
+    return this.$$mark.mutate(this, (contain) => {
       contain([value]);
       super.add(value);
       return this;
@@ -25323,14 +25416,14 @@ let MarkedSet$1 = class MarkedSet extends Set {
     if (!this.has(value)) {
       return false;
     }
-    return this.$$token.mutate(this, (_, uncontain) => {
+    return this.$$mark.mutate(this, (_, uncontain) => {
       uncontain([value]);
       return super.delete(value);
     });
   }
   // Set<S> interface, mutates
   clear() {
-    this.$$token.mutate(this, (_, uncontain) => {
+    this.$$mark.mutate(this, (_, uncontain) => {
       uncontain(this);
       for (const elem of this) {
         super.delete(elem);
@@ -25339,7 +25432,7 @@ let MarkedSet$1 = class MarkedSet extends Set {
   }
   // non-standard //
   replace(set2) {
-    this.$$token.mutate(this, (contain, uncontain) => {
+    this.$$mark.mutate(this, (contain, uncontain) => {
       uncontain(this);
       for (const elem of this) {
         super.delete(elem);
@@ -25358,106 +25451,6 @@ let MarkedSet$1 = class MarkedSet extends Set {
     return result;
   }
 };
-let MarkedArray$1 = class MarkedArray extends Array {
-  $$token;
-  constructor(_array, _id) {
-    super(..._array);
-    subbableContainer$1._containAll(this, _array);
-    this.$$token = new SubbableMark$1(this, _id, this);
-  }
-  static create(initialValue) {
-    return new this(initialValue ?? [], nanoid$1(5));
-  }
-  // Array<S> interface, mutates
-  pop() {
-    if (super.length < 1) {
-      return;
-    }
-    return this.$$token.mutate(this, (_, uncontain) => {
-      const res = super.pop();
-      res != null && uncontain([res]);
-      return res;
-    });
-  }
-  // Array<S> interface, mutates
-  shift() {
-    if (super.length < 1) {
-      return;
-    }
-    return this.$$token.mutate(this, (_, uncontain) => {
-      const res = super.shift();
-      res != null && uncontain([res]);
-      return res;
-    });
-  }
-  // Array<S> interface, mutates
-  push(...items) {
-    if (items.length < 1) {
-      return super.length;
-    }
-    return this.$$token.mutate(this, (contain) => {
-      contain(items);
-      return super.push(...items);
-    });
-  }
-  // Array<S> interface, mutates
-  unshift(...items) {
-    if (items.length < 1) {
-      return super.length;
-    }
-    return this.$$token.mutate(this, (contain) => {
-      contain(items);
-      return super.unshift(...items);
-    });
-  }
-  // Array<S> interface, mutates
-  sort(compareFn) {
-    return this.$$token.mutate(this, () => {
-      super.sort(compareFn);
-      return this;
-    });
-  }
-  // Array<S> interface, mutates
-  reverse() {
-    return this.$$token.mutate(this, () => {
-      super.reverse();
-      return this;
-    });
-  }
-  splice(start, deleteCount, ...items) {
-    return this.$$token.mutate(this, (contain, uncontain) => {
-      contain(items);
-      const deleted = super.splice(start, deleteCount, ...items);
-      uncontain(deleted);
-      return deleted;
-    });
-  }
-  // Array<S> interface, mutates
-  fill(value, start, end) {
-    console.warn("TODO: TEST CONTAINMENT MarkedArray.fill");
-    return this.$$token.mutate(this, (contain) => {
-      contain([value]);
-      super.fill(value, start, end);
-      return this;
-    });
-  }
-  // Array<S> interface, mutates
-  copyWithin(target, start, end) {
-    return this.$$token.mutate(this, () => {
-      console.warn("TODO: copyWithin BREAKING: containment");
-      super.copyWithin(target, start, end);
-      return this;
-    });
-  }
-  // not in standard arrays
-  remove(searchElement) {
-    const index = this.indexOf(searchElement);
-    if (index === -1) {
-      return null;
-    }
-    return this.splice(index, 1)[0];
-  }
-};
 function useLink$1(obj, recursiveChanges = false) {
   "use no memo";
   reactExports.useSyncExternalStore(reactExports.useCallback((onStoreChange) => {
@@ -25466,7 +25459,7 @@ function useLink$1(obj, recursiveChanges = false) {
         onStoreChange();
       }
     });
-  }, [obj, recursiveChanges]), reactExports.useCallback(() => obj.$$token._hash, [obj]));
+  }, [obj, recursiveChanges]), reactExports.useCallback(() => obj.$$mark._hash, [obj]), reactExports.useCallback(() => obj.$$mark._hash, [obj]));
   return () => obj;
 }
 const TAB_SIZE = 2;
@@ -25636,8 +25629,8 @@ function Header(t0) {
   if ($[0] !== showContainerId || $[1] !== t2) {
     obj = t2();
     kindStr = obj.constructor.name;
-    hashStr = `.${obj.$$token._hash}`;
-    t3 = showContainerId ? ` -^ ${[...obj.$$token._container.values()].map(_temp$2).join(",")}` : "";
+    hashStr = `.${obj.$$mark._hash}`;
+    t3 = showContainerId ? ` -^ ${[...obj.$$mark._container.values()].map(_temp$2).join(",")}` : "";
     $[0] = showContainerId;
     $[1] = t2;
     $[2] = hashStr;
@@ -25675,19 +25668,19 @@ function Header(t0) {
     t6 = $[9];
   }
   let t7;
-  if ($[10] !== container || $[11] !== hashStr || $[12] !== obj.$$token._id || $[13] !== path || $[14] !== t6) {
+  if ($[10] !== container || $[11] !== hashStr || $[12] !== obj.$$mark._id || $[13] !== path || $[14] !== t6) {
     t7 = /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: t4, title: path, children: [
       "(",
       t6,
       ": ",
-      obj.$$token._id,
+      obj.$$mark._id,
       hashStr,
       container,
       ")"
     ] });
     $[10] = container;
     $[11] = hashStr;
-    $[12] = obj.$$token._id;
+    $[12] = obj.$$mark._id;
     $[13] = path;
     $[14] = t6;
     $[15] = t7;
@@ -25697,7 +25690,7 @@ function Header(t0) {
   return t7;
 }
 function _temp$2(v) {
-  return v.$$token._id;
+  return v.$$mark._id;
 }
 function DynamicTest(t0) {
   const $ = compilerRuntimeExports.c(11);
@@ -25789,84 +25782,6 @@ let nanoid = (size = 21) => {
   }
   return id;
 };
-function isContainable(value) {
-  return typeof value === "object" && value !== null && "$$token" in value && value.$$token instanceof SubbableMark2;
-}
-const subbable = {
-  /**
-   * Records a callback, so that changes to "subbable" trigger a call of "callback"
-   */
-  subscribe(mh, cb) {
-    mh.$$token._subscriptors.add(cb);
-    return () => mh.$$token._subscriptors.delete(cb);
-  },
-  /**
-   * @param mh what we're notifying of a change
-   * @param target what changed
-   *  this is the recursive child that changed, subscribers can choose to
-   *  act differently based on weather it was the object they're listening to
-   *  that changed, or a recursive child
-   */
-  mutated(mh, target) {
-    mh.$$token._hash = (mh.$$token._hash + 1) % Number.MAX_SAFE_INTEGER;
-    for (const cb of mh.$$token._subscriptors) {
-      cb(target, mh);
-    }
-  }
-};
-class UpdateToken4 {
-  constructor(target) {
-    this.target = target;
-  }
-}
-const subbableContainer = {
-  // abstract _replace(val: T): void;
-  _containAll(container, items) {
-    for (const elem of items) {
-      if (!isContainable(elem)) {
-        continue;
-      }
-      elem.$$token._container.add(container);
-    }
-  },
-  _uncontainAll(container, items) {
-    for (const item of items) {
-      if (!isContainable(item)) {
-        continue;
-      }
-      if (!item.$$token._container.has(container)) {
-        console.warn("_uncontain:", item.$$token._container, "does not contain", item);
-      }
-      item.$$token._container.delete(container);
-      if ("_destroy" in item) {
-        item._destroy();
-      }
-    }
-  },
-  /**
-   * Creates a change notification to be propagated, starting at this object,
-   * and about the change of a certain target
-   */
-  // TODO: take MarkedSubbable, not SubbableContainer
-  _notifyChange(struct, target) {
-    const token = new UpdateToken4(target);
-    struct.$$token._propagatedTokens.add(token);
-    subbable.mutated(struct, target);
-    for (const container of struct.$$token._container) {
-      subbableContainer._childChanged(container, token);
-    }
-  },
-  _childChanged(struct, token) {
-    if (struct.$$token._propagatedTokens.has(token)) {
-      return;
-    }
-    struct.$$token._propagatedTokens.add(token);
-    subbable.mutated(struct, token.target);
-    for (const container of struct.$$token._container) {
-      subbableContainer._childChanged(container, token);
-    }
-  }
-};
 class SubbableMark2 {
   // Subbable
   _id;
@@ -25891,11 +25806,250 @@ class SubbableMark2 {
     return result;
   }
 }
+function isContainable(value) {
+  return typeof value === "object" && value !== null && "$$token" in value && value.$$token instanceof SubbableMark2;
+}
+const subbable = {
+  /**
+   * Records a callback, so that changes to "subbable" trigger a call of "callback"
+   */
+  subscribe(mh, cb) {
+    mh.$$mark._subscriptors.add(cb);
+    return () => mh.$$mark._subscriptors.delete(cb);
+  },
+  /**
+   * @param mh what we're notifying of a change
+   * @param target what changed
+   *  this is the recursive child that changed, subscribers can choose to
+   *  act differently based on weather it was the object they're listening to
+   *  that changed, or a recursive child
+   */
+  mutated(mh, target) {
+    mh.$$mark._hash = (mh.$$mark._hash + 1) % Number.MAX_SAFE_INTEGER;
+    for (const cb of mh.$$mark._subscriptors) {
+      cb(target, mh);
+    }
+  }
+};
+class UpdateToken4 {
+  constructor(target) {
+    this.target = target;
+  }
+}
+const subbableContainer = {
+  // abstract _replace(val: T): void;
+  _containAll(container, items) {
+    for (const elem of items) {
+      if (!isContainable(elem)) {
+        continue;
+      }
+      elem.$$mark._container.add(container);
+    }
+  },
+  _uncontainAll(container, items) {
+    for (const item of items) {
+      if (!isContainable(item)) {
+        continue;
+      }
+      if (!item.$$mark._container.has(container)) {
+        console.warn("_uncontain:", item.$$mark._container, "does not contain", item);
+      }
+      item.$$mark._container.delete(container);
+      if ("_destroy" in item) {
+        item._destroy();
+      }
+    }
+  },
+  /**
+   * Creates a change notification to be propagated, starting at this object,
+   * and about the change of a certain target
+   */
+  // TODO: take MarkedSubbable, not SubbableContainer
+  _notifyChange(struct, target) {
+    const token = new UpdateToken4(target);
+    struct.$$mark._propagatedTokens.add(token);
+    subbable.mutated(struct, target);
+    for (const container of struct.$$mark._container) {
+      subbableContainer._childChanged(container, token);
+    }
+  },
+  _childChanged(struct, token) {
+    if (struct.$$mark._propagatedTokens.has(token)) {
+      return;
+    }
+    struct.$$mark._propagatedTokens.add(token);
+    subbable.mutated(struct, token.target);
+    for (const container of struct.$$mark._container) {
+      subbableContainer._childChanged(container, token);
+    }
+  }
+};
+class MarkedArray2 extends Array {
+  $$mark;
+  constructor(_array, _id) {
+    super(..._array);
+    subbableContainer._containAll(this, _array);
+    this.$$mark = new SubbableMark2(this, _id, this);
+  }
+  static create(initialValue) {
+    return new this(initialValue ?? [], nanoid(5));
+  }
+  // Array<S> interface, mutates
+  pop() {
+    if (super.length < 1) {
+      return;
+    }
+    return this.$$mark.mutate(this, (_, uncontain) => {
+      const res = super.pop();
+      res != null && uncontain([res]);
+      return res;
+    });
+  }
+  // Array<S> interface, mutates
+  shift() {
+    if (super.length < 1) {
+      return;
+    }
+    return this.$$mark.mutate(this, (_, uncontain) => {
+      const res = super.shift();
+      res != null && uncontain([res]);
+      return res;
+    });
+  }
+  // Array<S> interface, mutates
+  push(...items) {
+    if (items.length < 1) {
+      return super.length;
+    }
+    return this.$$mark.mutate(this, (contain) => {
+      contain(items);
+      return super.push(...items);
+    });
+  }
+  // Array<S> interface, mutates
+  unshift(...items) {
+    if (items.length < 1) {
+      return super.length;
+    }
+    return this.$$mark.mutate(this, (contain) => {
+      contain(items);
+      return super.unshift(...items);
+    });
+  }
+  // Array<S> interface, mutates
+  sort(compareFn) {
+    if (this.length === 0) return this;
+    return this.$$mark.mutate(this, () => {
+      super.sort(compareFn);
+      return this;
+    });
+  }
+  // Array<S> interface, mutates
+  reverse() {
+    if (this.length === 0) return this;
+    return this.$$mark.mutate(this, () => {
+      super.reverse();
+      return this;
+    });
+  }
+  splice(start, deleteCount, ...items) {
+    return this.$$mark.mutate(this, (contain, uncontain) => {
+      contain(items);
+      const deleted = super.splice(start, deleteCount, ...items);
+      uncontain(deleted);
+      return deleted;
+    });
+  }
+  // Array<S> interface, mutates
+  fill(value, start, end) {
+    throw new Error("unimplemented");
+  }
+  // Array<S> interface, mutates
+  copyWithin(target, start, end) {
+    throw new Error("unimplemented");
+  }
+  // not in standard arrays
+  remove(searchElement) {
+    const index = this.indexOf(searchElement);
+    if (index === -1) {
+      return null;
+    }
+    return this.splice(index, 1)[0];
+  }
+}
+function nullthrows(val, message) {
+  if (val == null) {
+    throw new Error(message);
+  }
+  return val;
+}
+class MarkedMap extends Map {
+  $$mark;
+  constructor(initialValue, id) {
+    super();
+    this.$$mark = new SubbableMark2(this, id, this);
+    this.replace(initialValue);
+  }
+  static create(initial) {
+    return new this(new Map(initial), nanoid(5));
+  }
+  //////////// Map interface
+  // Map<K, V> interface, mutates
+  clear() {
+    return this.$$mark.mutate(this, (_, uncontain) => {
+      uncontain(this);
+      return super.clear();
+    });
+  }
+  // Map<K, V> interface, mutates
+  delete(key) {
+    if (!this.has(key)) {
+      return false;
+    }
+    return this.$$mark.mutate(this, (_, uncontain) => {
+      const value = nullthrows(this.get(key), "this should never happen");
+      uncontain([value]);
+      return super.delete(key);
+    });
+  }
+  // Map<K, V> interface, mutates
+  set(key, value) {
+    return this.$$mark.mutate(this, (contain, uncontain) => {
+      const old = this.get(key);
+      if (old != null) {
+        uncontain([old]);
+      }
+      contain([value]);
+      return super.set(key, value);
+    });
+  }
+  // non-standard
+  replace(map2) {
+    this.$$mark.mutate(this, (contain, uncontain) => {
+      uncontain(this);
+      for (const [key] of this) {
+        super.delete(key);
+      }
+      contain(map2);
+      for (const [key, value] of map2) {
+        super.set(key, value);
+      }
+    });
+  }
+  map(callbackfn) {
+    const mapped = [];
+    this.forEach((value, key) => {
+      const res = callbackfn(value, key, this);
+      mapped.push(res);
+    });
+    return mapped;
+  }
+}
 class MarkedSet2 extends Set {
-  $$token;
+  $$mark;
   constructor(_set, _id) {
     super();
-    this.$$token = new SubbableMark2(this, _id, this);
+    this.$$mark = new SubbableMark2(this, _id, this);
     for (const elem of _set) {
       this.add(elem);
     }
@@ -25908,7 +26062,7 @@ class MarkedSet2 extends Set {
     if (this.has(value)) {
       return this;
     }
-    return this.$$token.mutate(this, (contain) => {
+    return this.$$mark.mutate(this, (contain) => {
       contain([value]);
       super.add(value);
       return this;
@@ -25919,14 +26073,14 @@ class MarkedSet2 extends Set {
     if (!this.has(value)) {
       return false;
     }
-    return this.$$token.mutate(this, (_, uncontain) => {
+    return this.$$mark.mutate(this, (_, uncontain) => {
       uncontain([value]);
       return super.delete(value);
     });
   }
   // Set<S> interface, mutates
   clear() {
-    this.$$token.mutate(this, (_, uncontain) => {
+    this.$$mark.mutate(this, (_, uncontain) => {
       uncontain(this);
       for (const elem of this) {
         super.delete(elem);
@@ -25935,7 +26089,7 @@ class MarkedSet2 extends Set {
   }
   // non-standard //
   replace(set2) {
-    this.$$token.mutate(this, (contain, uncontain) => {
+    this.$$mark.mutate(this, (contain, uncontain) => {
       uncontain(this);
       for (const elem of this) {
         super.delete(elem);
@@ -25954,106 +26108,6 @@ class MarkedSet2 extends Set {
     return result;
   }
 }
-class MarkedArray2 extends Array {
-  $$token;
-  constructor(_array, _id) {
-    super(..._array);
-    subbableContainer._containAll(this, _array);
-    this.$$token = new SubbableMark2(this, _id, this);
-  }
-  static create(initialValue) {
-    return new this(initialValue ?? [], nanoid(5));
-  }
-  // Array<S> interface, mutates
-  pop() {
-    if (super.length < 1) {
-      return;
-    }
-    return this.$$token.mutate(this, (_, uncontain) => {
-      const res = super.pop();
-      res != null && uncontain([res]);
-      return res;
-    });
-  }
-  // Array<S> interface, mutates
-  shift() {
-    if (super.length < 1) {
-      return;
-    }
-    return this.$$token.mutate(this, (_, uncontain) => {
-      const res = super.shift();
-      res != null && uncontain([res]);
-      return res;
-    });
-  }
-  // Array<S> interface, mutates
-  push(...items) {
-    if (items.length < 1) {
-      return super.length;
-    }
-    return this.$$token.mutate(this, (contain) => {
-      contain(items);
-      return super.push(...items);
-    });
-  }
-  // Array<S> interface, mutates
-  unshift(...items) {
-    if (items.length < 1) {
-      return super.length;
-    }
-    return this.$$token.mutate(this, (contain) => {
-      contain(items);
-      return super.unshift(...items);
-    });
-  }
-  // Array<S> interface, mutates
-  sort(compareFn) {
-    return this.$$token.mutate(this, () => {
-      super.sort(compareFn);
-      return this;
-    });
-  }
-  // Array<S> interface, mutates
-  reverse() {
-    return this.$$token.mutate(this, () => {
-      super.reverse();
-      return this;
-    });
-  }
-  splice(start, deleteCount, ...items) {
-    return this.$$token.mutate(this, (contain, uncontain) => {
-      contain(items);
-      const deleted = super.splice(start, deleteCount, ...items);
-      uncontain(deleted);
-      return deleted;
-    });
-  }
-  // Array<S> interface, mutates
-  fill(value, start, end) {
-    console.warn("TODO: TEST CONTAINMENT MarkedArray.fill");
-    return this.$$token.mutate(this, (contain) => {
-      contain([value]);
-      super.fill(value, start, end);
-      return this;
-    });
-  }
-  // Array<S> interface, mutates
-  copyWithin(target, start, end) {
-    return this.$$token.mutate(this, () => {
-      console.warn("TODO: copyWithin BREAKING: containment");
-      super.copyWithin(target, start, end);
-      return this;
-    });
-  }
-  // not in standard arrays
-  remove(searchElement) {
-    const index = this.indexOf(searchElement);
-    if (index === -1) {
-      return null;
-    }
-    return this.splice(index, 1)[0];
-  }
-}
 function useLink(obj, recursiveChanges = false) {
   "use no memo";
   reactExports.useSyncExternalStore(reactExports.useCallback((onStoreChange) => {
@@ -26062,11 +26116,12 @@ function useLink(obj, recursiveChanges = false) {
         onStoreChange();
       }
     });
-  }, [obj, recursiveChanges]), reactExports.useCallback(() => obj.$$token._hash, [obj]));
+  }, [obj, recursiveChanges]), reactExports.useCallback(() => obj.$$mark._hash, [obj]), reactExports.useCallback(() => obj.$$mark._hash, [obj]));
   return () => obj;
 }
 MarkedSet2.create.bind(MarkedSet2);
 MarkedArray2.create.bind(MarkedArray2);
+MarkedArray2.create.bind(MarkedMap);
 function MarkedCollection(t0) {
   const $ = compilerRuntimeExports.c(30);
   const {

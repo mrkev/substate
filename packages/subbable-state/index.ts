@@ -1,10 +1,12 @@
 import { MarkedArray } from "./src/MarkedArray";
 import { MarkedMap } from "./src/MarkedMap";
 import { MarkedSet } from "./src/MarkedSet";
+import { MarkedValue } from "./src/MarkedValue";
 
 export { MarkedArray } from "./src/MarkedArray";
 export { MarkedMap } from "./src/MarkedMap";
 export { MarkedSet } from "./src/MarkedSet";
+export { MarkedValue } from "./src/MarkedValue";
 
 export {
   //
@@ -13,4 +15,5 @@ export {
 
 export const mSet = MarkedSet.create.bind(MarkedSet);
 export const mArray = MarkedArray.create.bind(MarkedArray);
-export const mMap = MarkedArray.create.bind(MarkedMap);
+export const mMap = MarkedMap.create.bind(MarkedMap);
+export const mValue = MarkedValue.create.bind(MarkedValue);

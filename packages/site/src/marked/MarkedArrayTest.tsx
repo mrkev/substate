@@ -20,8 +20,6 @@ export function MarkedArrayTest({ className }: { className?: string }) {
 
   return (
     <div className={twMerge("overflow-scroll", className)}>
-      <h2>marked array Tester</h2>
-      <button onClick={add}>+</button>
       <pre className="text-start text-sm">
         <MarkedCollection
           delimiters={["[", "]"]}
