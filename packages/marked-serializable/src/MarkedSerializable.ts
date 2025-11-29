@@ -1,7 +1,11 @@
+import { SubbableMark } from "@mrkev/subbable-state";
 import { Simplifiable } from "./simplify";
 
 type Descriptor = Record<string, Simplifiable>;
 export interface MarkedSerializable<M extends SerializationMark<any, any>> {
+  // We want MarkedSerializables to also be MarkedSubbables to get the id for the object.
+  // We use the id for packaging, where we serialize nodes as refs, to serialize non-tree graphs
+  readonly $$mark: SubbableMark;
   readonly $$serialization: M;
 }
 

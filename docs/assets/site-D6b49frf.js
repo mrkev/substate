@@ -14998,7 +14998,7 @@ function assertConstructableStructured(spec) {
     throw new Error(`is not a Structured`);
   }
 }
-class OrderedMap {
+let OrderedMap$1 = class OrderedMap {
   constructor(_map = /* @__PURE__ */ new Map()) {
     this._map = _map;
     this._order = Array.from(_map.keys());
@@ -15086,7 +15086,7 @@ class OrderedMap {
     this._order.push(key);
     return this;
   }
-}
+};
 class SSet extends SubbableContainer {
   _set;
   _schema;
@@ -15225,7 +15225,7 @@ class SSet extends SubbableContainer {
   }
 }
 function serialize$1(state) {
-  const simplified = simplifyAndPackage(state);
+  const simplified = simplifyAndPackage$1(state);
   const result = JSON.stringify(simplified);
   return result;
 }
@@ -15447,7 +15447,7 @@ class InitializationMetadata {
     this.initializedNodes = initializedNodes;
   }
   static fromPackage(pkg) {
-    return new InitializationMetadata(OrderedMap.fromEntries(pkg.nodes), /* @__PURE__ */ new Map());
+    return new InitializationMetadata(OrderedMap$1.fromEntries(pkg.nodes), /* @__PURE__ */ new Map());
   }
 }
 function initOfPkg(metadata) {
@@ -16382,7 +16382,7 @@ function ref(simplified) {
 }
 class SimplificationMetadata {
   allObjs = /* @__PURE__ */ new Map();
-  refered = new OrderedMap();
+  refered = new OrderedMap$1();
   record(obj, simplified) {
     if (this.allObjs.has(obj._id)) {
       return ref(simplified);
@@ -16399,7 +16399,7 @@ class SimplificationMetadata {
     return ref(simplified);
   }
 }
-function simplifyAndPackage(state) {
+function simplifyAndPackage$1(state) {
   const acc = new SimplificationMetadata();
   const simplified = simplifyStructuredKind(state, acc);
   return {
@@ -27061,6 +27061,12 @@ const mValue = MarkedValue.create.bind(MarkedValue);
 function exhaustive(x, msg) {
   throw new Error(msg ?? `Exhaustive violation, unexpected value ${x}`);
 }
+function nullthrows(val, message) {
+  if (val == null) {
+    throw new Error(message || `Expected ${val} to be non nil.`);
+  }
+  return val;
+}
 class SerializationMark {
   constructor(kind, construct2, describe) {
     this.kind = kind;
@@ -27088,38 +27094,159 @@ function consolidateMarks(marks) {
   }
   return map2;
 }
+class OrderedMap2 {
+  constructor(_map = /* @__PURE__ */ new Map()) {
+    this._map = _map;
+    this._order = Array.from(_map.keys());
+  }
+  _order;
+  static fromEntries(entries) {
+    return new OrderedMap2(new Map(entries));
+  }
+  clear() {
+    this._map.clear();
+    this._order.splice(0, this._order.length);
+  }
+  delete(key) {
+    const value = this._map.get(key);
+    if (value == null) {
+      return false;
+    }
+    const orderPos = this._order.indexOf(key);
+    if (orderPos < 0) {
+      throw new Error("deleting key without order");
+    }
+    this._map.delete(key);
+    this._order.splice(orderPos, 1);
+    return true;
+  }
+  forEach(callbackfn, thisArg) {
+    throw new Error("Method not implemented.");
+  }
+  get(key) {
+    return this._map.get(key);
+  }
+  has(key) {
+    return this._map.has(key);
+  }
+  set(key, value) {
+    throw new Error("Method not implemented.");
+  }
+  get size() {
+    return this._map.size;
+  }
+  entries() {
+    const self = this;
+    return function* () {
+      for (const key of self._order) {
+        yield [key, nullthrows(self._map.get(key))];
+      }
+      return void 0;
+    }();
+  }
+  keys() {
+    return this._order[Symbol.iterator]();
+  }
+  values() {
+    const self = this;
+    return function* () {
+      for (const key of self._order) {
+        yield nullthrows(self._map.get(key));
+      }
+      return void 0;
+    }();
+  }
+  [Symbol.iterator]() {
+    return this.entries();
+  }
+  [Symbol.toStringTag] = "[OrderedMap]";
+  // Array
+  get length() {
+    return this.size;
+  }
+  sort(compareFn) {
+    if (compareFn == null) {
+      this._order.sort();
+    } else {
+      this._order.sort((a, b) => {
+        const aval = nullthrows(this._map.get(a));
+        const bval = nullthrows(this._map.get(b));
+        return compareFn([a, aval], [b, bval]);
+      });
+    }
+    return this;
+  }
+  push(key, value) {
+    this.delete(key);
+    this._map.set(key, value);
+    this._order.push(key);
+    return this;
+  }
+}
+class RefPackage {
+  constructor(initial) {
+    for (const [key, value] of Object.entries(initial)) {
+      this.refmap.set(key, value);
+    }
+  }
+  refmap = new OrderedMap2();
+  record(obj, simplified) {
+    if (!this.refmap.has(obj.$$mark._id)) {
+      this.refmap.set(obj.$$mark._id, simplified);
+    }
+    return {
+      $$: "ref",
+      _id: obj.$$mark._id
+    };
+  }
+  refs() {
+    const result = {};
+    for (const [_id, value] of this.refmap) {
+      result[_id] = value;
+    }
+    return result;
+  }
+}
 function isSimplified(json) {
   return typeof json === "object" && json != null && !Array.isArray(json) && "$$" in json;
 }
 function isPrimitive(val) {
   return typeof val === "number" || typeof val === "string" || typeof val === "boolean" || val === null;
 }
-function simplify(value) {
+function simplifyAndPackage(value) {
+  const refpkg = new RefPackage({});
+  const result = simplify(value, refpkg);
+  return {
+    root: result,
+    refs: refpkg.refs()
+  };
+}
+function simplify(value, refpkg) {
   if (typeof value === "string" || typeof value === "number" || typeof value === "boolean" || value == null) {
     return value;
   } else if (typeof value === "function") {
     throw new Error("cant simplify function");
   } else if (isSerializable(value)) {
-    return simplifyMarkedObject(value);
+    return simplifyMarkedObject(value, refpkg);
   } else if (value instanceof MarkedArray2) {
-    return simplifyMarkedArray(value);
+    return simplifyMarkedArray(value, refpkg);
   } else if (value instanceof MarkedMap) {
-    return simplifyMarkedMap(value);
+    return simplifyMarkedMap(value, refpkg);
   } else if (value instanceof MarkedSet2) {
-    return simplifyMarkedSet(value);
+    return simplifyMarkedSet(value, refpkg);
   } else if (value instanceof MarkedValue) {
-    return simplifyMarkedValue(value);
+    return simplifyMarkedValue(value, refpkg);
   } else {
     exhaustive(value);
   }
 }
-function simplifyMarkedObject(obj) {
+function simplifyMarkedObject(obj, refpkg) {
   const serializable = {};
   const description = obj.$$serialization.describe(obj);
   for (const entry of Object.entries(description)) {
     const key = entry[0];
     const value = entry[1];
-    serializable[key] = simplify(value);
+    serializable[key] = simplify(value, refpkg);
   }
   return {
     $$: "obj",
@@ -27127,42 +27254,48 @@ function simplifyMarkedObject(obj) {
     entries: serializable
   };
 }
-function simplifyMarkedValue(obj) {
+function simplifyMarkedValue(obj, refpkg) {
+  console.log("recorded val", refpkg.record(obj, {
+    $$: "val",
+    value: simplify(
+      // todo as any
+      obj.get(),
+      refpkg
+    )
+  }));
   return {
     $$: "val",
-    value: simplify(obj.get())
-    // todo
+    value: simplify(
+      // todo as any
+      obj.get(),
+      refpkg
+    )
   };
 }
-function simplifyMarkedArray(arr) {
+function simplifyMarkedArray(arr, refpkg) {
   return {
     $$: "arr",
-    entries: arr.map((x) => simplify(x))
+    entries: arr.map((x) => simplify(x, refpkg))
   };
 }
-function simplifyMarkedMap(map2) {
+function simplifyMarkedMap(map2, refpkg) {
   return {
     $$: "map",
-    entries: map2.map((value, key) => [simplify(key), simplify(value)])
+    entries: map2.map((value, key) => [simplify(key, refpkg), simplify(value, refpkg)])
   };
 }
-function simplifyMarkedSet(map2) {
+function simplifyMarkedSet(map2, refpkg) {
   return {
     $$: "set",
-    entries: map2.map((value) => simplify(value))
+    entries: map2.map((value) => simplify(value, refpkg))
   };
 }
-function nullthrows(val, message) {
-  if (val == null) {
-    throw new Error(message || `Expected ${val} to be non nil.`);
-  }
-  return val;
-}
-function constructSimplified(simplified, index) {
-  const result = initialize(simplified, index);
+function constructSimplifiedPackage(pkg, index) {
+  new RefPackage(pkg.refs);
+  const result = initialize(pkg.root, index);
   return result;
 }
-function initialize(json, index) {
+function initialize(json, index, refpkg) {
   if (isPrimitive(json)) {
     return json;
   }
@@ -27178,13 +27311,16 @@ function initialize(json, index) {
         return initializeMarkedValue(json, index);
       case "obj":
         return initializeObj(json, index);
+      case "ref":
+        throw new Error("not implemented");
+      // return initializeObj(json, index);
       default:
         exhaustive(json, "invalid $$ type");
     }
   }
   return json;
 }
-function initializeObj(simplified, index) {
+function initializeObj(simplified, index, refpkg) {
   const mark = nullthrows(index.get(simplified.kind), `kind ${simplified.kind} not found in SerializationIndex`);
   const entries = {};
   for (const [key, value] of Object.entries(simplified.entries)) {
@@ -27194,20 +27330,20 @@ function initializeObj(simplified, index) {
   const instance = mark.construct(entries);
   return instance;
 }
-function initializeMarkedValue(obj, index) {
+function initializeMarkedValue(obj, index, refpkg) {
   const value = isSimplified(obj.value) ? initialize(obj.value, index) : obj.value;
   const result = MarkedValue.create(value);
   return result;
 }
-function initializeMarkedArray(arr, index) {
+function initializeMarkedArray(arr, index, refpkg) {
   const result = MarkedArray2.create(arr.entries.map((x) => initialize(x, index)));
   return result;
 }
-function initializeMarkedMap(map2, index) {
+function initializeMarkedMap(map2, index, refpkg) {
   const result = MarkedMap.create(map2.entries.map((key, value) => [initialize(key, index), initialize(value, index)]));
   return result;
 }
-function initializeMarkedSet(set2, index) {
+function initializeMarkedSet(set2, index, refpkg) {
   const result = MarkedSet2.create(set2.entries.map((x) => initialize(x, index)));
   return result;
 }
@@ -27343,7 +27479,7 @@ const serialization_mproject = SerializationMark.create({
   }
 });
 function MProjectDebug(t0) {
-  const $ = compilerRuntimeExports.c(17);
+  const $ = compilerRuntimeExports.c(18);
   const {
     project: project2
   } = t0;
@@ -27399,32 +27535,33 @@ function MProjectDebug(t0) {
     t8 = $[9];
   }
   let t9;
-  if ($[10] !== tab) {
+  if ($[10] !== project2 || $[11] !== tab) {
     t9 = tab === "serialized" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
       overflow: "scroll",
       textAlign: "left",
       fontFamily: "monospace"
-    }, children: "not implemented" });
-    $[10] = tab;
-    $[11] = t9;
+    }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(JSONView, { json: JSON.parse(JSON.stringify(simplifyAndPackage(project2))) }) });
+    $[10] = project2;
+    $[11] = tab;
+    $[12] = t9;
   } else {
-    t9 = $[11];
+    t9 = $[12];
   }
   let t10;
-  if ($[12] !== t4 || $[13] !== t7 || $[14] !== t8 || $[15] !== t9) {
+  if ($[13] !== t4 || $[14] !== t7 || $[15] !== t8 || $[16] !== t9) {
     t10 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: t1, children: [
       t4,
       t7,
       t8,
       t9
     ] });
-    $[12] = t4;
-    $[13] = t7;
-    $[14] = t8;
-    $[15] = t9;
-    $[16] = t10;
+    $[13] = t4;
+    $[14] = t7;
+    $[15] = t8;
+    $[16] = t9;
+    $[17] = t10;
   } else {
-    t10 = $[16];
+    t10 = $[17];
   }
   return t10;
 }
@@ -27434,25 +27571,26 @@ function recordHistory(name, cb) {
   return cb();
 }
 function serialize(x) {
-  return simplifyMarkedObject(x);
+  return simplifyAndPackage(x);
 }
 function construct(x, index) {
-  return constructSimplified(x, serializationIndex);
+  return constructSimplifiedPackage(x, serializationIndex);
 }
 const serializationIndex = consolidateMarks([serialization_mtime, serialization_maudioclip, serialization_maudiotrack, serialization_mproject]);
 function MarkedProjectTest() {
-  const $ = compilerRuntimeExports.c(1);
+  const $ = compilerRuntimeExports.c(2);
   let t0;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
-    t0 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp, children: "construct test" }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
-        display: "flex",
-        flexDirection: "row",
-        flexGrow: 1,
-        gap: 8,
-        fontFamily: "monospace"
-      }, children: [
+    t0 = /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp, children: "construct test" }) });
+    $[0] = t0;
+  } else {
+    t0 = $[0];
+  }
+  let t1;
+  if ($[1] === Symbol.for("react.memo_cache_sentinel")) {
+    t1 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      t0,
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-row gap-2 grow font-mono", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(MProjectDebug, { project }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("fieldset", { style: {
           border: "none",
@@ -27464,11 +27602,11 @@ function MarkedProjectTest() {
         ] })
       ] })
     ] });
-    $[0] = t0;
+    $[1] = t1;
   } else {
-    t0 = $[0];
+    t1 = $[1];
   }
-  return t0;
+  return t1;
 }
 function _temp() {
   const serialized = serialize(project);

@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { nullthrows, setWindow } from "../../../linked-state/src/nullthrows";
 import {
   MarkedSerializable,
   SerializationMark,
-  Simplified,
+  SimplifiedPackage,
   consolidateMarks,
-  constructSimplified,
-  simplifyMarkedObject,
+  constructSimplifiedPackage,
+  simplifyAndPackage,
 } from "@mrkev/marked-serializable";
 import { useLink } from "@mrkev/subbable-state";
+import { useState } from "react";
+import { nullthrows, setWindow } from "../../../linked-state/src/nullthrows";
 import { UtilityToggle } from "../UtilityToggle";
 import {
   MAudioClip,
@@ -39,10 +39,10 @@ function recordHistory(name: string, cb: () => void) {
 }
 
 function serialize(x: MarkedSerializable<any>) {
-  return simplifyMarkedObject(x);
+  return simplifyAndPackage(x);
 }
-function construct(x: Simplified["any"], index: SerializationMark<any, any>) {
-  return constructSimplified(x, serializationIndex);
+function construct(x: SimplifiedPackage, index: SerializationMark<any, any>) {
+  return constructSimplifiedPackage(x, serializationIndex);
 }
 
 const serializationIndex = consolidateMarks([
@@ -73,15 +73,7 @@ export function MarkedProjectTest() {
           construct test
         </button>
       </div>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          flexGrow: 1,
-          gap: 8,
-          fontFamily: "monospace",
-        }}
-      >
+      <div className="flex flex-row gap-2 grow font-mono">
         <MProjectDebug project={project} />
 
         <fieldset

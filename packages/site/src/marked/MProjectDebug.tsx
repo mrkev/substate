@@ -2,6 +2,8 @@ import { useState } from "react";
 import { DebugTree } from "@mrkev/subbable-state";
 import { UtilityToggle } from "../UtilityToggle";
 import { MProject } from "./MProject";
+import { JSONView } from "../JSONView";
+import { simplifyAndPackage } from "@mrkev/marked-serializable";
 
 export function MProjectDebug({ project }: { project: MProject }) {
   const [tab, setTab] = useState<"struct" | "serialized">("struct");
@@ -28,8 +30,10 @@ export function MProjectDebug({ project }: { project: MProject }) {
             fontFamily: "monospace",
           }}
         >
-          not implemented
-          {/* <JSONView json={JSON.parse(serialize(project))} /> */}
+          <JSONView
+            defaultExpandedLevels={3}
+            json={JSON.parse(JSON.stringify(simplifyAndPackage(project)))}
+          />
         </div>
       )}
     </div>

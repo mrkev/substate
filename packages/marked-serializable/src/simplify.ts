@@ -1,11 +1,13 @@
-import { exhaustive } from "./exhaustive";
 import {
   MarkedArray,
   MarkedMap,
   MarkedSet,
   MarkedValue,
 } from "@mrkev/subbable-state";
+import { SimplifiedPackage } from "./construct";
+import { exhaustive } from "./exhaustive";
 import { isSerializable, MarkedSerializable } from "./MarkedSerializable";
+import { RefPackage } from "./RefPackage";
 
 export type Primitive = number | string | boolean | null;
 
@@ -25,6 +27,8 @@ export type Simplified = {
   arr: SimplifiedMarkedArray;
   set: SimplifiedMarkedSet;
   map: SimplifiedMarkedMap;
+  //
+  ref: SimplifiedRef;
 };
 
 type SimplifiedObj = Readonly<{
@@ -55,6 +59,11 @@ type SimplifiedMarkedMap = Readonly<{
   entries: [Simplified["any"] | Primitive, Simplified["any"] | Primitive][];
 }>;
 
+export type SimplifiedRef = Readonly<{
+  $$: "ref";
+  _id: string;
+}>;
+
 export function isSimplified(json: unknown): json is Simplified["any"] {
   // TODO: more validation?
   return (
@@ -76,7 +85,16 @@ export function isPrimitive(val: unknown) {
 
 ////////////
 
-function simplify(value: Simplifiable): Simplified["any"] | Primitive {
+export function simplifyAndPackage(value: Simplifiable): SimplifiedPackage {
+  const refpkg = new RefPackage({});
+  const result = simplify(value, refpkg);
+  return { root: result, refs: refpkg.refs() };
+}
+
+function simplify(
+  value: Simplifiable,
+  refpkg: RefPackage
+): Simplified["any"] | Primitive {
   if (
     typeof value === "string" ||
     typeof value === "number" ||
@@ -87,22 +105,23 @@ function simplify(value: Simplifiable): Simplified["any"] | Primitive {
   } else if (typeof value === "function") {
     throw new Error("cant simplify function");
   } else if (isSerializable(value)) {
-    return simplifyMarkedObject(value);
+    return simplifyMarkedObject(value, refpkg);
   } else if (value instanceof MarkedArray) {
-    return simplifyMarkedArray(value);
+    return simplifyMarkedArray(value, refpkg);
   } else if (value instanceof MarkedMap) {
-    return simplifyMarkedMap(value);
+    return simplifyMarkedMap(value, refpkg);
   } else if (value instanceof MarkedSet) {
-    return simplifyMarkedSet(value);
+    return simplifyMarkedSet(value, refpkg);
   } else if (value instanceof MarkedValue) {
-    return simplifyMarkedValue(value);
+    return simplifyMarkedValue(value, refpkg);
   } else {
     exhaustive(value);
   }
 }
 
-export function simplifyMarkedObject<C extends MarkedSerializable<any>>(
-  obj: C
+function simplifyMarkedObject<C extends MarkedSerializable<any>>(
+  obj: C,
+  refpkg: RefPackage
 ): Simplified["any"] {
   const serializable: SimplifiedObj["entries"] = {};
 
@@ -112,7 +131,7 @@ export function simplifyMarkedObject<C extends MarkedSerializable<any>>(
   for (const entry of Object.entries(description)) {
     const key = entry[0] as string;
     const value = entry[1] as Simplifiable;
-    serializable[key] = simplify(value);
+    serializable[key] = simplify(value, refpkg);
   }
 
   return {
@@ -122,30 +141,61 @@ export function simplifyMarkedObject<C extends MarkedSerializable<any>>(
   };
 }
 
-export function simplifyMarkedValue(obj: MarkedValue<any>): Simplified["val"] {
+function simplifyMarkedValue(
+  obj: MarkedValue<any>,
+  refpkg: RefPackage
+): Simplified["val"] {
+  // console.log(
+  //   "recorded val",
+  //   refpkg.record(obj, {
+  //     $$: "val",
+  //     value: simplify(
+  //       // todo as any
+  //       obj.get() as any,
+  //       refpkg
+  //     ),
+  //   })
+  // );
+
   return {
     $$: "val",
-    value: simplify(obj.get() as any), // todo
+    value: simplify(
+      // todo as any
+      obj.get() as any,
+      refpkg
+    ),
   };
 }
 
-export function simplifyMarkedArray(arr: MarkedArray<any>): Simplified["arr"] {
+function simplifyMarkedArray(
+  arr: MarkedArray<any>,
+  refpkg: RefPackage
+): Simplified["arr"] {
   return {
     $$: "arr",
-    entries: arr.map((x) => simplify(x)),
+    entries: arr.map((x) => simplify(x, refpkg)),
   };
 }
 
-export function simplifyMarkedMap(map: MarkedMap<any, any>): Simplified["map"] {
+function simplifyMarkedMap(
+  map: MarkedMap<any, any>,
+  refpkg: RefPackage
+): Simplified["map"] {
   return {
     $$: "map",
-    entries: map.map((value, key) => [simplify(key), simplify(value)]),
+    entries: map.map((value, key) => [
+      simplify(key, refpkg),
+      simplify(value, refpkg),
+    ]),
   };
 }
 
-export function simplifyMarkedSet(map: MarkedSet<any>): Simplified["set"] {
+function simplifyMarkedSet(
+  map: MarkedSet<any>,
+  refpkg: RefPackage
+): Simplified["set"] {
   return {
     $$: "set",
-    entries: map.map((value) => simplify(value)),
+    entries: map.map((value) => simplify(value, refpkg)),
   };
 }

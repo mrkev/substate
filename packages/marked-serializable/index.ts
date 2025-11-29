@@ -1,7 +1,7 @@
-export { simplifyMarkedObject } from "./src/simplify";
-export type { Simplified } from "./src/simplify";
-
-export { consolidateMarks, SerializationMark } from "./src/MarkedSerializable";
 export type { MarkedSerializable } from "./src/MarkedSerializable";
 
-export { constructSimplified } from "./src/construct";
+export { constructSimplifiedPackage } from "./src/construct";
+export { simplifyAndPackage } from "./src/simplify";
+
+export type { SimplifiedPackage } from "./src/construct";
+export { consolidateMarks, SerializationMark } from "./src/MarkedSerializable";

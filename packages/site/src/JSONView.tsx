@@ -16,36 +16,40 @@ export function JSONView({
   json,
   showUnknowns = false,
   style,
+  defaultExpandedLevels,
 }: {
   json: JSON;
   showUnknowns?: boolean;
   style?: React.CSSProperties;
+  defaultExpandedLevels?: number;
 }) {
-  console.log("val", json);
   return (
     <div style={{ overflow: "scroll", ...style }}>
       <pre style={{ textAlign: "left", width: 300, fontSize: 12 }}>
-        <DebugOutReact
+        <JsonOutReact
           val={json}
           pad={0}
           path={"ROOT"}
           showUnknowns={showUnknowns}
+          defaultExpandedLevels={defaultExpandedLevels}
         />
       </pre>
     </div>
   );
 }
 
-export function DebugOutReact({
+export function JsonOutReact({
   val,
   pad,
   path = "",
   showUnknowns = true,
+  defaultExpandedLevels,
 }: {
   val: JSON;
   pad: number;
   path?: string;
   showUnknowns?: boolean;
+  defaultExpandedLevels?: number;
 }) {
   if (
     typeof val === "string" ||
@@ -56,7 +60,13 @@ export function DebugOutReact({
     return <JSONPrimitive val={val} />;
   } else if (Array.isArray(val)) {
     return (
-      <JSONArray arr={val} pad={pad} path={path} showUnknowns={showUnknowns} />
+      <JSONArray
+        arr={val}
+        pad={pad}
+        path={path}
+        showUnknowns={showUnknowns}
+        defaultExpandedLevels={defaultExpandedLevels}
+      />
     );
   } else if (
     typeof val === "function" ||
@@ -65,7 +75,14 @@ export function DebugOutReact({
   ) {
     return `(invalid: ${typeof val}:${val})`;
   } else {
-    return <JSONRecord record={val} pad={pad} showUnknowns={showUnknowns} />;
+    return (
+      <JSONRecord
+        record={val}
+        pad={pad}
+        showUnknowns={showUnknowns}
+        defaultExpandedLevels={defaultExpandedLevels}
+      />
+    );
   }
 }
 
@@ -105,13 +122,17 @@ function JSONRecord({
   pad,
   path = "",
   showUnknowns,
+  defaultExpandedLevels = 0,
 }: {
   record: { [key: string]: JSON };
   pad: number;
   path?: string;
   showUnknowns: boolean;
+  defaultExpandedLevels?: number;
 }) {
-  const [displayState, setDisplayState] = useState<DisplayState>("summary");
+  const [displayState, setDisplayState] = useState<DisplayState>(
+    defaultExpandedLevels > 1 ? "full" : "summary"
+  );
 
   const body: Array<ReactNode> = ["{"];
   const keys = Object.keys(record);
@@ -133,12 +154,15 @@ function JSONRecord({
         {key}
       </span>,
       ": ",
-      <DebugOutReact
+      <JsonOutReact
         key={`elem-${key}`}
         val={val}
         pad={baseline}
         path={`${path}/${key}`}
         showUnknowns={showUnknowns}
+        defaultExpandedLevels={
+          defaultExpandedLevels ? defaultExpandedLevels - 1 : undefined
+        }
       />
     );
   }
@@ -192,13 +216,17 @@ function JSONArray({
   pad,
   path = "",
   showUnknowns,
+  defaultExpandedLevels = 0,
 }: {
   arr: JSON[];
   pad: number;
   path?: string;
   showUnknowns: boolean;
+  defaultExpandedLevels?: number;
 }) {
-  const [displayState, setDisplayState] = useState<DisplayState>("summary");
+  const [displayState, setDisplayState] = useState<DisplayState>(
+    defaultExpandedLevels > 1 ? "full" : "summary"
+  );
 
   const body = [];
 
@@ -221,12 +249,15 @@ function JSONArray({
     body.push(
       <br key={`br-${i}`} />,
       " ".repeat(baseline),
-      <DebugOutReact
+      <JsonOutReact
         key={`elem-${i}`}
         val={elem}
         pad={baseline}
         path={`${path}/${i}`}
         showUnknowns={showUnknowns}
+        defaultExpandedLevels={
+          defaultExpandedLevels ? defaultExpandedLevels - 1 : undefined
+        }
       />
     );
   }

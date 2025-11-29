@@ -10,21 +10,30 @@ import { nullthrows } from "./nullthrows";
 import {
   isPrimitive,
   isSimplified,
+  Primitive,
   Simplifiable,
   Simplified,
 } from "./simplify";
+import { RefPackage } from "./RefPackage";
 
-export function constructSimplified(
-  simplified: Simplified["any"],
+export type SimplifiedPackage = {
+  root: Simplified["any"] | Primitive;
+  refs: Record<string, Exclude<Simplified["any"], Simplified["ref"]>>;
+};
+
+export function constructSimplifiedPackage(
+  pkg: SimplifiedPackage,
   index: SerializationIndex
 ) {
-  const result = initialize(simplified, index);
+  const refpkg = new RefPackage(pkg.refs);
+  const result = initialize(pkg.root, index, refpkg);
   return result;
 }
 
-export function initialize(
+function initialize(
   json: unknown,
-  index: SerializationIndex
+  index: SerializationIndex,
+  refpkg: RefPackage
 ): Simplifiable {
   if (isPrimitive(json)) {
     return json;
@@ -33,15 +42,18 @@ export function initialize(
   if (isSimplified(json)) {
     switch (json.$$) {
       case "arr":
-        return initializeMarkedArray(json, index);
+        return initializeMarkedArray(json, index, refpkg);
       case "map":
-        return initializeMarkedMap(json, index);
+        return initializeMarkedMap(json, index, refpkg);
       case "set":
-        return initializeMarkedSet(json, index);
+        return initializeMarkedSet(json, index, refpkg);
       case "val":
-        return initializeMarkedValue(json, index);
+        return initializeMarkedValue(json, index, refpkg);
       case "obj":
-        return initializeObj(json, index);
+        return initializeObj(json, index, refpkg);
+      case "ref":
+        throw new Error("not implemented");
+      // return initializeObj(json, index);
       default:
         exhaustive(json, "invalid $$ type");
     }
@@ -50,9 +62,10 @@ export function initialize(
   return json as any; // todo: right type? Containers can hold normal objects/arrays/etc too
 }
 
-export function initializeObj(
+function initializeObj(
   simplified: Simplified["obj"],
-  index: SerializationIndex
+  index: SerializationIndex,
+  refpkg: RefPackage
 ): MarkedSerializable<any> {
   const mark = nullthrows(
     index.get(simplified.kind),
@@ -61,7 +74,7 @@ export function initializeObj(
 
   const entries = {} as Record<string, Simplifiable>;
   for (const [key, value] of Object.entries(simplified.entries)) {
-    const initialized = initialize(value, index);
+    const initialized = initialize(value, index, refpkg);
     entries[key] = initialized;
   }
 
@@ -75,10 +88,11 @@ export function initializeObj(
 
 function initializeMarkedValue(
   obj: Simplified["val"],
-  index: SerializationIndex
+  index: SerializationIndex,
+  refpkg: RefPackage
 ): MarkedValue<any> {
   const value = isSimplified(obj.value)
-    ? initialize(obj.value, index)
+    ? initialize(obj.value, index, refpkg)
     : obj.value;
 
   const result = MarkedValue.create(value);
@@ -87,22 +101,27 @@ function initializeMarkedValue(
 
 function initializeMarkedArray(
   arr: Simplified["arr"],
-  index: SerializationIndex
+  index: SerializationIndex,
+  refpkg: RefPackage
 ): MarkedArray<any> {
   const result = MarkedArray.create(
-    arr.entries.map((x) => initialize(x, index))
+    arr.entries.map((x) => initialize(x, index, refpkg))
   );
   return result;
 }
 
 function initializeMarkedMap(
   map: Simplified["map"],
-  index: SerializationIndex
+  index: SerializationIndex,
+  refpkg: RefPackage
 ): MarkedMap<any, any> {
   const result = MarkedMap.create(
     map.entries.map(
       (key, value) =>
-        [initialize(key, index), initialize(value, index)] as const
+        [
+          initialize(key, index, refpkg),
+          initialize(value, index, refpkg),
+        ] as const
     )
   );
   return result;
@@ -110,8 +129,11 @@ function initializeMarkedMap(
 
 function initializeMarkedSet(
   set: Simplified["set"],
-  index: SerializationIndex
+  index: SerializationIndex,
+  refpkg: RefPackage
 ): MarkedSet<any> {
-  const result = MarkedSet.create(set.entries.map((x) => initialize(x, index)));
+  const result = MarkedSet.create(
+    set.entries.map((x) => initialize(x, index, refpkg))
+  );
   return result;
 }
