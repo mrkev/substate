@@ -4,7 +4,6 @@ import {
   MarkedSet,
   MarkedValue,
 } from "@mrkev/subbable-state";
-import { SimplifiedPackage } from "./construct";
 import { exhaustive } from "./exhaustive";
 import { isSerializable, MarkedSerializable } from "./MarkedSerializable";
 import { RefPackage } from "./RefPackage";
@@ -85,6 +84,11 @@ export function isPrimitive(val: unknown) {
 
 ////////////
 
+export type SimplifiedPackage = {
+  root: Simplified["any"] | Primitive;
+  refs: Record<string, Exclude<Simplified["any"], Simplified["ref"]>>;
+};
+
 export function simplifyAndPackage(value: Simplifiable): SimplifiedPackage {
   const refpkg = new RefPackage({});
   const result = simplify(value, refpkg);
@@ -105,15 +109,25 @@ function simplify(
   } else if (typeof value === "function") {
     throw new Error("cant simplify function");
   } else if (isSerializable(value)) {
-    return simplifyMarkedObject(value, refpkg);
+    const res = simplifyMarkedObject(value, refpkg);
+    const ref = refpkg.record(value.$$mark._id, res);
+    return ref;
   } else if (value instanceof MarkedArray) {
-    return simplifyMarkedArray(value, refpkg);
+    const res = simplifyMarkedArray(value, refpkg);
+    const ref = refpkg.record(value.$$mark._id, res);
+    return ref;
   } else if (value instanceof MarkedMap) {
-    return simplifyMarkedMap(value, refpkg);
+    const res = simplifyMarkedMap(value, refpkg);
+    const ref = refpkg.record(value.$$mark._id, res);
+    return ref;
   } else if (value instanceof MarkedSet) {
-    return simplifyMarkedSet(value, refpkg);
+    const res = simplifyMarkedSet(value, refpkg);
+    const ref = refpkg.record(value.$$mark._id, res);
+    return ref;
   } else if (value instanceof MarkedValue) {
-    return simplifyMarkedValue(value, refpkg);
+    const res = simplifyMarkedValue(value, refpkg);
+    const ref = refpkg.record(value.$$mark._id, res);
+    return ref;
   } else {
     exhaustive(value);
   }
@@ -122,7 +136,7 @@ function simplify(
 function simplifyMarkedObject<C extends MarkedSerializable<any>>(
   obj: C,
   refpkg: RefPackage
-): Simplified["any"] {
+): Simplified["obj"] {
   const serializable: SimplifiedObj["entries"] = {};
 
   // serialization mark always applies to self
@@ -145,18 +159,6 @@ function simplifyMarkedValue(
   obj: MarkedValue<any>,
   refpkg: RefPackage
 ): Simplified["val"] {
-  // console.log(
-  //   "recorded val",
-  //   refpkg.record(obj, {
-  //     $$: "val",
-  //     value: simplify(
-  //       // todo as any
-  //       obj.get() as any,
-  //       refpkg
-  //     ),
-  //   })
-  // );
-
   return {
     $$: "val",
     value: simplify(

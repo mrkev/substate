@@ -14998,7 +14998,7 @@ function assertConstructableStructured(spec) {
     throw new Error(`is not a Structured`);
   }
 }
-let OrderedMap$1 = class OrderedMap {
+class OrderedMap {
   constructor(_map = /* @__PURE__ */ new Map()) {
     this._map = _map;
     this._order = Array.from(_map.keys());
@@ -15086,7 +15086,7 @@ let OrderedMap$1 = class OrderedMap {
     this._order.push(key);
     return this;
   }
-};
+}
 class SSet extends SubbableContainer {
   _set;
   _schema;
@@ -15447,7 +15447,7 @@ class InitializationMetadata {
     this.initializedNodes = initializedNodes;
   }
   static fromPackage(pkg) {
-    return new InitializationMetadata(OrderedMap$1.fromEntries(pkg.nodes), /* @__PURE__ */ new Map());
+    return new InitializationMetadata(OrderedMap.fromEntries(pkg.nodes), /* @__PURE__ */ new Map());
   }
 }
 function initOfPkg(metadata) {
@@ -16382,7 +16382,7 @@ function ref(simplified) {
 }
 class SimplificationMetadata {
   allObjs = /* @__PURE__ */ new Map();
-  refered = new OrderedMap$1();
+  refered = new OrderedMap();
   record(obj, simplified) {
     if (this.allObjs.has(obj._id)) {
       return ref(simplified);
@@ -16998,7 +16998,7 @@ function DebugOut(t0) {
   }
   let t3;
   if ($[3] !== showUnknowns || $[4] !== val) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { style: t2, children: /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$2, { val, pad: 0, path: "ROOT", showUnknowns }) });
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { style: t2, children: /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val, pad: 0, path: "ROOT", showUnknowns }) });
     $[3] = showUnknowns;
     $[4] = val;
     $[5] = t3;
@@ -17027,7 +17027,7 @@ function stringifyUnknown$4(val) {
     return res;
   }
 }
-function DebugOutReact$2(t0) {
+function DebugOutReact$1(t0) {
   const $ = compilerRuntimeExports.c(44);
   const {
     val,
@@ -17231,7 +17231,7 @@ function DebugOutStruct(t0) {
         continue;
       }
       const val = struct[key];
-      body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$3("attr"), children: key }, `span-${key}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$2, { val, pad: baseline, path: `${path}/${key}`, showUnknowns }, `elem-${key}`));
+      body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$3("attr"), children: key }, `span-${key}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val, pad: baseline, path: `${path}/${key}`, showUnknowns }, `elem-${key}`));
     }
     if (!showBody) {
       body.push("...", "}");
@@ -17337,7 +17337,7 @@ function DebugOutArray$1(t0) {
     for (let i = 0; i < arr.length; i++) {
       const baseline = pad + TAB_SIZE$7;
       const elem = arr.at(i);
-      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$2, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`));
+      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`));
     }
     if (result.length > 0) {
       let t22;
@@ -17405,7 +17405,7 @@ function DebugOutSet$2(t0) {
     let i = 0;
     for (const elem of set2) {
       const baseline = pad + TAB_SIZE$7;
-      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$2, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`));
+      result.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val: elem, pad: baseline, path: `${path}/${i}-s`, showUnknowns }, `elem-${i}`));
       i++;
     }
     if (result.length > 0) {
@@ -17937,14 +17937,14 @@ const s = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
 }, Symbol.toStringTag, { value: "Module" }));
 const TAB_SIZE$6 = 2;
 function JSONView(t0) {
-  const $ = compilerRuntimeExports.c(9);
+  const $ = compilerRuntimeExports.c(10);
   const {
     json,
     showUnknowns: t1,
-    style
+    style,
+    defaultExpandedLevels
   } = t0;
   const showUnknowns = t1 === void 0 ? false : t1;
-  console.log("val", json);
   let t2;
   if ($[0] !== style) {
     t2 = {
@@ -17968,32 +17968,34 @@ function JSONView(t0) {
     t3 = $[2];
   }
   let t4;
-  if ($[3] !== json || $[4] !== showUnknowns) {
-    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { style: t3, children: /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val: json, pad: 0, path: "ROOT", showUnknowns }) });
-    $[3] = json;
-    $[4] = showUnknowns;
-    $[5] = t4;
+  if ($[3] !== defaultExpandedLevels || $[4] !== json || $[5] !== showUnknowns) {
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { style: t3, children: /* @__PURE__ */ jsxRuntimeExports.jsx(JsonOutReact, { val: json, pad: 0, path: "ROOT", showUnknowns, defaultExpandedLevels }) });
+    $[3] = defaultExpandedLevels;
+    $[4] = json;
+    $[5] = showUnknowns;
+    $[6] = t4;
   } else {
-    t4 = $[5];
+    t4 = $[6];
   }
   let t5;
-  if ($[6] !== t2 || $[7] !== t4) {
+  if ($[7] !== t2 || $[8] !== t4) {
     t5 = /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: t2, children: t4 });
-    $[6] = t2;
-    $[7] = t4;
-    $[8] = t5;
+    $[7] = t2;
+    $[8] = t4;
+    $[9] = t5;
   } else {
-    t5 = $[8];
+    t5 = $[9];
   }
   return t5;
 }
-function DebugOutReact$1(t0) {
-  const $ = compilerRuntimeExports.c(11);
+function JsonOutReact(t0) {
+  const $ = compilerRuntimeExports.c(13);
   const {
     val,
     pad,
     path: t1,
-    showUnknowns: t2
+    showUnknowns: t2,
+    defaultExpandedLevels
   } = t0;
   const path = t1 === void 0 ? "" : t1;
   const showUnknowns = t2 === void 0 ? true : t2;
@@ -18010,15 +18012,16 @@ function DebugOutReact$1(t0) {
   } else {
     if (Array.isArray(val)) {
       let t3;
-      if ($[2] !== pad || $[3] !== path || $[4] !== showUnknowns || $[5] !== val) {
-        t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(JSONArray, { arr: val, pad, path, showUnknowns });
-        $[2] = pad;
-        $[3] = path;
-        $[4] = showUnknowns;
-        $[5] = val;
-        $[6] = t3;
+      if ($[2] !== defaultExpandedLevels || $[3] !== pad || $[4] !== path || $[5] !== showUnknowns || $[6] !== val) {
+        t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(JSONArray, { arr: val, pad, path, showUnknowns, defaultExpandedLevels });
+        $[2] = defaultExpandedLevels;
+        $[3] = pad;
+        $[4] = path;
+        $[5] = showUnknowns;
+        $[6] = val;
+        $[7] = t3;
       } else {
-        t3 = $[6];
+        t3 = $[7];
       }
       return t3;
     } else {
@@ -18026,14 +18029,15 @@ function DebugOutReact$1(t0) {
         return `(invalid: ${typeof val}:${val})`;
       } else {
         let t3;
-        if ($[7] !== pad || $[8] !== showUnknowns || $[9] !== val) {
-          t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(JSONRecord, { record: val, pad, showUnknowns });
-          $[7] = pad;
-          $[8] = showUnknowns;
-          $[9] = val;
-          $[10] = t3;
+        if ($[8] !== defaultExpandedLevels || $[9] !== pad || $[10] !== showUnknowns || $[11] !== val) {
+          t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(JSONRecord, { record: val, pad, showUnknowns, defaultExpandedLevels });
+          $[8] = defaultExpandedLevels;
+          $[9] = pad;
+          $[10] = showUnknowns;
+          $[11] = val;
+          $[12] = t3;
         } else {
-          t3 = $[10];
+          t3 = $[12];
         }
         return t3;
       }
@@ -18102,105 +18106,108 @@ function _temp$d(prev) {
   }
 }
 function JSONRecord(t0) {
-  const $ = compilerRuntimeExports.c(18);
+  const $ = compilerRuntimeExports.c(19);
   const {
     record,
     pad,
     path: t1,
-    showUnknowns
+    showUnknowns,
+    defaultExpandedLevels: t2
   } = t0;
   const path = t1 === void 0 ? "" : t1;
-  const [displayState, setDisplayState] = reactExports.useState("summary");
+  const defaultExpandedLevels = t2 === void 0 ? 0 : t2;
+  const [displayState, setDisplayState] = reactExports.useState(defaultExpandedLevels > 1 ? "full" : "summary");
   let body;
-  if ($[0] !== displayState || $[1] !== pad || $[2] !== path || $[3] !== record || $[4] !== showUnknowns) {
+  if ($[0] !== defaultExpandedLevels || $[1] !== displayState || $[2] !== pad || $[3] !== path || $[4] !== record || $[5] !== showUnknowns) {
     body = ["{"];
-    let t22;
-    if ($[6] !== record) {
-      t22 = Object.keys(record);
-      $[6] = record;
-      $[7] = t22;
+    let t32;
+    if ($[7] !== record) {
+      t32 = Object.keys(record);
+      $[7] = record;
+      $[8] = t32;
     } else {
-      t22 = $[7];
+      t32 = $[8];
     }
-    const keys = t22;
+    const keys = t32;
     if (displayState === "summary") {
-      let t32;
-      if ($[8] === Symbol.for("react.memo_cache_sentinel")) {
-        t32 = classOfKind$2("prm");
-        $[8] = t32;
+      let t42;
+      if ($[9] === Symbol.for("react.memo_cache_sentinel")) {
+        t42 = classOfKind$2("prm");
+        $[9] = t42;
       } else {
-        t32 = $[8];
+        t42 = $[9];
       }
-      const t4 = keys.join(", ");
-      let t5;
-      if ($[9] !== t4) {
-        t5 = /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: t32, children: [
+      const t5 = keys.join(", ");
+      let t6;
+      if ($[10] !== t5) {
+        t6 = /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: t42, children: [
           " ",
-          t4,
+          t5,
           " "
-        ] });
-        $[9] = t4;
+        ] }, "summary-span");
         $[10] = t5;
+        $[11] = t6;
       } else {
-        t5 = $[10];
+        t6 = $[11];
       }
-      body.push(t5);
+      body.push(t6);
     }
     for (let i = 0; i < keys.length && displayState === "full"; i++) {
       const key = keys[i];
       const baseline = pad + TAB_SIZE$6;
       const val = record[key];
-      body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$2("attr"), children: key }, `span-${key}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val, pad: baseline, path: `${path}/${key}`, showUnknowns }, `elem-${key}`));
+      body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$2("attr"), children: key }, `span-${key}`), ": ", /* @__PURE__ */ jsxRuntimeExports.jsx(JsonOutReact, { val, pad: baseline, path: `${path}/${key}`, showUnknowns, defaultExpandedLevels: defaultExpandedLevels ? defaultExpandedLevels - 1 : void 0 }, `elem-${key}`));
     }
     if (displayState === "collapsed") {
       body.push("...", "}");
     } else {
       if (displayState === "full") {
-        let t32;
-        if ($[11] !== pad) {
-          t32 = " ".repeat(pad);
-          $[11] = pad;
-          $[12] = t32;
+        let t42;
+        if ($[12] !== pad) {
+          t42 = " ".repeat(pad);
+          $[12] = pad;
+          $[13] = t42;
         } else {
-          t32 = $[12];
+          t42 = $[13];
         }
-        body.push("\n", t32, "}");
+        body.push("\n", t42, "}");
       } else {
         if (displayState === "summary") {
           body.push("}");
         }
       }
     }
-    $[0] = displayState;
-    $[1] = pad;
-    $[2] = path;
-    $[3] = record;
-    $[4] = showUnknowns;
-    $[5] = body;
+    $[0] = defaultExpandedLevels;
+    $[1] = displayState;
+    $[2] = pad;
+    $[3] = path;
+    $[4] = record;
+    $[5] = showUnknowns;
+    $[6] = body;
   } else {
-    body = $[5];
-  }
-  let t2;
-  if ($[13] !== displayState) {
-    t2 = /* @__PURE__ */ jsxRuntimeExports.jsx(Collapser, { display: displayState, setDisplay: setDisplayState });
-    $[13] = displayState;
-    $[14] = t2;
-  } else {
-    t2 = $[14];
+    body = $[6];
   }
   let t3;
-  if ($[15] !== body || $[16] !== t2) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      t2,
+  if ($[14] !== displayState) {
+    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Collapser, { display: displayState, setDisplay: setDisplayState });
+    $[14] = displayState;
+    $[15] = t3;
+  } else {
+    t3 = $[15];
+  }
+  let t4;
+  if ($[16] !== body || $[17] !== t3) {
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      t3,
       body
     ] });
-    $[15] = body;
-    $[16] = t2;
+    $[16] = body;
     $[17] = t3;
+    $[18] = t4;
   } else {
-    t3 = $[17];
+    t4 = $[18];
   }
-  return t3;
+  return t4;
 }
 function string(val, depth) {
   if (typeof val === "string") {
@@ -18216,113 +18223,116 @@ function string(val, depth) {
   }
 }
 function JSONArray(t0) {
-  const $ = compilerRuntimeExports.c(19);
+  const $ = compilerRuntimeExports.c(20);
   const {
     arr,
     pad,
     path: t1,
-    showUnknowns
+    showUnknowns,
+    defaultExpandedLevels: t2
   } = t0;
   const path = t1 === void 0 ? "" : t1;
-  const [displayState, setDisplayState] = reactExports.useState("summary");
+  const defaultExpandedLevels = t2 === void 0 ? 0 : t2;
+  const [displayState, setDisplayState] = reactExports.useState(defaultExpandedLevels > 1 ? "full" : "summary");
   let body;
-  let t2;
-  if ($[0] !== arr || $[1] !== displayState || $[2] !== pad || $[3] !== path || $[4] !== showUnknowns) {
-    t2 = Symbol.for("react.early_return_sentinel");
+  let t3;
+  if ($[0] !== arr || $[1] !== defaultExpandedLevels || $[2] !== displayState || $[3] !== pad || $[4] !== path || $[5] !== showUnknowns) {
+    t3 = Symbol.for("react.early_return_sentinel");
     bb0: {
       body = [];
       if (arr.length < 1) {
-        t2 = "[]";
+        t3 = "[]";
         break bb0;
       }
       if (displayState === "summary") {
-        let t32;
-        if ($[7] === Symbol.for("react.memo_cache_sentinel")) {
-          t32 = classOfKind$2("prm");
-          $[7] = t32;
-        } else {
-          t32 = $[7];
-        }
         let t42;
-        if ($[8] !== arr) {
-          t42 = arr.map(_temp2$8).join(", ");
-          $[8] = arr;
-          $[9] = t42;
+        if ($[8] === Symbol.for("react.memo_cache_sentinel")) {
+          t42 = classOfKind$2("prm");
+          $[8] = t42;
         } else {
-          t42 = $[9];
+          t42 = $[8];
         }
-        let t5;
-        if ($[10] !== t42) {
-          t5 = /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: t32, children: [
+        let t52;
+        if ($[9] !== arr) {
+          t52 = arr.map(_temp2$8).join(", ");
+          $[9] = arr;
+          $[10] = t52;
+        } else {
+          t52 = $[10];
+        }
+        let t6;
+        if ($[11] !== t52) {
+          t6 = /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: t42, children: [
             " ",
-            t42,
+            t52,
             " "
           ] });
-          $[10] = t42;
-          $[11] = t5;
+          $[11] = t52;
+          $[12] = t6;
         } else {
-          t5 = $[11];
+          t6 = $[12];
         }
-        body.push(t5);
+        body.push(t6);
       }
       for (let i = 0; i < arr.length && displayState === "full"; i++) {
         const baseline = pad + TAB_SIZE$6;
         const elem = arr[i];
-        body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutReact$1, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns }, `elem-${i}`));
+        body.push(/* @__PURE__ */ jsxRuntimeExports.jsx("br", {}, `br-${i}`), " ".repeat(baseline), /* @__PURE__ */ jsxRuntimeExports.jsx(JsonOutReact, { val: elem, pad: baseline, path: `${path}/${i}`, showUnknowns, defaultExpandedLevels: defaultExpandedLevels ? defaultExpandedLevels - 1 : void 0 }, `elem-${i}`));
       }
       if (displayState === "collapsed") {
         body.push("...", "");
       } else {
         if (displayState === "full") {
-          let t32;
-          if ($[12] !== pad) {
-            t32 = " ".repeat(pad);
-            $[12] = pad;
-            $[13] = t32;
+          let t42;
+          if ($[13] !== pad) {
+            t42 = " ".repeat(pad);
+            $[13] = pad;
+            $[14] = t42;
           } else {
-            t32 = $[13];
+            t42 = $[14];
           }
-          body.push("\n", t32);
+          body.push("\n", t42);
         }
       }
     }
     $[0] = arr;
-    $[1] = displayState;
-    $[2] = pad;
-    $[3] = path;
-    $[4] = showUnknowns;
-    $[5] = body;
-    $[6] = t2;
+    $[1] = defaultExpandedLevels;
+    $[2] = displayState;
+    $[3] = pad;
+    $[4] = path;
+    $[5] = showUnknowns;
+    $[6] = body;
+    $[7] = t3;
   } else {
-    body = $[5];
-    t2 = $[6];
+    body = $[6];
+    t3 = $[7];
   }
-  if (t2 !== Symbol.for("react.early_return_sentinel")) {
-    return t2;
-  }
-  let t3;
-  if ($[14] !== displayState) {
-    t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(Collapser, { display: displayState, setDisplay: setDisplayState });
-    $[14] = displayState;
-    $[15] = t3;
-  } else {
-    t3 = $[15];
+  if (t3 !== Symbol.for("react.early_return_sentinel")) {
+    return t3;
   }
   let t4;
-  if ($[16] !== body || $[17] !== t3) {
-    t4 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      t3,
+  if ($[15] !== displayState) {
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx(Collapser, { display: displayState, setDisplay: setDisplayState });
+    $[15] = displayState;
+    $[16] = t4;
+  } else {
+    t4 = $[16];
+  }
+  let t5;
+  if ($[17] !== body || $[18] !== t4) {
+    t5 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      t4,
       "[",
       body,
       "]"
     ] });
-    $[16] = body;
-    $[17] = t3;
+    $[17] = body;
     $[18] = t4;
+    $[19] = t5;
   } else {
-    t4 = $[18];
+    t5 = $[19];
   }
-  return t4;
+  return t5;
 }
 function _temp2$8(x) {
   return string(x);
@@ -27061,12 +27071,6 @@ const mValue = MarkedValue.create.bind(MarkedValue);
 function exhaustive(x, msg) {
   throw new Error(msg ?? `Exhaustive violation, unexpected value ${x}`);
 }
-function nullthrows(val, message) {
-  if (val == null) {
-    throw new Error(message || `Expected ${val} to be non nil.`);
-  }
-  return val;
-}
 class SerializationMark {
   constructor(kind, construct2, describe) {
     this.kind = kind;
@@ -27094,94 +27098,11 @@ function consolidateMarks(marks) {
   }
   return map2;
 }
-class OrderedMap2 {
-  constructor(_map = /* @__PURE__ */ new Map()) {
-    this._map = _map;
-    this._order = Array.from(_map.keys());
+function nullthrows(val, message) {
+  if (val == null) {
+    throw new Error(message || `Expected ${val} to be non nil.`);
   }
-  _order;
-  static fromEntries(entries) {
-    return new OrderedMap2(new Map(entries));
-  }
-  clear() {
-    this._map.clear();
-    this._order.splice(0, this._order.length);
-  }
-  delete(key) {
-    const value = this._map.get(key);
-    if (value == null) {
-      return false;
-    }
-    const orderPos = this._order.indexOf(key);
-    if (orderPos < 0) {
-      throw new Error("deleting key without order");
-    }
-    this._map.delete(key);
-    this._order.splice(orderPos, 1);
-    return true;
-  }
-  forEach(callbackfn, thisArg) {
-    throw new Error("Method not implemented.");
-  }
-  get(key) {
-    return this._map.get(key);
-  }
-  has(key) {
-    return this._map.has(key);
-  }
-  set(key, value) {
-    throw new Error("Method not implemented.");
-  }
-  get size() {
-    return this._map.size;
-  }
-  entries() {
-    const self = this;
-    return function* () {
-      for (const key of self._order) {
-        yield [key, nullthrows(self._map.get(key))];
-      }
-      return void 0;
-    }();
-  }
-  keys() {
-    return this._order[Symbol.iterator]();
-  }
-  values() {
-    const self = this;
-    return function* () {
-      for (const key of self._order) {
-        yield nullthrows(self._map.get(key));
-      }
-      return void 0;
-    }();
-  }
-  [Symbol.iterator]() {
-    return this.entries();
-  }
-  [Symbol.toStringTag] = "[OrderedMap]";
-  // Array
-  get length() {
-    return this.size;
-  }
-  sort(compareFn) {
-    if (compareFn == null) {
-      this._order.sort();
-    } else {
-      this._order.sort((a, b) => {
-        const aval = nullthrows(this._map.get(a));
-        const bval = nullthrows(this._map.get(b));
-        return compareFn([a, aval], [b, bval]);
-      });
-    }
-    return this;
-  }
-  push(key, value) {
-    this.delete(key);
-    this._map.set(key, value);
-    this._order.push(key);
-    return this;
-  }
+  return val;
 }
 class RefPackage {
   constructor(initial) {
@@ -27189,15 +27110,18 @@ class RefPackage {
       this.refmap.set(key, value);
     }
   }
-  refmap = new OrderedMap2();
-  record(obj, simplified) {
-    if (!this.refmap.has(obj.$$mark._id)) {
-      this.refmap.set(obj.$$mark._id, simplified);
+  refmap = /* @__PURE__ */ new Map();
+  record(_id, simplified) {
+    if (!this.refmap.has(_id)) {
+      this.refmap.set(_id, simplified);
     }
     return {
       $$: "ref",
-      _id: obj.$$mark._id
+      _id
     };
+  }
+  get(_id) {
+    return nullthrows(this.refmap.get(_id), `ref ${_id} not found`);
   }
   refs() {
     const result = {};
@@ -27227,15 +27151,25 @@ function simplify(value, refpkg) {
   } else if (typeof value === "function") {
     throw new Error("cant simplify function");
   } else if (isSerializable(value)) {
-    return simplifyMarkedObject(value, refpkg);
+    const res = simplifyMarkedObject(value, refpkg);
+    const ref2 = refpkg.record(value.$$mark._id, res);
+    return ref2;
   } else if (value instanceof MarkedArray2) {
-    return simplifyMarkedArray(value, refpkg);
+    const res = simplifyMarkedArray(value, refpkg);
+    const ref2 = refpkg.record(value.$$mark._id, res);
+    return ref2;
   } else if (value instanceof MarkedMap) {
-    return simplifyMarkedMap(value, refpkg);
+    const res = simplifyMarkedMap(value, refpkg);
+    const ref2 = refpkg.record(value.$$mark._id, res);
+    return ref2;
   } else if (value instanceof MarkedSet2) {
-    return simplifyMarkedSet(value, refpkg);
+    const res = simplifyMarkedSet(value, refpkg);
+    const ref2 = refpkg.record(value.$$mark._id, res);
+    return ref2;
   } else if (value instanceof MarkedValue) {
-    return simplifyMarkedValue(value, refpkg);
+    const res = simplifyMarkedValue(value, refpkg);
+    const ref2 = refpkg.record(value.$$mark._id, res);
+    return ref2;
   } else {
     exhaustive(value);
   }
@@ -27255,14 +27189,6 @@ function simplifyMarkedObject(obj, refpkg) {
   };
 }
 function simplifyMarkedValue(obj, refpkg) {
-  console.log("recorded val", refpkg.record(obj, {
-    $$: "val",
-    value: simplify(
-      // todo as any
-      obj.get(),
-      refpkg
-    )
-  }));
   return {
     $$: "val",
     value: simplify(
@@ -27291,60 +27217,77 @@ function simplifyMarkedSet(map2, refpkg) {
   };
 }
 function constructSimplifiedPackage(pkg, index) {
-  new RefPackage(pkg.refs);
-  const result = initialize(pkg.root, index);
+  const refpkg = new RefPackage(pkg.refs);
+  const objmap = /* @__PURE__ */ new Map();
+  const result = initialize(pkg.root, {
+    index,
+    refpkg,
+    objmap
+  });
   return result;
 }
-function initialize(json, index, refpkg) {
+function initialize(json, rsc) {
   if (isPrimitive(json)) {
     return json;
   }
   if (isSimplified(json)) {
     switch (json.$$) {
-      case "arr":
-        return initializeMarkedArray(json, index);
-      case "map":
-        return initializeMarkedMap(json, index);
-      case "set":
-        return initializeMarkedSet(json, index);
-      case "val":
-        return initializeMarkedValue(json, index);
-      case "obj":
-        return initializeObj(json, index);
-      case "ref":
-        throw new Error("not implemented");
-      // return initializeObj(json, index);
+      case "arr": {
+        return initializeMarkedArray(json, rsc);
+      }
+      case "map": {
+        return initializeMarkedMap(json, rsc);
+      }
+      case "set": {
+        return initializeMarkedSet(json, rsc);
+      }
+      case "val": {
+        return initializeMarkedValue(json, rsc);
+      }
+      case "obj": {
+        return initializeObj(json, rsc);
+      }
+      case "ref": {
+        const existing = rsc.objmap.get(json._id);
+        if (existing != null) {
+          return existing;
+        } else {
+          const result = initialize(rsc.refpkg.get(json._id), rsc);
+          rsc.objmap.set(json._id, result);
+          return result;
+        }
+      }
       default:
         exhaustive(json, "invalid $$ type");
     }
   }
   return json;
 }
-function initializeObj(simplified, index, refpkg) {
-  const mark = nullthrows(index.get(simplified.kind), `kind ${simplified.kind} not found in SerializationIndex`);
+function initializeObj(simplified, rsc) {
+  const mark = nullthrows(rsc.index.get(simplified.kind), `kind ${simplified.kind} not found in SerializationIndex`);
   const entries = {};
   for (const [key, value] of Object.entries(simplified.entries)) {
-    const initialized = initialize(value, index);
+    const initialized = initialize(value, rsc);
     entries[key] = initialized;
   }
   const instance = mark.construct(entries);
   return instance;
 }
-function initializeMarkedValue(obj, index, refpkg) {
-  const value = isSimplified(obj.value) ? initialize(obj.value, index) : obj.value;
+function initializeMarkedValue(obj, rsc) {
+  const value = isSimplified(obj.value) ? initialize(obj.value, rsc) : obj.value;
   const result = MarkedValue.create(value);
   return result;
 }
-function initializeMarkedArray(arr, index, refpkg) {
-  const result = MarkedArray2.create(arr.entries.map((x) => initialize(x, index)));
+function initializeMarkedArray(arr, rsc) {
+  const result = MarkedArray2.create(arr.entries.map((x) => initialize(x, rsc)));
   return result;
 }
-function initializeMarkedMap(map2, index, refpkg) {
-  const result = MarkedMap.create(map2.entries.map((key, value) => [initialize(key, index), initialize(value, index)]));
+function initializeMarkedMap(map2, rsc) {
+  const result = MarkedMap.create(map2.entries.map((key, value) => [initialize(key, rsc), initialize(value, rsc)]));
   return result;
 }
-function initializeMarkedSet(set2, index, refpkg) {
-  const result = MarkedSet2.create(set2.entries.map((x) => initialize(x, index)));
+function initializeMarkedSet(set2, rsc) {
+  const result = MarkedSet2.create(set2.entries.map((x) => initialize(x, rsc)));
   return result;
 }
 class MTime {
@@ -27413,6 +27356,7 @@ class MAudioTrack {
   constructor(name, clips) {
     this.name = name;
     this.clips = clips;
+    console.log("INIT AUDIO TRACK");
     this.$$mark.register(this, [name]);
   }
   $$mark = SubbableMark2.create();
@@ -27540,7 +27484,7 @@ function MProjectDebug(t0) {
       overflow: "scroll",
       textAlign: "left",
       fontFamily: "monospace"
-    }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(JSONView, { json: JSON.parse(JSON.stringify(simplifyAndPackage(project2))) }) });
+    }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(JSONView, { defaultExpandedLevels: 3, json: JSON.parse(JSON.stringify(simplifyAndPackage(project2))) }) });
     $[10] = project2;
     $[11] = tab;
     $[12] = t9;

@@ -138,7 +138,12 @@ function JSONRecord({
   const keys = Object.keys(record);
 
   if (displayState === "summary") {
-    body.push(<span className={classOfKind("prm")}> {keys.join(", ")} </span>);
+    body.push(
+      <span key={"summary-span"} className={classOfKind("prm")}>
+        {" "}
+        {keys.join(", ")}{" "}
+      </span>
+    );
   }
 
   for (let i = 0; i < keys.length && displayState === "full"; i++) {

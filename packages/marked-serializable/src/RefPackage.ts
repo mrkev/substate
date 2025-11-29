@@ -1,4 +1,5 @@
-import { Primitive, Simplifiable, Simplified, SimplifiedRef } from "./simplify";
+import { nullthrows } from "./nullthrows";
+import { Simplified, SimplifiedRef } from "./simplify";
 
 export class RefPackage {
   constructor(
@@ -15,13 +16,17 @@ export class RefPackage {
   >();
 
   record(
-    obj: Exclude<Simplifiable, Primitive>,
+    _id: string,
     simplified: Exclude<Simplified["any"], Simplified["ref"]>
   ): SimplifiedRef {
-    if (!this.refmap.has(obj.$$mark._id)) {
-      this.refmap.set(obj.$$mark._id, simplified);
+    if (!this.refmap.has(_id)) {
+      this.refmap.set(_id, simplified);
     }
-    return { $$: "ref", _id: obj.$$mark._id } as const;
+    return { $$: "ref", _id: _id } as const;
+  }
+
+  get(_id: string): Exclude<Simplified["any"], Simplified["ref"]> {
+    return nullthrows(this.refmap.get(_id), `ref ${_id} not found`);
   }
 
   refs() {

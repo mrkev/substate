@@ -7,18 +7,19 @@ import {
 import { exhaustive } from "./exhaustive";
 import { MarkedSerializable, SerializationIndex } from "./MarkedSerializable";
 import { nullthrows } from "./nullthrows";
+import { RefPackage } from "./RefPackage";
 import {
   isPrimitive,
   isSimplified,
-  Primitive,
   Simplifiable,
   Simplified,
+  SimplifiedPackage,
 } from "./simplify";
-import { RefPackage } from "./RefPackage";
 
-export type SimplifiedPackage = {
-  root: Simplified["any"] | Primitive;
-  refs: Record<string, Exclude<Simplified["any"], Simplified["ref"]>>;
+type Resources = {
+  index: SerializationIndex;
+  refpkg: RefPackage;
+  objmap: Map<string, Simplifiable>;
 };
 
 export function constructSimplifiedPackage(
@@ -26,34 +27,43 @@ export function constructSimplifiedPackage(
   index: SerializationIndex
 ) {
   const refpkg = new RefPackage(pkg.refs);
-  const result = initialize(pkg.root, index, refpkg);
+  const objmap = new Map<string, Simplifiable>();
+  const result = initialize(pkg.root, { index, refpkg, objmap });
   return result;
 }
 
-function initialize(
-  json: unknown,
-  index: SerializationIndex,
-  refpkg: RefPackage
-): Simplifiable {
+function initialize(json: unknown, rsc: Resources): Simplifiable {
   if (isPrimitive(json)) {
     return json;
   }
 
   if (isSimplified(json)) {
     switch (json.$$) {
-      case "arr":
-        return initializeMarkedArray(json, index, refpkg);
-      case "map":
-        return initializeMarkedMap(json, index, refpkg);
-      case "set":
-        return initializeMarkedSet(json, index, refpkg);
-      case "val":
-        return initializeMarkedValue(json, index, refpkg);
-      case "obj":
-        return initializeObj(json, index, refpkg);
-      case "ref":
-        throw new Error("not implemented");
-      // return initializeObj(json, index);
+      case "arr": {
+        return initializeMarkedArray(json, rsc);
+      }
+      case "map": {
+        return initializeMarkedMap(json, rsc);
+      }
+      case "set": {
+        return initializeMarkedSet(json, rsc);
+      }
+      case "val": {
+        return initializeMarkedValue(json, rsc);
+      }
+      case "obj": {
+        return initializeObj(json, rsc);
+      }
+      case "ref": {
+        const existing = rsc.objmap.get(json._id);
+        if (existing != null) {
+          return existing;
+        } else {
+          const result = initialize(rsc.refpkg.get(json._id), rsc);
+          rsc.objmap.set(json._id, result);
+          return result;
+        }
+      }
       default:
         exhaustive(json, "invalid $$ type");
     }
@@ -64,17 +74,16 @@ function initialize(
 
 function initializeObj(
   simplified: Simplified["obj"],
-  index: SerializationIndex,
-  refpkg: RefPackage
+  rsc: Resources
 ): MarkedSerializable<any> {
   const mark = nullthrows(
-    index.get(simplified.kind),
+    rsc.index.get(simplified.kind),
     `kind ${simplified.kind} not found in SerializationIndex`
   );
 
   const entries = {} as Record<string, Simplifiable>;
   for (const [key, value] of Object.entries(simplified.entries)) {
-    const initialized = initialize(value, index, refpkg);
+    const initialized = initialize(value, rsc);
     entries[key] = initialized;
   }
 
@@ -88,11 +97,10 @@ function initializeObj(
 
 function initializeMarkedValue(
   obj: Simplified["val"],
-  index: SerializationIndex,
-  refpkg: RefPackage
+  rsc: Resources
 ): MarkedValue<any> {
   const value = isSimplified(obj.value)
-    ? initialize(obj.value, index, refpkg)
+    ? initialize(obj.value, rsc)
     : obj.value;
 
   const result = MarkedValue.create(value);
@@ -101,27 +109,19 @@ function initializeMarkedValue(
 
 function initializeMarkedArray(
   arr: Simplified["arr"],
-  index: SerializationIndex,
-  refpkg: RefPackage
+  rsc: Resources
 ): MarkedArray<any> {
-  const result = MarkedArray.create(
-    arr.entries.map((x) => initialize(x, index, refpkg))
-  );
+  const result = MarkedArray.create(arr.entries.map((x) => initialize(x, rsc)));
   return result;
 }
 
 function initializeMarkedMap(
   map: Simplified["map"],
-  index: SerializationIndex,
-  refpkg: RefPackage
+  rsc: Resources
 ): MarkedMap<any, any> {
   const result = MarkedMap.create(
     map.entries.map(
-      (key, value) =>
-        [
-          initialize(key, index, refpkg),
-          initialize(value, index, refpkg),
-        ] as const
+      (key, value) => [initialize(key, rsc), initialize(value, rsc)] as const
     )
   );
   return result;
@@ -129,11 +129,8 @@ function initializeMarkedMap(
 
 function initializeMarkedSet(
   set: Simplified["set"],
-  index: SerializationIndex,
-  refpkg: RefPackage
+  rsc: Resources
 ): MarkedSet<any> {
-  const result = MarkedSet.create(
-    set.entries.map((x) => initialize(x, index, refpkg))
-  );
+  const result = MarkedSet.create(set.entries.map((x) => initialize(x, rsc)));
   return result;
 }

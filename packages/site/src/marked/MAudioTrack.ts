@@ -24,6 +24,7 @@ export class MAudioTrack
     public readonly name: MarkedValue<string>,
     public readonly clips: MarkedArray<MAudioClip>
   ) {
+    console.log("INIT AUDIO TRACK");
     this.$$mark.register(this, [name]);
   }
 
