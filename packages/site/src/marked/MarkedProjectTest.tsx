@@ -57,8 +57,9 @@ export function MarkedProjectTest() {
 
   return (
     <>
-      <div>
+      <div className="flex flex-row gap-2 justify-center">
         <button
+          className="px-1"
           onClick={() => {
             const serialized = serialize(project);
             console.log("serialized", JSON.parse(JSON.stringify(serialized)));
@@ -72,19 +73,26 @@ export function MarkedProjectTest() {
         >
           construct test
         </button>
+        <button
+          className="px-1"
+          onClick={() => {
+            const serialized = serialize(project);
+          }}
+        >
+          save
+        </button>
       </div>
       <div className="flex flex-row gap-2 grow font-mono">
         <MProjectDebug project={project} />
 
         <fieldset
+          className="border-none"
           style={{
-            border: "none",
             background: "#181818",
             alignSelf: "flex-start",
           }}
         >
           <legend>Project</legend>
-
           <UProject project={project} />
         </fieldset>
       </div>
