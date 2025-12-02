@@ -6,7 +6,7 @@ import {
   constructSimplifiedPackage,
   simplifyAndPackage,
 } from "@mrkev/marked-serializable";
-import { useLink } from "@mrkev/subbable-state";
+import { subbable, useLink } from "@mrkev/subbable-state";
 import { useState } from "react";
 import { nullthrows, setWindow } from "../../../linked-state/src/nullthrows";
 import { UtilityToggle } from "../UtilityToggle";
@@ -31,6 +31,10 @@ const project = MProject.of(
     [1, "bar"],
   ]
 );
+
+// subbable.subscribe(project, (target) => {
+//   console.log("here", target);
+// });
 
 setWindow("project", project);
 
@@ -96,8 +100,17 @@ export function MarkedProjectTest() {
           <UProject project={project} />
         </fieldset>
       </div>
+
+      <Changelog mproject={project} />
     </>
   );
+}
+
+function Changelog({ mproject }: { mproject: MProject }) {
+  "use no memo";
+  const project = useLink(mproject, true);
+  // console.log("changed", project());
+  return null;
 }
 
 function UProject({ project }: { project: MProject }) {

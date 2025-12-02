@@ -58,23 +58,3 @@ export class SubbableMark implements Subbable, SubbableContainer, Contained {
 export interface MarkedSubbable {
   readonly $$mark: SubbableMark;
 }
-
-// type Constructor<T = any> = new (...args: any[]) => T;
-
-// // Identity function for any class
-// function marked<C extends Constructor>(Cls: C): C {
-//   const klass = class extends Cls {
-//     public readonly $$token: SubbableMark;
-
-//     private constructor(_set: Set<S>, _id: string) {
-//       super(_set);
-//       this.$$token = new SubbableMark(_id, this);
-//       subbableContainer._containAll(this.$$token, this);
-//     }
-//   };
-
-//   Object.defineProperty(klass, "name", { value: `Marked${Cls.name}` });
-//   return klass;
-// }
-
-// class Foo<T> extends marked(Set)<T> {}

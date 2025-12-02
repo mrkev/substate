@@ -1,3 +1,4 @@
+import { printId } from "../src/printId";
 import { isContainable } from "./Contained";
 import { subbable, SubbableCallback } from "./Subbable";
 import { MarkedSubbable } from "./SubbableMark";
@@ -73,6 +74,13 @@ export const subbableContainer = {
     const token = new UpdateToken(target);
     struct.$$mark._propagatedTokens.add(token);
 
+    // console.log(
+    //   "[_notifyChange]: ",
+    //   printId(struct),
+    //   "changed:",
+    //   printId(target)
+    // );
+
     subbable.mutated(struct, target);
     for (const container of struct.$$mark._container) {
       subbableContainer._childChanged(container, token);
@@ -83,7 +91,16 @@ export const subbableContainer = {
   },
 
   _childChanged(struct: MarkedSubbable, token: UpdateToken) {
+    // console.log(
+    //   "[_childChanged]: ",
+    //   printId(struct),
+    //   struct.$$mark._container,
+    //   "token:",
+    //   token
+    // );
+
     if (struct.$$mark._propagatedTokens.has(token)) {
+      console.log("token seen");
       // we already processed this event. stop here to prevent loops
       return;
     }

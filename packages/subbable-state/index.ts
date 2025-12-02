@@ -16,9 +16,11 @@ export { DebugTree } from "./debug/DebugTree";
 export {
   //
   useLink,
-} from "./src/hooks";
+} from "./src/useLink";
 
 export const mSet = MarkedSet.create.bind(MarkedSet);
 export const mArray = MarkedArray.create.bind(MarkedArray);
 export const mMap = MarkedMap.create.bind(MarkedMap);
 export const mValue = MarkedValue.create.bind(MarkedValue);
+
+export { subbable } from "./lib/Subbable";

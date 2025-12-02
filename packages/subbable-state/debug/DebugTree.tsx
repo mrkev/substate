@@ -3,7 +3,7 @@ import { ReactNode, useState } from "react";
 import { isContainable } from "../lib/Contained";
 import { MarkedSubbable, SubbableMark } from "../lib/SubbableMark";
 import { exhaustive } from "../src/exhaustive";
-import { useLink } from "../src/hooks";
+import { useLink } from "../src/useLink";
 import { MarkedArray } from "../src/MarkedArray";
 import { MarkedMap } from "../src/MarkedMap";
 import { MarkedSet } from "../src/MarkedSet";
@@ -382,6 +382,8 @@ function Header({
   path?: string;
   showContainerId?: boolean;
 }) {
+  const sub = useLink(obj, true);
+
   const container = showContainerId
     ? ` -^ ${[...obj.$$mark._container.values()]
         .map((v) => v.$$mark._id)
@@ -408,7 +410,7 @@ function Header({
     <span className={classOfKind("kind")} title={path}>
       (
       {/*<span className={classOfKind("kind")}>{obj.constructor.name}</span>:{" "} */}
-      {kindStr}.{obj.$$mark._id}.{obj.$$mark._hash}
+      {kindStr}.{sub().$$mark._id}.{sub().$$mark._hash}
       {container})
     </span>
   );

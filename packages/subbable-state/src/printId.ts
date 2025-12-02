@@ -4,8 +4,9 @@
 // import { LinkableSet } from "./LinkableSet";
 
 import { Subbable } from "../lib/Subbable";
+import { MarkedSubbable } from "../lib/SubbableMark";
 
-export function printId(obj: Subbable) {
+export function printId(obj: MarkedSubbable) {
   const kindStr = (() => {
     // if (obj instanceof LinkableMap) {
     //   return "lmap";
@@ -23,8 +24,8 @@ export function printId(obj: Subbable) {
     // return "unknown";
   })();
 
-  const hashStr = `.${obj._hash}`;
+  const hashStr = `.${obj.$$mark._hash}`;
 
-  return `${obj.constructor.name}: ${obj._id}${hashStr}`;
+  return `${obj.constructor.name}:${obj.$$mark._id}${hashStr}`;
   // return `${kindStr}: ${obj._id}${hashStr}`;
 }
