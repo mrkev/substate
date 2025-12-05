@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { MarkedArray, useLink } from "../../../subbable-state/index";
+import { MarkedArray, useLink } from "@mrkev/marked-subbable";
 import { MarkedCollection } from "./MarkedCollection";
 
 const array = MarkedArray.create<number>();

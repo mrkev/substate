@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DebugTree } from "@mrkev/subbable-state";
+import { DebugTree } from "@mrkev/marked-subbable";
 import { UtilityToggle } from "../UtilityToggle";
 import { MProject } from "./MProject";
 import { JSONView } from "../JSONView";

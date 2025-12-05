@@ -1,5 +1,5 @@
 {
-  "name": "@mrkev/subbable-state",
+  "name": "@mrkev/marked-subbable",
   "private": true,
   "version": "0.0.2",
   "type": "module",
@@ -31,7 +31,7 @@
     "react-dom": ">=18.0.0 || >=19.0.0"
   },
   "devDependencies": {
-    "@mrkev/subbable-state": "workspace:*",
+    "@mrkev/marked-subbable": "workspace:*",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "vite": "^7.2.2",
@@ -42,7 +42,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/mrkev/substate.git",
-    "directory": "packages/subbable-state"
+    "directory": "packages/marked-subbable"
   },
   "keywords": [
     "state",

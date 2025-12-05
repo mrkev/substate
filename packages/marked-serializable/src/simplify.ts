@@ -3,7 +3,7 @@ import {
   MarkedMap,
   MarkedSet,
   MarkedValue,
-} from "@mrkev/subbable-state";
+} from "@mrkev/marked-subbable";
 import { exhaustive } from "./exhaustive";
 import { isSerializable, MarkedSerializable } from "./MarkedSerializable";
 import { RefPackage } from "./RefPackage";

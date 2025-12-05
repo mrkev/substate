@@ -1,4 +1,4 @@
-import { MarkedSubbable, SubbableMark } from "@mrkev/subbable-state";
+import { MarkedSubbable, SubbableMark } from "@mrkev/marked-subbable";
 import {
   MarkedSerializable,
   SerializationMark,

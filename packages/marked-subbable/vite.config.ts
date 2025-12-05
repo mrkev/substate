@@ -10,7 +10,7 @@ export default defineConfig({
     lib: {
       // Could also be a dictionary or array of multiple entry points
       entry: resolve(__dirname, "index.ts"),
-      name: "subbable-state",
+      name: "marked-subbable",
       formats: ["es"],
       // the proper extensions will be added
       fileName: "index",

@@ -24,7 +24,7 @@
   },
   "dependencies": {},
   "peerDependencies": {
-    "@mrkev/subbable-state": "workspace:*"
+    "@mrkev/marked-subbable": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^19.2.5",

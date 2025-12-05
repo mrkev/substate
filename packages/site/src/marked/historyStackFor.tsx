@@ -11,7 +11,7 @@ import {
   MarkedMap,
   MarkedSet,
   MarkedValue,
-} from "@mrkev/subbable-state";
+} from "@mrkev/marked-subbable";
 
 type StackEntry = {
   name: string;

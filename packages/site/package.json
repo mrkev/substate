@@ -24,7 +24,7 @@
     "@tailwindcss/vite": "^4.1.17",
     "json-stringify-deterministic": "^1.0.12",
     "@mrkev/linked-state": "workspace:*",
-    "@mrkev/subbable-state": "workspace:*",
+    "@mrkev/marked-subbable": "workspace:*",
     "@mrkev/marked-serializable": "workspace:*",
     "react-json-pretty": "^2.2.0",
     "react-json-tree": "^0.20.0",

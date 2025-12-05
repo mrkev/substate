@@ -9,7 +9,7 @@ import {
   mArray,
   mValue,
   SubbableMark,
-} from "@mrkev/subbable-state";
+} from "@mrkev/marked-subbable";
 import { MAudioClip } from "./MAudioClip";
 
 export class MAudioTrack

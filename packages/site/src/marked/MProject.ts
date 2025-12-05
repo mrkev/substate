@@ -13,7 +13,7 @@ import {
   mSet,
   mValue,
   SubbableMark,
-} from "@mrkev/subbable-state";
+} from "@mrkev/marked-subbable";
 import { MAudioTrack } from "./MAudioTrack";
 
 type Marker = readonly [number, string];

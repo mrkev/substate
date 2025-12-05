@@ -1,9 +1,5 @@
 import stringify from "json-stringify-deterministic";
-import {
-  MarkedSet,
-  MarkedSubbable,
-  useLink,
-} from "../../../subbable-state/index";
+import { MarkedSet, MarkedSubbable, useLink } from "@mrkev/marked-subbable";
 import { classOfKind, DebugOutSimplePrm } from "../ls/LinkedStateDebug";
 import { TxtButton } from "../ls/TxtButton";
 

@@ -1,4 +1,4 @@
-import { SubbableMark } from "@mrkev/subbable-state";
+import { SubbableMark } from "@mrkev/marked-subbable";
 import { Simplifiable } from "./simplify";
 
 type Descriptor = Record<string, Simplifiable>;

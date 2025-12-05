@@ -6,7 +6,7 @@ import {
   constructSimplifiedPackage,
   simplifyAndPackage,
 } from "@mrkev/marked-serializable";
-import { useLink } from "@mrkev/subbable-state";
+import { useLink } from "@mrkev/marked-subbable";
 import { useState } from "react";
 import { nullthrows, setWindow } from "../../../linked-state/src/nullthrows";
 import { UtilityToggle } from "../UtilityToggle";

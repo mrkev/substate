@@ -2,7 +2,7 @@ import {
   MarkedSerializable,
   SerializationMark,
 } from "@mrkev/marked-serializable";
-import { MarkedSubbable, SubbableMark } from "@mrkev/subbable-state";
+import { MarkedSubbable, SubbableMark } from "@mrkev/marked-subbable";
 import { MTime } from "./MTime";
 
 export class MAudioClip

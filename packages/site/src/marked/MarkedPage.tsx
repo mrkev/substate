@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { MarkedSet, useLink } from "../../../subbable-state/index";
+import { MarkedSet, useLink } from "@mrkev/marked-subbable";
 import { MarkedArrayTest } from "./MarkedArrayTest";
 import { DebugOutMarkedSet, DynamicTest } from "./MarkedSetTest";
 
