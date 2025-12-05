@@ -15891,7 +15891,7 @@ function forwardHistory() {
     replacePackage(json, object);
   }
 }
-const history = {
+const history$1 = {
   push: pushHistory,
   record: recordHistory$1,
   //
@@ -16697,11 +16697,11 @@ function _temp$f() {
   return SSet._create();
 }
 function useNewLinkedMap() {
-  const [map2] = reactExports.useState(_temp2$a);
+  const [map2] = reactExports.useState(_temp2$b);
   useSubscribeToSubbableMutationHashable(map2);
   return map2;
 }
-function _temp2$a() {
+function _temp2$b() {
   return LinkedMap.create();
 }
 var defaults$1;
@@ -17524,7 +17524,7 @@ function Header$3(t0) {
   const hashStr = t3;
   let t4;
   if ($[2] !== obj._container || $[3] !== showContainerId) {
-    t4 = showContainerId ? ` -^ ${[...obj._container.values()].map(_temp2$9).join(",")}` : "";
+    t4 = showContainerId ? ` -^ ${[...obj._container.values()].map(_temp2$a).join(",")}` : "";
     $[2] = obj._container;
     $[3] = showContainerId;
     $[4] = t4;
@@ -17577,7 +17577,7 @@ function Header$3(t0) {
   }
   return t8;
 }
-function _temp2$9(v) {
+function _temp2$a(v) {
   return v._id;
 }
 function DebugOutSPrimitive(t0) {
@@ -17919,7 +17919,7 @@ const s = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   debugOutHtml,
   debugOutText: debugOut,
   getGlobalState,
-  history,
+  history: history$1,
   map: map$2,
   nil,
   number,
@@ -18254,7 +18254,7 @@ function JSONArray(t0) {
         }
         let t52;
         if ($[9] !== arr) {
-          t52 = arr.map(_temp2$8).join(", ");
+          t52 = arr.map(_temp2$9).join(", ");
           $[9] = arr;
           $[10] = t52;
         } else {
@@ -18334,7 +18334,7 @@ function JSONArray(t0) {
   }
   return t5;
 }
-function _temp2$8(x) {
+function _temp2$9(x) {
   return string(x);
 }
 function JSONPrimitive({
@@ -19070,14 +19070,14 @@ function SchedulerTest() {
   const $ = compilerRuntimeExports.c(1);
   let t0;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
-    t0 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp2$7, children: "test" });
+    t0 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp2$8, children: "test" });
     $[0] = t0;
   } else {
     t0 = $[0];
   }
   return t0;
 }
-async function _temp2$7() {
+async function _temp2$8() {
   const one = schedulerExports.unstable_scheduleCallback(schedulerExports.unstable_NormalPriority, function callbackFoo() {
     console.log("one");
   });
@@ -19150,9 +19150,9 @@ function App() {
   let t9;
   if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
     t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp$a, children: "undo" });
-    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp2$6, children: "redo" });
+    t4 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp2$7, children: "redo" });
     t5 = /* @__PURE__ */ jsxRuntimeExports.jsx("br", {});
-    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp4$1, children: "Add Track" });
+    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp4$2, children: "Add Track" });
     t7 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp6, children: "Add 100" });
     t8 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp8, children: "remove all" });
     t9 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp9, children: "construct test" });
@@ -19246,27 +19246,27 @@ function _temp7() {
 }
 function _temp6() {
   performance.mark("1");
-  recordHistory$1("add 1000 tracks", _temp5);
+  recordHistory$1("add 1000 tracks", _temp5$1);
   performance.mark("2");
   performance.measure("Add 1000 items", "1", "2");
   console.log("Added 1000");
 }
-function _temp5() {
+function _temp5$1() {
   for (let i = 0; i < 1e3; i++) {
     project$1.addTrack("hello world");
   }
 }
-function _temp4$1() {
+function _temp4$2() {
   return recordHistory$1("add track", _temp3$4);
 }
 function _temp3$4() {
   project$1.addTrack("hello world");
 }
-function _temp2$6() {
-  return history.redo();
+function _temp2$7() {
+  return history$1.redo();
 }
 function _temp$a() {
-  return history.undo();
+  return history$1.undo();
 }
 function UProject$1(t0) {
   const $ = compilerRuntimeExports.c(37);
@@ -19323,7 +19323,7 @@ function UProject$1(t0) {
   let t5;
   if ($[8] !== markers) {
     t5 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => {
-      history.record("add marker", () => {
+      history$1.record("add marker", () => {
         markers.push([0, "foo"]);
         console.log("pushed");
       });
@@ -19349,7 +19349,7 @@ function UProject$1(t0) {
   let t7;
   if ($[13] !== project2.tracks) {
     t7 = /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "button", value: "move clip and change time", onClick: () => {
-      history.record("move clip", () => {
+      history$1.record("move clip", () => {
         const track0 = nullthrows$3(project2.tracks.at(0));
         const track1 = nullthrows$3(project2.tracks.at(1));
         const clip = nullthrows$3(track0.clips.at(0));
@@ -24601,7 +24601,7 @@ function DebugOutNumber(t0) {
   const increment = t2;
   let t3;
   if ($[2] !== setValue) {
-    t3 = () => setValue(_temp2$5);
+    t3 = () => setValue(_temp2$6);
     $[2] = setValue;
     $[3] = t3;
   } else {
@@ -24731,7 +24731,7 @@ function DebugOutNumber(t0) {
     return t9;
   }
 }
-function _temp2$5(v_0) {
+function _temp2$6(v_0) {
   return v_0 - 1;
 }
 function _temp$6(v) {
@@ -24894,7 +24894,7 @@ function ListExample() {
   }
   let t1;
   if ($[1] !== list) {
-    t1 = list().entries().map(_temp2$4).toArray();
+    t1 = list().entries().map(_temp2$5).toArray();
     $[1] = list;
     $[2] = t1;
   } else {
@@ -24913,7 +24913,7 @@ function ListExample() {
   }
   return t2;
 }
-function _temp2$4(t0, i) {
+function _temp2$5(t0, i) {
   const [name, doneState] = t0;
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ListItem, { name, doneState }, i);
 }
@@ -25305,6 +25305,7 @@ const subbableContainer$1 = {
   },
   _childChanged(struct, token) {
     if (struct.$$mark._propagatedTokens.has(token)) {
+      console.log("token seen");
       return;
     }
     struct.$$mark._propagatedTokens.add(token);
@@ -25741,7 +25742,7 @@ function DynamicTest(t0) {
       if (val instanceof MarkedSet$1) {
         let t3;
         if ($[2] !== pad || $[3] !== path || $[4] !== showUnknowns || $[5] !== val) {
-          t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutMarkedSet, { set: val, pad, path, showUnknowns, renderValue: _temp2$3 });
+          t3 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutMarkedSet, { set: val, pad, path, showUnknowns, renderValue: _temp2$4 });
           $[2] = pad;
           $[3] = path;
           $[4] = showUnknowns;
@@ -25781,7 +25782,7 @@ function DynamicTest(t0) {
     }
   }
 }
-function _temp2$3(value, key, pad_0, path_0, showUnknowns_0) {
+function _temp2$4(value, key, pad_0, path_0, showUnknowns_0) {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest, { val: value, pad: pad_0, path: path_0, showUnknowns: showUnknowns_0 }, key);
 }
 function stringifyUnknown$1(val) {
@@ -25987,7 +25988,7 @@ function MarkedArrayTest(t0) {
   }
   let t6;
   if ($[10] !== add || $[11] !== del || $[12] !== t5) {
-    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(MarkedCollection, { delimiters: t4, set: t5, pad: 0, showUnknowns: false, handleAdd: add, handleDelete: del, renderValue: _temp2$2 }) });
+    t6 = /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "text-start text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(MarkedCollection, { delimiters: t4, set: t5, pad: 0, showUnknowns: false, handleAdd: add, handleDelete: del, renderValue: _temp2$3 }) });
     $[10] = add;
     $[11] = del;
     $[12] = t5;
@@ -26006,7 +26007,7 @@ function MarkedArrayTest(t0) {
   }
   return t7;
 }
-function _temp2$2(v_0, pad, showUnknowns) {
+function _temp2$3(v_0, pad, showUnknowns) {
   return `${v_0}`;
 }
 function _temp$3(prev) {
@@ -26040,7 +26041,7 @@ function MarkedSetTest(t0) {
   if ($[0] !== set2) {
     t1 = function add2() {
       set2().add(MarkedSet$1.create([0]));
-      setNext(_temp2$1);
+      setNext(_temp2$2);
     };
     $[0] = set2;
     $[1] = t1;
@@ -26104,7 +26105,7 @@ function MarkedSetTest(t0) {
   }
   let t9;
   if ($[14] !== add || $[15] !== t7 || $[16] !== t8) {
-    t9 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutMarkedSet, { set: t7, pad: 0, showUnknowns: false, handleAdd: add, handleDelete: t8, renderValue: _temp4 });
+    t9 = /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutMarkedSet, { set: t7, pad: 0, showUnknowns: false, handleAdd: add, handleDelete: t8, renderValue: _temp4$1 });
     $[14] = add;
     $[15] = t7;
     $[16] = t8;
@@ -26143,13 +26144,13 @@ function MarkedSetTest(t0) {
   }
   return t11;
 }
-function _temp4(value, key, pad, path, showUnknowns) {
+function _temp4$1(value, key, pad, path, showUnknowns) {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(DynamicTest, { val: value, pad, path, showUnknowns }, key);
 }
 function _temp3$1(x, i) {
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: JSON.stringify([...x]) }, i);
 }
-function _temp2$1(prev) {
+function _temp2$2(prev) {
   return prev + 1;
 }
 const urlAlphabet = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
@@ -26254,6 +26255,7 @@ const subbableContainer = {
   },
   _childChanged(struct, token) {
     if (struct.$$mark._propagatedTokens.has(token)) {
+      console.log("token seen");
       return;
     }
     struct.$$mark._propagatedTokens.add(token);
@@ -26992,30 +26994,63 @@ function TreeMarkedValue(t0) {
     return t3;
   }
 }
-function Header({
-  obj,
-  path,
-  showContainerId = false
-}) {
-  const container = showContainerId ? ` -^ ${[...obj.$$mark._container.values()].map((v) => v.$$mark._id).join(",")}` : "";
-  const kindStr = (() => {
-    if (obj instanceof MarkedArray2) {
-      return "arr";
-    } else if (obj instanceof MarkedMap) {
-      return "map";
-    } else if (obj instanceof MarkedSet2) {
-      return "set";
-    } else if (obj instanceof MarkedValue) {
-      return "val";
+function Header(t0) {
+  const $ = compilerRuntimeExports.c(8);
+  const {
+    obj,
+    path,
+    showContainerId: t1
+  } = t0;
+  const showContainerId = t1 === void 0 ? false : t1;
+  const sub = useLink(obj, true);
+  let t2;
+  if ($[0] !== obj || $[1] !== showContainerId) {
+    t2 = showContainerId ? ` -^ ${[...obj.$$mark._container.values()].map(_temp2$1).join(",")}` : "";
+    $[0] = obj;
+    $[1] = showContainerId;
+    $[2] = t2;
+  } else {
+    t2 = $[2];
+  }
+  const container = t2;
+  let t3;
+  if (obj instanceof MarkedArray2) {
+    t3 = "arr";
+  } else {
+    if (obj instanceof MarkedMap) {
+      t3 = "map";
     } else {
-      return "obj";
+      if (obj instanceof MarkedSet2) {
+        t3 = "set";
+      } else {
+        if (obj instanceof MarkedValue) {
+          t3 = "val";
+        } else {
+          t3 = "obj";
+        }
+      }
     }
-  })();
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("span", {
-    className: classOfKind("kind"),
-    title: path,
-    children: ["(", kindStr, ".", obj.$$mark._id, ".", obj.$$mark._hash, container, ")"]
-  });
+  }
+  const kindStr = t3;
+  let t4;
+  if ($[3] !== container || $[4] !== kindStr || $[5] !== path || $[6] !== sub) {
+    t4 = jsxRuntimeExports.jsxs("span", {
+      className: classOfKind("kind"),
+      title: path,
+      children: ["(", kindStr, ".", sub().$$mark._id, ".", sub().$$mark._hash, container, ")"]
+    });
+    $[3] = container;
+    $[4] = kindStr;
+    $[5] = path;
+    $[6] = sub;
+    $[7] = t4;
+  } else {
+    t4 = $[7];
+  }
+  return t4;
+}
+function _temp2$1(v) {
+  return v.$$mark._id;
 }
 function DebugOutSimplePrm({
   val
@@ -27356,8 +27391,7 @@ class MAudioTrack {
   constructor(name, clips) {
     this.name = name;
     this.clips = clips;
-    console.log("INIT AUDIO TRACK");
-    this.$$mark.register(this, [name]);
+    this.$$mark.register(this, [name, clips]);
   }
   $$mark = SubbableMark2.create();
   $$serialization = serialization_maudiotrack;
@@ -27386,8 +27420,8 @@ class MProject {
     this.tracks = tracks;
     this.markers = markers;
     this.solodTracks = solodTracks;
-    this.$$mark.register(this, [name, tracks, markers, solodTracks]);
     this.randomNumbers = mSet();
+    this.$$mark.register(this, [name, tracks, markers, solodTracks, this.randomNumbers]);
   }
   $$mark = SubbableMark2.create();
   $$serialization = serialization_mproject;
@@ -27509,8 +27543,51 @@ function MProjectDebug(t0) {
   }
   return t10;
 }
+class HistoryStack {
+  unsubscribe;
+  stack = [];
+  // current changes
+  changeset = [];
+  constructor(observed) {
+    const start = simplifyAndPackage(observed);
+    this.changeset.push(start);
+    this.unsubscribe = subbable.subscribe(observed, (target) => {
+      if (isSerializable(target) || target instanceof MarkedArray2 || target instanceof MarkedMap || target instanceof MarkedSet2 || target instanceof MarkedValue) {
+        this.changeset.push(simplifyAndPackage(observed));
+      } else {
+        console.warn("can't record history of non-serializable target!", target);
+      }
+    });
+  }
+  checkpoint(name) {
+    this.stack.push({
+      name,
+      changeset: this.changeset
+    });
+    this.changeset = [];
+  }
+  pop() {
+    const revert = this.stack.pop();
+    if (revert == null) {
+      return;
+    }
+    let change;
+    while (change = revert.changeset.pop()) {
+      console.log("would revert", change);
+    }
+  }
+  destroy() {
+    this.unsubscribe();
+  }
+}
+function historyStackFor(m) {
+  const history2 = new HistoryStack(m);
+  return history2;
+}
 const project = MProject.of("untitled project", [MAudioTrack.of("track 1", [MAudioClip.of(0, 4)]), MAudioTrack.of("track 2", [])], [[0, "foo"], [1, "bar"]]);
+const history = historyStackFor(project);
 setWindow("project", project);
+setWindow("mhistory", history);
 function recordHistory(name, cb) {
   return cb();
 }
@@ -27522,41 +27599,66 @@ function construct(x, index) {
 }
 const serializationIndex = consolidateMarks([serialization_mtime, serialization_maudioclip, serialization_maudiotrack, serialization_mproject]);
 function MarkedProjectTest() {
-  const $ = compilerRuntimeExports.c(2);
+  const $ = compilerRuntimeExports.c(3);
   let t0;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
-    t0 = /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: _temp, children: "construct test" }) });
+    t0 = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-row gap-2 justify-center", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "px-1", onClick: _temp, children: "construct test" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "px-1", onClick: _temp2, children: "save" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "px-1", onClick: _temp3, children: "undo" })
+    ] });
     $[0] = t0;
   } else {
     t0 = $[0];
   }
   let t1;
   if ($[1] === Symbol.for("react.memo_cache_sentinel")) {
-    t1 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    t1 = /* @__PURE__ */ jsxRuntimeExports.jsx(MProjectDebug, { project });
+    $[1] = t1;
+  } else {
+    t1 = $[1];
+  }
+  let t2;
+  if ($[2] === Symbol.for("react.memo_cache_sentinel")) {
+    t2 = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
       t0,
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-row gap-2 grow font-mono", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(MProjectDebug, { project }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("fieldset", { style: {
-          border: "none",
+        t1,
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("fieldset", { className: "border-none", style: {
           background: "#181818",
           alignSelf: "flex-start"
         }, children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("legend", { children: "Project" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(UProject, { project })
         ] })
-      ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Changelog, { mproject: project })
     ] });
-    $[1] = t1;
+    $[2] = t2;
   } else {
-    t1 = $[1];
+    t2 = $[2];
   }
-  return t1;
+  return t2;
+}
+function _temp3() {
+  history.pop();
+}
+function _temp2() {
+  const serialized_0 = serialize(project);
+  console.log("should save", serialized_0);
 }
 function _temp() {
   const serialized = serialize(project);
   console.log("serialized", JSON.parse(JSON.stringify(serialized)));
   const constructed = construct(serialized);
   console.log("og vs constructed", project, constructed);
+}
+function Changelog({
+  mproject
+}) {
+  "use no memo";
+  useLink(mproject, true);
+  return null;
 }
 function UProject(t0) {
   const $ = compilerRuntimeExports.c(44);
@@ -27586,9 +27688,8 @@ function UProject(t0) {
   let t3;
   if ($[3] !== project2.randomNumbers) {
     t3 = /* @__PURE__ */ jsxRuntimeExports.jsx("button", { title: "add random num", onClick: () => {
-      recordHistory("add random num", () => {
-        project2.randomNumbers.add(Math.random());
-      });
+      project2.randomNumbers.add(Math.random());
+      history.checkpoint("add random num");
     }, children: "+" });
     $[3] = project2.randomNumbers;
     $[4] = t3;
@@ -27630,7 +27731,7 @@ function UProject(t0) {
   }
   let t7;
   if ($[11] !== markers) {
-    t7 = markers().map(_temp2);
+    t7 = markers().map(_temp4);
     $[11] = markers;
     $[12] = t7;
   } else {
@@ -27790,7 +27891,7 @@ function UProject(t0) {
   }
   return t18;
 }
-function _temp2(val, key) {
+function _temp4(val, key) {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
     key,
     ": ",
@@ -27948,7 +28049,7 @@ function TrackA(t0) {
   }
   let t16;
   if ($[32] !== clips) {
-    t16 = clips().map(_temp3);
+    t16 = clips().map(_temp5);
     $[32] = clips;
     $[33] = t16;
   } else {
@@ -27989,7 +28090,7 @@ function TrackA(t0) {
   }
   return t19;
 }
-function _temp3(clip, i) {
+function _temp5(clip, i) {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ClipA, { clip }, i);
 }
 function ClipA(t0) {

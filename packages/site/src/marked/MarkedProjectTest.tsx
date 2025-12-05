@@ -6,7 +6,7 @@ import {
   constructSimplifiedPackage,
   simplifyAndPackage,
 } from "@mrkev/marked-serializable";
-import { subbable, useLink } from "@mrkev/subbable-state";
+import { useLink } from "@mrkev/subbable-state";
 import { useState } from "react";
 import { nullthrows, setWindow } from "../../../linked-state/src/nullthrows";
 import { UtilityToggle } from "../UtilityToggle";
@@ -19,6 +19,7 @@ import { MAudioTrack, serialization_maudiotrack } from "./MAudioTrack";
 import { MProject, serialization_mproject } from "./MProject";
 import { MProjectDebug } from "./MProjectDebug";
 import { serialization_mtime } from "./MTime";
+import { historyStackFor } from "./historyStackFor";
 
 const project = MProject.of(
   "untitled project",
@@ -32,11 +33,10 @@ const project = MProject.of(
   ]
 );
 
-// subbable.subscribe(project, (target) => {
-//   console.log("here", target);
-// });
+const history = historyStackFor(project);
 
 setWindow("project", project);
+setWindow("mhistory", history);
 
 function recordHistory(name: string, cb: () => void) {
   return cb();
@@ -72,7 +72,6 @@ export function MarkedProjectTest() {
               MAudioClip_serializationMark
             );
             console.log("og vs constructed", project, constructed);
-            // setProject(constructed as any);
           }}
         >
           construct test
@@ -81,9 +80,19 @@ export function MarkedProjectTest() {
           className="px-1"
           onClick={() => {
             const serialized = serialize(project);
+            console.log("should save", serialized);
           }}
         >
           save
+        </button>
+
+        <button
+          className="px-1"
+          onClick={() => {
+            history.pop();
+          }}
+        >
+          undo
         </button>
       </div>
       <div className="flex flex-row gap-2 grow font-mono">
@@ -125,9 +134,12 @@ function UProject({ project }: { project: MProject }) {
           <button
             title="add random num"
             onClick={() => {
-              recordHistory("add random num", () => {
-                project.randomNumbers.add(Math.random());
-              });
+              project.randomNumbers.add(Math.random());
+              history.checkpoint("add random num");
+
+              // recordHistory("add random num", () => {
+              //   project.randomNumbers.add(Math.random());
+              // });
             }}
           >
             +

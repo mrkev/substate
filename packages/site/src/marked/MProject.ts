@@ -32,12 +32,18 @@ export class MProject
     readonly markers: MarkedMap<number, string>,
     readonly solodTracks: MarkedSet<MAudioTrack>
   ) {
-    this.$$mark.register(this, [name, tracks, markers, solodTracks]);
-
     // TODO: it's bc it's unintialized.
     // [["foo", 3]] // why does this print as unknown when empty?
     // NOTE: we don't initialize this, it's always a new set
     this.randomNumbers = mSet();
+
+    this.$$mark.register(this, [
+      name,
+      tracks,
+      markers,
+      solodTracks,
+      this.randomNumbers,
+    ]);
   }
 
   static of(name: string, tracks: MAudioTrack[], markers: Marker[]) {
