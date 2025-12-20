@@ -2,6 +2,7 @@ import { MarkedArray } from "./src/MarkedArray";
 import { MarkedMap } from "./src/MarkedMap";
 import { MarkedSet } from "./src/MarkedSet";
 import { MarkedValue } from "./src/MarkedValue";
+export { printId } from "./src/printId";
 
 export { MarkedArray } from "./src/MarkedArray";
 export { MarkedMap } from "./src/MarkedMap";

@@ -35,15 +35,19 @@ export const subbableContainer = {
   // abstract _replace(val: T): void;
 
   _containAll(container: MarkedSubbable, items: IterableCollection) {
+    const contained = [];
     for (const elem of items) {
       if (!isContainable(elem)) {
         continue;
       }
       elem.$$mark._container.add(container);
+      contained.push(elem);
     }
+    return contained;
   },
 
   _uncontainAll(container: MarkedSubbable, items: IterableCollection) {
+    const uncontained = [];
     for (const item of items) {
       if (!isContainable(item)) {
         continue;
@@ -63,7 +67,9 @@ export const subbableContainer = {
       if ("_destroy" in item) {
         (item as any)._destroy();
       }
+      uncontained.push(item);
     }
+    return uncontained;
   },
 
   /**

@@ -19,7 +19,7 @@ import { MAudioTrack, serialization_maudiotrack } from "./MAudioTrack";
 import { MProject, serialization_mproject } from "./MProject";
 import { MProjectDebug } from "./MProjectDebug";
 import { serialization_mtime } from "./MTime";
-import { historyStackFor } from "./historyStackFor";
+import { historyStackFor } from "./exp/historyStackFor";
 
 const project = MProject.of(
   "untitled project",
@@ -33,7 +33,14 @@ const project = MProject.of(
   ]
 );
 
-const history = historyStackFor(project);
+const serializationIndex = consolidateMarks([
+  serialization_mtime,
+  serialization_maudioclip,
+  serialization_maudiotrack,
+  serialization_mproject,
+]);
+
+const history = historyStackFor(project, serializationIndex);
 
 setWindow("project", project);
 setWindow("mhistory", history);
@@ -48,13 +55,6 @@ function serialize(x: MarkedSerializable<any>) {
 function construct(x: SimplifiedPackage, index: SerializationMark<any, any>) {
   return constructSimplifiedPackage(x, serializationIndex);
 }
-
-const serializationIndex = consolidateMarks([
-  serialization_mtime,
-  serialization_maudioclip,
-  serialization_maudiotrack,
-  serialization_mproject,
-]);
 
 export function MarkedProjectTest() {
   // const [projectDirtyState, markProjectClean] = useDirtyTracker(project);

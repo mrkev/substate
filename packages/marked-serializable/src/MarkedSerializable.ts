@@ -1,7 +1,7 @@
 import { SubbableMark } from "@mrkev/marked-subbable";
 import { Simplifiable } from "./simplify";
 
-type Descriptor = Record<string, Simplifiable>;
+export type Description = Record<string, Simplifiable>;
 export interface MarkedSerializable<M extends SerializationMark<any, any>> {
   // We want MarkedSerializables to also be MarkedSubbables to get the id for the object.
   // We use the id for packaging, where we serialize nodes as refs, to serialize non-tree graphs
@@ -10,7 +10,7 @@ export interface MarkedSerializable<M extends SerializationMark<any, any>> {
 }
 
 export class SerializationMark<
-  D extends Descriptor,
+  D extends Description,
   C extends MarkedSerializable<any>
 > {
   constructor(
@@ -18,7 +18,7 @@ export class SerializationMark<
     readonly construct: (description: D) => C,
     readonly describe: (constructed: C) => D
   ) {}
-  static create<D extends Descriptor, C extends MarkedSerializable<any>>({
+  static create<D extends Description, C extends MarkedSerializable<any>>({
     kind,
     construct,
     simplify,

@@ -25241,7 +25241,12 @@ class SubbableMark {
     subbableContainer._containAll(holder, new Set(contain));
   }
   mutate(struct, mutator) {
-    const result = mutator((items) => subbableContainer._containAll(struct, items), (items) => subbableContainer._uncontainAll(struct, items));
+    const changes = {
+      contained: [],
+      uncontained: []
+    };
+    const result = mutator((items) => changes.contained = subbableContainer._containAll(struct, items), (items) => changes.uncontained = subbableContainer._uncontainAll(struct, items));
+    console.log("changes", changes);
     subbableContainer._notifyChange(struct, struct);
     return result;
   }
@@ -25279,14 +25284,18 @@ class UpdateToken3 {
 const subbableContainer = {
   // abstract _replace(val: T): void;
   _containAll(container, items) {
+    const contained = [];
     for (const elem of items) {
       if (!isContainable(elem)) {
         continue;
       }
       elem.$$mark._container.add(container);
+      contained.push(elem);
     }
+    return contained;
   },
   _uncontainAll(container, items) {
+    const uncontained = [];
     for (const item of items) {
       if (!isContainable(item)) {
         continue;
@@ -25298,7 +25307,9 @@ const subbableContainer = {
       if ("_destroy" in item) {
         item._destroy();
       }
+      uncontained.push(item);
     }
+    return uncontained;
   },
   /**
    * Creates a change notification to be propagated, starting at this object,
@@ -25581,6 +25592,13 @@ class MarkedValue {
   replace(value) {
     this.set(value);
   }
+}
+function printId(obj) {
+  (() => {
+    return obj.constructor.name;
+  })();
+  const hashStr = `.${obj.$$mark._hash}`;
+  return `${obj.constructor.name}:${obj.$$mark._id}${hashStr}`;
 }
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
@@ -27052,6 +27070,9 @@ function initializeMarkedSet(set2, rsc) {
   const result = MarkedSet.create(set2.entries.map((x) => initialize(x, rsc)));
   return result;
 }
+function isSimplifiable(target) {
+  return isSerializable(target) || target instanceof MarkedArray || target instanceof MarkedMap || target instanceof MarkedSet || target instanceof MarkedValue;
+}
 class MTime {
   constructor(t, u) {
     this.t = t;
@@ -27271,21 +27292,34 @@ function MProjectDebug(t0) {
   return t10;
 }
 class HistoryStack {
-  unsubscribe;
-  stack = [];
-  // current changes
-  changeset = [];
-  constructor(observed) {
+  constructor(observed, serializationIndex2) {
+    this.serializationIndex = serializationIndex2;
+    this.knownObjects.set(observed.$$mark._id, observed);
     const start = simplifyAndPackage(observed);
     this.changeset.push(start);
     this.unsubscribe = subbable.subscribe(observed, (target) => {
-      if (isSerializable(target) || target instanceof MarkedArray || target instanceof MarkedMap || target instanceof MarkedSet || target instanceof MarkedValue) {
-        this.changeset.push(simplifyAndPackage(observed));
+      if (this.ignoreChanges) {
+        return;
+      }
+      if (isSimplifiable(target)) {
+        const existing = this.knownObjects.get(target.$$mark._id);
+        if (existing == null) {
+          this.knownObjects.set(target.$$mark._id, target);
+          console.log("recorded known object", printId(target));
+        }
+        const change = simplifyAndPackage(target);
+        this.changeset.push(change);
       } else {
-        console.warn("can't record history of non-serializable target!", target);
+        console.warn("can't record history of non-simplifiable target!", target);
       }
     });
   }
+  unsubscribe;
+  stack = [];
+  knownObjects = new WeakRefMap(1e4);
+  ignoreChanges = false;
+  // current changes
+  changeset = [];
   checkpoint(name) {
     this.stack.push({
       name,
@@ -27298,21 +27332,35 @@ class HistoryStack {
     if (revert == null) {
       return;
     }
-    let change;
-    while (change = revert.changeset.pop()) {
-      console.log("would revert", change);
+    try {
+      this.ignoreChanges = true;
+      let change;
+      while (change = revert.changeset.pop()) {
+        if (isPrimitive(change.root)) {
+          throw new Error("primitive serialized at root in history?");
+        }
+        console.log("would revert", change);
+        const obj = this.knownObjects.get(change.root._id);
+        const constructed = constructSimplifiedPackage(change, this.serializationIndex);
+        console.log("we want to alter", obj, "and make it", constructed);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.ignoreChanges = false;
     }
   }
   destroy() {
     this.unsubscribe();
   }
 }
-function historyStackFor(m) {
-  const history2 = new HistoryStack(m);
+function historyStackFor(m, serializationIndex2) {
+  const history2 = new HistoryStack(m, serializationIndex2);
   return history2;
 }
 const project = MProject.of("untitled project", [MAudioTrack.of("track 1", [MAudioClip.of(0, 4)]), MAudioTrack.of("track 2", [])], [[0, "foo"], [1, "bar"]]);
-const history = historyStackFor(project);
+const serializationIndex = consolidateMarks([serialization_mtime, serialization_maudioclip, serialization_maudiotrack, serialization_mproject]);
+const history = historyStackFor(project, serializationIndex);
 setWindow("project", project);
 setWindow("mhistory", history);
 function recordHistory(name, cb) {
@@ -27324,7 +27372,6 @@ function serialize(x) {
 function construct(x, index) {
   return constructSimplifiedPackage(x, serializationIndex);
 }
-const serializationIndex = consolidateMarks([serialization_mtime, serialization_maudioclip, serialization_maudiotrack, serialization_mproject]);
 function MarkedProjectTest() {
   const $ = compilerRuntimeExports.c(3);
   let t0;

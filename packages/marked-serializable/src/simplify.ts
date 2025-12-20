@@ -5,7 +5,12 @@ import {
   MarkedValue,
 } from "@mrkev/marked-subbable";
 import { exhaustive } from "./exhaustive";
-import { isSerializable, MarkedSerializable } from "./MarkedSerializable";
+import {
+  Description,
+  isSerializable,
+  MarkedSerializable,
+  SerializationMark,
+} from "./MarkedSerializable";
 import { RefPackage } from "./RefPackage";
 
 export type Primitive = number | string | boolean | null;
@@ -85,7 +90,7 @@ export function isPrimitive(val: unknown) {
 ////////////
 
 export type SimplifiedPackage = {
-  root: Simplified["any"] | Primitive;
+  root: Simplified["ref"] | Primitive;
   refs: Record<string, Exclude<Simplified["any"], Simplified["ref"]>>;
 };
 
@@ -98,7 +103,7 @@ export function simplifyAndPackage(value: Simplifiable): SimplifiedPackage {
 function simplify(
   value: Simplifiable,
   refpkg: RefPackage
-): Simplified["any"] | Primitive {
+): Simplified["ref"] | Primitive {
   if (
     typeof value === "string" ||
     typeof value === "number" ||
@@ -133,18 +138,17 @@ function simplify(
   }
 }
 
-function simplifyMarkedObject<C extends MarkedSerializable<any>>(
-  obj: C,
-  refpkg: RefPackage
-): Simplified["obj"] {
+function simplifyMarkedObject<
+  C extends MarkedSerializable<SerializationMark<Description, C>>
+>(obj: C, refpkg: RefPackage): Simplified["obj"] {
   const serializable: SimplifiedObj["entries"] = {};
 
   // serialization mark always applies to self
   const description = obj.$$serialization.describe(obj);
 
   for (const entry of Object.entries(description)) {
-    const key = entry[0] as string;
-    const value = entry[1] as Simplifiable;
+    const key = entry[0];
+    const value = entry[1];
     serializable[key] = simplify(value, refpkg);
   }
 

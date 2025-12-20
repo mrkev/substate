@@ -46,10 +46,18 @@ export class SubbableMark implements Subbable, SubbableContainer, Contained {
     ) => V
   ): V {
     // saveForHistory(this);
+    const changes = {
+      contained: [] as MarkedSubbable[],
+      uncontained: [] as MarkedSubbable[],
+    };
     const result = mutator(
-      (items) => subbableContainer._containAll(struct, items),
-      (items) => subbableContainer._uncontainAll(struct, items)
+      (items) =>
+        (changes.contained = subbableContainer._containAll(struct, items)),
+      (items) =>
+        (changes.uncontained = subbableContainer._uncontainAll(struct, items))
     );
+
+    console.log("changes", changes);
     subbableContainer._notifyChange(struct, struct);
     return result;
   }
