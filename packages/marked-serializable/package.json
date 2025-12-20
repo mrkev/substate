@@ -27,11 +27,11 @@
     "@mrkev/marked-subbable": "workspace:*"
   },
   "devDependencies": {
-    "@types/react": "^19.2.5",
+    "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "vite": "^7.2.2",
+    "vite": "^7.3.0",
     "vite-plugin-dts": "^4.5.4",
-    "vitest": "^4.0.9"
+    "vitest": "^4.0.16"
   },
   "homepage": "https://aykev.dev/substate/",
   "repository": {
