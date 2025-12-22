@@ -17,6 +17,7 @@ export { DebugTree } from "./debug/DebugTree";
 export {
   //
   useLink,
+  useLinkAsState,
 } from "./src/useLink";
 
 export const mSet = MarkedSet.create.bind(MarkedSet);
