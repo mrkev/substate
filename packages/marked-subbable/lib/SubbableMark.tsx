@@ -57,7 +57,7 @@ export class SubbableMark implements Subbable, SubbableContainer, Contained {
         (changes.uncontained = subbableContainer._uncontainAll(struct, items))
     );
 
-    console.log("changes", changes);
+    // console.log("changes", changes);
     subbableContainer._notifyChange(struct, struct);
     return result;
   }

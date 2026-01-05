@@ -18,3 +18,6 @@ export const lValue = LinkableValue.create.bind(LinkableValue);
 export const lArray = LinkableArray.create.bind(LinkableArray);
 export const lMap = LinkableMap.create.bind(LinkableMap);
 export const lSet = LinkableSet.create.bind(LinkableSet);
+
+import { subbable } from "./lib/Subbable";
+export const subscribe = subbable.subscribe;

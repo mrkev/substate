@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { SPrimitive } from "structured-state";
 import { LinkedState } from "./LinkedState";
-import { subscribe } from "./Subbable";
+import { subscribe } from "../state/Subbable";
 
 type StateChangeHandler<S> = (value: S) => void;
 
@@ -50,12 +50,17 @@ export class DerivedState<F extends Function> {
     };
   }
 
-  static from<F extends Function>(states: TupleOfLinkedStates<FnSrcTuple<F>>, callback: F): DerivedState<F> {
+  static from<F extends Function>(
+    states: TupleOfLinkedStates<FnSrcTuple<F>>,
+    callback: F
+  ): DerivedState<F> {
     return new DerivedState(states, callback);
   }
 }
 
-export function useDerivedState<F extends Function>(derivedState: DerivedState<F>): FnDst<F> {
+export function useDerivedState<F extends Function>(
+  derivedState: DerivedState<F>
+): FnDst<F> {
   const [state, setState] = useState<FnDst<F>>(() => derivedState.get());
 
   useEffect(() => {

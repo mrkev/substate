@@ -25885,12 +25885,7 @@ class SubbableMark {
     subbableContainer._containAll(holder, new Set(contain));
   }
   mutate(struct, mutator) {
-    const changes = {
-      contained: [],
-      uncontained: []
-    };
-    const result = mutator((items) => changes.contained = subbableContainer._containAll(struct, items), (items) => changes.uncontained = subbableContainer._uncontainAll(struct, items));
-    console.log("changes", changes);
+    const result = mutator((items) => subbableContainer._containAll(struct, items), (items) => subbableContainer._uncontainAll(struct, items));
     subbableContainer._notifyChange(struct, struct);
     return result;
   }
