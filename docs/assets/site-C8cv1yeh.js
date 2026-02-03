@@ -493,7 +493,7 @@ function requireReact_production$1() {
   react_production$1.useTransition = function() {
     return ReactSharedInternals.H.useTransition();
   };
-  react_production$1.version = "19.2.3";
+  react_production$1.version = "19.2.4";
   return react_production$1;
 }
 var hasRequiredReact$1;
@@ -921,7 +921,7 @@ function requireReactDom_production() {
   reactDom_production.useFormStatus = function() {
     return ReactSharedInternals.H.useHostTransitionStatus();
   };
-  reactDom_production.version = "19.2.3";
+  reactDom_production.version = "19.2.4";
   return reactDom_production;
 }
 var hasRequiredReactDom;
@@ -12365,12 +12365,12 @@ function requireReactDomClient_production() {
     }
   };
   var isomorphicReactPackageVersion$jscomp$inline_1840 = React2.version;
-  if ("19.2.3" !== isomorphicReactPackageVersion$jscomp$inline_1840)
+  if ("19.2.4" !== isomorphicReactPackageVersion$jscomp$inline_1840)
     throw Error(
       formatProdErrorMessage(
         527,
         isomorphicReactPackageVersion$jscomp$inline_1840,
-        "19.2.3"
+        "19.2.4"
       )
     );
   ReactDOMSharedInternals.findDOMNode = function(componentOrElement) {
@@ -12388,10 +12388,10 @@ function requireReactDomClient_production() {
   };
   var internals$jscomp$inline_2347 = {
     bundleType: 0,
-    version: "19.2.3",
+    version: "19.2.4",
     rendererPackageName: "react-dom",
     currentDispatcherRef: ReactSharedInternals,
-    reconcilerVersion: "19.2.3"
+    reconcilerVersion: "19.2.4"
   };
   if ("undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__) {
     var hook$jscomp$inline_2348 = __REACT_DEVTOOLS_GLOBAL_HOOK__;
@@ -12458,7 +12458,7 @@ function requireReactDomClient_production() {
     listenToAllSupportedEvents(container);
     return new ReactDOMHydrationRoot(initialChildren);
   };
-  reactDomClient_production.version = "19.2.3";
+  reactDomClient_production.version = "19.2.4";
   return reactDomClient_production;
 }
 var hasRequiredClient;
@@ -12975,7 +12975,6 @@ function stripBasename(pathname, basename) {
   return pathname.slice(startIndex) || "/";
 }
 var ABSOLUTE_URL_REGEX = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i;
-var isAbsoluteUrl = (url) => ABSOLUTE_URL_REGEX.test(url);
 function resolvePath(to, fromPathname = "/") {
   let {
     pathname: toPathname,
@@ -12984,22 +12983,11 @@ function resolvePath(to, fromPathname = "/") {
   } = typeof to === "string" ? parsePath(to) : to;
   let pathname;
   if (toPathname) {
-    if (isAbsoluteUrl(toPathname)) {
-      pathname = toPathname;
+    toPathname = toPathname.replace(/\/\/+/g, "/");
+    if (toPathname.startsWith("/")) {
+      pathname = resolvePathname(toPathname.substring(1), "/");
     } else {
-      if (toPathname.includes("//")) {
-        let oldPathname = toPathname;
-        toPathname = toPathname.replace(/\/\/+/g, "/");
-        warning(
-          false,
-          `Pathnames cannot have embedded double slashes - normalizing ${oldPathname} -> ${toPathname}`
-        );
-      }
-      if (toPathname.startsWith("/")) {
-        pathname = resolvePathname(toPathname.substring(1), "/");
-      } else {
-        pathname = resolvePathname(toPathname, fromPathname);
-      }
+      pathname = resolvePathname(toPathname, fromPathname);
     }
   } else {
     pathname = fromPathname;
@@ -14006,19 +13994,27 @@ function invariant2(value, message) {
     throw new Error(message);
   }
 }
-function singleFetchUrl(reqUrl, basename, extension) {
+function singleFetchUrl(reqUrl, basename, trailingSlashAware, extension) {
   let url = typeof reqUrl === "string" ? new URL(
     reqUrl,
     // This can be called during the SSR flow via PrefetchPageLinksImpl so
     // don't assume window is available
     typeof window === "undefined" ? "server://singlefetch/" : window.location.origin
   ) : reqUrl;
-  if (url.pathname === "/") {
-    url.pathname = `_root.${extension}`;
-  } else if (basename && stripBasename(url.pathname, basename) === "/") {
-    url.pathname = `${basename.replace(/\/$/, "")}/_root.${extension}`;
+  if (trailingSlashAware) {
+    if (url.pathname.endsWith("/")) {
+      url.pathname = `${url.pathname}_.${extension}`;
+    } else {
+      url.pathname = `${url.pathname}.${extension}`;
+    }
   } else {
-    url.pathname = `${url.pathname.replace(/\/$/, "")}.${extension}`;
+    if (url.pathname === "/") {
+      url.pathname = `_root.${extension}`;
+    } else if (basename && stripBasename(url.pathname, basename) === "/") {
+      url.pathname = `${basename.replace(/\/$/, "")}/_root.${extension}`;
+    } else {
+      url.pathname = `${url.pathname.replace(/\/$/, "")}.${extension}`;
+    }
   }
   return url;
 }
@@ -14291,7 +14287,7 @@ function PrefetchPageLinksImpl({
   ...linkProps
 }) {
   let location = useLocation();
-  let { manifest, routeModules } = useFrameworkContext();
+  let { future, manifest, routeModules } = useFrameworkContext();
   let { basename } = useDataRouterContext2();
   let { loaderData, matches } = useDataRouterStateContext();
   let newMatchesForData = reactExports$1.useMemo(
@@ -14338,7 +14334,12 @@ function PrefetchPageLinksImpl({
     if (routesParams.size === 0) {
       return [];
     }
-    let url = singleFetchUrl(page, basename, "data");
+    let url = singleFetchUrl(
+      page,
+      basename,
+      future.unstable_trailingSlashAwareDataRequests,
+      "data"
+    );
     if (foundOptOutRoute && routesParams.size > 0) {
       url.searchParams.set(
         "_routes",
@@ -14348,6 +14349,7 @@ function PrefetchPageLinksImpl({
     return [url.pathname + url.search];
   }, [
     basename,
+    future.unstable_trailingSlashAwareDataRequests,
     loaderData,
     location,
     manifest,
@@ -14364,7 +14366,15 @@ function PrefetchPageLinksImpl({
   return /* @__PURE__ */ reactExports$1.createElement(reactExports$1.Fragment, null, dataHrefs.map((href) => /* @__PURE__ */ reactExports$1.createElement("link", { key: href, rel: "prefetch", as: "fetch", href, ...linkProps })), moduleHrefs.map((href) => /* @__PURE__ */ reactExports$1.createElement("link", { key: href, rel: "modulepreload", href, ...linkProps })), keyedPrefetchLinks.map(({ key, link }) => (
     // these don't spread `linkProps` because they are full link descriptors
     // already with their own props
-    /* @__PURE__ */ reactExports$1.createElement("link", { key, nonce: linkProps.nonce, ...link })
+    /* @__PURE__ */ reactExports$1.createElement(
+      "link",
+      {
+        key,
+        nonce: linkProps.nonce,
+        ...link,
+        crossOrigin: link.crossOrigin ?? linkProps.crossOrigin
+      }
+    )
   )));
 }
 function mergeRefs(...refs) {
@@ -14382,7 +14392,7 @@ var isBrowser2 = typeof window !== "undefined" && typeof window.document !== "un
 try {
   if (isBrowser2) {
     window.__reactRouterVersion = // @ts-expect-error
-    "7.11.0";
+    "7.13.0";
   }
 } catch (e) {
 }
