@@ -10,7 +10,10 @@ import { getGlobalState, saveForHistory } from "./sstate.history";
 import type { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { Subbable } from "./state/Subbable";
-import { SubbableContainer } from "./state/SubbableContainer";
+import {
+  subbableContainer,
+  SubbableContainer,
+} from "./state/SubbableContainer";
 
 type IsEmptyObjType<T extends Record<PropertyKey, unknown>> =
   keyof T extends never ? true : false;
@@ -31,11 +34,10 @@ type IntrinsicFields<T extends Record<string, any>> = Omit<
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type NeverIfEmpty<T> = {} extends T ? never : T;
 type StateProps<T extends Record<string, any>> = SPrimitiveFieldsToSOut<T>;
-type PropsForStruct<Child extends Struct<any>> = IsEmptyObjType<
-  SPrimitiveFieldsToSOut<Child>
-> extends true
-  ? null
-  : SPrimitiveFieldsToSOut<Child>;
+type PropsForStruct<Child extends Struct<any>> =
+  IsEmptyObjType<SPrimitiveFieldsToSOut<Child>> extends true
+    ? null
+    : SPrimitiveFieldsToSOut<Child>;
 
 export abstract class Struct<Child extends Struct<any>>
   implements SubbableContainer, Subbable, Contained
@@ -66,7 +68,7 @@ export abstract class Struct<Child extends Struct<any>>
       const child = self[key];
       toContain.push(child);
     }
-    SubbableContainer._containAll(this, toContain);
+    subbableContainer._containAll(this, toContain);
 
     const globalState = getGlobalState();
     globalState.knownObjects.set(this._id, this);
@@ -102,7 +104,7 @@ export abstract class Struct<Child extends Struct<any>>
       // Act on initialized keys
       child = self[key];
 
-      SubbableContainer._contain(this, child);
+      subbableContainer._contain(this, child);
     }
     const globalState = getGlobalState();
     globalState.knownObjects.set(this._id, this);
@@ -117,7 +119,7 @@ export abstract class Struct<Child extends Struct<any>>
   featuredMutation(action: () => void) {
     saveForHistory(this);
     action();
-    SubbableContainer._notifyChange(this, this);
+    subbableContainer._notifyChange(this, this);
   }
 }
 
@@ -130,7 +132,7 @@ type OneArgClass = {
 
 export type StructProps<
   T extends Struct<any>,
-  U extends Record<string, any>
+  U extends Record<string, any>,
 > = SPrimitiveFieldsToSOut<T> & U;
 
 export type ConstructorArguments<T extends AnyClass> = T extends OneArgClass

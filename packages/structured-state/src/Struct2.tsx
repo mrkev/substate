@@ -2,7 +2,10 @@ import { nanoid } from "nanoid";
 import { isContainable } from "./assertions";
 import type { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
 import { MutationHashable } from "./state/MutationHashable";
-import { SubbableContainer } from "./state/SubbableContainer";
+import {
+  subbableContainer,
+  SubbableContainer,
+} from "./state/SubbableContainer";
 import { Subbable, notify } from "./state/Subbable";
 import { getGlobalState, saveForHistory } from "./sstate.history";
 import { SString } from "./sstate";
@@ -47,7 +50,7 @@ export abstract class Struct2<Sub extends Constructable>
 
     for (const key of props) {
       const child = self[key];
-      SubbableContainer._contain(this, child);
+      subbableContainer._contain(this, child);
     }
     const globalState = getGlobalState();
     globalState.knownObjects.set(this._id, this);
@@ -80,7 +83,7 @@ export abstract class Struct2<Sub extends Constructable>
   featuredMutation(action: () => void) {
     saveForHistory(this);
     action();
-    SubbableContainer._notifyChange(this, this);
+    subbableContainer._notifyChange(this, this);
   }
 }
 

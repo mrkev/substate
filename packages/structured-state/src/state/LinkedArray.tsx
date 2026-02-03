@@ -3,7 +3,7 @@ import { mutablearr } from "../lib/nullthrows";
 import { getGlobalState, saveForHistory } from "../sstate.history";
 import { StateChangeHandler } from "./LinkedPrimitive";
 import { Subbable } from "./Subbable";
-import { SubbableContainer } from "./SubbableContainer";
+import { subbableContainer, SubbableContainer } from "./SubbableContainer";
 
 // .sort, .reverse, .fill, .copyWithin operate in place and return the array. SubbableArray
 // is not quite an array so the return types don't match.
@@ -41,25 +41,25 @@ export class LinkedArray<S>
 
   // // NOTE: we want this here because we overwite it in SSchemaArray
   // protected _contain(items: Array<S>) {
-  //   SubbableContainer._contain(this, items);
+  //   subbableContainer._contain(this, items);
   // }
 
   // NOTE: we want this here because we overwite it in SSchemaArray
   // protected _uncontain(item: S) {
-  //   SubbableContainer._uncontain(item);
+  //   subbableContainer._uncontain(item);
   // }
 
   _replace(cb: (arr: Array<S>) => ReadonlyArray<S>) {
-    SubbableContainer._uncontainAll(this, this._array);
+    subbableContainer._uncontainAll(this, this._array);
     this._array = mutablearr(cb(this._array)); // todo, call ._destroy on child elements?
-    SubbableContainer._containAll(this, this._array);
-    SubbableContainer._notifyChange(this, this);
+    subbableContainer._containAll(this, this._array);
+    subbableContainer._notifyChange(this, this);
   }
 
   constructor(initialValue: Array<S>, id: string, anonymous = false) {
     this._id = id;
     this._array = initialValue;
-    SubbableContainer._containAll(this, this._array);
+    subbableContainer._containAll(this, this._array);
     if (!anonymous) {
       getGlobalState().knownObjects.set(this._id, this);
     }
@@ -68,7 +68,7 @@ export class LinkedArray<S>
   private mutate<V>(mutator: (rep: Array<S>) => V): V {
     saveForHistory(this);
     const result = mutator(this._array);
-    SubbableContainer._notifyChange(this, this);
+    subbableContainer._notifyChange(this, this);
     return result;
   }
 
@@ -119,7 +119,7 @@ export class LinkedArray<S>
 
     return this.mutate((rep) => {
       const res = rep.pop();
-      res != null && SubbableContainer._uncontain(this, res);
+      res != null && subbableContainer._uncontain(this, res);
       return res;
     });
   }
@@ -132,7 +132,7 @@ export class LinkedArray<S>
 
     return this.mutate((clone) => {
       const res = clone.shift();
-      res != null && SubbableContainer._uncontain(this, res);
+      res != null && subbableContainer._uncontain(this, res);
       return res;
     });
   }
@@ -142,7 +142,7 @@ export class LinkedArray<S>
     if (items.length < 1) {
       return this.length;
     }
-    SubbableContainer._containAll(this, items);
+    subbableContainer._containAll(this, items);
 
     return this.mutate((clone) => {
       return clone.push(...items);
@@ -154,7 +154,7 @@ export class LinkedArray<S>
     if (items.length < 1) {
       return this.length;
     }
-    SubbableContainer._containAll(this, items);
+    subbableContainer._containAll(this, items);
 
     return this.mutate((clone) => {
       return clone.unshift(...items);
@@ -181,11 +181,11 @@ export class LinkedArray<S>
   splice(start: number, deleteCount?: number): S[];
   splice(start: number, deleteCount: number, ...items: S[]): S[];
   splice(start: any, deleteCount?: any, ...items: any[]): S[] {
-    SubbableContainer._containAll(this, items);
+    subbableContainer._containAll(this, items);
     return this.mutate((_array) => {
       const deleted = _array.splice(start, deleteCount, ...items);
       for (const elem of deleted) {
-        SubbableContainer._uncontain(this, elem);
+        subbableContainer._uncontain(this, elem);
       }
       return deleted;
     });
@@ -193,7 +193,7 @@ export class LinkedArray<S>
 
   // Array<S> interface, mutates
   fill(value: S, start?: number, end?: number): this {
-    SubbableContainer._containAll(this, [value]);
+    subbableContainer._containAll(this, [value]);
     console.warn("TODO: fill BREAKING: containment");
     return this.mutate((_array) => {
       _array.fill(value, start, end);
@@ -213,7 +213,7 @@ export class LinkedArray<S>
   // Array<S> interface
   map<U>(
     callbackfn: (value: S, index: number, array: readonly S[]) => U,
-    thisArg?: any
+    thisArg?: any,
   ): U[] {
     return this._array.map(callbackfn, thisArg);
   }
@@ -258,35 +258,35 @@ export class LinkedArray<S>
   }
   every<S>(
     predicate: (value: S, index: number, array: S[]) => value is S,
-    thisArg?: any
+    thisArg?: any,
   ): this is S[];
   every(
     predicate: (value: S, index: number, array: S[]) => unknown,
-    thisArg?: any
+    thisArg?: any,
   ): boolean;
   every(predicate: any, thisArg?: any): boolean {
     throw new Error("Method not implemented.");
   }
   some(
     predicate: (value: S, index: number, array: S[]) => unknown,
-    thisArg?: any
+    thisArg?: any,
   ): boolean {
     throw new Error("Method not implemented.");
   }
   forEach(
     callbackfn: (value: S, index: number, array: S[]) => void,
-    thisArg?: any
+    thisArg?: any,
   ): void {
     throw new Error("Method not implemented.");
   }
 
   filter<S>(
     predicate: (value: S, index: number, array: S[]) => value is S,
-    thisArg?: any
+    thisArg?: any,
   ): S[];
   filter(
     predicate: (value: S, index: number, array: S[]) => unknown,
-    thisArg?: any
+    thisArg?: any,
   ): S[];
   filter(predicate: any, thisArg?: any): S[] | S[] {
     throw new Error("Method not implemented.");
@@ -294,29 +294,29 @@ export class LinkedArray<S>
 
   find<S>(
     predicate: (this: void, value: S, index: number, obj: S[]) => value is S,
-    thisArg?: any
+    thisArg?: any,
   ): S | undefined;
   find(
     predicate: (value: S, index: number, obj: S[]) => unknown,
-    thisArg?: any
+    thisArg?: any,
   ): S | undefined;
   find(predicate: any, thisArg?: any): S | S | undefined {
     return this._array.find(predicate, thisArg);
   }
   findIndex(
     predicate: (value: S, index: number, obj: S[]) => unknown,
-    thisArg?: any
+    thisArg?: any,
   ): number {
     return this._array.findIndex(predicate, thisArg);
   }
 
   findLast<S>(
     predicate: (value: S, index: number, array: S[]) => value is S,
-    thisArg?: any
+    thisArg?: any,
   ): S | undefined;
   findLast(
     predicate: (value: S, index: number, array: S[]) => unknown,
-    thisArg?: any
+    thisArg?: any,
   ): S | undefined;
   findLast(predicate: unknown, thisArg?: unknown): S | S | undefined {
     throw new Error("Method not implemented.");
@@ -324,7 +324,7 @@ export class LinkedArray<S>
 
   findLastIndex(
     predicate: (value: S, index: number, array: S[]) => unknown,
-    thisArg?: any
+    thisArg?: any,
   ): number {
     throw new Error("Method not implemented.");
   }
@@ -346,9 +346,9 @@ export class LinkedArray<S>
       this: This,
       value: S,
       index: number,
-      array: S[]
+      array: S[],
     ) => U | readonly U[],
-    thisArg?: This
+    thisArg?: This,
   ): U[] {
     throw new Error("Method not implemented.");
   }

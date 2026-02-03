@@ -2,7 +2,7 @@ import { nanoid } from "nanoid";
 import { mutableset } from "../lib/nullthrows";
 import { getGlobalState, saveForHistory } from "../sstate.history";
 import { StructSchema } from "../StructuredKinds";
-import { SubbableContainer } from "./SubbableContainer";
+import { subbableContainer, SubbableContainer } from "./SubbableContainer";
 
 export class SSet<S> extends SubbableContainer implements Set<S> {
   private _set: ReadonlySet<S>;
@@ -12,7 +12,7 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
     super(_id);
     this._set = _set;
     this._schema = _schema;
-    SubbableContainer._containAll(this, this._set);
+    subbableContainer._containAll(this, this._set);
     getGlobalState().knownObjects.set(this._id, this);
   }
 
@@ -21,38 +21,38 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
   }
 
   _setRaw(set: ReadonlySet<S>) {
-    SubbableContainer._uncontainAll(this, this._set);
+    subbableContainer._uncontainAll(this, this._set);
     this._set = set;
-    SubbableContainer._containAll(this, set);
-    SubbableContainer._notifyChange(this, this);
+    subbableContainer._containAll(this, set);
+    subbableContainer._notifyChange(this, this);
   }
 
   /** should only be used internally */
   public static _create<T>(
     initialValue?: Iterable<T>,
     id?: string,
-    schema?: StructSchema | null
+    schema?: StructSchema | null,
   ) {
     return new this<T>(
       initialValue instanceof Set ? initialValue : new Set(initialValue),
       id ?? nanoid(5),
-      schema ?? null
+      schema ?? null,
     );
   }
 
   private mutate<V>(mutator: (raw: Set<S>) => V): V {
     saveForHistory(this);
     const result = mutator(mutableset(this._set));
-    SubbableContainer._notifyChange(this, this);
+    subbableContainer._notifyChange(this, this);
     return result;
   }
 
   _replace(cb: (set: Set<S>) => ReadonlySet<S>) {
     // todo, call ._destroy on child elements?
-    SubbableContainer._uncontainAll(this, this._set);
+    subbableContainer._uncontainAll(this, this._set);
     this._set = cb(mutableset(this._set));
-    SubbableContainer._containAll(this, this._set);
-    SubbableContainer._notifyChange(this, this);
+    subbableContainer._containAll(this, this._set);
+    subbableContainer._notifyChange(this, this);
   }
 
   // In some future, create a set that does several operations at once
@@ -64,7 +64,7 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
       return this;
     }
     return this.mutate((clone) => {
-      SubbableContainer._containAll(this, [value]);
+      subbableContainer._containAll(this, [value]);
       clone.add(value);
       return this;
     });
@@ -73,7 +73,7 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
   // Set<S> interface, mutates
   clear(): void {
     for (const elem of this._set) {
-      SubbableContainer._uncontain(this, elem);
+      subbableContainer._uncontain(this, elem);
     }
     // To trigger everything that should be triggered
     this.mutate(() => {});
@@ -88,7 +88,7 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
 
     return this.mutate((raw) => {
       // NOTE: We have confirmed above the set has this value
-      SubbableContainer._uncontain(this, value);
+      subbableContainer._uncontain(this, value);
       return raw.delete(value);
     });
   }
@@ -96,7 +96,7 @@ export class SSet<S> extends SubbableContainer implements Set<S> {
   // Set<S> interface
   forEach(
     _callbackfn: (value: S, value2: S, set: Set<S>) => void,
-    _thisArg?: any
+    _thisArg?: any,
   ): void {
     throw new Error("Method not implemented.");
   }

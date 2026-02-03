@@ -13,7 +13,10 @@ import { nullthrows } from "../lib/nullthrows";
 import { SArray, SSchemaArray } from "../SArray";
 import { LinkedPrimitive } from "../state/LinkedPrimitive";
 import { SSet } from "../state/LinkedSet";
-import { SubbableContainer } from "../state/SubbableContainer";
+import {
+  subbableContainer,
+  SubbableContainer,
+} from "../state/SubbableContainer";
 import { Struct } from "../Struct";
 import { Struct2 } from "../Struct2";
 import { Structured } from "../Structured";
@@ -44,7 +47,7 @@ export function replacePackage(json: unknown, obj: StructuredKind): void {
 export function replace(
   json: Simplified,
   obj: StructuredKind,
-  acc: InitializationMetadata
+  acc: InitializationMetadata,
 ) {
   try {
     switch (json.$$) {
@@ -83,7 +86,7 @@ export function replace(
       case "ref": {
         const simple = nullthrows(
           acc.knownSimples.get(json._id),
-          "ref not found"
+          "ref not found",
         );
         return replace(simple, obj, acc);
         // return replaceRef(json, obj, acc);
@@ -100,7 +103,7 @@ export function replace(
 export function replacePrimitive<T>(
   json: SimplifiedTypePrimitive<T> | SimplifiedRef,
   obj: LinkedPrimitive<T>,
-  acc: InitializationMetadata
+  acc: InitializationMetadata,
 ) {
   switch (json.$$) {
     case "prim": {
@@ -123,7 +126,7 @@ function replaceStruct(json: NSimplified["struct"], obj: Struct<any>): void {
   // offer a way to override replacement
   if ("_replace" in obj && typeof obj._replace === "function") {
     obj._replace(json._value);
-    SubbableContainer._notifyChange(obj, obj);
+    subbableContainer._notifyChange(obj, obj);
     return;
   }
 
@@ -134,14 +137,14 @@ function replaceStruct(json: NSimplified["struct"], obj: Struct<any>): void {
     }
     (obj as any)[key] = json._value[key];
   }
-  SubbableContainer._notifyChange(obj, obj);
+  subbableContainer._notifyChange(obj, obj);
 }
 
 function replaceStruct2(json: NSimplified["struct2"], obj: Struct2<any>): void {
   // offer a way to override replacement
   if ("_replace" in obj && typeof obj._replace === "function") {
     obj._replace(json._value);
-    SubbableContainer._notifyChange(obj, obj);
+    subbableContainer._notifyChange(obj, obj);
     return;
   }
 
@@ -152,16 +155,16 @@ function replaceStruct2(json: NSimplified["struct2"], obj: Struct2<any>): void {
     }
     (obj as any)[key] = json._value[key];
   }
-  SubbableContainer._notifyChange(obj, obj);
+  subbableContainer._notifyChange(obj, obj);
 }
 
 export function replaceStructured(
   json: NSimplified["structured"],
   obj: Structured<any, any>,
-  acc: InitializationMetadata
+  acc: InitializationMetadata,
 ) {
   obj.replace(json._value, replaceOfPkg(acc));
-  SubbableContainer._notifyChange(obj, obj);
+  subbableContainer._notifyChange(obj, obj);
 }
 
 export function replaceSUnion(json: NSimplified["union"], obj: SUnion<any>) {
@@ -170,25 +173,25 @@ export function replaceSUnion(json: NSimplified["union"], obj: SUnion<any>) {
   // todo: null as any, unimplemented
   const value = initialize(json._value, [], null as any);
   obj.replace(value);
-  SubbableContainer._notifyChange(obj, obj);
+  subbableContainer._notifyChange(obj, obj);
 }
 
 export function replaceOfPkg(
-  metadata: InitializationMetadata
+  metadata: InitializationMetadata,
 ): ReplaceFunctions {
   /** `this` on second argument to avoid double-initializing the same elements */
   return {
     string: (
       json: SimplifiedTypePrimitive<string>,
-      obj: LinkedPrimitive<string>
+      obj: LinkedPrimitive<string>,
     ) => replacePrimitive<string>(json, obj, metadata),
     number: (
       json: SimplifiedTypePrimitive<number>,
-      obj: LinkedPrimitive<number>
+      obj: LinkedPrimitive<number>,
     ) => replacePrimitive<number>(json, obj, metadata),
     boolean: (
       json: SimplifiedTypePrimitive<boolean>,
-      obj: LinkedPrimitive<boolean>
+      obj: LinkedPrimitive<boolean>,
     ) => replacePrimitive<boolean>(json, obj, metadata),
     null: (json: SimplifiedTypePrimitive<null>, obj: LinkedPrimitive<null>) =>
       replacePrimitive<null>(json, obj, metadata),
@@ -196,7 +199,7 @@ export function replaceOfPkg(
       replacePrimitive(json, obj, metadata),
     schemaArray: <T extends Struct<any> | Struct2<any> | Structured<any, any>>(
       json: NSimplified["arr-schema"],
-      arr: SSchemaArray<T>
+      arr: SSchemaArray<T>,
     ) => replaceSchemaArray(json, arr, metadata),
     array: replaceSimpleArray,
     struct: replaceStruct,
@@ -211,34 +214,34 @@ export function replaceOfPkg(
 export type ReplaceFunctions = Readonly<{
   string: (
     json: SimplifiedTypePrimitive<string>,
-    obj: LinkedPrimitive<string>
+    obj: LinkedPrimitive<string>,
   ) => void;
   number: (
     json: SimplifiedTypePrimitive<number>,
-    obj: LinkedPrimitive<number>
+    obj: LinkedPrimitive<number>,
   ) => void;
   boolean: (
     json: SimplifiedTypePrimitive<boolean>,
-    obj: LinkedPrimitive<boolean>
+    obj: LinkedPrimitive<boolean>,
   ) => void;
   null: (
     json: SimplifiedTypePrimitive<null>,
-    obj: LinkedPrimitive<null>
+    obj: LinkedPrimitive<null>,
   ) => void;
   primitive: <T>(
     json: SimplifiedTypePrimitive<T>,
-    obj: LinkedPrimitive<T>
+    obj: LinkedPrimitive<T>,
   ) => void;
   schemaArray: <T extends Struct<any> | Struct2<any> | Structured<any, any>>(
     json: NSimplified["arr-schema"],
-    arr: SSchemaArray<T>
+    arr: SSchemaArray<T>,
   ) => void;
   array: <T>(json: SimplifiedSimpleArray<T>, arr: SArray<T>) => void;
   struct: (json: NSimplified["struct"], obj: Struct<any>) => void;
   struct2: (json: NSimplified["struct2"], obj: Struct2<any>) => void;
   structured: (
     json: NSimplified["structured"],
-    obj: Structured<any, any>
+    obj: Structured<any, any>,
   ) => void;
   set: <T>(json: SimplifiedSet<T>, obj: SSet<T>) => void;
 }>;

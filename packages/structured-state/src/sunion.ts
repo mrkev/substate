@@ -3,7 +3,11 @@ import { getGlobalState, StructuredKind } from ".";
 import { saveForHistory } from "./sstate.history";
 import { StateChangeHandler } from "./state/LinkedPrimitive";
 import { notify, Subbable } from "./state/Subbable";
-import { SubbableContainer, UpdateToken } from "./state/SubbableContainer";
+import {
+  subbableContainer,
+  SubbableContainer,
+  UpdateToken,
+} from "./state/SubbableContainer";
 
 /**
  * SUnion holds a single Structured value. Accepts multiple kinds.
@@ -33,11 +37,11 @@ export class SUnion<S extends StructuredKind> implements SubbableContainer {
     this._value = value;
     // TODO: when merging Subbable and Contained, put this in `notify`
     notify(this, this);
-    // TODO: add hash to subbable to just do SubbableContainer._notifyChange(this, this);??
+    // TODO: add hash to subbable to just do subbableContainer._notifyChange(this, this);??
     // we don't need to save the token, since primitvies, being leaves, will never be notified when a child changes
     const token = new UpdateToken(this);
     for (const container of this._container) {
-      SubbableContainer._childChanged(container, token);
+      subbableContainer._childChanged(container, token);
     }
   }
 

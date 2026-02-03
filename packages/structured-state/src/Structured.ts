@@ -10,7 +10,10 @@ import { InitFunctions } from "./serialization/initialize";
 import { getGlobalState, saveForHistory } from "./sstate.history";
 import type { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
 import { Subbable } from "./state/Subbable";
-import { SubbableContainer } from "./state/SubbableContainer";
+import {
+  subbableContainer,
+  SubbableContainer,
+} from "./state/SubbableContainer";
 import { PrimitiveKind, StructuredKind } from "./StructuredKinds";
 
 // export type AnyClass = {
@@ -25,11 +28,11 @@ type Structured_Static = typeof Structured;
 
 export type DeserializeFunc = <M extends NeedsSchema, N extends Schema>(
   json: M,
-  schema: N
+  schema: N,
 ) => ApplyDeserialization<M>;
 
 export interface ConstructableStructure<
-  SAuto extends Record<string, StructuredKind | PrimitiveKind>
+  SAuto extends Record<string, StructuredKind | PrimitiveKind>,
   // ,Sub extends ConstructableStructure<any>
 > {
   new (...args: never[]): Structured<SAuto, any>;
@@ -37,7 +40,7 @@ export interface ConstructableStructure<
 }
 
 export type JSONOfAuto<
-  SAuto extends Record<string, StructuredKind | PrimitiveKind>
+  SAuto extends Record<string, StructuredKind | PrimitiveKind>,
 > = {
   [Property in keyof SAuto]: SAuto[Property] extends StructuredKind
     ? ApplySerialization<SAuto[Property]>
@@ -48,8 +51,9 @@ export type JSONOfAuto<
 // we use external arguments to pass in for example the liveAudioContext, which is not available just from the serialized json
 export abstract class Structured<
   SAuto extends Record<string, StructuredKind | PrimitiveKind>,
-  Sub extends ConstructableStructure<any>
-> implements SubbableContainer, Subbable, Contained
+  Sub extends ConstructableStructure<any>,
+>
+  implements SubbableContainer, Subbable, Contained
 {
   readonly _id: string;
   public _hash: number = 0;
@@ -59,7 +63,7 @@ export abstract class Structured<
 
   abstract replace(
     autoJson: JSONOfAuto<SAuto>,
-    replace: ReplaceFunctions
+    replace: ReplaceFunctions,
   ): void;
   abstract autoSimplify(): SAuto;
 
@@ -71,7 +75,7 @@ export abstract class Structured<
   constructor() {
     if (!Structured.IN_CREATE) {
       throw new Error(
-        `Attempted to initialize a Structured object without using Structured.create`
+        `Attempted to initialize a Structured object without using Structured.create`,
       );
     }
     this._id = nanoid(5);
@@ -92,11 +96,11 @@ export abstract class Structured<
   public featuredMutation(action: () => void) {
     saveForHistory(this);
     action();
-    SubbableContainer._notifyChange(this, this);
+    subbableContainer._notifyChange(this, this);
   }
 
   public notifyChange() {
-    SubbableContainer._notifyChange(this, this);
+    subbableContainer._notifyChange(this, this);
   }
 }
 
@@ -106,7 +110,7 @@ export function initStructured(structured: Structured<any, any>) {
   // or something along those lines?
   for (const key in structured) {
     const child = (structured as any)[key];
-    SubbableContainer._contain(structured, child);
+    subbableContainer._contain(structured, child);
   }
   const globalState = getGlobalState();
   globalState.knownObjects.set(structured._id, structured);

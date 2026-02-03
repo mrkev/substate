@@ -1,6 +1,10 @@
 import { nanoid } from "nanoid";
 
-import { SubbableContainer, UpdateToken } from "./SubbableContainer";
+import {
+  subbableContainer,
+  SubbableContainer,
+  UpdateToken,
+} from "./SubbableContainer";
 import { Subbable, notify } from "./Subbable";
 import { getGlobalState, saveForHistory } from "../sstate.history";
 
@@ -36,11 +40,11 @@ export class LinkedPrimitive<S> implements Contained, Subbable {
     this._value = value;
     // TODO: when merging Subbable and Contained, put this in `notify`
     notify(this, this);
-    // TODO: add hash to subbable to just do SubbableContainer._notifyChange(this, this);??
+    // TODO: add hash to subbable to just do subbableContainer._notifyChange(this, this);??
     // we don't need to save the token, since primitvies, being leaves, will never be notified when a child changes
     const token = new UpdateToken(this);
     for (const container of this._container) {
-      SubbableContainer._childChanged(container, token);
+      subbableContainer._childChanged(container, token);
     }
   }
 
