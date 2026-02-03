@@ -12,7 +12,7 @@ export function SchedulerTest() {
           unstable_NormalPriority,
           function callbackFoo() {
             console.log("one");
-          }
+          },
         );
 
         const pr = new Promise<void>((res) => {
@@ -23,7 +23,7 @@ export function SchedulerTest() {
                 performance.mark("two");
                 console.log("two");
                 res();
-              }
+              },
             );
           } catch (e) {
             console.log("FO");
@@ -36,7 +36,7 @@ export function SchedulerTest() {
           function callbackFoo() {
             performance.mark("three");
             console.log("three");
-          }
+          },
         );
 
         unstable_cancelCallback(one);

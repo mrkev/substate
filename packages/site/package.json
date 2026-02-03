@@ -21,15 +21,17 @@
     "vite": "^7.3.1"
   },
   "dependencies": {
+    "@mrkev/linked-state": "workspace:*",
+    "@mrkev/marked-serializable": "workspace:*",
+    "@mrkev/marked-subbable": "workspace:*",
     "@tailwindcss/vite": "^4.1.18",
     "json-stringify-deterministic": "^1.0.12",
-    "@mrkev/linked-state": "workspace:*",
-    "@mrkev/marked-subbable": "workspace:*",
-    "@mrkev/marked-serializable": "workspace:*",
+    "nanoid": "^5.1.6",
     "react-json-pretty": "^2.2.0",
     "react-json-tree": "^0.20.0",
     "react-json-view-lite": "^2.5.0",
     "react-router-dom": "^7.13.0",
+    "scheduler": "^0.27.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18"
   }

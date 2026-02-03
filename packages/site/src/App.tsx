@@ -8,12 +8,12 @@ import {
   useDirtyTracker,
 } from "../../structured-state/src/index";
 import { setWindow } from "../../structured-state/src/lib/nullthrows";
+import { LinkedArray } from "../../structured-state/src/obj/LinkedArray";
 import {
   HistorySnapshot,
   getGlobalState,
   recordHistory,
 } from "../../structured-state/src/sstate.history";
-import { LinkedArray } from "../../structured-state/src/state/LinkedArray";
 import { JSONView } from "./JSONView";
 import { AudioClip } from "./structs/AudioClip";
 import { AudioTrack } from "./structs/AudioTrack";
@@ -65,7 +65,7 @@ const project = Project.of(
   [
     [0, "foo"],
     [1, "bar"],
-  ]
+  ],
 );
 
 setWindow("project", project);

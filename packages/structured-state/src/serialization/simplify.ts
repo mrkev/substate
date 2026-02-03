@@ -320,10 +320,10 @@ export function simplifyStructuredKind(
 ): Simplified {
   if (state instanceof LinkedPrimitive) {
     return simplifyPrimitive(state, acc);
-  } else if (state instanceof SArray) {
-    return simplifySimpleArray(state, acc);
   } else if (state instanceof SSchemaArray) {
     return simplifySchemaArray(state, acc);
+  } else if (state instanceof SArray) {
+    return simplifySimpleArray(state, acc);
   } else if (state instanceof Struct) {
     return simplifyStruct(state, acc);
   } else if (state instanceof Struct2) {

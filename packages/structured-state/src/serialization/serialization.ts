@@ -7,6 +7,7 @@ import { Struct2 } from "../obj/Struct2";
 import { Structured } from "../obj/Structured";
 import { PrimitiveKind, StructuredKind } from "../state/StructuredKinds";
 import { simplifyAndPackage } from "./simplify";
+import { debug } from "node:console";
 
 export type Simplified = NSimplified[keyof NSimplified];
 
