@@ -1,12 +1,11 @@
 import * as s from "./index";
 import { Structured } from "./index";
+import { OrderedMap } from "./lib/OrderedMap";
+import { EmptyObject } from "./lib/types";
 import {
   InitializationMetadata,
   initializeStructured,
 } from "./serialization/initialize";
-import { EmptyObject } from "./lib/types";
-import { SimplePackage } from "./serialization/simplify";
-import { OrderedMap } from "./lib/OrderedMap";
 
 export class Minimal extends s.Structured<EmptyObject, typeof Minimal> {
   override replace(): void {}
@@ -21,7 +20,7 @@ export class Minimal extends s.Structured<EmptyObject, typeof Minimal> {
     const min = initializeStructured(
       { $$: "structured", _id: id, _value: {} },
       Minimal,
-      new InitializationMetadata(new OrderedMap(), new Map())
+      new InitializationMetadata(new OrderedMap(), new Map()),
     );
     return min;
   }
@@ -39,7 +38,7 @@ export class Simple extends s.Structured<ASimple, typeof Minimal> {
 
   override replace(
     autoJson: s.JSONOfAuto<ASimple>,
-    replace: s.ReplaceFunctions
+    replace: s.ReplaceFunctions,
   ): void {
     replace.number(autoJson.num, this.num);
   }
@@ -61,7 +60,7 @@ export class Simple extends s.Structured<ASimple, typeof Minimal> {
         },
       },
       Simple,
-      new InitializationMetadata(new OrderedMap(), new Map())
+      new InitializationMetadata(new OrderedMap(), new Map()),
     );
     return min;
   }

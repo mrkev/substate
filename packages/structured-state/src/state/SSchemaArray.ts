@@ -1,17 +1,12 @@
-import { LinkedArray } from "./state/LinkedArray";
-import { Struct } from "./Struct";
-import { Struct2 } from "./Struct2";
-import { Structured } from "./Structured";
-import { StructSchema } from "./StructuredKinds";
-
-/** Describes an array */
-export class SArray<T> extends LinkedArray<T> {
-  // readonly _differentiator = "sarray";
-}
+import { LinkedArray } from "./LinkedArray";
+import { Struct } from "../Struct";
+import { Struct2 } from "../Struct2";
+import { Structured } from "../Structured";
+import { StructSchema } from "../StructuredKinds";
 
 /** Describes an array of subbable objects */
 export class SSchemaArray<
-  T extends Struct<any> | Struct2<any> | Structured<any, any>
+  T extends Struct<any> | Struct2<any> | Structured<any, any>,
 > extends LinkedArray<T> {
   _schema: StructSchema[];
 

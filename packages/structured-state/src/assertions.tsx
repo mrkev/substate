@@ -1,6 +1,7 @@
 import { SSet, StructuredKind } from ".";
-import { SArray, SSchemaArray } from "./SArray";
+import { LinkedArray } from "./state/LinkedArray";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
+import { SSchemaArray } from "./state/SSchemaArray";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
@@ -18,8 +19,8 @@ export function assertSPrimitive<T>(
 
 export function assertSSimpleArray<T>(
   value: unknown,
-): asserts value is SArray<any> {
-  if (!(value instanceof SArray)) {
+): asserts value is LinkedArray<any> {
+  if (!(value instanceof LinkedArray)) {
     console.log("ERR:", value, "to be sarray");
     throw new Error("not an sarray"); // assertion error
   }

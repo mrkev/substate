@@ -13,11 +13,11 @@ import {
 } from "./serialization";
 
 export function replaceSchemaArray<
-  T extends Struct<any> | Struct2<any> | Structured<any, any>
+  T extends Struct<any> | Struct2<any> | Structured<any, any>,
 >(
   json: NSimplified["arr-schema"],
   arr: SSchemaArray<T>,
-  acc: InitializationMetadata
+  acc: InitializationMetadata,
 ) {
   // arr is current state, we want json by the end
   arr._replace((raw) => {
@@ -26,7 +26,7 @@ export function replaceSchemaArray<
     for (const elem of json._value) {
       if (!isSimplified(elem)) {
         console.error(
-          "ERR: non structured object found in SSchemaArray. skipping replace."
+          "ERR: non structured object found in SSchemaArray. skipping replace.",
         );
         continue;
       }
@@ -80,13 +80,13 @@ export function replaceSchemaArray<
       if (aIndex < 0) {
         // debugger;
         console.warn(
-          "replace: arr has an element not in json, this should never happen"
+          "replace: arr has an element not in json, this should never happen",
         );
       }
       const bIndex = jsonOrder.indexOf(b._id);
       if (bIndex < 0) {
         console.warn(
-          "replace: arr has an element not in json, this should never happen"
+          "replace: arr has an element not in json, this should never happen",
         );
       }
 
@@ -99,7 +99,7 @@ export function replaceSchemaArray<
 
 export function replaceSimpleArray<T>(
   json: SimplifiedSimpleArray<T>,
-  arr: SArray<T>
+  arr: SArray<T>,
 ) {
   arr._replace((raw) => {
     return json._value;

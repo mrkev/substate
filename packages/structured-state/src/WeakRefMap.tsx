@@ -20,7 +20,7 @@ export class WeakRefMap<T extends WeakKey> {
         this.map.delete(key);
         if (this.expectsCleanToClean !== true) {
           console.warn(
-            `WeakRefMap: (${this.expectsCleanToClean}) cleaned ${key} but expects to clean nothing.`
+            `WeakRefMap: (${this.expectsCleanToClean}) cleaned ${key} but expects to clean nothing.`,
           );
         }
       }

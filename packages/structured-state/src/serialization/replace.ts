@@ -10,7 +10,8 @@ import {
   exhaustive,
 } from "../assertions";
 import { nullthrows } from "../lib/nullthrows";
-import { SArray, SSchemaArray } from "../SArray";
+import { SSchemaArray } from "../state/SSchemaArray";
+import { LinkedArray } from "../state/LinkedArray";
 import { LinkedPrimitive } from "../state/LinkedPrimitive";
 import { SSet } from "../state/LinkedSet";
 import {
@@ -236,7 +237,7 @@ export type ReplaceFunctions = Readonly<{
     json: NSimplified["arr-schema"],
     arr: SSchemaArray<T>,
   ) => void;
-  array: <T>(json: SimplifiedSimpleArray<T>, arr: SArray<T>) => void;
+  array: <T>(json: SimplifiedSimpleArray<T>, arr: LinkedArray<T>) => void;
   struct: (json: NSimplified["struct"], obj: Struct<any>) => void;
   struct2: (json: NSimplified["struct2"], obj: Struct2<any>) => void;
   structured: (

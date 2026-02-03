@@ -1,5 +1,6 @@
 import { SSet, Structured } from ".";
-import { SArray, SSchemaArray } from "./SArray";
+import { SSchemaArray } from "./state/SSchemaArray";
+import { LinkedArray } from "./state/LinkedArray";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
@@ -23,7 +24,7 @@ export type StructuredKind =
   | Struct<any>
   | Struct2<any>
   | Structured<any, any>
-  | SArray<any>
+  | LinkedArray<any>
   | SSchemaArray<any>
   | SSet<any>
   | SUnion<any>;
@@ -33,7 +34,7 @@ export type StructuredKindConstructor =
   | typeof Struct<any>
   | typeof Struct2<any>
   | ConstructableStructure<any>
-  | typeof SArray<any>
+  | typeof LinkedArray<any>
   | typeof SSchemaArray<any>
   | typeof SSet<any>
   | typeof SUnion<any>;
@@ -54,7 +55,7 @@ export function isStructuredKind(val: unknown) {
     val instanceof Struct ||
     val instanceof Struct2 ||
     val instanceof Structured ||
-    val instanceof SArray ||
+    val instanceof LinkedArray ||
     val instanceof SSchemaArray ||
     val instanceof SSet ||
     val instanceof SUnion

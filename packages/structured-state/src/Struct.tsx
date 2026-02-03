@@ -1,5 +1,6 @@
 import { nanoid } from "nanoid";
-import { SArray, SSchemaArray } from "./SArray";
+import { SSchemaArray } from "./state/SSchemaArray";
+import { LinkedArray } from "./state/LinkedArray";
 import {
   SOut,
   UNINITIALIZED_ARRAY,
@@ -19,13 +20,13 @@ type IsEmptyObjType<T extends Record<PropertyKey, unknown>> =
   keyof T extends never ? true : false;
 
 type SPrimitiveFieldsToSOut<T extends Record<string, any>> = {
-  [key in keyof T as T[key] extends LinkedPrimitive<any> | SArray<any>
+  [key in keyof T as T[key] extends LinkedPrimitive<any> | LinkedArray<any>
     ? key
     : never]: SOut<T[key]>;
 };
 type IntrinsicFields<T extends Record<string, any>> = Omit<
   {
-    [key in keyof T as T[key] extends LinkedPrimitive<any> | SArray<any>
+    [key in keyof T as T[key] extends LinkedPrimitive<any> | LinkedArray<any>
       ? never
       : key]: T[key];
   },
@@ -94,7 +95,7 @@ export abstract class Struct<Child extends Struct<any>>
       }
 
       if (child instanceof UNINITIALIZED_ARRAY) {
-        self[key] = new SArray(args[key], nanoid(5));
+        self[key] = new LinkedArray(args[key], nanoid(5));
       }
 
       if (child instanceof UNINITIALIZED_TYPED_ARRAY) {

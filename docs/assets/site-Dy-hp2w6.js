@@ -15205,7 +15205,7 @@ function assertSPrimitive(value) {
   }
 }
 function assertSSimpleArray(value) {
-  if (!(value instanceof SArray)) {
+  if (!(value instanceof LinkedArray)) {
     console.log("ERR:", value, "to be sarray");
     throw new Error("not an sarray");
   }
@@ -15440,11 +15440,11 @@ function initializeSchemaArray(json, spec, metadata) {
   return result;
 }
 function initializeSimpleArray(json, metadata) {
-  const found = find(json, metadata, SArray);
+  const found = find(json, metadata, LinkedArray);
   if (found != null) {
     return found;
   }
-  const result = new SArray(json._value, json._id);
+  const result = new LinkedArray(json._value, json._id);
   metadata.initializedNodes.set(result._id, result);
   return result;
 }
@@ -15706,7 +15706,7 @@ function isPrimitiveKind$3(val) {
   return typeof val === "number" || typeof val === "string" || typeof val === "boolean" || val === null;
 }
 function isStructuredKind(val) {
-  return val instanceof LinkedPrimitive || val instanceof Struct || val instanceof Struct2 || val instanceof Structured || val instanceof SArray || val instanceof SSchemaArray || val instanceof SSet || val instanceof SUnion;
+  return val instanceof LinkedPrimitive || val instanceof Struct || val instanceof Struct2 || val instanceof Structured || val instanceof LinkedArray || val instanceof SSchemaArray || val instanceof SSet || val instanceof SUnion;
 }
 function replaceSSet(json, set2, acc) {
   if (json._schema != Boolean(set2._schema != null)) {
@@ -16300,9 +16300,6 @@ class LinkedArray {
     throw new Error("Method not implemented.");
   }
 }
-class SArray extends LinkedArray {
-  // readonly _differentiator = "sarray";
-}
 class SSchemaArray extends LinkedArray {
   _schema;
   // // TODO: do I need this? I think I was planning on using this in history, but since
@@ -16478,7 +16475,7 @@ function arrayOf(schema, val) {
   return val == null ? new UNINITIALIZED_TYPED_ARRAY(schema) : new SSchemaArray(val, nanoid$1(5), schema);
 }
 function array$2(val) {
-  return val == null ? new UNINITIALIZED_ARRAY() : new SArray(val, nanoid$1(5));
+  return val == null ? new UNINITIALIZED_ARRAY() : new LinkedArray(val, nanoid$1(5));
 }
 function map$2(initialValue) {
   return LinkedMap.create(initialValue);
@@ -16524,7 +16521,7 @@ class Struct {
         self[key] = LinkedPrimitive.of(args[key]);
       }
       if (child instanceof UNINITIALIZED_ARRAY) {
-        self[key] = new SArray(args[key], nanoid$1(5));
+        self[key] = new LinkedArray(args[key], nanoid$1(5));
       }
       if (child instanceof UNINITIALIZED_TYPED_ARRAY) {
         self[key] = new SSchemaArray(args[key], nanoid$1(5), child.schema);
@@ -16672,7 +16669,7 @@ function autoSimplify(descriptor, acc) {
       throw new Error("cant simplify function");
     } else if (value instanceof LinkedPrimitive) {
       serializable[key] = simplifyPrimitive(value, acc);
-    } else if (value instanceof SArray) {
+    } else if (value instanceof LinkedArray) {
       serializable[key] = simplifySimpleArray(value, acc);
     } else if (value instanceof SSchemaArray) {
       serializable[key] = simplifySchemaArray(value, acc);
@@ -16730,7 +16727,7 @@ function simplify$2(state, acc) {
     return state;
   } else if (typeof state === "function") {
     throw new Error("cant simplify function");
-  } else if (state instanceof LinkedPrimitive || state instanceof SArray || state instanceof SSchemaArray || state instanceof Struct || state instanceof Struct2 || state instanceof Structured || state instanceof SSet || state instanceof SUnion) {
+  } else if (state instanceof LinkedPrimitive || state instanceof LinkedArray || state instanceof SSchemaArray || state instanceof Struct || state instanceof Struct2 || state instanceof Structured || state instanceof SSet || state instanceof SUnion) {
     return simplifyStructuredKind(state, acc);
   } else if (typeof state === "object") {
     if (state.constructor !== Object && !Array.isArray(state)) {
@@ -16744,7 +16741,7 @@ function simplify$2(state, acc) {
 function simplifyStructuredKind(state, acc) {
   if (state instanceof LinkedPrimitive) {
     return simplifyPrimitive(state, acc);
-  } else if (state instanceof SArray) {
+  } else if (state instanceof LinkedArray) {
     return simplifySimpleArray(state, acc);
   } else if (state instanceof SSchemaArray) {
     return simplifySchemaArray(state, acc);
@@ -17374,7 +17371,7 @@ function debugOutHtml(val, pad = 0, showUnknowns = true) {
     return debugOutPrm(val);
   } else if (typeof val === "function") {
     return "(function)";
-  } else if (val instanceof SArray) {
+  } else if (val instanceof LinkedArray) {
     return debugOutArray$1(val, pad, showUnknowns);
   } else if (val instanceof SSchemaArray) {
     return debugOutArray$1(val, pad, showUnknowns);
@@ -17450,7 +17447,7 @@ ${debugOutHtml(elem, pad, showUnknowns).split("\n").map((s2) => `  ${s2}`).join(
 }
 function header$1(elem, showContainerId = false) {
   const kindStr = (() => {
-    if (elem instanceof SArray) {
+    if (elem instanceof LinkedArray) {
       return "arr";
     } else if (elem instanceof SSchemaArray) {
       return "s_arr";
@@ -17591,7 +17588,7 @@ function DebugOutReact$1({
     return /* @__PURE__ */ jsxRuntimeExports.jsx(DebugOutSimplePrm$2, { val });
   } else if (typeof val === "function") {
     return "(function)";
-  } else if (val instanceof SArray) {
+  } else if (val instanceof LinkedArray) {
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       DebugOutArray$1,
       {
@@ -17833,7 +17830,7 @@ function Header$3({
   showContainerId = false
 }) {
   const kindStr = (() => {
-    if (obj instanceof SArray) {
+    if (obj instanceof LinkedArray) {
       return "arr";
     } else if (obj instanceof SSchemaArray) {
       return "s_arr";
@@ -17934,7 +17931,7 @@ function debugOut(val, pad = 0, showUnknowns = true) {
     return JSON.stringify(val);
   } else if (typeof val === "function") {
     return "(function)";
-  } else if (val instanceof SArray) {
+  } else if (val instanceof LinkedArray) {
     return debugOutArray(val, pad, showUnknowns);
   } else if (val instanceof SSchemaArray) {
     return debugOutArray(val, pad, showUnknowns);
@@ -18008,7 +18005,7 @@ ${debugOut(elem, pad, showUnknowns).split("\n").map((s2) => `  ${s2}`).join("\n"
 }
 function header(elem, showContainerId = false) {
   const kind = (() => {
-    if (elem instanceof SArray) {
+    if (elem instanceof LinkedArray) {
       return "arr";
     } else if (elem instanceof SSchemaArray) {
       return "s_arr";
@@ -18125,7 +18122,7 @@ const s = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   DebugOut,
   DirtyObserver,
-  SArray,
+  SArray: LinkedArray,
   SBoolean,
   SMap: LinkedMap,
   SNil,

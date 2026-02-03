@@ -7,9 +7,9 @@ export {
   map,
   nil,
   number,
+  primitive,
   set,
   string,
-  primitive,
 } from "./sstate";
 
 export { SBoolean, SNil, SNumber, SString } from "./sstate";
@@ -20,10 +20,11 @@ export { create2, Struct2 } from "./Struct2";
 export { Structured } from "./Structured";
 export type { DeserializeFunc, JSONOfAuto } from "./Structured";
 
-export { SArray, SSchemaArray } from "./SArray";
+export { LinkedArray as SArray } from "./state/LinkedArray";
 export { LinkedMap as SMap } from "./state/LinkedMap";
 export { LinkedPrimitive as SPrimitive } from "./state/LinkedPrimitive";
 export { SSet } from "./state/LinkedSet";
+export { SSchemaArray } from "./state/SSchemaArray";
 
 export { useNewLinkedMap, useNewLinkedSet } from "./state/useNew";
 

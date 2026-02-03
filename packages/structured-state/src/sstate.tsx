@@ -1,7 +1,8 @@
 //////// Schema ////////
 
 import { nanoid } from "nanoid";
-import { SArray, SSchemaArray } from "./SArray";
+import { SSchemaArray } from "./state/SSchemaArray";
+import { LinkedArray } from "./state/LinkedArray";
 import { StructSchema } from "./StructuredKinds";
 import { LinkedMap } from "./state/LinkedMap";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
@@ -43,17 +44,17 @@ export class UNINITIALIZED_TYPED_ARRAY<S extends StructSchema> {
 export type SOut<T> = T extends SNumber
   ? number
   : T extends SString
-  ? string
-  : T extends SBoolean
-  ? boolean
-  : T extends SNil
-  ? null
-  : T extends SArray<infer O>
-  ? O[]
-  : // ? {
-    //     [Key in keyof O]: NWOut<O[Key]>;
-    //   }
-    never;
+    ? string
+    : T extends SBoolean
+      ? boolean
+      : T extends SNil
+        ? null
+        : T extends LinkedArray<infer O>
+          ? O[]
+          : // ? {
+            //     [Key in keyof O]: NWOut<O[Key]>;
+            //   }
+            never;
 
 ////////////// CREATION FUNCTIONS //////////////
 
@@ -85,17 +86,17 @@ export function primitive<T>(value: T) {
 
 export function arrayOf<T extends StructSchema>(
   schema: T[],
-  val?: InstanceType<T>[]
+  val?: InstanceType<T>[],
 ): SSchemaArray<InstanceType<T>> {
   return val == null
     ? (new UNINITIALIZED_TYPED_ARRAY(schema as any) as any)
     : new SSchemaArray(val, nanoid(5), schema);
 }
 
-export function array<T extends JSONValue>(val?: T[]): SArray<T> {
+export function array<T extends JSONValue>(val?: T[]): LinkedArray<T> {
   return val == null
     ? (new UNINITIALIZED_ARRAY() as any)
-    : new SArray(val, nanoid(5));
+    : new LinkedArray(val, nanoid(5));
 }
 
 export function map<K, V>(initialValue?: Map<K, V>) {
@@ -108,7 +109,7 @@ export function set<T>(initialValue?: Iterable<T>) {
 
 export function setOf<T extends StructSchema>(
   schema: T,
-  initialValue?: Iterable<InstanceType<T>>
+  initialValue?: Iterable<InstanceType<T>>,
 ) {
   return SSet._create(initialValue, undefined, schema);
 }

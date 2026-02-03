@@ -1,4 +1,5 @@
-import { SArray, SSchemaArray } from "../SArray";
+import { SSchemaArray } from "../state/SSchemaArray";
+import { LinkedArray } from "../state/LinkedArray";
 import { LinkedPrimitive } from "../state/LinkedPrimitive";
 import { SSet } from "../state/LinkedSet";
 import { Struct } from "../Struct";
@@ -108,56 +109,56 @@ export type ApplySerialization<T extends StructuredKind> =
   T extends LinkedPrimitive<infer U>
     ? SimplifiedTypePrimitive<U>
     : T extends Struct<any>
-    ? NSimplified["struct"]
-    : T extends Struct2<any>
-    ? NSimplified["struct2"]
-    : T extends Structured<any, any>
-    ? NSimplified["structured"]
-    : T extends SSchemaArray<any>
-    ? NSimplified["arr-schema"]
-    : T extends SArray<infer U>
-    ? SimplifiedSimpleArray<U>
-    : T extends SSet<infer U>
-    ? SimplifiedSet<U>
-    : never;
+      ? NSimplified["struct"]
+      : T extends Struct2<any>
+        ? NSimplified["struct2"]
+        : T extends Structured<any, any>
+          ? NSimplified["structured"]
+          : T extends SSchemaArray<any>
+            ? NSimplified["arr-schema"]
+            : T extends LinkedArray<infer U>
+              ? SimplifiedSimpleArray<U>
+              : T extends SSet<infer U>
+                ? SimplifiedSet<U>
+                : never;
 
 export type ApplyDeserialization<
   S extends Simplified,
-  T extends Struct<any> | Struct2<any> | Structured<any, any> = any
+  T extends Struct<any> | Struct2<any> | Structured<any, any> = any,
 > = S extends NSimplified["prim"]
   ? LinkedPrimitive<any>
   : S extends NSimplified["struct"]
-  ? Struct<any>
-  : S extends NSimplified["struct2"]
-  ? Struct2<any>
-  : S extends NSimplified["structured"]
-  ? Structured<any, any>
-  : S extends NSimplified["arr-simple"]
-  ? SArray<any>
-  : S extends NSimplified["arr-schema"]
-  ? SSchemaArray<T>
-  : S extends NSimplified["set"]
-  ? SSet<T>
-  : never;
+    ? Struct<any>
+    : S extends NSimplified["struct2"]
+      ? Struct2<any>
+      : S extends NSimplified["structured"]
+        ? Structured<any, any>
+        : S extends NSimplified["arr-simple"]
+          ? LinkedArray<any>
+          : S extends NSimplified["arr-schema"]
+            ? SSchemaArray<T>
+            : S extends NSimplified["set"]
+              ? SSet<T>
+              : never;
 
 export type ObjectDeserialization<
   S extends Simplified,
-  T extends Struct<any> | Struct2<any> | Structured<any, any> = any
+  T extends Struct<any> | Struct2<any> | Structured<any, any> = any,
 > = S extends NSimplified["prim"]
   ? LinkedPrimitive<any>
   : S extends NSimplified["struct"]
-  ? Struct<any>
-  : S extends NSimplified["struct2"]
-  ? Struct2<any>
-  : S extends NSimplified["structured"]
-  ? Structured<any, any>
-  : S extends NSimplified["arr-simple"]
-  ? T[]
-  : S extends NSimplified["arr-schema"]
-  ? T[]
-  : S extends NSimplified["set"]
-  ? Set<T>
-  : never;
+    ? Struct<any>
+    : S extends NSimplified["struct2"]
+      ? Struct2<any>
+      : S extends NSimplified["structured"]
+        ? Structured<any, any>
+        : S extends NSimplified["arr-simple"]
+          ? T[]
+          : S extends NSimplified["arr-schema"]
+            ? T[]
+            : S extends NSimplified["set"]
+              ? Set<T>
+              : never;
 
 ///////////////////////////////
 
@@ -199,7 +200,7 @@ export function isSimplified(json: unknown): json is Simplified {
 }
 
 export function isSeralizedStructured(
-  json: unknown
+  json: unknown,
 ): json is NSimplified["structured"] {
   return isSimplified(json) && json.$$ === "structured";
 }

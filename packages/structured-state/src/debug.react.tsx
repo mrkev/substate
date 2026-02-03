@@ -1,7 +1,8 @@
 import stringify from "json-stringify-deterministic";
 import { ReactNode, useState } from "react";
 import { PrimitiveKind, SSet, Structured } from ".";
-import { SArray, SSchemaArray } from "./SArray";
+import { SSchemaArray } from "./state/SSchemaArray";
+import { LinkedArray } from "./state/LinkedArray";
 import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
 import { isPrimitiveKind, StructuredKind } from "./StructuredKinds";
@@ -71,7 +72,7 @@ export function DebugOutReact({
     return <DebugOutSimplePrm val={val} />;
   } else if (typeof val === "function") {
     return "(function)";
-  } else if (val instanceof SArray) {
+  } else if (val instanceof LinkedArray) {
     return (
       <DebugOutArray
         arr={val}
@@ -251,7 +252,7 @@ function DebugOutArray({
   path = "",
   showUnknowns,
 }: {
-  arr: SArray<any> | SSchemaArray<any>;
+  arr: LinkedArray<any> | SSchemaArray<any>;
   pad: number;
   path?: string;
   showUnknowns: boolean;
@@ -348,7 +349,7 @@ function Header({
   showContainerId?: boolean;
 }) {
   const kindStr = (() => {
-    if (obj instanceof SArray) {
+    if (obj instanceof LinkedArray) {
       return "arr";
     } else if (obj instanceof SSchemaArray) {
       return "s_arr";
