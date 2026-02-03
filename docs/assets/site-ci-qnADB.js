@@ -14897,11 +14897,16 @@ function initStructured(structured) {
   const globalState = getGlobalState();
   globalState.knownObjects.set(structured._id, structured);
 }
-class SSet extends SubbableContainer {
+class SSet {
   _set;
   _schema;
+  _id;
+  _subscriptors = /* @__PURE__ */ new Set();
+  _hash = 0;
+  _container = /* @__PURE__ */ new Set();
+  _propagatedTokens = /* @__PURE__ */ new WeakSet();
   constructor(_set, _id, _schema) {
-    super(_id);
+    this._id = _id;
     this._set = _set;
     this._schema = _schema;
     subbableContainer$2._containAll(this, this._set);
@@ -15062,19 +15067,6 @@ let UpdateToken$2 = class UpdateToken {
     this.target = target;
   }
 };
-class SubbableContainer {
-  _id;
-  _subscriptors = /* @__PURE__ */ new Set();
-  _hash = 0;
-  // all containers can be contained
-  _container = /* @__PURE__ */ new Set();
-  _propagatedTokens = /* @__PURE__ */ new WeakSet();
-  // abstract _replace(val: T): void;
-  // abstract _childChanged(child: Subbable): void;
-  constructor(id) {
-    this._id = id;
-  }
-}
 const subbableContainer$2 = {
   _contain(container, item) {
     if (isContainable$2(item)) {

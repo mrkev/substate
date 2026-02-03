@@ -1,5 +1,4 @@
-import { isContainable } from "./Contained";
-import { Contained } from "./Contained";
+import { Contained, isContainable } from "./Contained";
 import { mutationHashable, MutationHashable } from "./MutationHashable";
 import { Subbable, SubbableCallback } from "./Subbable";
 
@@ -26,22 +25,23 @@ export type IterableCollection =
   | ReadonlySet<unknown>
   | IterableIterator<unknown>;
 
-export abstract class SubbableContainer
-  implements MutationHashable, Subbable, Contained
-{
+export interface SubbableContainer
+  extends MutationHashable, Subbable, Contained {
+  readonly _propagatedTokens: WeakSet<UpdateToken>;
+
+  // Subbable
+  readonly _subscriptors: Set<SubbableCallback>;
+
+  // MutationHashable
   readonly _id: string;
-  readonly _subscriptors: Set<SubbableCallback> = new Set();
-  public _hash: number = 0;
+  _hash: number;
+
+  // Contained
   // all containers can be contained
-  public readonly _container = new Set<SubbableContainer>();
-  public readonly _propagatedTokens = new WeakSet<UpdateToken>();
+  readonly _container: Set<SubbableContainer>;
 
   // abstract _replace(val: T): void;
   // abstract _childChanged(child: Subbable): void;
-
-  constructor(id: string) {
-    this._id = id;
-  }
 }
 
 export const subbableContainer = {

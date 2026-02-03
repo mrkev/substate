@@ -2,14 +2,21 @@ import { nanoid } from "nanoid";
 import { mutableset } from "../lib/nullthrows";
 import { getGlobalState, saveForHistory } from "../sstate.history";
 import { StructSchema } from "../StructuredKinds";
+import { SubbableCallback } from "./Subbable";
 import { subbableContainer, SubbableContainer } from "./SubbableContainer";
 
-export class SSet<S> extends SubbableContainer implements Set<S> {
+export class SSet<S> implements Set<S>, SubbableContainer {
   private _set: ReadonlySet<S>;
   public _schema: StructSchema | null;
 
+  readonly _id: string;
+  readonly _subscriptors: Set<SubbableCallback> = new Set();
+  _hash: number = 0;
+  readonly _container = new Set<SubbableContainer>();
+  readonly _propagatedTokens = new WeakSet();
+
   constructor(_set: Set<S>, _id: string, _schema: StructSchema | null) {
-    super(_id);
+    this._id = _id;
     this._set = _set;
     this._schema = _schema;
     subbableContainer._containAll(this, this._set);

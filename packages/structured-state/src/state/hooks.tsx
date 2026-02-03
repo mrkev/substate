@@ -4,6 +4,8 @@ import { mutationHashable, MutationHashable } from "./MutationHashable";
 import { Subbable, subscribe } from "./Subbable";
 import { SubbableContainer } from "./SubbableContainer";
 
+export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
+
 export function usePrimitive<S>(
   linkedState: LinkedPrimitive<S>,
 ): [S, StateDispath<S>] {
@@ -55,4 +57,3 @@ export function useSubscribeToSubbableMutationHashable<
   }, [cb, obj, recursiveChanges]);
   return obj;
 }
-export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
