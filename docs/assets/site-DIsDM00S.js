@@ -17221,15 +17221,22 @@ function useContainer(obj, recursiveChanges = false) {
   return obj;
 }
 function useSubscribeToSubbableMutationHashable(obj, cb, recursiveChanges = false) {
-  const [, setHash] = reactExports.useState(() => mutationHashable.getMutationHash(obj));
-  reactExports.useEffect(() => {
-    return subscribe(obj, (target) => {
-      if (obj === target || recursiveChanges) {
-        setHash((prev) => (prev + 1) % Number.MAX_SAFE_INTEGER);
-        cb?.();
-      }
-    });
-  }, [cb, obj, recursiveChanges]);
+  "use no memo";
+  reactExports.useSyncExternalStore(
+    reactExports.useCallback(
+      (onStoreChange) => {
+        return subscribe(obj, (target) => {
+          if (obj === target || recursiveChanges) {
+            onStoreChange();
+            cb?.();
+          }
+        });
+      },
+      [cb, obj, recursiveChanges]
+    ),
+    reactExports.useCallback(() => obj._hash, [obj]),
+    reactExports.useCallback(() => obj._hash, [obj])
+  );
   return obj;
 }
 function useNewLinkedSet() {

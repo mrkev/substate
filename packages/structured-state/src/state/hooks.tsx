@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import type { LinkedPrimitive } from "./LinkedPrimitive";
-import { mutationHashable, MutationHashable } from "./MutationHashable";
+import { MutationHashable } from "./MutationHashable";
 import { Subbable, subscribe } from "./Subbable";
 import { SubbableContainer } from "./SubbableContainer";
 
@@ -44,16 +44,29 @@ export function useContainer<S extends SubbableContainer>(
 export function useSubscribeToSubbableMutationHashable<
   T extends MutationHashable & Subbable,
 >(obj: T, cb?: () => void, recursiveChanges = false): T {
-  const [, setHash] = useState(() => mutationHashable.getMutationHash(obj));
-
-  useEffect(() => {
-    return subscribe(obj, (target) => {
-      // console.log("got notif", obj, "target is", target);
-      if (obj === target || recursiveChanges) {
-        setHash((prev) => (prev + 1) % Number.MAX_SAFE_INTEGER);
-        cb?.();
-      }
-    });
-  }, [cb, obj, recursiveChanges]);
+  "use no memo"; // dont memo this hook
+  const _hash = useSyncExternalStore(
+    useCallback(
+      (onStoreChange) => {
+        return subscribe(obj, (target) => {
+          // console.log(
+          //   "got notif",
+          //   obj,
+          //   "target is",
+          //   target,
+          //   "notifying?",
+          //   obj === target || recursiveChanges
+          // );
+          if (obj === target || recursiveChanges) {
+            onStoreChange();
+            cb?.();
+          }
+        });
+      },
+      [cb, obj, recursiveChanges],
+    ),
+    useCallback(() => obj._hash, [obj]),
+    useCallback(() => obj._hash, [obj]),
+  );
   return obj;
 }
