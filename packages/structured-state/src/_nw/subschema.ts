@@ -1,8 +1,15 @@
+import { nanoid } from "nanoid";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { exhaustive } from "../assertions";
 import { LinkedArray } from "../state/LinkedArray";
-import { StateChangeHandler, StateDispath } from "../state/LinkedPrimitive";
+import { StateDispath } from "../state/LinkedPrimitive";
 import { MutationHashable } from "../state/MutationHashable";
-import { Subbable, notify, subscribe } from "../state/Subbable";
+import {
+  Subbable,
+  SubbableCallback,
+  notify,
+  subscribe,
+} from "../state/Subbable";
 import * as nw from "./nwschema";
 import {
   NWArray,
@@ -15,8 +22,6 @@ import {
 } from "./nwschema";
 import { NWInLax, NWInUnion, NWOut } from "./nwschema.types";
 import { SubInLax, SubInLaxUnion, SubOut, SubOutLax } from "./subschema.types";
-import { nanoid } from "nanoid";
-import { exhaustive } from "../assertions";
 
 //////// Schema ////////
 
@@ -36,7 +41,7 @@ export function concretize(schema: NWBoolean, value: boolean): SubBoolean;
 export function concretize(schema: NWNil, value: null): SubNil;
 export function concretize(
   schema: NWString | NWNumber | NWBoolean | NWNil,
-  value: string | number | boolean | null
+  value: string | number | boolean | null,
 ): SubString | SubNumber | SubBoolean | SubNil {
   if (schema instanceof NWString) {
     const str = schema.expect(value);
@@ -89,7 +94,7 @@ type SubContainer = SubObject<any>; // todo: remove null
 /** Describes a string */
 class SubString implements SubSchema<string>, SubbableState<string> {
   // interface SubbableState
-  _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
+  _subscriptors: Set<SubbableCallback> = new Set();
 
   private val: string;
   private readonly schema: NWString;
@@ -132,7 +137,7 @@ class SubString implements SubSchema<string>, SubbableState<string> {
 /** Describes a number */
 class SubNumber implements SubSchema<number>, SubbableState<number> {
   // interface SubbableState
-  _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
+  _subscriptors: Set<SubbableCallback> = new Set();
 
   private val: number;
   private readonly schema: NWNumber;
@@ -313,7 +318,7 @@ class SubObject<TSub extends Record<string, SubSchema<unknown>>>
   private _container: SubContainer | null = null;
 
   // SubbableHashedState interface
-  _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
+  _subscriptors: Set<SubbableCallback> = new Set();
   _hash: number = 0;
 
   _getRaw(): { [Key in keyof TSub]: SubOut<TSub[Key]> } {
@@ -332,7 +337,7 @@ class SubObject<TSub extends Record<string, SubSchema<unknown>>>
 
   constructor(
     subs: TSub,
-    schema: nw.NWObject<{ [Key in keyof TSub]: NWInLax<SubOutLax<TSub[Key]>> }>
+    schema: nw.NWObject<{ [Key in keyof TSub]: NWInLax<SubOutLax<TSub[Key]>> }>,
   ) {
     this.schema = schema;
     this.sub = subs;
@@ -345,7 +350,7 @@ class SubObject<TSub extends Record<string, SubSchema<unknown>>>
 
     subscribe(this, () => {
       console.log(
-        `SUBOBJ: {${Object.keys(this.sub)}} notify parent ${this._container}`
+        `SUBOBJ: {${Object.keys(this.sub)}} notify parent ${this._container}`,
       );
       if (this._container != null) {
         notify(this._container, this);
@@ -369,14 +374,14 @@ class SubObject<TSub extends Record<string, SubSchema<unknown>>>
   }
 }
 
-class SubMap<T extends SubSchema<unknown>>
-  implements SubSchema<Record<string, SubOut<T>>>
-{
+class SubMap<T extends SubSchema<unknown>> implements SubSchema<
+  Record<string, SubOut<T>>
+> {
   private readonly schema: nw.NWMap<NWInLax<SubOutLax<T>>>;
   protected subs: Record<string, T>;
   constructor(
     subs: Record<string, T>,
-    schema: nw.NWMap<NWInLax<SubOutLax<T>>>
+    schema: nw.NWMap<NWInLax<SubOutLax<T>>>,
   ) {
     this.schema = schema;
     this.subs = subs;
@@ -428,7 +433,7 @@ export type NWUnionOptsToSubOpts<Opts extends NWSchema<any>> = SubInLaxUnion<
  */
 function union<Opts extends NWSchema<any>>(
   sub: NWUnionOptsToSubOpts<Opts>,
-  schema: NWUnion<Opts>
+  schema: NWUnion<Opts>,
 ): SubUnion<NWUnionOptsToSubOpts<Opts>> {
   // TODO
   return new SubUnion<NWUnionOptsToSubOpts<Opts>>(sub, schema as any);
@@ -437,21 +442,21 @@ function union<Opts extends NWSchema<any>>(
 function object<T extends Record<string, SubSchema<unknown>>>(
   sub: T,
   // schema: NWInLax<SubOutLax<SubObject<T>>>
-  schema: nw.NWObject<{ [Key in keyof T]: NWInLax<SubOutLax<T[Key]>> }>
+  schema: nw.NWObject<{ [Key in keyof T]: NWInLax<SubOutLax<T[Key]>> }>,
 ): SubObject<T> {
   return new SubObject<T>(sub, schema);
 }
 
 function map<T extends SubSchema<unknown>>(
   sub: Record<string, T>,
-  schema: nw.NWMap<NWInLax<SubOutLax<T>>>
+  schema: nw.NWMap<NWInLax<SubOutLax<T>>>,
 ): SubMap<T> {
   return new SubMap<T>(sub, schema);
 }
 
 function array<T extends SubSchema<unknown>>(
   sub: T[],
-  schema: NWArray<NWInLax<SubOutLax<T>>>
+  schema: NWArray<NWInLax<SubOutLax<T>>>,
 ): SubArray<T> {
   return new SubArray(sub, schema);
 }
@@ -491,7 +496,7 @@ export interface SubbableHashedState<T> extends Subbable, MutationHashable {
 }
 
 export function useSubbable<S>(
-  linkedState: SubbableState<S>
+  linkedState: SubbableState<S>,
 ): [S, StateDispath<S>] {
   const [state, setState] = useState<S>(() => linkedState.get());
 
@@ -517,7 +522,7 @@ export function useSubbable<S>(
         linkedState.set(newVal);
       }
     },
-    [linkedState]
+    [linkedState],
   );
 
   return [state, setter];

@@ -1,7 +1,6 @@
 import { nanoid } from "nanoid";
-import { StateChangeHandler } from "./LinkedPrimitive";
 import { MutationHashable } from "./MutationHashable";
-import { Subbable } from "./Subbable";
+import { Subbable, SubbableCallback } from "./Subbable";
 import {
   subbableContainer,
   SubbableContainer,
@@ -21,7 +20,7 @@ export class LinkedMap<K, V>
   public readonly _propagatedTokens: WeakSet<UpdateToken> = new WeakSet();
 
   // MutationHashable
-  _subscriptors = new Set<StateChangeHandler<Subbable>>();
+  readonly _subscriptors: Set<SubbableCallback> = new Set();
   _hash: number = 0;
 
   _setRaw(map: ReadonlyMap<K, V>) {

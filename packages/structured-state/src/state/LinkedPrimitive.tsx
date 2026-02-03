@@ -1,15 +1,13 @@
 import { nanoid } from "nanoid";
-
+import { getGlobalState, saveForHistory } from "../sstate.history";
+import { notify, Subbable, SubbableCallback } from "./Subbable";
 import {
   subbableContainer,
   SubbableContainer,
   UpdateToken,
 } from "./SubbableContainer";
-import { Subbable, notify } from "./Subbable";
-import { getGlobalState, saveForHistory } from "../sstate.history";
 
 export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
-export type StateChangeHandler<S> = (value: S) => void;
 
 export interface Contained {
   readonly _container: Set<Subbable>;
@@ -21,7 +19,7 @@ export interface Contained {
 export class LinkedPrimitive<S> implements Contained, Subbable {
   readonly _id: string;
   private _value: Readonly<S>;
-  readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
+  readonly _subscriptors: Set<SubbableCallback> = new Set();
   readonly _container = new Set<SubbableContainer>();
 
   constructor(initialValue: S, id: string) {

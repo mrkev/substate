@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid";
+import { InitFunctions } from "./serialization/initialize";
 import { ReplaceFunctions } from "./serialization/replace";
 import {
   ApplyDeserialization,
@@ -6,10 +7,9 @@ import {
   NeedsSchema,
   Schema,
 } from "./serialization/serialization";
-import { InitFunctions } from "./serialization/initialize";
 import { getGlobalState, saveForHistory } from "./sstate.history";
-import type { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
-import { Subbable } from "./state/Subbable";
+import type { Contained } from "./state/LinkedPrimitive";
+import { Subbable, SubbableCallback } from "./state/Subbable";
 import {
   subbableContainer,
   SubbableContainer,
@@ -57,7 +57,7 @@ export abstract class Structured<
 {
   readonly _id: string;
   public _hash: number = 0;
-  readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
+  readonly _subscriptors: Set<SubbableCallback> = new Set();
   readonly _container = new Set<SubbableContainer>();
   readonly _propagatedTokens = new WeakSet();
 

@@ -1,8 +1,7 @@
 import { nanoid } from "nanoid";
 import { getGlobalState, StructuredKind } from ".";
 import { saveForHistory } from "./sstate.history";
-import { StateChangeHandler } from "./state/LinkedPrimitive";
-import { notify, Subbable } from "./state/Subbable";
+import { notify, SubbableCallback } from "./state/Subbable";
 import {
   subbableContainer,
   SubbableContainer,
@@ -16,7 +15,7 @@ import {
 export class SUnion<S extends StructuredKind> implements SubbableContainer {
   readonly _id: string;
   private _value: S;
-  readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
+  readonly _subscriptors: Set<SubbableCallback> = new Set();
   readonly _container = new Set<SubbableContainer>();
   public _hash: number = 0;
   public readonly _propagatedTokens = new WeakSet<UpdateToken>();

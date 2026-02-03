@@ -1,9 +1,8 @@
 import { nanoid } from "nanoid";
 import { mutablearr } from "../lib/nullthrows";
 import { getGlobalState, saveForHistory } from "../sstate.history";
-import { StateChangeHandler } from "./LinkedPrimitive";
-import { Subbable } from "./Subbable";
 import { subbableContainer, SubbableContainer } from "./SubbableContainer";
+import { SubbableCallback } from "./Subbable";
 
 // .sort, .reverse, .fill, .copyWithin operate in place and return the array. SubbableArray
 // is not quite an array so the return types don't match.
@@ -31,7 +30,7 @@ export class LinkedArray<S>
 {
   readonly _id: string;
   protected _array: Array<S>;
-  readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
+  readonly _subscriptors: Set<SubbableCallback> = new Set();
   _hash: number = 0;
   readonly _container = new Set<SubbableContainer>();
   readonly _propagatedTokens = new WeakSet();

@@ -1,17 +1,17 @@
-import type { StateChangeHandler } from "./LinkedPrimitive";
-
-/* Subbables are objects one can subscribe to */
+/**
+ * Subbables are objects one can subscribe to. All Subbables include:
+ * - a set of callbacks to be called on mutation
+ */
 
 export type SubbableCallback = (changed: Subbable, notified: Subbable) => void;
 
 export interface Subbable {
-  readonly _id: string;
   readonly _subscriptors: Set<SubbableCallback>;
 }
 
 export function subscribe(
   subbable: Subbable,
-  cb: StateChangeHandler<Subbable>,
+  cb: SubbableCallback,
 ): () => void {
   subbable._subscriptors.add(cb);
   return () => subbable._subscriptors.delete(cb);

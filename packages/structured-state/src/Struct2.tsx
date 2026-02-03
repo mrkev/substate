@@ -1,14 +1,13 @@
 import { nanoid } from "nanoid";
 import { isContainable } from "./assertions";
-import type { Contained, StateChangeHandler } from "./state/LinkedPrimitive";
-import { MutationHashable } from "./state/MutationHashable";
+import { SString } from "./sstate";
+import { getGlobalState, saveForHistory } from "./sstate.history";
+import type { Contained } from "./state/LinkedPrimitive";
+import { Subbable, SubbableCallback } from "./state/Subbable";
 import {
   subbableContainer,
   SubbableContainer,
 } from "./state/SubbableContainer";
-import { Subbable, notify } from "./state/Subbable";
-import { getGlobalState, saveForHistory } from "./sstate.history";
-import { SString } from "./sstate";
 
 // export type AnyClass = {
 //   new (...args: any[]): Struct<any>;
@@ -23,7 +22,7 @@ export abstract class Struct2<Sub extends Constructable>
 {
   readonly _id: string;
   public _hash: number = 0;
-  readonly _subscriptors: Set<StateChangeHandler<Subbable>> = new Set();
+  readonly _subscriptors: Set<SubbableCallback> = new Set();
   readonly _container = new Set<SubbableContainer>();
   readonly _propagatedTokens = new WeakSet();
 
