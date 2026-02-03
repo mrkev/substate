@@ -18,7 +18,7 @@ import {
   subbable,
   SubbableMark,
 } from "@mrkev/marked-subbable";
-import { WeakRefMap } from "../../../../structured-state/src/WeakRefMap";
+import { WeakRefMap } from "../../../../structured-state/src/lib/WeakRefMap";
 
 // class HistoryMark {
 //   public readonly _id: string; // different id for history?
@@ -62,7 +62,7 @@ class HistoryStack {
 
   constructor(
     observed: MarkedHistoric,
-    private readonly serializationIndex: SerializationIndex
+    private readonly serializationIndex: SerializationIndex,
   ) {
     // record the observed "root" object
     this.knownObjects.set(observed.$$mark._id, observed);
@@ -86,7 +86,7 @@ class HistoryStack {
       } else {
         console.warn(
           "can't record history of non-simplifiable target!",
-          target
+          target,
         );
       }
     });
@@ -116,7 +116,7 @@ class HistoryStack {
         const obj = this.knownObjects.get(change.root._id);
         const constructed = constructSimplifiedPackage(
           change,
-          this.serializationIndex
+          this.serializationIndex,
         );
 
         console.log("we want to alter", obj, "and make it", constructed);
@@ -142,7 +142,7 @@ class HistoryStack {
 
 export function historyStackFor(
   m: MarkedSubbable & MarkedSerializable<any>,
-  serializationIndex: SerializationIndex
+  serializationIndex: SerializationIndex,
 ) {
   const history = new HistoryStack(m, serializationIndex);
   return history;

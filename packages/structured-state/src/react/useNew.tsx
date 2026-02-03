@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { LinkedArray } from "./LinkedArray";
-import { LinkedMap } from "./LinkedMap";
-import { SSet } from "./LinkedSet";
+import { LinkedArray } from "../obj/LinkedArray";
+import { LinkedMap } from "../obj/LinkedMap";
+import { SSet } from "../obj/LinkedSet";
 import { useSubscribeToSubbableMutationHashable } from "./hooks";
 
 export function useNewLinkedSet<S>(): SSet<S> {

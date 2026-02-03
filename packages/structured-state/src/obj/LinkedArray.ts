@@ -1,8 +1,11 @@
 import { nanoid } from "nanoid";
 import { mutablearr } from "../lib/nullthrows";
 import { getGlobalState, saveForHistory } from "../sstate.history";
-import { subbableContainer, SubbableContainer } from "./SubbableContainer";
-import { SubbableCallback } from "./Subbable";
+import {
+  subbableContainer,
+  SubbableContainer,
+} from "../state/SubbableContainer";
+import { SubbableCallback } from "../state/Subbable";
 
 // .sort, .reverse, .fill, .copyWithin operate in place and return the array. SubbableArray
 // is not quite an array so the return types don't match.

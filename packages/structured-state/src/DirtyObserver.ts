@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { useSubscribeToSubbableMutationHashable } from "./state/hooks";
+import { useSubscribeToSubbableMutationHashable } from "./react/hooks";
 import { mutationHashable, MutationHashable } from "./state/MutationHashable";
 import { SubbableCallback } from "./state/Subbable";
 

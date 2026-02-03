@@ -1,8 +1,8 @@
 import { SBoolean, SNil, SNumber, SPrimitive, SString } from "..";
-import { Struct } from "../Struct";
-import { Struct2 } from "../Struct2";
-import { ConstructableStructure, initStructured } from "../Structured";
-import { StructSchema, StructuredKind } from "../StructuredKinds";
+import { Struct } from "../obj/Struct";
+import { Struct2 } from "../obj/Struct2";
+import { ConstructableStructure, initStructured } from "../obj/Structured";
+import { StructSchema, StructuredKind } from "../state/StructuredKinds";
 import {
   assertArray,
   assertConstructableStruct,
@@ -10,14 +10,14 @@ import {
   assertConstructableStructured,
   assertNotArray,
   exhaustive,
-} from "../assertions";
+} from "../lib/assertions";
 import { OrderedMap } from "../lib/OrderedMap";
 import { assertNotNull, nullthrows } from "../lib/nullthrows";
 import { Constructor } from "../lib/types";
-import { LinkedArray } from "../state/LinkedArray";
-import { LinkedPrimitive } from "../state/LinkedPrimitive";
-import { SSet } from "../state/LinkedSet";
-import { SSchemaArray } from "../state/SSchemaArray";
+import { LinkedArray } from "../obj/LinkedArray";
+import { LinkedPrimitive } from "../obj/LinkedPrimitive";
+import { SSet } from "../obj/LinkedSet";
+import { SSchemaArray } from "../obj/SSchemaArray";
 import { SUnion } from "../sunion";
 import {
   NSimplified,

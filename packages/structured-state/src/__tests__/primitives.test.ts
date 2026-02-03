@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import * as Struct from "../Struct";
+import * as Struct from "../obj/Struct";
 import { boolean, nil, number, string } from "../sstate";
 
 class Primitives extends Struct.Struct<Primitives> {

@@ -1,13 +1,13 @@
 import { SArray, SSchemaArray, SSet } from "..";
-import { Struct } from "../Struct";
-import { Struct2 } from "../Struct2";
-import { Structured } from "../Structured";
+import { Struct } from "../obj/Struct";
+import { Struct2 } from "../obj/Struct2";
+import { Structured } from "../obj/Structured";
 import {
   isStructuredKind,
   PrimitiveKind,
   StructuredKind,
-} from "../StructuredKinds";
-import { exhaustive } from "../assertions";
+} from "../state/StructuredKinds";
+import { exhaustive } from "../lib/assertions";
 import {
   isSimplified,
   NSimplified,
@@ -15,7 +15,7 @@ import {
   SimplifiedDescriptor,
   SimplifiedRef,
 } from "./serialization";
-import { LinkedPrimitive } from "../state/LinkedPrimitive";
+import { LinkedPrimitive } from "../obj/LinkedPrimitive";
 import { CONTAINER_IGNORE_KEYS } from "../state/SubbableContainer";
 import { SUnion } from "../sunion";
 import { JSONValue } from "../lib/types";
@@ -31,7 +31,7 @@ export class SimplificationMetadata {
 
   record<T extends Simplified>(
     obj: StructuredKind,
-    simplified: T
+    simplified: T,
   ): T | SimplifiedRef {
     // console.log("simplifying", obj._id, simplified.$$);
     if (this.allObjs.has(obj._id)) {
@@ -47,7 +47,7 @@ export class SimplificationMetadata {
     const present = this.refered.get(simplified._id);
     if (present != null) {
       throw new Error(
-        `object ${simplified._id}:${simplified.$$} already referenced. Not supported yet.`
+        `object ${simplified._id}:${simplified.$$} already referenced. Not supported yet.`,
       );
     }
     this.refered.push(simplified._id, simplified);
@@ -87,7 +87,7 @@ export function isSimplePackage(json: unknown): json is SimplePackage {
 
 function simplifyPrimitive(
   obj: LinkedPrimitive<any>,
-  acc: SimplificationMetadata
+  acc: SimplificationMetadata,
 ): NSimplified["prim"] | SimplifiedRef {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
@@ -98,13 +98,13 @@ function simplifyPrimitive(
       $$: "prim",
       _value: obj.get(),
       _id: obj._id,
-    })
+    }),
   );
 }
 
 function simplifySimpleArray(
   obj: SArray<any>,
-  acc: SimplificationMetadata
+  acc: SimplificationMetadata,
 ): NSimplified["arr-simple"] | SimplifiedRef {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
@@ -118,7 +118,7 @@ function simplifySimpleArray(
 
 function simplifySchemaArray(
   obj: SSchemaArray<any>,
-  acc: SimplificationMetadata
+  acc: SimplificationMetadata,
 ): NSimplified["arr-schema"] | SimplifiedRef {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
@@ -139,7 +139,7 @@ function simplifySchemaArray(
 
 function simplifyStruct(
   obj: Struct<any>,
-  acc: SimplificationMetadata
+  acc: SimplificationMetadata,
 ): NSimplified["struct"] | SimplifiedRef {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
@@ -176,7 +176,7 @@ function simplifyStruct(
 
 function simplifyStruct2(
   obj: Struct2<any>,
-  acc: SimplificationMetadata
+  acc: SimplificationMetadata,
 ): NSimplified["struct2"] | SimplifiedRef {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
@@ -191,7 +191,7 @@ function simplifyStruct2(
 
 function autoSimplify(
   descriptor: Record<string, StructuredKind | PrimitiveKind>,
-  acc: SimplificationMetadata
+  acc: SimplificationMetadata,
 ): SimplifiedDescriptor {
   const serializable: SimplifiedDescriptor = {};
   for (const [key, value] of Object.entries(descriptor)) {
@@ -230,7 +230,7 @@ function autoSimplify(
 
 export function simplifyStructured(
   obj: Structured<any, any>,
-  acc: SimplificationMetadata
+  acc: SimplificationMetadata,
 ): NSimplified["structured"] | SimplifiedRef {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
@@ -245,7 +245,7 @@ export function simplifyStructured(
 
 function simplifySet(
   obj: SSet<any>,
-  acc: SimplificationMetadata
+  acc: SimplificationMetadata,
 ): NSimplified["set"] | SimplifiedRef {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
@@ -263,7 +263,7 @@ function simplifySet(
 
 function simplifyUnion(
   obj: SUnion<any>,
-  acc: SimplificationMetadata
+  acc: SimplificationMetadata,
 ): NSimplified["union"] | SimplifiedRef {
   if (obj._container.size > 1) {
     console.warn("multiple containers reference", obj);
@@ -278,7 +278,7 @@ function simplifyUnion(
 
 function simplify(
   state: StructuredKind | JSONValue,
-  acc: SimplificationMetadata
+  acc: SimplificationMetadata,
 ) {
   if (
     typeof state === "string" ||
@@ -316,7 +316,7 @@ export function simplifyPrimitiveKind(state: string | number | boolean | null) {
 
 export function simplifyStructuredKind(
   state: StructuredKind,
-  acc: SimplificationMetadata
+  acc: SimplificationMetadata,
 ): Simplified {
   if (state instanceof LinkedPrimitive) {
     return simplifyPrimitive(state, acc);

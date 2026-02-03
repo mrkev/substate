@@ -1,6 +1,6 @@
 import { nullthrows } from "../lib/nullthrows";
-import { SSet } from "../state/LinkedSet";
-import { isStructuredKind } from "../StructuredKinds";
+import { SSet } from "../obj/LinkedSet";
+import { isStructuredKind } from "../state/StructuredKinds";
 import { InitializationMetadata, initialize } from "./initialize";
 import { replace } from "./replace";
 import { NSimplified, isSimplified } from "./serialization";
@@ -23,7 +23,7 @@ import { NSimplified, isSimplified } from "./serialization";
 export function replaceSSet(
   json: NSimplified["set"],
   set: SSet<any>,
-  acc: InitializationMetadata
+  acc: InitializationMetadata,
 ) {
   // set is current state
   if (json._schema != Boolean(set._schema != null)) {
@@ -38,7 +38,7 @@ export function replaceSSet(
       } else {
         return [x, x];
       }
-    })
+    }),
   );
 
   const getWithAFromB = (elem: unknown) => {
@@ -56,9 +56,9 @@ export function replaceSSet(
         elem,
         nullthrows(
           set._schema,
-          "set holds structured state, but defines no schema"
+          "set holds structured state, but defines no schema",
         ),
-        acc
+        acc,
       );
       return initialized;
     } else {
@@ -82,7 +82,7 @@ export function replaceSSet(
       throw new Error(`simplified found, but element is not structured in set`);
     } else if (isStructuredKind(curr)) {
       throw new Error(
-        `structured kind found, but can't replace with non-simplified`
+        `structured kind found, but can't replace with non-simplified`,
       );
     } else {
       // do nothing

@@ -2,9 +2,9 @@ import { nanoid } from "nanoid";
 import { nullthrows, setWindow } from "./lib/nullthrows";
 import { replacePackage } from "./serialization/replace";
 import { serialize, Simplified } from "./serialization/serialization";
-import { LinkedArray } from "./state/LinkedArray";
-import { StructuredKind } from "./StructuredKinds";
-import { WeakRefMap } from "./WeakRefMap";
+import { LinkedArray } from "./obj/LinkedArray";
+import { StructuredKind } from "./state/StructuredKinds";
+import { WeakRefMap } from "./lib/WeakRefMap";
 
 // todo: use this for faster performance with array history
 export type ObjectSnapshot =
@@ -71,7 +71,7 @@ export function saveForHistory(obj: StructuredKind) {
 /** runs cb(), runs after() after cb() */
 function actAfter(
   cb: () => void | Promise<void>,
-  after: () => void
+  after: () => void,
 ): void | Promise<void> {
   const maybePromise = cb();
   if (maybePromise == null) {
@@ -119,11 +119,11 @@ export function pushHistory(name: string, objs: StructuredKind[]) {
 export function recordHistory(name: string, action: () => void): void;
 export function recordHistory(
   name: string,
-  action: () => Promise<void>
+  action: () => Promise<void>,
 ): Promise<void>;
 export function recordHistory(
   name: string,
-  action: () => void | Promise<void>
+  action: () => void | Promise<void>,
 ): void | Promise<void> {
   const globalState = getGlobalState();
 
@@ -160,7 +160,7 @@ export function recordHistory(
 
 function historyEntryOfObjectsEntryModifies(
   entry: HistorySnapshot,
-  globalState: GlobalState
+  globalState: GlobalState,
 ) {
   const newEntry: HistorySnapshot = {
     id: `h-${nanoid(4)}`,
@@ -172,7 +172,7 @@ function historyEntryOfObjectsEntryModifies(
     // get current state of object to save
     const object = nullthrows(
       globalState.knownObjects.get(id),
-      `no known object with ${id} found`
+      `no known object with ${id} found`,
     );
     newEntry.objects.set(id, serialize(object));
   }
@@ -195,7 +195,7 @@ function popHistory() {
   for (const [id, serialized] of [...prevState.objects.entries()].reverse()) {
     const object = nullthrows(
       globalState.knownObjects.get(id),
-      `no known object with ${id} found`
+      `no known object with ${id} found`,
     );
 
     const json = JSON.parse(serialized);
@@ -218,7 +218,7 @@ export function forwardHistory() {
   for (const [id, serialized] of [...next.objects.entries()].reverse()) {
     const object = nullthrows(
       globalState.knownObjects.get(id),
-      `no known object with ${id} found`
+      `no known object with ${id} found`,
     );
 
     const json = JSON.parse(serialized);

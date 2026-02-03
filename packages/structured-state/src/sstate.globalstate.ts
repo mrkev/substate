@@ -1,8 +1,8 @@
 import { setWindow } from "./lib/nullthrows";
 import { HistorySnapshot, ObjectSnapshot } from "./sstate.history";
-import { LinkedArray } from "./state/LinkedArray";
-import { StructuredKind } from "./StructuredKinds";
-import { WeakRefMap } from "./WeakRefMap";
+import { LinkedArray } from "./obj/LinkedArray";
+import { StructuredKind } from "./state/StructuredKinds";
+import { WeakRefMap } from "./lib/WeakRefMap";
 
 export class GlobalState {
   HISTORY_RECORDING: Map<string, ObjectSnapshot> | false = false;

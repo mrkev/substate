@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import { exhaustive } from "../../structured-state/src/assertions";
+import { exhaustive } from "../../structured-state/src/lib/assertions";
 
 export type JSON =
   | string
@@ -131,7 +131,7 @@ function JSONRecord({
   defaultExpandedLevels?: number;
 }) {
   const [displayState, setDisplayState] = useState<DisplayState>(
-    defaultExpandedLevels > 1 ? "full" : "summary"
+    defaultExpandedLevels > 1 ? "full" : "summary",
   );
 
   const body: Array<ReactNode> = ["{"];
@@ -142,7 +142,7 @@ function JSONRecord({
       <span key={"summary-span"} className={classOfKind("prm")}>
         {" "}
         {keys.join(", ")}{" "}
-      </span>
+      </span>,
     );
   }
 
@@ -168,7 +168,7 @@ function JSONRecord({
         defaultExpandedLevels={
           defaultExpandedLevels ? defaultExpandedLevels - 1 : undefined
         }
-      />
+      />,
     );
   }
 
@@ -230,7 +230,7 @@ function JSONArray({
   defaultExpandedLevels?: number;
 }) {
   const [displayState, setDisplayState] = useState<DisplayState>(
-    defaultExpandedLevels > 1 ? "full" : "summary"
+    defaultExpandedLevels > 1 ? "full" : "summary",
   );
 
   const body = [];
@@ -244,7 +244,7 @@ function JSONArray({
       <span className={classOfKind("prm")}>
         {" "}
         {arr.map((x) => string(x)).join(", ")}{" "}
-      </span>
+      </span>,
     );
   }
 
@@ -263,7 +263,7 @@ function JSONArray({
         defaultExpandedLevels={
           defaultExpandedLevels ? defaultExpandedLevels - 1 : undefined
         }
-      />
+      />,
     );
   }
 
@@ -299,7 +299,7 @@ function JSONPrimitive({
 }
 
 const classOfKind = (
-  kind: "string" | "kind" | "number" | "classname" | "hash" | "attr" | "prm"
+  kind: "string" | "kind" | "number" | "classname" | "hash" | "attr" | "prm",
 ): string => {
   switch (kind) {
     case "attr":

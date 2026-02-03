@@ -1,12 +1,12 @@
-import { SSet, StructuredKind } from ".";
-import { LinkedArray } from "./state/LinkedArray";
-import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { SSchemaArray } from "./state/SSchemaArray";
-import { Struct } from "./Struct";
-import { Struct2 } from "./Struct2";
-import { Structured } from "./Structured";
-import { StructSchema } from "./StructuredKinds";
-import { SUnion } from "./sunion";
+import { SSet, StructuredKind } from "..";
+import { LinkedArray } from "../obj/LinkedArray";
+import { LinkedPrimitive } from "../obj/LinkedPrimitive";
+import { SSchemaArray } from "../obj/SSchemaArray";
+import { Struct } from "../obj/Struct";
+import { Struct2 } from "../obj/Struct2";
+import { Structured } from "../obj/Structured";
+import { StructSchema } from "../state/StructuredKinds";
+import { SUnion } from "../sunion";
 
 export function assertSPrimitive<T>(
   value: unknown,

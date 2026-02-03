@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-import type { LinkedPrimitive } from "./LinkedPrimitive";
-import { MutationHashable } from "./MutationHashable";
-import { Subbable, subscribe } from "./Subbable";
-import { SubbableContainer } from "./SubbableContainer";
+import type { LinkedPrimitive } from "../obj/LinkedPrimitive";
+import { MutationHashable } from "../state/MutationHashable";
+import { Subbable, subscribe } from "../state/Subbable";
+import { SubbableContainer } from "../state/SubbableContainer";
 
 export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
 

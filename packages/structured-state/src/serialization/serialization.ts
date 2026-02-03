@@ -1,11 +1,11 @@
-import { SSchemaArray } from "../state/SSchemaArray";
-import { LinkedArray } from "../state/LinkedArray";
-import { LinkedPrimitive } from "../state/LinkedPrimitive";
-import { SSet } from "../state/LinkedSet";
-import { Struct } from "../Struct";
-import { Struct2 } from "../Struct2";
-import { Structured } from "../Structured";
-import { PrimitiveKind, StructuredKind } from "../StructuredKinds";
+import { SSchemaArray } from "../obj/SSchemaArray";
+import { LinkedArray } from "../obj/LinkedArray";
+import { LinkedPrimitive } from "../obj/LinkedPrimitive";
+import { SSet } from "../obj/LinkedSet";
+import { Struct } from "../obj/Struct";
+import { Struct2 } from "../obj/Struct2";
+import { Structured } from "../obj/Structured";
+import { PrimitiveKind, StructuredKind } from "../state/StructuredKinds";
 import { simplifyAndPackage } from "./simplify";
 
 export type Simplified = NSimplified[keyof NSimplified];

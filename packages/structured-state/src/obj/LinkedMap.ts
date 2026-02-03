@@ -1,11 +1,11 @@
 import { nanoid } from "nanoid";
-import { mutationHashable, MutationHashable } from "./MutationHashable";
-import { Subbable, SubbableCallback } from "./Subbable";
+import { mutationHashable, MutationHashable } from "../state/MutationHashable";
+import { Subbable, SubbableCallback } from "../state/Subbable";
 import {
   subbableContainer,
   SubbableContainer,
   UpdateToken,
-} from "./SubbableContainer";
+} from "../state/SubbableContainer";
 
 // todo: history
 export class LinkedMap<K, V>

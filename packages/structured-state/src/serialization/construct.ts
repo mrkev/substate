@@ -1,6 +1,6 @@
-import { Struct } from "../Struct";
-import { ConstructableStructure } from "../Structured";
-import { StructSchema } from "../StructuredKinds";
+import { Struct } from "../obj/Struct";
+import { ConstructableStructure } from "../obj/Structured";
+import { StructSchema } from "../state/StructuredKinds";
 import {
   InitializationMetadata,
   initialize,
@@ -12,7 +12,7 @@ import { isSimplePackage, SimplePackage } from "./simplify";
 function preInitialize(json: SimplePackage, metadata: InitializationMetadata) {
   console.log(
     "pre-init of nodes",
-    json.nodes.map(([_, node]) => `${node.$$}:${node._id}`)
+    json.nodes.map(([_, node]) => `${node.$$}:${node._id}`),
   );
   for (const [id, node] of json.nodes) {
     const _ = initializePrimitive(node as any, metadata);
@@ -28,7 +28,7 @@ export function construct(
     // | SState<unknown>
     | typeof Struct // Struct
     | (typeof Struct)[] // SArray
-    | null
+    | null,
 ) {
   try {
     const json = JSON.parse(str);
@@ -50,7 +50,7 @@ export function construct(
 export const constructFn = {
   structured<Spec extends ConstructableStructure<any>>(
     str: string,
-    spec: Spec
+    spec: Spec,
   ) {
     try {
       const json = JSON.parse(str);
@@ -64,7 +64,7 @@ export const constructFn = {
       const simple = json.simplified;
       if (simple.$$ !== "structured") {
         throw new Error(
-          `Construction: expected ${"structured"} but got ${json.simplified}`
+          `Construction: expected ${"structured"} but got ${json.simplified}`,
         );
       }
 

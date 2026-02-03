@@ -1,9 +1,9 @@
 import { Struct } from "..";
-import { Struct2 } from "../Struct2";
-import { Structured } from "../Structured";
-import { LinkedArray } from "./LinkedArray";
-import { LinkedPrimitive } from "./LinkedPrimitive";
-import { SSet } from "./LinkedSet";
+import { Struct2 } from "../obj/Struct2";
+import { Structured } from "../obj/Structured";
+import { LinkedArray } from "../obj/LinkedArray";
+import { LinkedPrimitive } from "../obj/LinkedPrimitive";
+import { SSet } from "../obj/LinkedSet";
 import { Subbable } from "./Subbable";
 
 export interface Contained {

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import * as s from "../index";
 import { replacePackage } from "../serialization/replace";
 import { simplifyAndPackage } from "../serialization/simplify";
-import { StructSchema } from "../StructuredKinds";
+import { StructSchema } from "../state/StructuredKinds";
 import { Minimal, Simple } from "../testUtils";
 
 const testSet = <T>(initialValue?: Iterable<T>) =>
@@ -11,7 +11,7 @@ const testSet = <T>(initialValue?: Iterable<T>) =>
 const testSetOf = <T extends StructSchema>(
   schema: T,
   initialValue?: Iterable<InstanceType<T>>,
-  id?: string
+  id?: string,
 ) => s.SSet._create(initialValue, id ?? "setid", schema);
 
 // TODO: test replace with non-mins to ensure replace does happen in children

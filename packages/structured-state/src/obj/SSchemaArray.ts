@@ -1,8 +1,8 @@
+import { Struct } from "./Struct";
+import { Struct2 } from "./Struct2";
+import { Structured } from "./Structured";
+import { StructSchema } from "../state/StructuredKinds";
 import { LinkedArray } from "./LinkedArray";
-import { Struct } from "../Struct";
-import { Struct2 } from "../Struct2";
-import { Structured } from "../Structured";
-import { StructSchema } from "../StructuredKinds";
 
 /** Describes an array of subbable objects */
 export class SSchemaArray<

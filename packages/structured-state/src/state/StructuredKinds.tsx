@@ -1,11 +1,11 @@
-import { SSet, Structured } from ".";
-import { SSchemaArray } from "./state/SSchemaArray";
-import { LinkedArray } from "./state/LinkedArray";
-import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { Struct } from "./Struct";
-import { Struct2 } from "./Struct2";
-import { ConstructableStructure } from "./Structured";
-import { SUnion } from "./sunion";
+import { SSet, Structured } from "..";
+import { SSchemaArray } from "../obj/SSchemaArray";
+import { LinkedArray } from "../obj/LinkedArray";
+import { LinkedPrimitive } from "../obj/LinkedPrimitive";
+import { Struct } from "../obj/Struct";
+import { Struct2 } from "../obj/Struct2";
+import { ConstructableStructure } from "../obj/Structured";
+import { SUnion } from "../sunion";
 
 export type PrimitiveKind = number | string | boolean | null;
 

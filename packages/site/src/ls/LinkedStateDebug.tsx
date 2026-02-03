@@ -3,9 +3,9 @@ import { ReactNode, useState } from "react";
 import { useLink, useLinkAsState } from "../../../linked-state/src/hooks";
 import { LinkableArray } from "../../../linked-state/src/LinkableArray";
 import { LinkableMap } from "../../../linked-state/src/LinkableMap";
-import { LinkableValue } from "../../../linked-state/src/LinkableValue";
 import { LinkableSet } from "../../../linked-state/src/LinkableSet";
-import { exhaustive } from "../../../structured-state/src/assertions";
+import { LinkableValue } from "../../../linked-state/src/LinkableValue";
+import { exhaustive } from "../../../structured-state/src/lib/assertions";
 
 const TAB_SIZE = 2;
 export type DisplayState = "full" | "native" | "collapsed";
@@ -148,7 +148,7 @@ function DebugOutMap({
         pad={baseline}
         path={`${path}/${key}`}
         showUnknowns={showUnknowns}
-      />
+      />,
     );
   }
 
@@ -215,7 +215,7 @@ function DebugOutArray({
         pad={baseline}
         path={`${path}/${i}`}
         showUnknowns={showUnknowns}
-      />
+      />,
     );
     // result += `\n${DebugOutReact(elem, pad, showUnknowns)
     //   .split("\n")
@@ -263,7 +263,7 @@ function DebugOutSet({
         pad={baseline}
         path={`${path}/${i}-s`}
         showUnknowns={showUnknowns}
-      />
+      />,
     );
     i++;
     // result += `\n${DebugOutReact(elem, pad, showUnknowns)
@@ -370,7 +370,7 @@ export function DebugOutSimplePrm({ val }: { val: PrimitiveKind | undefined }) {
 }
 
 export const classOfKind = (
-  kind: "string" | "kind" | "number" | "classname" | "hash" | "attr" | "prm"
+  kind: "string" | "kind" | "number" | "classname" | "hash" | "attr" | "prm",
 ): string => {
   switch (kind) {
     case "attr":

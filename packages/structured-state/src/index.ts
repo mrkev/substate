@@ -14,19 +14,19 @@ export {
 
 export { SBoolean, SNil, SNumber, SString } from "./sstate";
 
-export { create, Struct } from "./Struct";
-export type { StructProps } from "./Struct";
-export { create2, Struct2 } from "./Struct2";
-export { Structured } from "./Structured";
-export type { DeserializeFunc, JSONOfAuto } from "./Structured";
+export { create, Struct } from "./obj/Struct";
+export type { StructProps } from "./obj/Struct";
+export { create2, Struct2 } from "./obj/Struct2";
+export { Structured } from "./obj/Structured";
+export type { DeserializeFunc, JSONOfAuto } from "./obj/Structured";
 
-export { LinkedArray as SArray } from "./state/LinkedArray";
-export { LinkedMap as SMap } from "./state/LinkedMap";
-export { LinkedPrimitive as SPrimitive } from "./state/LinkedPrimitive";
-export { SSet } from "./state/LinkedSet";
-export { SSchemaArray } from "./state/SSchemaArray";
+export { LinkedArray as SArray } from "./obj/LinkedArray";
+export { LinkedMap as SMap } from "./obj/LinkedMap";
+export { LinkedPrimitive as SPrimitive } from "./obj/LinkedPrimitive";
+export { SSet } from "./obj/LinkedSet";
+export { SSchemaArray } from "./obj/SSchemaArray";
 
-export { useNewLinkedMap, useNewLinkedSet } from "./state/useNew";
+export { useNewLinkedMap, useNewLinkedSet } from "./react/useNew";
 
 export { debugOutHtml } from "./debug.html";
 export { DebugOut } from "./debug.react";
@@ -41,14 +41,14 @@ export {
   useContainer,
   usePrimitive,
   useSubscribeToSubbableMutationHashable,
-} from "./state/hooks";
+} from "./react/hooks";
 
 export { DirtyObserver, useDirtyTracker } from "./DirtyObserver";
 export type { DirtyState } from "./DirtyObserver";
 
 // export { init } from "./serialization.initialize";
 export type { InitFunctions } from "./serialization/initialize";
-export type { PrimitiveKind, StructuredKind } from "./StructuredKinds";
+export type { PrimitiveKind, StructuredKind } from "./state/StructuredKinds";
 
 export const simplify = {
   structured: simplifyStructured,

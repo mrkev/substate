@@ -8,20 +8,17 @@ import {
   assertStructured,
   assertSUnion,
   exhaustive,
-} from "../assertions";
+} from "../lib/assertions";
 import { nullthrows } from "../lib/nullthrows";
-import { SSchemaArray } from "../state/SSchemaArray";
-import { LinkedArray } from "../state/LinkedArray";
-import { LinkedPrimitive } from "../state/LinkedPrimitive";
-import { SSet } from "../state/LinkedSet";
-import {
-  subbableContainer,
-  SubbableContainer,
-} from "../state/SubbableContainer";
-import { Struct } from "../Struct";
-import { Struct2 } from "../Struct2";
-import { Structured } from "../Structured";
-import { StructuredKind } from "../StructuredKinds";
+import { LinkedArray } from "../obj/LinkedArray";
+import { LinkedPrimitive } from "../obj/LinkedPrimitive";
+import { SSet } from "../obj/LinkedSet";
+import { SSchemaArray } from "../obj/SSchemaArray";
+import { subbableContainer } from "../state/SubbableContainer";
+import { Struct } from "../obj/Struct";
+import { Struct2 } from "../obj/Struct2";
+import { Structured } from "../obj/Structured";
+import { StructuredKind } from "../state/StructuredKinds";
 import { SUnion } from "../sunion";
 import { InitializationMetadata, initialize } from "./initialize";
 import { replaceSchemaArray, replaceSimpleArray } from "./replace.array";

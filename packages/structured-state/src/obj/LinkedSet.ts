@@ -1,9 +1,12 @@
 import { nanoid } from "nanoid";
 import { mutableset } from "../lib/nullthrows";
 import { getGlobalState, saveForHistory } from "../sstate.history";
-import { StructSchema } from "../StructuredKinds";
-import { SubbableCallback } from "./Subbable";
-import { subbableContainer, SubbableContainer } from "./SubbableContainer";
+import { StructSchema } from "../state/StructuredKinds";
+import { SubbableCallback } from "../state/Subbable";
+import {
+  subbableContainer,
+  SubbableContainer,
+} from "../state/SubbableContainer";
 
 export class SSet<S> implements Set<S>, SubbableContainer {
   private _set: ReadonlySet<S>;

@@ -1,20 +1,20 @@
 import { nanoid } from "nanoid";
-import { SSchemaArray } from "./state/SSchemaArray";
-import { LinkedArray } from "./state/LinkedArray";
+import { SSchemaArray } from "./SSchemaArray";
+import { LinkedArray } from "./LinkedArray";
 import {
   SOut,
   UNINITIALIZED_ARRAY,
   UNINITIALIZED_PRIMITIVE,
   UNINITIALIZED_TYPED_ARRAY,
-} from "./sstate";
-import { getGlobalState, saveForHistory } from "./sstate.history";
-import type { Contained } from "./state/Contained";
-import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { Subbable, SubbableCallback } from "./state/Subbable";
+} from "../sstate";
+import { getGlobalState, saveForHistory } from "../sstate.history";
+import type { Contained } from "../state/Contained";
+import { LinkedPrimitive } from "./LinkedPrimitive";
+import { Subbable, SubbableCallback } from "../state/Subbable";
 import {
   subbableContainer,
   SubbableContainer,
-} from "./state/SubbableContainer";
+} from "../state/SubbableContainer";
 
 type IsEmptyObjType<T extends Record<PropertyKey, unknown>> =
   keyof T extends never ? true : false;

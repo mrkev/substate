@@ -1,14 +1,13 @@
 //////// Schema ////////
 
 import { nanoid } from "nanoid";
-import { SSchemaArray } from "./state/SSchemaArray";
-import { LinkedArray } from "./state/LinkedArray";
-import { StructSchema } from "./StructuredKinds";
-import { LinkedMap } from "./state/LinkedMap";
-import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { SSet } from "./state/LinkedSet";
 import { JSONValue } from "./lib/types";
-import * as foo from "@mrkev/linked-state";
+import { LinkedArray } from "./obj/LinkedArray";
+import { LinkedMap } from "./obj/LinkedMap";
+import { LinkedPrimitive } from "./obj/LinkedPrimitive";
+import { SSet } from "./obj/LinkedSet";
+import { SSchemaArray } from "./obj/SSchemaArray";
+import { StructSchema } from "./state/StructuredKinds";
 
 // todo? create -> of
 export class SString extends LinkedPrimitive<string> {

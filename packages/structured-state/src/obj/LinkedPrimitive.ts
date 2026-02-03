@@ -1,12 +1,12 @@
 import { nanoid } from "nanoid";
 import { getGlobalState, saveForHistory } from "../sstate.history";
-import { notify, Subbable, SubbableCallback } from "./Subbable";
+import { Contained } from "../state/Contained";
+import { notify, Subbable, SubbableCallback } from "../state/Subbable";
 import {
   subbableContainer,
   SubbableContainer,
   UpdateToken,
-} from "./SubbableContainer";
-import { Contained } from "./Contained";
+} from "../state/SubbableContainer";
 
 /**
  * LinkedState is a Subbable, a single atomic primitive
