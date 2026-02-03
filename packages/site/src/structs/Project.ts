@@ -12,6 +12,7 @@ import {
   string,
   Structured,
 } from "../../../structured-state/src";
+import { Subbable } from "../../../structured-state/src/state/Subbable";
 import { AudioTrack } from "./AudioTrack";
 
 type Marker = readonly [number, string];
@@ -29,11 +30,15 @@ type X = JSONOfAuto<AutoProject>["solodTracks"];
 export class Project extends Structured<AutoProject, typeof Project> {
   readonly randomNumbers: SSet<number>;
 
+  _changed(target: Subbable, self: Subbable) {
+    // console.log("FOOO", target, self);
+  }
+
   constructor(
     readonly name: SString,
     readonly tracks: SSchemaArray<AudioTrack>,
     readonly markers: SArray<Marker>,
-    readonly solodTracks: SSet<AudioTrack>
+    readonly solodTracks: SSet<AudioTrack>,
   ) {
     super();
 
@@ -56,7 +61,7 @@ export class Project extends Structured<AutoProject, typeof Project> {
   // TODO: I should make replae only care about non-knowables. All knowables get auto-set.
   override replace(
     json: JSONOfAuto<AutoProject>,
-    replace: ReplaceFunctions
+    replace: ReplaceFunctions,
   ): void {
     replace.string(json.name, this.name);
     replace.schemaArray(json.tracks, this.tracks);
@@ -71,7 +76,7 @@ export class Project extends Structured<AutoProject, typeof Project> {
       init.string(auto.name),
       init.schemaArray(auto.tracks, [AudioTrack]),
       init.array<Marker>(auto.markers),
-      init.set<AudioTrack>(auto.solodTracks, AudioTrack)
+      init.set<AudioTrack>(auto.solodTracks, AudioTrack),
     );
   }
 
@@ -81,7 +86,7 @@ export class Project extends Structured<AutoProject, typeof Project> {
       string(name),
       arrayOf([AudioTrack], tracks),
       array(markers),
-      set()
+      set(),
     );
   }
 

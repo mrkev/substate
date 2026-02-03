@@ -1,0 +1,117 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`set > replaces 1`] = `
+SSet {
+  "_container": Set {},
+  "_hash": 16,
+  "_id": "foobar",
+  "_propagatedTokens": WeakSet {},
+  "_schema": null,
+  "_set": Set {
+    4,
+    5,
+    1,
+    2,
+    3,
+  },
+  "_subscriptors": Set {},
+}
+`;
+
+exports[`set > serializes, constructs 1`] = `"{"nodes":[],"simplified":{"$$":"set","_schema":false,"_value":[2],"_id":"foobar"}}"`;
+
+exports[`set > serializes, constructs 2`] = `
+SSet {
+  "_container": Set {},
+  "_hash": 0,
+  "_id": "foobar",
+  "_propagatedTokens": WeakSet {},
+  "_schema": null,
+  "_set": Set {
+    2,
+  },
+  "_subscriptors": Set {},
+}
+`;
+
+exports[`setOf > replaces 1`] = `
+SSet {
+  "_container": Set {},
+  "_hash": 18,
+  "_id": "setid",
+  "_propagatedTokens": WeakSet {},
+  "_schema": [Function],
+  "_set": Set {
+    Minimal {
+      "_container": Set {
+        [Circular],
+      },
+      "_hash": 1,
+      "_id": "4",
+      "_propagatedTokens": WeakSet {},
+      "_subscriptors": Set {},
+    },
+    Minimal {
+      "_container": Set {
+        [Circular],
+      },
+      "_hash": 1,
+      "_id": "5",
+      "_propagatedTokens": WeakSet {},
+      "_subscriptors": Set {},
+    },
+    Minimal {
+      "_container": Set {
+        [Circular],
+      },
+      "_hash": 0,
+      "_id": "1",
+      "_propagatedTokens": WeakSet {},
+      "_subscriptors": Set {},
+    },
+    Minimal {
+      "_container": Set {
+        [Circular],
+      },
+      "_hash": 0,
+      "_id": "2",
+      "_propagatedTokens": WeakSet {},
+      "_subscriptors": Set {},
+    },
+    Minimal {
+      "_container": Set {
+        [Circular],
+      },
+      "_hash": 0,
+      "_id": "3",
+      "_propagatedTokens": WeakSet {},
+      "_subscriptors": Set {},
+    },
+  },
+  "_subscriptors": Set {},
+}
+`;
+
+exports[`setOf > serializes, constructs 1`] = `"{"nodes":[],"simplified":{"$$":"set","_schema":true,"_value":[{"$$":"structured","_id":"minid","_value":{}}],"_id":"setid"}}"`;
+
+exports[`setOf > serializes, constructs 2`] = `
+SSet {
+  "_container": Set {},
+  "_hash": 0,
+  "_id": "setid",
+  "_propagatedTokens": WeakSet {},
+  "_schema": null,
+  "_set": Set {
+    Minimal {
+      "_container": Set {
+        [Circular],
+      },
+      "_hash": 0,
+      "_id": "minid",
+      "_propagatedTokens": WeakSet {},
+      "_subscriptors": Set {},
+    },
+  },
+  "_subscriptors": Set {},
+}
+`;

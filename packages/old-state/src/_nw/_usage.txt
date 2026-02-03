@@ -1,0 +1,36 @@
+import * as nw from "./nwschema";
+
+const PersonModel = nw.object({
+  name: nw.string(),
+  age: nw.number(),
+});
+
+type Person = nw.infer<typeof PersonModel>;
+
+const PersonListModel = nw.array(UserModel);
+
+type PersonList = nw.infer<typeof PersonListModel>;
+
+const state = UserListModel.concretize([
+  { name: "foo", age: 40 },
+  { name: "bar", age: 42 },
+]);
+
+function UserList() {
+  return (
+    <>
+      {state.map((user) => {
+        return <User user={user} />;
+      })}
+    </>
+  );
+}
+
+function User({ user }: { user: PersonSubState }) {
+  const { name, age } = user.use();
+  return (
+    <div>
+      {name} {age}
+    </div>
+  );
+}

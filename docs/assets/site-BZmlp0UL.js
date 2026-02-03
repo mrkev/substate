@@ -14799,6 +14799,9 @@ function notify(subbable2, target) {
   for (const cb of subbable2._subscriptors) {
     cb(target, subbable2);
   }
+  if ("_changed" in subbable2 && typeof subbable2._changed === "function") {
+    subbable2._changed(target, subbable2);
+  }
 }
 class Struct2 {
   _id;
@@ -18497,6 +18500,8 @@ class Project extends Structured {
     this.randomNumbers = set$1();
   }
   randomNumbers;
+  _changed(target, self) {
+  }
   autoSimplify() {
     return {
       name: this.name,
