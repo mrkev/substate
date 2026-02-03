@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import type { LinkedPrimitive, StateDispath } from "./LinkedPrimitive";
-import { MutationHashable } from "./MutationHashable";
+import { mutationHashable, MutationHashable } from "./MutationHashable";
 import { Subbable, subscribe } from "./Subbable";
 import { SubbableContainer } from "./SubbableContainer";
 
 export function usePrimitive<S>(
-  linkedState: LinkedPrimitive<S>
+  linkedState: LinkedPrimitive<S>,
 ): [S, StateDispath<S>] {
   const [state, setState] = useState<S>(() => linkedState.get());
 
@@ -25,7 +25,7 @@ export function usePrimitive<S>(
         linkedState.set(newVal);
       }
     },
-    [linkedState]
+    [linkedState],
   );
 
   return [state, setter];
@@ -33,16 +33,16 @@ export function usePrimitive<S>(
 
 export function useContainer<S extends SubbableContainer>(
   obj: S,
-  recursiveChanges: boolean = false
+  recursiveChanges: boolean = false,
 ): S {
   useSubscribeToSubbableMutationHashable(obj, undefined, recursiveChanges);
   return obj;
 }
 
 export function useSubscribeToSubbableMutationHashable<
-  T extends MutationHashable & Subbable
+  T extends MutationHashable & Subbable,
 >(obj: T, cb?: () => void, recursiveChanges = false): T {
-  const [, setHash] = useState(() => MutationHashable.getMutationHash(obj));
+  const [, setHash] = useState(() => mutationHashable.getMutationHash(obj));
 
   useEffect(() => {
     return subscribe(obj, (target) => {

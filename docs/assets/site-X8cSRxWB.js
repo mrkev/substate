@@ -14800,17 +14800,15 @@ function notify(subbable2, target) {
     cb(target, subbable2);
   }
 }
-class MutationHashable {
-  _subscriptors = /* @__PURE__ */ new Set();
-  _hash = 0;
-  static getMutationHash(mh) {
+const mutationHashable = {
+  getMutationHash(mh) {
     return mh._hash;
-  }
-  static mutated(mh, target) {
+  },
+  mutated(mh, target) {
     mh._hash = (mh._hash + 1) % Number.MAX_SAFE_INTEGER;
     notify(mh, target);
   }
-}
+};
 const CONTAINER_IGNORE_KEYS = /* @__PURE__ */ new Set([
   "_id",
   "_hash",
@@ -14872,7 +14870,7 @@ const subbableContainer$2 = {
   _notifyChange(struct, target) {
     const token = new UpdateToken$2(target);
     struct._propagatedTokens.add(token);
-    MutationHashable.mutated(struct, target);
+    mutationHashable.mutated(struct, target);
     for (const container of struct._container) {
       subbableContainer$2._childChanged(container, token);
     }
@@ -14882,7 +14880,7 @@ const subbableContainer$2 = {
       return;
     }
     node._propagatedTokens.add(token);
-    MutationHashable.mutated(node, token.target);
+    mutationHashable.mutated(node, token.target);
     for (const container of node._container) {
       subbableContainer$2._childChanged(container, token);
     }
@@ -16350,7 +16348,7 @@ class LinkedMap {
   _hash = 0;
   _setRaw(map2) {
     this._map = new Map(map2);
-    MutationHashable.mutated(this, this);
+    mutationHashable.mutated(this, this);
   }
   _getRaw() {
     return this._map;
@@ -16378,7 +16376,7 @@ class LinkedMap {
     subbableContainer$2._uncontain(this, this._map.keys());
     subbableContainer$2._uncontain(this, this._map.values());
     this._map.clear();
-    MutationHashable.mutated(this, this);
+    mutationHashable.mutated(this, this);
   }
   // Map<K, V> interface, mutates
   delete(key) {
@@ -16388,7 +16386,7 @@ class LinkedMap {
     subbableContainer$2._uncontain(this, key);
     subbableContainer$2._uncontain(this, this._map.get(key));
     const result = this._map.delete(key);
-    MutationHashable.mutated(this, this);
+    mutationHashable.mutated(this, this);
     return result;
   }
   // Map<K, V> interface
@@ -16408,7 +16406,7 @@ class LinkedMap {
     subbableContainer$2._contain(this, key);
     subbableContainer$2._contain(this, value);
     this._map.set(key, value);
-    MutationHashable.mutated(this, this);
+    mutationHashable.mutated(this, this);
     return this;
   }
   // Map<K, V> interface
@@ -17231,7 +17229,7 @@ function useContainer(obj, recursiveChanges = false) {
   return obj;
 }
 function useSubscribeToSubbableMutationHashable(obj, cb, recursiveChanges = false) {
-  const [, setHash] = reactExports.useState(() => MutationHashable.getMutationHash(obj));
+  const [, setHash] = reactExports.useState(() => mutationHashable.getMutationHash(obj));
   reactExports.useEffect(() => {
     return subscribe(obj, (target) => {
       if (obj === target || recursiveChanges) {
@@ -17470,7 +17468,7 @@ function header$1(elem, showContainerId = false) {
       exhaustive$2(elem);
     }
   })();
-  const hashStr = elem instanceof LinkedPrimitive ? "" : `.${MutationHashable.getMutationHash(elem)}`;
+  const hashStr = elem instanceof LinkedPrimitive ? "" : `.${mutationHashable.getMutationHash(elem)}`;
   const container = showContainerId ? ` -^ ${[...elem._container.values()].map((v) => v._id).join(",")}` : "";
   const kind = span("kind", kindStr);
   span("hash", hashStr);
@@ -17853,7 +17851,7 @@ function Header$3({
       exhaustive$2(obj);
     }
   })();
-  const hashStr = obj instanceof LinkedPrimitive ? "" : `.${MutationHashable.getMutationHash(obj)}`;
+  const hashStr = obj instanceof LinkedPrimitive ? "" : `.${mutationHashable.getMutationHash(obj)}`;
   const container = showContainerId ? ` -^ ${[...obj._container.values()].map((v) => v._id).join(",")}` : "";
   /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: classOfKind$3("hash"), children: hashStr });
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: classOfKind$3("kind"), title: path, children: [
@@ -18028,7 +18026,7 @@ function header(elem, showContainerId = false) {
       exhaustive$2(elem);
     }
   })();
-  const hash = elem instanceof LinkedPrimitive ? "" : `.${MutationHashable.getMutationHash(elem)}`;
+  const hash = elem instanceof LinkedPrimitive ? "" : `.${mutationHashable.getMutationHash(elem)}`;
   const container = showContainerId ? ` -^ ${[...elem._container.values()].map((v) => v._id).join(",")}` : "";
   return `(${kind}: ${elem._id}${hash}${container})`;
 }
@@ -18074,7 +18072,7 @@ class MutationFlag {
     return new MutationFlag();
   }
   mutated() {
-    MutationHashable.mutated(this, this);
+    mutationHashable.mutated(this, this);
   }
 }
 class DirtyObserver {

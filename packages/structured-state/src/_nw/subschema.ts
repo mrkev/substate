@@ -3,11 +3,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { exhaustive } from "../assertions";
 import { LinkedArray } from "../state/LinkedArray";
 import { StateDispath } from "../state/LinkedPrimitive";
-import { MutationHashable } from "../state/MutationHashable";
+import { mutationHashable, MutationHashable } from "../state/MutationHashable";
 import {
+  notify,
   Subbable,
   SubbableCallback,
-  notify,
   subscribe,
 } from "../state/Subbable";
 import * as nw from "./nwschema";
@@ -115,7 +115,7 @@ class SubString implements SubSchema<string>, SubbableState<string> {
     notify(this, this);
     if (this._container != null) {
       // NOTE: is notify the right way to do it? is isn't changing the hash.
-      MutationHashable.mutated(this._container, this);
+      mutationHashable.mutated(this._container, this);
     }
   }
 
@@ -156,7 +156,7 @@ class SubNumber implements SubSchema<number>, SubbableState<number> {
     this.val = val;
     notify(this, this);
     if (this._container != null) {
-      MutationHashable.mutated(this._container, this);
+      mutationHashable.mutated(this._container, this);
     }
   }
 
@@ -462,6 +462,13 @@ function array<T extends SubSchema<unknown>>(
 }
 
 export {
+  array,
+  boolean,
+  map,
+  nil,
+  number,
+  object,
+  string,
   SubArray,
   SubBoolean,
   SubMap,
@@ -470,13 +477,6 @@ export {
   SubObject,
   SubString,
   SubUnion,
-  array,
-  boolean,
-  map,
-  nil,
-  number,
-  object,
-  string,
   union,
 };
 
@@ -529,7 +529,7 @@ export function useSubbable<S>(
 }
 
 export function useSubToObjectCached<K>(obj: SubbableHashedState<K>): K {
-  const [hash, setHash] = useState(() => MutationHashable.getMutationHash(obj));
+  const [hash, setHash] = useState(() => mutationHashable.getMutationHash(obj));
 
   const value = useMemo(() => {
     void hash; // bc we depend on it and we dont want eslint to yell

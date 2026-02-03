@@ -6,7 +6,7 @@ import { Struct2 } from "./Struct2";
 import { isPrimitiveKind, StructuredKind } from "./StructuredKinds";
 import { exhaustive } from "./assertions";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { MutationHashable } from "./state/MutationHashable";
+import { mutationHashable } from "./state/MutationHashable";
 import { CONTAINER_IGNORE_KEYS } from "./state/SubbableContainer";
 import { SUnion } from "./sunion";
 
@@ -66,7 +66,7 @@ function debugOutUnion(union: SUnion<any>, pad = 0, showUnknowns: boolean) {
 function debugOutStruct(
   struct: Struct<any> | Struct2<any> | Structured<any, any>,
   pad = 0,
-  showUnknowns: boolean
+  showUnknowns: boolean,
 ): string {
   // const result: Record<any, any> = { _kind: struct._kind };
   let result = "";
@@ -98,7 +98,7 @@ function debugOutStruct(
 function debugOutArray(
   arr: SArray<any> | SSchemaArray<any>,
   pad = 0,
-  showUnknowns: boolean
+  showUnknowns: boolean,
 ) {
   let result = "";
 
@@ -163,7 +163,7 @@ function header(elem: StructuredKind, showContainerId = false) {
   const hashStr =
     elem instanceof LinkedPrimitive
       ? ""
-      : `.${MutationHashable.getMutationHash(elem)}`;
+      : `.${mutationHashable.getMutationHash(elem)}`;
 
   const container = showContainerId
     ? ` -^ ${[...elem._container.values()].map((v) => v._id).join(",")}`
@@ -198,7 +198,7 @@ function debugOutPrm(val: PrimitiveKind | undefined): string {
 // class="hljs-attr"
 function span(
   kind: "string" | "kind" | "number" | "classname" | "hash" | "attr" | "prm",
-  value: string
+  value: string,
 ) {
   const classOfKind = ((): string => {
     switch (kind) {

@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
-import { MutationHashable } from "./state/MutationHashable";
 import { useSubscribeToSubbableMutationHashable } from "./state/hooks";
+import { mutationHashable, MutationHashable } from "./state/MutationHashable";
 import { SubbableCallback } from "./state/Subbable";
 
 class MutationFlag implements MutationHashable {
@@ -11,7 +11,7 @@ class MutationFlag implements MutationHashable {
     return new MutationFlag();
   }
   mutated() {
-    MutationHashable.mutated(this, this);
+    mutationHashable.mutated(this, this);
   }
 }
 
@@ -50,12 +50,12 @@ export class DirtyObserver {
 
 export function useDirtyTracker<S extends MutationHashable>(
   obj: S,
-  defaultState: "dirty" | "clean" = "clean"
+  defaultState: "dirty" | "clean" = "clean",
 ): [state: DirtyState, markClean: () => void] {
   const observer = useMemo(
     () => new DirtyObserver(obj, defaultState),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [obj]
+    [obj],
   );
   useSubscribeToSubbableMutationHashable(obj, undefined, true);
   useSubscribeToSubbableMutationHashable(observer.flag, undefined, false);

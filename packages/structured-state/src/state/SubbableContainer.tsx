@@ -1,6 +1,6 @@
 import { isContainable } from "../assertions";
 import { Contained } from "./LinkedPrimitive";
-import { MutationHashable } from "./MutationHashable";
+import { mutationHashable, MutationHashable } from "./MutationHashable";
 import { Subbable, SubbableCallback } from "./Subbable";
 
 /** Keys to ignore from SubbableContainer when serializing */
@@ -87,7 +87,7 @@ export const subbableContainer = {
     const token = new UpdateToken(target);
     struct._propagatedTokens.add(token);
 
-    MutationHashable.mutated(struct, target);
+    mutationHashable.mutated(struct, target);
     for (const container of struct._container) {
       subbableContainer._childChanged(container, token);
     }
@@ -103,7 +103,7 @@ export const subbableContainer = {
     }
     node._propagatedTokens.add(token);
 
-    MutationHashable.mutated(node, token.target);
+    mutationHashable.mutated(node, token.target);
     for (const container of node._container) {
       subbableContainer._childChanged(container, token);
     }

@@ -7,7 +7,7 @@ import { Struct2 } from "./Struct2";
 import { isPrimitiveKind, StructuredKind } from "./StructuredKinds";
 import { exhaustive } from "./assertions";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { MutationHashable } from "./state/MutationHashable";
+import { mutationHashable } from "./state/MutationHashable";
 import { CONTAINER_IGNORE_KEYS } from "./state/SubbableContainer";
 import { SUnion } from "./sunion";
 
@@ -204,7 +204,7 @@ function DebugOutStruct({
         pad={baseline}
         path={`${path}/${key}`}
         showUnknowns={showUnknowns}
-      />
+      />,
     );
   }
 
@@ -270,7 +270,7 @@ function DebugOutArray({
         pad={baseline}
         path={`${path}/${i}`}
         showUnknowns={showUnknowns}
-      />
+      />,
     );
     // result += `\n${DebugOutReact(elem, pad, showUnknowns)
     //   .split("\n")
@@ -316,7 +316,7 @@ function DebugOutSet({
         pad={baseline}
         path={`${path}/${i}-s`}
         showUnknowns={showUnknowns}
-      />
+      />,
     );
     i++;
     // result += `\n${DebugOutReact(elem, pad, showUnknowns)
@@ -372,7 +372,7 @@ function Header({
   const hashStr =
     obj instanceof LinkedPrimitive
       ? ""
-      : `.${MutationHashable.getMutationHash(obj)}`;
+      : `.${mutationHashable.getMutationHash(obj)}`;
 
   const container = showContainerId
     ? ` -^ ${[...obj._container.values()].map((v) => v._id).join(",")}`
@@ -430,7 +430,7 @@ function DebugOutSimplePrm({ val }: { val: PrimitiveKind | undefined }) {
 }
 
 const classOfKind = (
-  kind: "string" | "kind" | "number" | "classname" | "hash" | "attr" | "prm"
+  kind: "string" | "kind" | "number" | "classname" | "hash" | "attr" | "prm",
 ): string => {
   switch (kind) {
     case "attr":
