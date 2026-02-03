@@ -6,12 +6,7 @@ import {
   SubbableContainer,
   UpdateToken,
 } from "./SubbableContainer";
-
-export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
-
-export interface Contained {
-  readonly _container: Set<Subbable>;
-}
+import { Contained } from "./Contained";
 
 /**
  * LinkedState is a Subbable, a single atomic primitive

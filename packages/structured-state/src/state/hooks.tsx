@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { LinkedPrimitive, StateDispath } from "./LinkedPrimitive";
+import type { LinkedPrimitive } from "./LinkedPrimitive";
 import { mutationHashable, MutationHashable } from "./MutationHashable";
 import { Subbable, subscribe } from "./Subbable";
 import { SubbableContainer } from "./SubbableContainer";
@@ -55,3 +55,4 @@ export function useSubscribeToSubbableMutationHashable<
   }, [cb, obj, recursiveChanges]);
   return obj;
 }
+export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;

@@ -9,7 +9,7 @@ export interface Contained {
 }
 
 export function isContainable(
-  val: unknown
+  val: unknown,
 ): val is
   | LinkableValue<unknown>
   | LinkableArray<unknown>

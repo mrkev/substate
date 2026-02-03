@@ -7,7 +7,7 @@ import {
   UNINITIALIZED_TYPED_ARRAY,
 } from "./sstate";
 import { getGlobalState, saveForHistory } from "./sstate.history";
-import type { Contained } from "./state/LinkedPrimitive";
+import type { Contained } from "./state/Contained";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
 import { Subbable, SubbableCallback } from "./state/Subbable";
 import {

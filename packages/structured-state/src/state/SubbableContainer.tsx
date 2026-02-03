@@ -1,5 +1,5 @@
-import { isContainable } from "../assertions";
-import { Contained } from "./LinkedPrimitive";
+import { isContainable } from "./Contained";
+import { Contained } from "./Contained";
 import { mutationHashable, MutationHashable } from "./MutationHashable";
 import { Subbable, SubbableCallback } from "./Subbable";
 

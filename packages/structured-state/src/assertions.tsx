@@ -1,15 +1,14 @@
+import { SSet, StructuredKind } from ".";
 import { SArray, SSchemaArray } from "./SArray";
-import { Struct } from "./Struct";
 import { LinkedPrimitive } from "./state/LinkedPrimitive";
-import { LinkedArray } from "./state/LinkedArray";
+import { Struct } from "./Struct";
 import { Struct2 } from "./Struct2";
 import { Structured } from "./Structured";
-import { SSet, StructuredKind } from ".";
-import { SUnion } from "./sunion";
 import { StructSchema } from "./StructuredKinds";
+import { SUnion } from "./sunion";
 
 export function assertSPrimitive<T>(
-  value: unknown
+  value: unknown,
 ): asserts value is LinkedPrimitive<any> {
   if (!(value instanceof LinkedPrimitive)) {
     console.log("ERR:", value, "to be primitive");
@@ -18,7 +17,7 @@ export function assertSPrimitive<T>(
 }
 
 export function assertSSimpleArray<T>(
-  value: unknown
+  value: unknown,
 ): asserts value is SArray<any> {
   if (!(value instanceof SArray)) {
     console.log("ERR:", value, "to be sarray");
@@ -27,7 +26,7 @@ export function assertSSimpleArray<T>(
 }
 
 export function assertSSchemaArray<T>(
-  value: unknown
+  value: unknown,
 ): asserts value is SSchemaArray<any> {
   if (!(value instanceof SSchemaArray)) {
     console.log("ERR:", value, "to be sschemaarray");
@@ -43,7 +42,7 @@ export function assertStruct<T>(value: unknown): asserts value is Struct<any> {
 }
 
 export function assertStruct2<T>(
-  value: unknown
+  value: unknown,
 ): asserts value is Struct2<any> {
   if (!(value instanceof Struct2)) {
     console.log("ERR:", value, "to be struct2");
@@ -52,7 +51,7 @@ export function assertStruct2<T>(
 }
 
 export function assertStructured<T>(
-  value: unknown
+  value: unknown,
 ): asserts value is Structured<any, any> {
   if (!(value instanceof Structured)) {
     console.log("ERR:", value, "to be structured");
@@ -68,7 +67,7 @@ export function assertSSet<T>(value: unknown): asserts value is SSet<T> {
 }
 
 export function assertSUnion<T extends StructuredKind>(
-  value: unknown
+  value: unknown,
 ): asserts value is SUnion<T> {
   if (!(value instanceof SUnion)) {
     console.log("ERR:", value, "to be sunion");
@@ -80,34 +79,8 @@ export function exhaustive(x: never, msg?: string): never {
   throw new Error(msg ?? `Exhaustive violation, unexpected value ${x}`);
 }
 
-export type Containable =
-  | LinkedPrimitive<unknown>
-  | LinkedArray<unknown>
-  | Struct<any>
-  | Struct2<any>
-  | Structured<any, any>;
-
-export function isContainable(
-  val: unknown
-): val is
-  | LinkedPrimitive<unknown>
-  | LinkedArray<unknown>
-  | Struct<any>
-  | Struct2<any>
-  | Structured<any, any>
-  | SSet<unknown> {
-  return (
-    val instanceof LinkedPrimitive ||
-    val instanceof LinkedArray ||
-    val instanceof Struct ||
-    val instanceof Struct2 ||
-    val instanceof Structured ||
-    val instanceof SSet
-  );
-}
-
 export function assertArray<T>(
-  val: Array<T> | unknown
+  val: Array<T> | unknown,
 ): asserts val is Array<T> {
   if (!Array.isArray(val)) {
     throw new Error(`not an array`);
@@ -121,7 +94,7 @@ export function assertNotArray<T>(val: Array<T> | T): asserts val is T {
 }
 
 export function assertConstructableStruct(
-  spec: StructSchema
+  spec: StructSchema,
 ): asserts spec is typeof Struct {
   if (spec instanceof Struct) {
     throw new Error(`is not a Struct`);
@@ -129,7 +102,7 @@ export function assertConstructableStruct(
 }
 
 export function assertConstructableStruct2(
-  spec: StructSchema
+  spec: StructSchema,
 ): asserts spec is typeof Struct2 {
   if ((spec as any).__proto__ !== Struct2) {
     throw new Error(`is not a Struct2`);
@@ -137,7 +110,7 @@ export function assertConstructableStruct2(
 }
 
 export function assertConstructableStructured(
-  spec: StructSchema | typeof Structured
+  spec: StructSchema | typeof Structured,
 ): asserts spec is typeof Structured {
   if ((spec as any).__proto__ !== Structured) {
     throw new Error(`is not a Structured`);
@@ -145,7 +118,7 @@ export function assertConstructableStructured(
 }
 
 export function assertConstructableObj(
-  spec: StructSchema
+  spec: StructSchema,
 ): asserts spec is StructSchema {
   if (
     (spec as any).__proto__ === Structured ||

@@ -2,7 +2,7 @@ import { nanoid } from "nanoid";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { exhaustive } from "../assertions";
 import { LinkedArray } from "../state/LinkedArray";
-import { StateDispath } from "../state/LinkedPrimitive";
+import { StateDispath } from "../state/hooks";
 import { mutationHashable, MutationHashable } from "../state/MutationHashable";
 import {
   notify,

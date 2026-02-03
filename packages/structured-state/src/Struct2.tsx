@@ -1,8 +1,8 @@
 import { nanoid } from "nanoid";
-import { isContainable } from "./assertions";
+import { isContainable } from "./state/Contained";
 import { SString } from "./sstate";
 import { getGlobalState, saveForHistory } from "./sstate.history";
-import type { Contained } from "./state/LinkedPrimitive";
+import type { Contained } from "./state/Contained";
 import { Subbable, SubbableCallback } from "./state/Subbable";
 import {
   subbableContainer,

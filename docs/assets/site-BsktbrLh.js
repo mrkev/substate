@@ -14800,132 +14800,6 @@ function notify(subbable2, target) {
     cb(target, subbable2);
   }
 }
-const mutationHashable = {
-  getMutationHash(mh) {
-    return mh._hash;
-  },
-  mutated(mh, target) {
-    mh._hash = (mh._hash + 1) % Number.MAX_SAFE_INTEGER;
-    notify(mh, target);
-  }
-};
-const CONTAINER_IGNORE_KEYS = /* @__PURE__ */ new Set([
-  "_id",
-  "_hash",
-  "_subscriptors",
-  "_container",
-  "_propagatedTokens"
-]);
-let UpdateToken$2 = class UpdateToken {
-  constructor(target) {
-    this.target = target;
-  }
-};
-class SubbableContainer {
-  _id;
-  _subscriptors = /* @__PURE__ */ new Set();
-  _hash = 0;
-  // all containers can be contained
-  _container = /* @__PURE__ */ new Set();
-  _propagatedTokens = /* @__PURE__ */ new WeakSet();
-  // abstract _replace(val: T): void;
-  // abstract _childChanged(child: Subbable): void;
-  constructor(id) {
-    this._id = id;
-  }
-}
-const subbableContainer$2 = {
-  _contain(container, item) {
-    if (isContainable$2(item)) {
-      item._container.add(container);
-    }
-  },
-  _containAll(container, items) {
-    for (const elem of items) {
-      if (isContainable$2(elem)) {
-        elem._container.add(container);
-      }
-    }
-  },
-  _uncontain(container, item) {
-    if (isContainable$2(item)) {
-      if (!item._container.has(container)) {
-        console.warn("_uncontain:", item._container, "does not contain", item);
-      }
-      item._container.delete(container);
-      if ("_destroy" in item) {
-        item._destroy();
-      }
-    }
-  },
-  _uncontainAll(container, items) {
-    for (const item of items) {
-      subbableContainer$2._uncontain(container, item);
-    }
-  },
-  /**
-   * Creates a change notification to be propagated, starting at this object,
-   * and about the change of a certain target
-   */
-  _notifyChange(struct, target) {
-    const token = new UpdateToken$2(target);
-    struct._propagatedTokens.add(token);
-    mutationHashable.mutated(struct, target);
-    for (const container of struct._container) {
-      subbableContainer$2._childChanged(container, token);
-    }
-  },
-  _childChanged(node, token) {
-    if (node._propagatedTokens.has(token)) {
-      return;
-    }
-    node._propagatedTokens.add(token);
-    mutationHashable.mutated(node, token.target);
-    for (const container of node._container) {
-      subbableContainer$2._childChanged(container, token);
-    }
-  }
-};
-class LinkedPrimitive {
-  _id;
-  _value;
-  _subscriptors = /* @__PURE__ */ new Set();
-  _container = /* @__PURE__ */ new Set();
-  constructor(initialValue, id) {
-    this._value = initialValue;
-    this._id = id;
-    const globalState = getGlobalState();
-    globalState.knownObjects.set(this._id, this);
-  }
-  static of(val) {
-    return new this(val, nanoid$1(5));
-  }
-  set(value) {
-    saveForHistory(this);
-    this._value = value;
-    notify(this, this);
-    const token = new UpdateToken$2(this);
-    for (const container of this._container) {
-      subbableContainer$2._childChanged(container, token);
-    }
-  }
-  setDyn(cb) {
-    const newVal = cb(this.get());
-    this.set(newVal);
-  }
-  get() {
-    return this._value;
-  }
-  replace(value) {
-    this.set(value);
-  }
-  toJSON() {
-    return {
-      _value: this._value,
-      _id: this._id
-    };
-  }
-}
 class Struct2 {
   _id;
   _hash = 0;
@@ -15022,210 +14896,6 @@ function initStructured(structured) {
   }
   const globalState = getGlobalState();
   globalState.knownObjects.set(structured._id, structured);
-}
-class SUnion {
-  _id;
-  _value;
-  _subscriptors = /* @__PURE__ */ new Set();
-  _container = /* @__PURE__ */ new Set();
-  _hash = 0;
-  _propagatedTokens = /* @__PURE__ */ new WeakSet();
-  constructor(initialValue, id) {
-    this._value = initialValue;
-    this._id = id;
-    const globalState = getGlobalState();
-    globalState.knownObjects.set(this._id, this);
-  }
-  static of(val) {
-    return new this(val, nanoid$1(5));
-  }
-  set(value) {
-    saveForHistory(this);
-    this._value = value;
-    notify(this, this);
-    const token = new UpdateToken$2(this);
-    for (const container of this._container) {
-      subbableContainer$2._childChanged(container, token);
-    }
-  }
-  setDyn(cb) {
-    const newVal = cb(this.get());
-    this.set(newVal);
-  }
-  get() {
-    return this._value;
-  }
-  replace(value) {
-    this.set(value);
-  }
-}
-function assertSPrimitive(value) {
-  if (!(value instanceof LinkedPrimitive)) {
-    console.log("ERR:", value, "to be primitive");
-    throw new Error("not an sprimitive");
-  }
-}
-function assertSSimpleArray(value) {
-  if (!(value instanceof SArray)) {
-    console.log("ERR:", value, "to be sarray");
-    throw new Error("not an sarray");
-  }
-}
-function assertSSchemaArray(value) {
-  if (!(value instanceof SSchemaArray)) {
-    console.log("ERR:", value, "to be sschemaarray");
-    throw new Error("not an sschemaarray");
-  }
-}
-function assertStruct(value) {
-  if (!(value instanceof Struct)) {
-    console.log("ERR:", value, "to be struct");
-    throw new Error("not a struct");
-  }
-}
-function assertStruct2(value) {
-  if (!(value instanceof Struct2)) {
-    console.log("ERR:", value, "to be struct2");
-    throw new Error("not a struct2");
-  }
-}
-function assertStructured(value) {
-  if (!(value instanceof Structured)) {
-    console.log("ERR:", value, "to be structured");
-    throw new Error("not a Structured");
-  }
-}
-function assertSSet(value) {
-  if (!(value instanceof SSet)) {
-    console.log("ERR:", value, "to be sset");
-    throw new Error("not a SSet");
-  }
-}
-function assertSUnion(value) {
-  if (!(value instanceof SUnion)) {
-    console.log("ERR:", value, "to be sunion");
-    throw new Error("not a SUnion");
-  }
-}
-function exhaustive$2(x, msg) {
-  throw new Error(msg ?? `Exhaustive violation, unexpected value ${x}`);
-}
-function isContainable$2(val) {
-  return val instanceof LinkedPrimitive || val instanceof LinkedArray || val instanceof Struct || val instanceof Struct2 || val instanceof Structured || val instanceof SSet;
-}
-function assertArray(val) {
-  if (!Array.isArray(val)) {
-    throw new Error(`not an array`);
-  }
-}
-function assertNotArray(val) {
-  if (Array.isArray(val)) {
-    throw new Error(`is an array`);
-  }
-}
-function assertConstructableStruct(spec) {
-  if (spec instanceof Struct) {
-    throw new Error(`is not a Struct`);
-  }
-}
-function assertConstructableStruct2(spec) {
-  if (spec.__proto__ !== Struct2) {
-    throw new Error(`is not a Struct2`);
-  }
-}
-function assertConstructableStructured(spec) {
-  if (spec.__proto__ !== Structured) {
-    throw new Error(`is not a Structured`);
-  }
-}
-class OrderedMap {
-  constructor(_map = /* @__PURE__ */ new Map()) {
-    this._map = _map;
-    this._order = Array.from(_map.keys());
-  }
-  _order;
-  static fromEntries(entries) {
-    return new OrderedMap(new Map(entries));
-  }
-  clear() {
-    this._map.clear();
-    this._order.splice(0, this._order.length);
-  }
-  delete(key) {
-    const value = this._map.get(key);
-    if (value == null) {
-      return false;
-    }
-    const orderPos = this._order.indexOf(key);
-    if (orderPos < 0) {
-      throw new Error("deleting key without order");
-    }
-    this._map.delete(key);
-    this._order.splice(orderPos, 1);
-    return true;
-  }
-  forEach(callbackfn, thisArg) {
-    throw new Error("Method not implemented.");
-  }
-  get(key) {
-    return this._map.get(key);
-  }
-  has(key) {
-    return this._map.has(key);
-  }
-  set(key, value) {
-    throw new Error("Method not implemented.");
-  }
-  get size() {
-    return this._map.size;
-  }
-  entries() {
-    const self = this;
-    return (function* () {
-      for (const key of self._order) {
-        yield [key, nullthrows$4(self._map.get(key))];
-      }
-      return void 0;
-    })();
-  }
-  keys() {
-    return this._order[Symbol.iterator]();
-  }
-  values() {
-    const self = this;
-    return (function* () {
-      for (const key of self._order) {
-        yield nullthrows$4(self._map.get(key));
-      }
-      return void 0;
-    })();
-  }
-  [Symbol.iterator]() {
-    return this.entries();
-  }
-  [Symbol.toStringTag] = "[OrderedMap]";
-  // Array
-  get length() {
-    return this.size;
-  }
-  sort(compareFn) {
-    if (compareFn == null) {
-      this._order.sort();
-    } else {
-      this._order.sort((a, b) => {
-        const aval = nullthrows$4(this._map.get(a));
-        const bval = nullthrows$4(this._map.get(b));
-        return compareFn([a, aval], [b, bval]);
-      });
-    }
-    return this;
-  }
-  push(key, value) {
-    this.delete(key);
-    this._map.set(key, value);
-    this._order.push(key);
-    return this;
-  }
 }
 class SSet extends SubbableContainer {
   _set;
@@ -15366,6 +15036,336 @@ class SSet extends SubbableContainer {
       result.push(callbackfn(value));
     }
     return result;
+  }
+}
+function isContainable$2(val) {
+  return val instanceof LinkedPrimitive || val instanceof LinkedArray || val instanceof Struct || val instanceof Struct2 || val instanceof Structured || val instanceof SSet;
+}
+const mutationHashable = {
+  getMutationHash(mh) {
+    return mh._hash;
+  },
+  mutated(mh, target) {
+    mh._hash = (mh._hash + 1) % Number.MAX_SAFE_INTEGER;
+    notify(mh, target);
+  }
+};
+const CONTAINER_IGNORE_KEYS = /* @__PURE__ */ new Set([
+  "_id",
+  "_hash",
+  "_subscriptors",
+  "_container",
+  "_propagatedTokens"
+]);
+let UpdateToken$2 = class UpdateToken {
+  constructor(target) {
+    this.target = target;
+  }
+};
+class SubbableContainer {
+  _id;
+  _subscriptors = /* @__PURE__ */ new Set();
+  _hash = 0;
+  // all containers can be contained
+  _container = /* @__PURE__ */ new Set();
+  _propagatedTokens = /* @__PURE__ */ new WeakSet();
+  // abstract _replace(val: T): void;
+  // abstract _childChanged(child: Subbable): void;
+  constructor(id) {
+    this._id = id;
+  }
+}
+const subbableContainer$2 = {
+  _contain(container, item) {
+    if (isContainable$2(item)) {
+      item._container.add(container);
+    }
+  },
+  _containAll(container, items) {
+    for (const elem of items) {
+      if (isContainable$2(elem)) {
+        elem._container.add(container);
+      }
+    }
+  },
+  _uncontain(container, item) {
+    if (isContainable$2(item)) {
+      if (!item._container.has(container)) {
+        console.warn("_uncontain:", item._container, "does not contain", item);
+      }
+      item._container.delete(container);
+      if ("_destroy" in item) {
+        item._destroy();
+      }
+    }
+  },
+  _uncontainAll(container, items) {
+    for (const item of items) {
+      subbableContainer$2._uncontain(container, item);
+    }
+  },
+  /**
+   * Creates a change notification to be propagated, starting at this object,
+   * and about the change of a certain target
+   */
+  _notifyChange(struct, target) {
+    const token = new UpdateToken$2(target);
+    struct._propagatedTokens.add(token);
+    mutationHashable.mutated(struct, target);
+    for (const container of struct._container) {
+      subbableContainer$2._childChanged(container, token);
+    }
+  },
+  _childChanged(node, token) {
+    if (node._propagatedTokens.has(token)) {
+      return;
+    }
+    node._propagatedTokens.add(token);
+    mutationHashable.mutated(node, token.target);
+    for (const container of node._container) {
+      subbableContainer$2._childChanged(container, token);
+    }
+  }
+};
+class LinkedPrimitive {
+  _id;
+  _value;
+  _subscriptors = /* @__PURE__ */ new Set();
+  _container = /* @__PURE__ */ new Set();
+  constructor(initialValue, id) {
+    this._value = initialValue;
+    this._id = id;
+    const globalState = getGlobalState();
+    globalState.knownObjects.set(this._id, this);
+  }
+  static of(val) {
+    return new this(val, nanoid$1(5));
+  }
+  set(value) {
+    saveForHistory(this);
+    this._value = value;
+    notify(this, this);
+    const token = new UpdateToken$2(this);
+    for (const container of this._container) {
+      subbableContainer$2._childChanged(container, token);
+    }
+  }
+  setDyn(cb) {
+    const newVal = cb(this.get());
+    this.set(newVal);
+  }
+  get() {
+    return this._value;
+  }
+  replace(value) {
+    this.set(value);
+  }
+  toJSON() {
+    return {
+      _value: this._value,
+      _id: this._id
+    };
+  }
+}
+class SUnion {
+  _id;
+  _value;
+  _subscriptors = /* @__PURE__ */ new Set();
+  _container = /* @__PURE__ */ new Set();
+  _hash = 0;
+  _propagatedTokens = /* @__PURE__ */ new WeakSet();
+  constructor(initialValue, id) {
+    this._value = initialValue;
+    this._id = id;
+    const globalState = getGlobalState();
+    globalState.knownObjects.set(this._id, this);
+  }
+  static of(val) {
+    return new this(val, nanoid$1(5));
+  }
+  set(value) {
+    saveForHistory(this);
+    this._value = value;
+    notify(this, this);
+    const token = new UpdateToken$2(this);
+    for (const container of this._container) {
+      subbableContainer$2._childChanged(container, token);
+    }
+  }
+  setDyn(cb) {
+    const newVal = cb(this.get());
+    this.set(newVal);
+  }
+  get() {
+    return this._value;
+  }
+  replace(value) {
+    this.set(value);
+  }
+}
+function assertSPrimitive(value) {
+  if (!(value instanceof LinkedPrimitive)) {
+    console.log("ERR:", value, "to be primitive");
+    throw new Error("not an sprimitive");
+  }
+}
+function assertSSimpleArray(value) {
+  if (!(value instanceof SArray)) {
+    console.log("ERR:", value, "to be sarray");
+    throw new Error("not an sarray");
+  }
+}
+function assertSSchemaArray(value) {
+  if (!(value instanceof SSchemaArray)) {
+    console.log("ERR:", value, "to be sschemaarray");
+    throw new Error("not an sschemaarray");
+  }
+}
+function assertStruct(value) {
+  if (!(value instanceof Struct)) {
+    console.log("ERR:", value, "to be struct");
+    throw new Error("not a struct");
+  }
+}
+function assertStruct2(value) {
+  if (!(value instanceof Struct2)) {
+    console.log("ERR:", value, "to be struct2");
+    throw new Error("not a struct2");
+  }
+}
+function assertStructured(value) {
+  if (!(value instanceof Structured)) {
+    console.log("ERR:", value, "to be structured");
+    throw new Error("not a Structured");
+  }
+}
+function assertSSet(value) {
+  if (!(value instanceof SSet)) {
+    console.log("ERR:", value, "to be sset");
+    throw new Error("not a SSet");
+  }
+}
+function assertSUnion(value) {
+  if (!(value instanceof SUnion)) {
+    console.log("ERR:", value, "to be sunion");
+    throw new Error("not a SUnion");
+  }
+}
+function exhaustive$2(x, msg) {
+  throw new Error(msg ?? `Exhaustive violation, unexpected value ${x}`);
+}
+function assertArray(val) {
+  if (!Array.isArray(val)) {
+    throw new Error(`not an array`);
+  }
+}
+function assertNotArray(val) {
+  if (Array.isArray(val)) {
+    throw new Error(`is an array`);
+  }
+}
+function assertConstructableStruct(spec) {
+  if (spec instanceof Struct) {
+    throw new Error(`is not a Struct`);
+  }
+}
+function assertConstructableStruct2(spec) {
+  if (spec.__proto__ !== Struct2) {
+    throw new Error(`is not a Struct2`);
+  }
+}
+function assertConstructableStructured(spec) {
+  if (spec.__proto__ !== Structured) {
+    throw new Error(`is not a Structured`);
+  }
+}
+class OrderedMap {
+  constructor(_map = /* @__PURE__ */ new Map()) {
+    this._map = _map;
+    this._order = Array.from(_map.keys());
+  }
+  _order;
+  static fromEntries(entries) {
+    return new OrderedMap(new Map(entries));
+  }
+  clear() {
+    this._map.clear();
+    this._order.splice(0, this._order.length);
+  }
+  delete(key) {
+    const value = this._map.get(key);
+    if (value == null) {
+      return false;
+    }
+    const orderPos = this._order.indexOf(key);
+    if (orderPos < 0) {
+      throw new Error("deleting key without order");
+    }
+    this._map.delete(key);
+    this._order.splice(orderPos, 1);
+    return true;
+  }
+  forEach(callbackfn, thisArg) {
+    throw new Error("Method not implemented.");
+  }
+  get(key) {
+    return this._map.get(key);
+  }
+  has(key) {
+    return this._map.has(key);
+  }
+  set(key, value) {
+    throw new Error("Method not implemented.");
+  }
+  get size() {
+    return this._map.size;
+  }
+  entries() {
+    const self = this;
+    return (function* () {
+      for (const key of self._order) {
+        yield [key, nullthrows$4(self._map.get(key))];
+      }
+      return void 0;
+    })();
+  }
+  keys() {
+    return this._order[Symbol.iterator]();
+  }
+  values() {
+    const self = this;
+    return (function* () {
+      for (const key of self._order) {
+        yield nullthrows$4(self._map.get(key));
+      }
+      return void 0;
+    })();
+  }
+  [Symbol.iterator]() {
+    return this.entries();
+  }
+  [Symbol.toStringTag] = "[OrderedMap]";
+  // Array
+  get length() {
+    return this.size;
+  }
+  sort(compareFn) {
+    if (compareFn == null) {
+      this._order.sort();
+    } else {
+      this._order.sort((a, b) => {
+        const aval = nullthrows$4(this._map.get(a));
+        const bval = nullthrows$4(this._map.get(b));
+        return compareFn([a, aval], [b, bval]);
+      });
+    }
+    return this;
+  }
+  push(key, value) {
+    this.delete(key);
+    this._map.set(key, value);
+    this._order.push(key);
+    return this;
   }
 }
 function serialize$1(state) {
