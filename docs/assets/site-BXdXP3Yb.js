@@ -14801,6 +14801,52 @@ function mutableset$1(set2) {
 function setWindow$1(prop, value) {
   globalThis[prop] = value;
 }
+class WeakRefMap {
+  map = /* @__PURE__ */ new Map();
+  cleanFactor;
+  actionCounter = 0;
+  /**
+   * On structured (linked) arrays we don't actually expect clean to do anything, since we
+   * do cleanup ourselves. In that case if clean removes something. String value is just
+   * some debug string, to help with debugging.
+   */
+  expectsCleanToClean;
+  constructor(cleanFactor, expectsCleanToClean = true) {
+    this.cleanFactor = cleanFactor;
+    this.expectsCleanToClean = expectsCleanToClean;
+  }
+  _clean() {
+    for (const [key, value] of this.map.entries()) {
+      if (value.deref() == null) {
+        this.map.delete(key);
+        if (this.expectsCleanToClean !== true) {
+          console.warn(
+            `WeakRefMap: (${this.expectsCleanToClean}) cleaned ${key} but expects to clean nothing.`
+          );
+        }
+      }
+    }
+  }
+  set(id, value) {
+    this.map.set(id, new WeakRef(value));
+    this.actionCounter++;
+    if (this.actionCounter > this.cleanFactor) {
+      this._clean();
+      this.actionCounter = 0;
+    }
+  }
+  get(id) {
+    return this.map.get(id)?.deref() ?? null;
+  }
+  delete(key) {
+    return this.map.delete(key);
+  }
+  print() {
+    for (const [key, value] of this.map.entries()) {
+      console.log(key, value.deref() ?? null);
+    }
+  }
+}
 function subscribe(subbable2, cb) {
   subbable2._subscriptors.add(cb);
   return () => subbable2._subscriptors.delete(cb);
@@ -15903,52 +15949,6 @@ function replaceOfPkg(metadata) {
     structured: (json, obj) => replaceStructured(json, obj, metadata),
     set: (json, set2) => replaceSSet(json, set2, metadata)
   };
-}
-class WeakRefMap {
-  map = /* @__PURE__ */ new Map();
-  cleanFactor;
-  actionCounter = 0;
-  /**
-   * On structured (linked) arrays we don't actually expect clean to do anything, since we
-   * do cleanup ourselves. In that case if clean removes something. String value is just
-   * some debug string, to help with debugging.
-   */
-  expectsCleanToClean;
-  constructor(cleanFactor, expectsCleanToClean = true) {
-    this.cleanFactor = cleanFactor;
-    this.expectsCleanToClean = expectsCleanToClean;
-  }
-  _clean() {
-    for (const [key, value] of this.map.entries()) {
-      if (value.deref() == null) {
-        this.map.delete(key);
-        if (this.expectsCleanToClean !== true) {
-          console.warn(
-            `WeakRefMap: (${this.expectsCleanToClean}) cleaned ${key} but expects to clean nothing.`
-          );
-        }
-      }
-    }
-  }
-  set(id, value) {
-    this.map.set(id, new WeakRef(value));
-    this.actionCounter++;
-    if (this.actionCounter > this.cleanFactor) {
-      this._clean();
-      this.actionCounter = 0;
-    }
-  }
-  get(id) {
-    return this.map.get(id)?.deref() ?? null;
-  }
-  delete(key) {
-    return this.map.delete(key);
-  }
-  print() {
-    for (const [key, value] of this.map.entries()) {
-      console.log(key, value.deref() ?? null);
-    }
-  }
 }
 class GlobalState {
   HISTORY_RECORDING = false;
@@ -18053,6 +18053,9 @@ function preInitialize(json, metadata) {
     json.nodes.map(([_, node]) => `${node.$$}:${node._id}`)
   );
   for (const [id, node] of json.nodes) {
+    if (node.$$ !== "prim") {
+      continue;
+    }
     initializePrimitive(node, metadata);
     console.log("inited", id);
   }
@@ -18551,21 +18554,6 @@ class Project extends Structured {
     while (this.tracks.pop()) ;
   }
 }
-function ClipA$1({ clip }) {
-  const timelineStart = useContainer(clip.timelineStart);
-  const timelineLength = useContainer(clip.timelineLength);
-  return /* @__PURE__ */ jsxRuntimeExports$1.jsxs("fieldset", { children: [
-    /* @__PURE__ */ jsxRuntimeExports$1.jsx("legend", { children: clip.constructor.name }),
-    timelineStart.t,
-    " ",
-    timelineStart.u,
-    " ",
-    /* @__PURE__ */ jsxRuntimeExports$1.jsx("br", {}),
-    timelineLength.t,
-    " ",
-    timelineLength.u
-  ] });
-}
 function UtilityToggle({
   className,
   style: styleArg,
@@ -18588,6 +18576,36 @@ function UtilityToggle({
     }
   );
 }
+function ClipA$1({
+  clip,
+  onRemove
+}) {
+  const timelineStart = useContainer(clip.timelineStart);
+  const timelineLength = useContainer(clip.timelineLength);
+  const { t: st, u: su } = timelineStart;
+  const { t: lt, u: lu } = timelineLength;
+  return /* @__PURE__ */ jsxRuntimeExports$1.jsxs("fieldset", { className: "bg-gray-800", children: [
+    /* @__PURE__ */ jsxRuntimeExports$1.jsxs("legend", { className: "flex flex-row text-left w-full justify-between", children: [
+      clip.constructor.name,
+      /* @__PURE__ */ jsxRuntimeExports$1.jsx("button", { onClick: onRemove, children: "x" })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports$1.jsx("button", { onClick: () => timelineStart.set(st - 1), children: "-" }),
+    " ",
+    st,
+    " ",
+    su,
+    " ",
+    /* @__PURE__ */ jsxRuntimeExports$1.jsx("button", { onClick: () => timelineStart.set(st + 1), children: "+" }),
+    /* @__PURE__ */ jsxRuntimeExports$1.jsx("br", {}),
+    /* @__PURE__ */ jsxRuntimeExports$1.jsx("button", { onClick: () => timelineLength.set(lt - 1), children: "-" }),
+    " ",
+    lt,
+    " ",
+    lu,
+    " ",
+    /* @__PURE__ */ jsxRuntimeExports$1.jsx("button", { onClick: () => timelineLength.set(lt + 1), children: "+" })
+  ] });
+}
 function TrackA$1({
   track,
   project: project2
@@ -18606,19 +18624,19 @@ function TrackA$1({
       });
     }
   }
-  return /* @__PURE__ */ jsxRuntimeExports$1.jsxs("fieldset", { children: [
+  return /* @__PURE__ */ jsxRuntimeExports$1.jsxs("fieldset", { className: "flex flex-col gap-2 p-2 border border-gray-700", children: [
     /* @__PURE__ */ jsxRuntimeExports$1.jsxs("legend", { children: [
       track.constructor.name,
       " ",
       /* @__PURE__ */ jsxRuntimeExports$1.jsx(
         "input",
         {
+          className: "w-[10ch]",
           type: "text",
           value: edit ?? "",
           placeholder: "name",
           onChange: (e) => setEdit(e.target.value),
           onBlur: () => commitEdit(),
-          style: { width: "10ch" },
           onKeyDown: (e) => {
             if (e.key === "Enter") {
               commitEdit();
@@ -18641,6 +18659,8 @@ function TrackA$1({
     /* @__PURE__ */ jsxRuntimeExports$1.jsx(
       UtilityToggle,
       {
+        className: "self-start border px-1",
+        style: { background: "none", border: "1px solid gray" },
         onToggle: () => {
           if (project2.solodTracks.has(track)) {
             project2.solodTracks.delete(track);
@@ -18649,12 +18669,35 @@ function TrackA$1({
           }
         },
         toggled: project2.solodTracks.has(track),
-        children: "s"
+        children: " solo "
       }
     ),
     clips.map((clip, i) => {
-      return /* @__PURE__ */ jsxRuntimeExports$1.jsx(ClipA$1, { clip }, i);
-    })
+      return /* @__PURE__ */ jsxRuntimeExports$1.jsx(
+        ClipA$1,
+        {
+          clip,
+          onRemove: () => recordHistory$1("remove clip", () => {
+            track.clips.remove(clip);
+          })
+        },
+        i
+      );
+    }),
+    /* @__PURE__ */ jsxRuntimeExports$1.jsx(
+      "button",
+      {
+        style: { background: "#333" },
+        onClick: () => clips.push(
+          Structured.create(
+            AudioClip,
+            time(4, "seconds"),
+            time(4, "seconds")
+          )
+        ),
+        children: "+"
+      }
+    )
   ] });
 }
 var schedulerExports = requireScheduler();
@@ -18722,7 +18765,7 @@ setWindow$1("project", project$1);
 function App() {
   const [projectDirtyState, markProjectClean] = useDirtyTracker(project$1);
   return /* @__PURE__ */ jsxRuntimeExports$1.jsxs(jsxRuntimeExports$1.Fragment, { children: [
-    /* @__PURE__ */ jsxRuntimeExports$1.jsxs("div", { children: [
+    /* @__PURE__ */ jsxRuntimeExports$1.jsxs("div", { className: "flex flex-row gap-2 justify-center", children: [
       /* @__PURE__ */ jsxRuntimeExports$1.jsx(SchedulerTest, {}),
       "useIsDirty: ",
       JSON.stringify(projectDirtyState),
@@ -18737,206 +18780,158 @@ function App() {
         }
       ),
       /* @__PURE__ */ jsxRuntimeExports$1.jsx("button", { onClick: () => history$1.undo(), children: "undo" }),
-      /* @__PURE__ */ jsxRuntimeExports$1.jsx("button", { onClick: () => history$1.redo(), children: "redo" }),
-      /* @__PURE__ */ jsxRuntimeExports$1.jsx("br", {}),
-      /* @__PURE__ */ jsxRuntimeExports$1.jsx(
-        "button",
-        {
-          onClick: () => recordHistory$1("add track", () => {
-            project$1.addTrack("hello world");
-          }),
-          children: "Add Track"
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports$1.jsx(
-        "button",
-        {
-          onClick: () => {
-            const NUM = 1e3;
-            performance.mark("1");
-            recordHistory$1(`add ${NUM} tracks`, () => {
-              for (let i = 0; i < NUM; i++) {
-                project$1.addTrack("hello world");
-              }
-            });
-            performance.mark("2");
-            performance.measure("Add 1000 items", "1", "2");
-            console.log("Added 1000");
-          },
-          children: "Add 100"
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports$1.jsx(
-        "button",
-        {
-          onClick: () => {
-            recordHistory$1("clear", () => {
-              project$1.clear();
-            });
-          },
-          children: "remove all"
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports$1.jsx(
-        "button",
-        {
-          onClick: () => {
-            const serialized = serialize$1(project$1);
-            console.log("serialized", serialized);
-            console.log("serialized", JSON.parse(serialized));
-            const constructed = construct$1(serialized, Project);
-            console.log("constructed", constructed);
-          },
-          children: "construct test"
-        }
-      )
+      /* @__PURE__ */ jsxRuntimeExports$1.jsx("button", { onClick: () => history$1.redo(), children: "redo" })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports$1.jsxs(
-      "div",
+    /* @__PURE__ */ jsxRuntimeExports$1.jsx("div", { className: "flex flex-row gap-2 justify-center", children: /* @__PURE__ */ jsxRuntimeExports$1.jsx(
+      "button",
       {
-        style: {
-          display: "flex",
-          flexDirection: "row",
-          flexGrow: 1,
-          gap: 8,
-          fontFamily: "monospace"
+        onClick: () => {
+          const serialized = serialize$1(project$1);
+          console.log("serialized", serialized);
+          console.log("serialized", JSON.parse(serialized));
+          const constructed = construct$1(serialized, Project);
+          console.log("constructed", constructed);
         },
-        children: [
-          /* @__PURE__ */ jsxRuntimeExports$1.jsx(ProjectDebug, { project: project$1 }),
-          /* @__PURE__ */ jsxRuntimeExports$1.jsxs(
-            "fieldset",
-            {
-              style: {
-                border: "none",
-                background: "#181818",
-                alignSelf: "flex-start"
-              },
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports$1.jsx("legend", { children: "Project" }),
-                /* @__PURE__ */ jsxRuntimeExports$1.jsx(UProject$1, { project: project$1 })
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports$1.jsx(HistoryStacks, {})
-        ]
+        children: "construct test"
       }
-    )
+    ) }),
+    /* @__PURE__ */ jsxRuntimeExports$1.jsxs("div", { className: "flex flex-row grow font-mono gap-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports$1.jsx(ProjectDebug, { project: project$1 }),
+      /* @__PURE__ */ jsxRuntimeExports$1.jsxs(
+        "fieldset",
+        {
+          className: "border-none",
+          style: {
+            background: "#181818",
+            alignSelf: "flex-start"
+          },
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports$1.jsx("legend", { children: "Project" }),
+            /* @__PURE__ */ jsxRuntimeExports$1.jsx(UProject$1, { project: project$1 })
+          ]
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports$1.jsx(HistoryStacks, {})
+    ] })
   ] });
 }
 function UProject$1({ project: project2 }) {
   const tracks = useContainer(project2.tracks);
   const randomNumbers = useContainer(project2.randomNumbers);
   const markers = useContainer(project2.markers);
-  return /* @__PURE__ */ jsxRuntimeExports$1.jsxs(
-    "div",
-    {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 8
-      },
-      children: [
-        /* @__PURE__ */ jsxRuntimeExports$1.jsxs("div", { children: [
-          "Set: ",
-          randomNumbers.size,
-          /* @__PURE__ */ jsxRuntimeExports$1.jsx(
-            "button",
-            {
-              title: "add random num",
-              onClick: () => {
-                recordHistory$1("add random num", () => {
-                  project2.randomNumbers.add(Math.random());
-                });
-              },
-              children: "+"
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports$1.jsxs("div", { children: [
-          "SArray: ",
-          markers.map(String).join(","),
-          /* @__PURE__ */ jsxRuntimeExports$1.jsx(
-            "button",
-            {
-              onClick: () => {
-                history$1.record("add marker", () => {
-                  markers.push([0, "foo"]);
-                  console.log("pushed");
-                });
-              },
-              children: "+"
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports$1.jsx("div", { children: /* @__PURE__ */ jsxRuntimeExports$1.jsx(
+  return /* @__PURE__ */ jsxRuntimeExports$1.jsxs("div", { className: "p-1 flex flex-row gap-2", children: [
+    /* @__PURE__ */ jsxRuntimeExports$1.jsxs("div", { className: "p-1 flex flex-col gap-2 min-w-50 items-start", children: [
+      /* @__PURE__ */ jsxRuntimeExports$1.jsxs("div", { children: [
+        "Set: ",
+        randomNumbers.size,
+        /* @__PURE__ */ jsxRuntimeExports$1.jsx(
+          "button",
+          {
+            title: "add random num",
+            onClick: () => {
+              recordHistory$1("add random num", () => {
+                project2.randomNumbers.add(Math.random());
+              });
+            },
+            children: "+"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports$1.jsxs("div", { children: [
+        "SArray:",
+        /* @__PURE__ */ jsxRuntimeExports$1.jsx(
+          "button",
+          {
+            onClick: () => {
+              history$1.record("add marker", () => {
+                markers.push([0, "foo"]);
+                console.log("pushed");
+              });
+            },
+            children: "+"
+          }
+        ),
+        markers.map(([num, str], i) => {
+          return /* @__PURE__ */ jsxRuntimeExports$1.jsxs("div", { children: [
+            "[",
+            num,
+            ", ",
+            str,
+            "]"
+          ] }, i);
+        })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports$1.jsxs("div", { className: "p-1 flex flex-col gap-2", children: [
+      "Tracks",
+      /* @__PURE__ */ jsxRuntimeExports$1.jsx("div", { children: /* @__PURE__ */ jsxRuntimeExports$1.jsx(
+        "input",
+        {
+          type: "button",
+          value: "move clip and change time",
+          onClick: () => {
+            history$1.record("move clip", () => {
+              const track0 = nullthrows$3(project2.tracks.at(0));
+              const track1 = nullthrows$3(project2.tracks.at(1));
+              const clip = nullthrows$3(track0.clips.at(0));
+              clip.timelineStart.set(4);
+              track0.clips.remove(clip);
+              track1.clips.push(clip);
+            });
+          }
+        }
+      ) }),
+      /* @__PURE__ */ jsxRuntimeExports$1.jsxs("div", { children: [
+        /* @__PURE__ */ jsxRuntimeExports$1.jsx(
           "input",
           {
             type: "button",
-            value: "move clip and change time",
+            value: "add track",
+            onClick: () => recordHistory$1("add track", () => {
+              project2.addTrack("hello world");
+            })
+          }
+        ),
+        " ",
+        /* @__PURE__ */ jsxRuntimeExports$1.jsx(
+          "input",
+          {
+            type: "button",
+            value: "add 1000",
             onClick: () => {
-              history$1.record("move clip", () => {
-                const track0 = nullthrows$3(project2.tracks.at(0));
-                const track1 = nullthrows$3(project2.tracks.at(1));
-                const clip = nullthrows$3(track0.clips.at(0));
-                clip.timelineStart.set(4);
-                track0.clips.remove(clip);
-                track1.clips.push(clip);
+              const NUM = 1e3;
+              performance.mark("1");
+              recordHistory$1(`add ${NUM} tracks`, () => {
+                for (let i = 0; i < NUM; i++) {
+                  project2.addTrack("hello world");
+                }
+              });
+              performance.mark("2");
+              performance.measure("Add 1000 items", "1", "2");
+              console.log("Added 1000");
+            }
+          }
+        ),
+        " ",
+        /* @__PURE__ */ jsxRuntimeExports$1.jsx(
+          "input",
+          {
+            type: "button",
+            value: "del all",
+            onClick: () => {
+              recordHistory$1("clear", () => {
+                project2.clear();
               });
             }
           }
-        ) }),
-        /* @__PURE__ */ jsxRuntimeExports$1.jsxs("div", { children: [
-          /* @__PURE__ */ jsxRuntimeExports$1.jsx(
-            "input",
-            {
-              type: "button",
-              value: "add track",
-              onClick: () => recordHistory$1("add track", () => {
-                project2.addTrack("hello world");
-              })
-            }
-          ),
-          " ",
-          /* @__PURE__ */ jsxRuntimeExports$1.jsx(
-            "input",
-            {
-              type: "button",
-              value: "add 1000",
-              onClick: () => {
-                const NUM = 1e3;
-                performance.mark("1");
-                recordHistory$1(`add ${NUM} tracks`, () => {
-                  for (let i = 0; i < NUM; i++) {
-                    project2.addTrack("hello world");
-                  }
-                });
-                performance.mark("2");
-                performance.measure("Add 1000 items", "1", "2");
-                console.log("Added 1000");
-              }
-            }
-          ),
-          " ",
-          /* @__PURE__ */ jsxRuntimeExports$1.jsx(
-            "input",
-            {
-              type: "button",
-              value: "del all",
-              onClick: () => {
-                recordHistory$1("clear", () => {
-                  project2.clear();
-                });
-              }
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports$1.jsx("hr", { style: { width: "100%" } }),
-        tracks.map((track) => {
-          return /* @__PURE__ */ jsxRuntimeExports$1.jsx(TrackA$1, { project: project2, track }, track._id);
-        })
-      ]
-    }
-  );
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports$1.jsx("hr", { className: "w-full" }),
+      tracks.map((track) => {
+        return /* @__PURE__ */ jsxRuntimeExports$1.jsx(TrackA$1, { project: project2, track }, track._id);
+      })
+    ] })
+  ] });
 }
 function ProjectDebug({ project: project2 }) {
   const [tab, setTab] = reactExports$1.useState("struct");
@@ -18977,9 +18972,8 @@ function HistoryStacks() {
   return /* @__PURE__ */ jsxRuntimeExports$1.jsxs(
     "div",
     {
+      className: "flex flex-col",
       style: {
-        display: "flex",
-        flexDirection: "column",
         flex: "1 1 1px",
         textAlign: "left"
       },
@@ -18991,15 +18985,13 @@ function HistoryStacks() {
         /* @__PURE__ */ jsxRuntimeExports$1.jsxs(
           "div",
           {
+            className: "flex flex-row items-center",
             style: {
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
               gap: "1ch"
             },
             children: [
-              /* @__PURE__ */ jsxRuntimeExports$1.jsx("span", { style: { whiteSpace: "nowrap", flexShrink: 0 }, children: "> now " }),
-              /* @__PURE__ */ jsxRuntimeExports$1.jsx("hr", { style: { width: "100%" } })
+              /* @__PURE__ */ jsxRuntimeExports$1.jsx("span", { className: "whitespace-nowrap shrink-0", children: "> now " }),
+              /* @__PURE__ */ jsxRuntimeExports$1.jsx("hr", { className: "w-full" })
             ]
           }
         ),
@@ -25155,7 +25147,7 @@ function UProject({ project: project2 }) {
   const randomNumbers = useLink(project2.randomNumbers);
   const markers = useLink(project2.markers);
   return /* @__PURE__ */ jsxRuntimeExports$1.jsxs("div", { className: "p-1 flex flex-row gap-2", children: [
-    /* @__PURE__ */ jsxRuntimeExports$1.jsxs("div", { className: "p-1 flex flex-col gap-2", style: { minWidth: 200 }, children: [
+    /* @__PURE__ */ jsxRuntimeExports$1.jsxs("div", { className: "p-1 flex flex-col gap-2 min-w-50", children: [
       /* @__PURE__ */ jsxRuntimeExports$1.jsxs("div", { children: [
         "MarkedSet: ",
         randomNumbers().size,
@@ -25288,12 +25280,12 @@ function TrackA({
       /* @__PURE__ */ jsxRuntimeExports$1.jsx(
         "input",
         {
+          className: "w-[10ch]",
           type: "text",
           value: edit ?? "",
           placeholder: "name",
           onChange: (e) => setEdit(e.target.value),
           onBlur: () => commitEdit(),
-          style: { width: "10ch" },
           onKeyDown: (e) => {
             if (e.key === "Enter") {
               commitEdit();
@@ -25307,7 +25299,7 @@ function TrackA({
         {
           type: "button",
           value: "x",
-          onClick: () => recordHistory("remove clip", () => {
+          onClick: () => recordHistory("remove track", () => {
             project2.tracks.remove(track);
           })
         }
@@ -25332,7 +25324,18 @@ function TrackA({
       }
     ),
     clips().map((clip, i) => {
-      return /* @__PURE__ */ jsxRuntimeExports$1.jsx(ClipA, { clip }, i);
+      return /* @__PURE__ */ jsxRuntimeExports$1.jsx(
+        ClipA,
+        {
+          clip,
+          onRemove: function() {
+            recordHistory("remove clip", () => {
+              track.clips.remove(clip);
+            });
+          }
+        },
+        i
+      );
     }),
     /* @__PURE__ */ jsxRuntimeExports$1.jsx(
       "button",
@@ -25344,13 +25347,19 @@ function TrackA({
     )
   ] });
 }
-function ClipA({ clip }) {
+function ClipA({
+  clip,
+  onRemove
+}) {
   const timelineStart = useLink(clip.timelineStart);
   const timelineLength = useLink(clip.timelineLength);
   const { t: st, u: su } = timelineStart();
   const { t: lt, u: lu } = timelineLength();
   return /* @__PURE__ */ jsxRuntimeExports$1.jsxs("fieldset", { className: "bg-gray-800", children: [
-    /* @__PURE__ */ jsxRuntimeExports$1.jsx("legend", { children: clip.constructor.name }),
+    /* @__PURE__ */ jsxRuntimeExports$1.jsxs("legend", { className: "flex flex-row text-left w-full justify-between", children: [
+      clip.constructor.name,
+      /* @__PURE__ */ jsxRuntimeExports$1.jsx("button", { onClick: onRemove, children: "x" })
+    ] }),
     /* @__PURE__ */ jsxRuntimeExports$1.jsx("button", { onClick: () => timelineStart().set(st - 1), children: "-" }),
     " ",
     st,
@@ -25359,7 +25368,7 @@ function ClipA({ clip }) {
     " ",
     /* @__PURE__ */ jsxRuntimeExports$1.jsx("button", { onClick: () => timelineStart().set(st + 1), children: "+" }),
     /* @__PURE__ */ jsxRuntimeExports$1.jsx("br", {}),
-    /* @__PURE__ */ jsxRuntimeExports$1.jsx("button", { onClick: () => timelineStart().set(lt - 1), children: "-" }),
+    /* @__PURE__ */ jsxRuntimeExports$1.jsx("button", { onClick: () => timelineLength().set(lt - 1), children: "-" }),
     " ",
     lt,
     " ",

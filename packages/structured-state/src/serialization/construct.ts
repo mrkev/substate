@@ -14,8 +14,13 @@ function preInitialize(json: SimplePackage, metadata: InitializationMetadata) {
     "pre-init of nodes",
     json.nodes.map(([_, node]) => `${node.$$}:${node._id}`),
   );
+
   for (const [id, node] of json.nodes) {
-    const _ = initializePrimitive(node as any, metadata);
+    if (node.$$ !== "prim") {
+      continue;
+    }
+
+    const _ = initializePrimitive(node, metadata);
     console.log("inited", id);
   }
 }

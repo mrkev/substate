@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
-import { useContainer, usePrimitive } from "../../../structured-state/src";
+import {
+  Structured,
+  useContainer,
+  usePrimitive,
+} from "../../../structured-state/src";
 import { recordHistory } from "../../../structured-state/src/sstate.history";
+import { UtilityToggle } from "../UtilityToggle";
+import { AudioClip } from "../structs/AudioClip";
 import { AudioTrack } from "../structs/AudioTrack";
 import { Project } from "../structs/Project";
+import { time } from "../structs/TimelineT";
 import { ClipA } from "./ClipA";
-import { UtilityToggle } from "../UtilityToggle";
 
 export function TrackA({
   track,
@@ -32,16 +38,16 @@ export function TrackA({
   }
 
   return (
-    <fieldset>
+    <fieldset className="flex flex-col gap-2 p-2 border border-gray-700">
       <legend>
         {track.constructor.name}{" "}
         <input
+          className="w-[10ch]"
           type="text"
           value={edit ?? ""}
           placeholder="name"
           onChange={(e) => setEdit(e.target.value)}
           onBlur={() => commitEdit()}
-          style={{ width: "10ch" }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               commitEdit();
@@ -59,6 +65,8 @@ export function TrackA({
         />
       </legend>
       <UtilityToggle
+        className="self-start border px-1"
+        style={{ background: "none", border: "1px solid gray" }}
         onToggle={() => {
           if (project.solodTracks.has(track)) {
             project.solodTracks.delete(track);
@@ -68,24 +76,35 @@ export function TrackA({
         }}
         toggled={project.solodTracks.has(track)}
       >
-        s
+        {" solo "}
       </UtilityToggle>
       {clips.map((clip, i) => {
         return (
-          <ClipA key={i} clip={clip} />
-          // <li key={i}>
-          //   <input
-          //     type="button"
-          //     value={"x"}
-          //     onClick={() => {
-          //       // recordHistory("remove note", () => {
-          //       //   notes.remove(note);
-          //       // });
-          //     }}
-          //   ></input>
-          // </li>
+          <ClipA
+            key={i}
+            clip={clip}
+            onRemove={() =>
+              recordHistory("remove clip", () => {
+                track.clips.remove(clip);
+              })
+            }
+          />
         );
       })}
+      <button
+        style={{ background: "#333" }}
+        onClick={() =>
+          clips.push(
+            Structured.create(
+              AudioClip,
+              time(4, "seconds"),
+              time(4, "seconds"),
+            ),
+          )
+        }
+      >
+        +
+      </button>
     </fieldset>
   );
 }

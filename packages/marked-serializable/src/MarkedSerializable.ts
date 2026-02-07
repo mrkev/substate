@@ -11,12 +11,12 @@ export interface MarkedSerializable<M extends SerializationMark<any, any>> {
 
 export class SerializationMark<
   D extends Description,
-  C extends MarkedSerializable<any>
+  C extends MarkedSerializable<any>,
 > {
   constructor(
     readonly kind: string,
     readonly construct: (description: D) => C,
-    readonly describe: (constructed: C) => D
+    readonly describe: (constructed: C) => D,
   ) {}
   static create<D extends Description, C extends MarkedSerializable<any>>({
     kind,
@@ -32,7 +32,7 @@ export class SerializationMark<
 }
 
 export function isSerializable(
-  value: unknown
+  value: unknown,
 ): value is MarkedSerializable<any> {
   return (
     typeof value === "object" &&
@@ -45,7 +45,7 @@ export function isSerializable(
 export type SerializationIndex = Map<string, SerializationMark<any, any>>;
 
 export function consolidateMarks(
-  marks: SerializationMark<any, any>[]
+  marks: SerializationMark<any, any>[],
 ): SerializationIndex {
   const map = new Map<string, SerializationMark<any, any>>();
   for (const mark of marks) {

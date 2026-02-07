@@ -30,7 +30,7 @@ const project = MProject.of(
   [
     [0, "foo"],
     [1, "bar"],
-  ]
+  ],
 );
 
 const serializationIndex = consolidateMarks([
@@ -69,7 +69,7 @@ export function MarkedProjectTest() {
             console.log("serialized", JSON.parse(JSON.stringify(serialized)));
             const constructed = construct(
               serialized,
-              MAudioClip_serializationMark
+              MAudioClip_serializationMark,
             );
             console.log("og vs constructed", project, constructed);
           }}
@@ -128,7 +128,7 @@ function UProject({ project }: { project: MProject }) {
   const markers = useLink(project.markers);
   return (
     <div className="p-1 flex flex-row gap-2">
-      <div className="p-1 flex flex-col gap-2" style={{ minWidth: 200 }}>
+      <div className="p-1 flex flex-col gap-2 min-w-50">
         <div>
           MarkedSet: {randomNumbers().size}
           <button
@@ -295,12 +295,12 @@ export function TrackA({
       <legend>
         {track.constructor.name}{" "}
         <input
+          className="w-[10ch]"
           type="text"
           value={edit ?? ""}
           placeholder="name"
           onChange={(e) => setEdit(e.target.value)}
           onBlur={() => commitEdit()}
-          style={{ width: "10ch" }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               commitEdit();
@@ -311,7 +311,7 @@ export function TrackA({
           type="button"
           value={"x"}
           onClick={() =>
-            recordHistory("remove clip", () => {
+            recordHistory("remove track", () => {
               project.tracks.remove(track);
             })
           }
@@ -335,7 +335,15 @@ export function TrackA({
       </UtilityToggle>
       {clips().map((clip, i) => {
         return (
-          <ClipA key={i} clip={clip} />
+          <ClipA
+            key={i}
+            clip={clip}
+            onRemove={function (): void {
+              recordHistory("remove clip", () => {
+                track.clips.remove(clip);
+              });
+            }}
+          />
           // <li key={i}>
           //   <input
           //     type="button"
@@ -359,7 +367,13 @@ export function TrackA({
   );
 }
 
-export function ClipA({ clip }: { clip: MAudioClip }) {
+export function ClipA({
+  clip,
+  onRemove,
+}: {
+  clip: MAudioClip;
+  onRemove: () => void;
+}) {
   const timelineStart = useLink(clip.timelineStart);
   const timelineLength = useLink(clip.timelineLength);
   const { t: st, u: su } = timelineStart();
@@ -367,11 +381,14 @@ export function ClipA({ clip }: { clip: MAudioClip }) {
 
   return (
     <fieldset className="bg-gray-800">
-      <legend>{clip.constructor.name}</legend>
+      <legend className="flex flex-row text-left w-full justify-between">
+        {clip.constructor.name}
+        <button onClick={onRemove}>x</button>
+      </legend>
       <button onClick={() => timelineStart().set(st - 1)}>-</button> {st} {su}{" "}
       <button onClick={() => timelineStart().set(st + 1)}>+</button>
       <br />
-      <button onClick={() => timelineStart().set(lt - 1)}>-</button> {lt} {lu}{" "}
+      <button onClick={() => timelineLength().set(lt - 1)}>-</button> {lt} {lu}{" "}
       <button onClick={() => timelineLength().set(lt + 1)}>+</button>
     </fieldset>
   );

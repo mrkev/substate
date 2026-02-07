@@ -1,10 +1,10 @@
 import { nanoid } from "nanoid";
 import { nullthrows, setWindow } from "./lib/nullthrows";
+import { WeakRefMap } from "./lib/WeakRefMap";
+import { LinkedArray } from "./obj/LinkedArray";
 import { replacePackage } from "./serialization/replace";
 import { serialize, Simplified } from "./serialization/serialization";
-import { LinkedArray } from "./obj/LinkedArray";
 import { StructuredKind } from "./state/StructuredKinds";
-import { WeakRefMap } from "./lib/WeakRefMap";
 
 // todo: use this for faster performance with array history
 export type ObjectSnapshot =

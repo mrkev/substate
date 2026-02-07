@@ -75,7 +75,7 @@ export function App() {
 
   return (
     <>
-      <div>
+      <div className="flex flex-row gap-2 justify-center">
         <SchedulerTest />
         useIsDirty: {JSON.stringify(projectDirtyState)}{" "}
         <button
@@ -87,41 +87,8 @@ export function App() {
         </button>
         <button onClick={() => s.history.undo()}>undo</button>
         <button onClick={() => s.history.redo()}>redo</button>
-        <br></br>
-        <button
-          onClick={() =>
-            recordHistory("add track", () => {
-              project.addTrack("hello world");
-            })
-          }
-        >
-          Add Track
-        </button>
-        <button
-          onClick={() => {
-            const NUM = 1000;
-            performance.mark("1");
-            recordHistory(`add ${NUM} tracks`, () => {
-              for (let i = 0; i < NUM; i++) {
-                project.addTrack("hello world");
-              }
-            });
-            performance.mark("2");
-            performance.measure("Add 1000 items", "1", "2");
-            console.log("Added 1000");
-          }}
-        >
-          Add 100
-        </button>
-        <button
-          onClick={() => {
-            recordHistory("clear", () => {
-              project.clear();
-            });
-          }}
-        >
-          remove all
-        </button>
+      </div>
+      <div className="flex flex-row gap-2 justify-center">
         <button
           onClick={() => {
             const serialized = serialize(project);
@@ -135,20 +102,12 @@ export function App() {
           construct test
         </button>
       </div>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          flexGrow: 1,
-          gap: 8,
-          fontFamily: "monospace",
-        }}
-      >
+      <div className="flex flex-row grow font-mono gap-2">
         <ProjectDebug project={project} />
 
         <fieldset
+          className="border-none"
           style={{
-            border: "none",
             background: "#181818",
             alignSelf: "flex-start",
           }}
@@ -168,103 +127,107 @@ function UProject({ project }: { project: Project }) {
   const randomNumbers = useContainer(project.randomNumbers);
   const markers = useContainer(project.markers);
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 8,
-      }}
-    >
-      <div>
-        Set: {randomNumbers.size}
-        <button
-          title="add random num"
-          onClick={() => {
-            recordHistory("add random num", () => {
-              project.randomNumbers.add(Math.random());
-            });
-          }}
-        >
-          +
-        </button>
+    <div className="p-1 flex flex-row gap-2">
+      <div className="p-1 flex flex-col gap-2 min-w-50 items-start">
+        <div>
+          Set: {randomNumbers.size}
+          <button
+            title="add random num"
+            onClick={() => {
+              recordHistory("add random num", () => {
+                project.randomNumbers.add(Math.random());
+              });
+            }}
+          >
+            +
+          </button>
+        </div>
+        <div>
+          SArray:
+          <button
+            onClick={() => {
+              s.history.record("add marker", () => {
+                markers.push([0, "foo"]);
+                console.log("pushed");
+              });
+            }}
+          >
+            +
+          </button>
+          {markers.map(([num, str], i) => {
+            return (
+              <div key={i}>
+                [{num}, {str}]
+              </div>
+            );
+          })}
+        </div>
       </div>
-      <div>
-        SArray: {markers.map(String).join(",")}
-        <button
-          onClick={() => {
-            s.history.record("add marker", () => {
-              markers.push([0, "foo"]);
-              console.log("pushed");
-            });
-          }}
-        >
-          +
-        </button>
-      </div>
-      <div>
-        <input
-          type="button"
-          value={"move clip and change time"}
-          onClick={() => {
-            s.history.record("move clip", () => {
-              const track0 = nullthrows(project.tracks.at(0));
-              const track1 = nullthrows(project.tracks.at(1));
-              const clip = nullthrows(track0.clips.at(0));
+      <div className="p-1 flex flex-col gap-2">
+        Tracks
+        <div>
+          <input
+            type="button"
+            value={"move clip and change time"}
+            onClick={() => {
+              s.history.record("move clip", () => {
+                const track0 = nullthrows(project.tracks.at(0));
+                const track1 = nullthrows(project.tracks.at(1));
+                const clip = nullthrows(track0.clips.at(0));
 
-              clip.timelineStart.set(4);
-              track0.clips.remove(clip);
-              track1.clips.push(clip);
+                clip.timelineStart.set(4);
+                track0.clips.remove(clip);
+                track1.clips.push(clip);
 
-              // works if:
-              // track0.clips.remove(clip);
-              // clip.timelineStart.set(4);
-              // track1.clips.push(clip);
-            });
-          }}
-        />
-      </div>
-
-      <div>
-        <input
-          type="button"
-          value={"add track"}
-          onClick={() =>
-            recordHistory("add track", () => {
-              project.addTrack("hello world");
-            })
-          }
-        />{" "}
-        <input
-          type="button"
-          value={"add 1000"}
-          onClick={() => {
-            const NUM = 1000;
-            performance.mark("1");
-            recordHistory(`add ${NUM} tracks`, () => {
-              for (let i = 0; i < NUM; i++) {
+                // works if:
+                // track0.clips.remove(clip);
+                // clip.timelineStart.set(4);
+                // track1.clips.push(clip);
+              });
+            }}
+          />
+        </div>
+        <div>
+          <input
+            type="button"
+            value={"add track"}
+            onClick={() =>
+              recordHistory("add track", () => {
                 project.addTrack("hello world");
-              }
-            });
-            performance.mark("2");
-            performance.measure("Add 1000 items", "1", "2");
-            console.log("Added 1000");
-          }}
-        />{" "}
-        <input
-          type="button"
-          value={"del all"}
-          onClick={() => {
-            recordHistory("clear", () => {
-              project.clear();
-            });
-          }}
-        />
+              })
+            }
+          />{" "}
+          <input
+            type="button"
+            value={"add 1000"}
+            onClick={() => {
+              const NUM = 1000;
+              performance.mark("1");
+              recordHistory(`add ${NUM} tracks`, () => {
+                for (let i = 0; i < NUM; i++) {
+                  project.addTrack("hello world");
+                }
+              });
+              performance.mark("2");
+              performance.measure("Add 1000 items", "1", "2");
+              console.log("Added 1000");
+            }}
+          />{" "}
+          <input
+            type="button"
+            value={"del all"}
+            onClick={() => {
+              recordHistory("clear", () => {
+                project.clear();
+              });
+            }}
+          />
+        </div>
+        <hr className="w-full" />
+        {tracks.map((track) => {
+          return <TrackA project={project} key={track._id} track={track} />;
+        })}
       </div>
-      <hr style={{ width: "100%" }} />
-
-      {tracks.map((track) => {
-        return <TrackA project={project} key={track._id} track={track} />;
-      })}
     </div>
   );
 }
@@ -332,9 +295,8 @@ function HistoryStacks() {
 
   return (
     <div
+      className="flex flex-col"
       style={{
-        display: "flex",
-        flexDirection: "column",
         flex: "1 1 1px",
         textAlign: "left",
       }}
@@ -344,15 +306,13 @@ function HistoryStacks() {
         return <HistoryItem entry={entry} key={i} />;
       })}
       <div
+        className="flex flex-row items-center"
         style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
           gap: "1ch",
         }}
       >
-        <span style={{ whiteSpace: "nowrap", flexShrink: 0 }}>{"> now "}</span>
-        <hr style={{ width: "100%" }} />
+        <span className="whitespace-nowrap shrink-0">{"> now "}</span>
+        <hr className="w-full" />
       </div>
       {/* <div>^ undo / v redo</div> */}
       {redoStack.map((entry, i) => {
