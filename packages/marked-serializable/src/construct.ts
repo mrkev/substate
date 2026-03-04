@@ -7,7 +7,7 @@ import {
 import { exhaustive } from "./exhaustive";
 import { MarkedSerializable, SerializationIndex } from "./MarkedSerializable";
 import { nullthrows } from "./nullthrows";
-import { RefPackage } from "./RefPackage";
+import { RefMap } from "./RefMap";
 import {
   isPrimitive,
   isSimplified,
@@ -18,17 +18,17 @@ import {
 
 type Resources = {
   index: SerializationIndex;
-  refpkg: RefPackage;
+  refmap: RefMap;
   objmap: Map<string, Simplifiable>;
 };
 
 export function constructSimplifiedPackage(
   pkg: SimplifiedPackage,
-  index: SerializationIndex
+  index: SerializationIndex,
 ) {
-  const refpkg = new RefPackage(pkg.refs);
+  const refmap = new RefMap(pkg.refs);
   const objmap = new Map<string, Simplifiable>();
-  const result = initialize(pkg.root, { index, refpkg, objmap });
+  const result = initialize(pkg.root, { index, refmap, objmap });
   return result;
 }
 
@@ -59,7 +59,7 @@ function initialize(json: unknown, rsc: Resources): Simplifiable {
         if (existing != null) {
           return existing;
         } else {
-          const result = initialize(rsc.refpkg.get(json._id), rsc);
+          const result = initialize(rsc.refmap.get(json._id), rsc);
           rsc.objmap.set(json._id, result);
           return result;
         }
@@ -74,11 +74,11 @@ function initialize(json: unknown, rsc: Resources): Simplifiable {
 
 function initializeObj(
   simplified: Simplified["obj"],
-  rsc: Resources
+  rsc: Resources,
 ): MarkedSerializable<any> {
   const mark = nullthrows(
     rsc.index.get(simplified.kind),
-    `kind ${simplified.kind} not found in SerializationIndex`
+    `kind ${simplified.kind} not found in SerializationIndex`,
   );
 
   const entries = {} as Record<string, Simplifiable>;
@@ -97,7 +97,7 @@ function initializeObj(
 
 function initializeMarkedValue(
   obj: Simplified["val"],
-  rsc: Resources
+  rsc: Resources,
 ): MarkedValue<any> {
   const value = isSimplified(obj.value)
     ? initialize(obj.value, rsc)
@@ -109,7 +109,7 @@ function initializeMarkedValue(
 
 function initializeMarkedArray(
   arr: Simplified["arr"],
-  rsc: Resources
+  rsc: Resources,
 ): MarkedArray<any> {
   const result = MarkedArray.create(arr.entries.map((x) => initialize(x, rsc)));
   return result;
@@ -117,19 +117,19 @@ function initializeMarkedArray(
 
 function initializeMarkedMap(
   map: Simplified["map"],
-  rsc: Resources
+  rsc: Resources,
 ): MarkedMap<any, any> {
   const result = MarkedMap.create(
     map.entries.map(
-      (key, value) => [initialize(key, rsc), initialize(value, rsc)] as const
-    )
+      (key, value) => [initialize(key, rsc), initialize(value, rsc)] as const,
+    ),
   );
   return result;
 }
 
 function initializeMarkedSet(
   set: Simplified["set"],
-  rsc: Resources
+  rsc: Resources,
 ): MarkedSet<any> {
   const result = MarkedSet.create(set.entries.map((x) => initialize(x, rsc)));
   return result;

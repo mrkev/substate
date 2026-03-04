@@ -30,7 +30,7 @@ export class MProject
     public readonly name: MarkedValue<string>,
     readonly tracks: MarkedArray<MAudioTrack>,
     readonly markers: MarkedMap<number, string>,
-    readonly solodTracks: MarkedSet<MAudioTrack>
+    readonly solodTracks: MarkedSet<MAudioTrack>,
   ) {
     // TODO: it's bc it's unintialized.
     // [["foo", 3]] // why does this print as unknown when empty?

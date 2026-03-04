@@ -1,7 +1,8 @@
 import { nullthrows } from "../lib/nullthrows";
 import { SSet } from "../obj/LinkedSet";
 import { isStructuredKind } from "../state/StructuredKinds";
-import { InitializationMetadata, initialize } from "./initialize";
+import { initialize } from "./initialize";
+import { InitializationMetadata } from "./construct";
 import { replace } from "./replace";
 import { NSimplified, isSimplified } from "./serialization";
 

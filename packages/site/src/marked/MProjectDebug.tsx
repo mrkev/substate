@@ -23,13 +23,7 @@ export function MProjectDebug({ project }: { project: MProject }) {
       </UtilityToggle>
       {tab === "struct" && <DebugTree val={project}></DebugTree>}
       {tab === "serialized" && (
-        <div
-          style={{
-            overflow: "scroll",
-            textAlign: "left",
-            fontFamily: "monospace",
-          }}
-        >
+        <div className="font-mono text-left overflow-scroll">
           <JSONView
             defaultExpandedLevels={3}
             json={JSON.parse(JSON.stringify(simplifyAndPackage(project)))}

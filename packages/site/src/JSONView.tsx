@@ -241,7 +241,7 @@ function JSONArray({
 
   if (displayState === "summary") {
     body.push(
-      <span className={classOfKind("prm")}>
+      <span key={"summary"} className={classOfKind("prm")}>
         {" "}
         {arr.map((x) => string(x)).join(", ")}{" "}
       </span>,

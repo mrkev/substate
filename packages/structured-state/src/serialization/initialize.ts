@@ -1,8 +1,4 @@
 import { SBoolean, SNil, SNumber, SPrimitive, SString } from "..";
-import { Struct } from "../obj/Struct";
-import { Struct2 } from "../obj/Struct2";
-import { ConstructableStructure, initStructured } from "../obj/Structured";
-import { StructSchema, StructuredKind } from "../state/StructuredKinds";
 import {
   assertArray,
   assertConstructableStruct,
@@ -11,14 +7,18 @@ import {
   assertNotArray,
   exhaustive,
 } from "../lib/assertions";
-import { OrderedMap } from "../lib/OrderedMap";
 import { assertNotNull, nullthrows } from "../lib/nullthrows";
 import { Constructor } from "../lib/types";
 import { LinkedArray } from "../obj/LinkedArray";
 import { LinkedPrimitive } from "../obj/LinkedPrimitive";
 import { SSet } from "../obj/LinkedSet";
 import { SSchemaArray } from "../obj/SSchemaArray";
+import { Struct } from "../obj/Struct";
+import { Struct2 } from "../obj/Struct2";
+import { ConstructableStructure, initStructured } from "../obj/Structured";
+import { StructSchema, StructuredKind } from "../state/StructuredKinds";
 import { SUnion } from "../sunion";
+import { InitializationMetadata } from "./construct";
 import {
   NSimplified,
   Simplified,
@@ -28,7 +28,6 @@ import {
   SimplifiedTypePrimitive,
   isSimplified,
 } from "./serialization";
-import { SimplePackage } from "./simplify";
 
 function find<T extends Simplified, O extends StructuredKind>(
   json: T,
@@ -36,7 +35,7 @@ function find<T extends Simplified, O extends StructuredKind>(
   kind: Constructor<O>,
 ): O | null {
   // console.log("looking for", json._id, json.$$);
-  const found = metadata.initializedNodes.get(json._id);
+  const found = metadata.objmap.get(json._id);
   if (found == null) {
     return null;
   }
@@ -53,9 +52,18 @@ function initializeRef(
   json: SimplifiedRef,
   metadata: InitializationMetadata,
 ): StructuredKind {
+  const existing = metadata.objmap.get(json._id);
+  if (existing != null) {
+    return existing;
+  }
+
+  const referenced = metadata.refmap.get(json._id);
+
+  let result;
   switch (json.kind) {
     case "prim":
-      return initializePrimitiveRef(json, metadata);
+      result = initializePrimitiveRef(json, metadata);
+      break;
     case "arr-schema":
     case "arr-simple":
     case "ref":
@@ -68,6 +76,9 @@ function initializeRef(
     default:
       exhaustive(json.kind);
   }
+
+  metadata.objmap.set(json._id, result);
+  return result;
 }
 
 export function initializePrimitiveRef<T>(
@@ -82,14 +93,14 @@ export function initializePrimitiveRef<T>(
   // }
 
   const simple = nullthrows(
-    metadata.knownSimples.get(json._id),
+    metadata.refmap.get(json._id),
     `ref:${json._id}:${json.kind}: didn't find it pre-initialized nor in simples`,
   );
 
   assertRefKind(simple, "prim");
 
   const result = new LinkedPrimitive(simple._value, json._id);
-  metadata.initializedNodes.set(result._id, result);
+  metadata.objmap.set(result._id, result);
   return result as any;
 
   // initialize it
@@ -117,7 +128,7 @@ export function initializePrimitive<T>(
   }
 
   const result = new LinkedPrimitive(json._value, json._id);
-  metadata.initializedNodes.set(result._id, result);
+  metadata.objmap.set(result._id, result);
   return result;
 }
 
@@ -138,7 +149,7 @@ function initializeSchemaArray(
 
   // todo: cansimplifyStructuredKind only have schema arrays of structured objects rn apparently
   const result = new SSchemaArray(initialized as any, json._id, spec);
-  metadata.initializedNodes.set(result._id, result);
+  metadata.objmap.set(result._id, result);
   return result;
 }
 
@@ -152,7 +163,7 @@ function initializeSimpleArray<T>(
   }
 
   const result = new LinkedArray<T>(json._value as any, json._id);
-  metadata.initializedNodes.set(result._id, result);
+  metadata.objmap.set(result._id, result);
   return result;
 }
 
@@ -177,7 +188,7 @@ function initializeSet<T>(
     result = SSet._create<T>(json._value, json._id, null);
   }
 
-  metadata.initializedNodes.set(result._id, result);
+  metadata.objmap.set(result._id, result);
   return result;
 }
 
@@ -272,7 +283,7 @@ function initializeStruct(
   }
 
   instance._initConstructed(Object.keys(json._value));
-  metadata.initializedNodes.set(instance._id, instance);
+  metadata.objmap.set(instance._id, instance);
   return instance;
 }
 
@@ -290,7 +301,7 @@ function initializeStruct2(
   const instance = new (spec as any)(..._value);
   instance._id = _id;
   instance._initConstructed(Object.keys(_value));
-  metadata.initializedNodes.set(instance._id, instance);
+  metadata.objmap.set(instance._id, instance);
   return instance;
 }
 
@@ -308,7 +319,7 @@ export function initializeStructured<Spec extends ConstructableStructure<any>>(
   // note: we override id before calling initStructured. Important! So correct id gets registered
   overrideId(instance, json._id);
   initStructured(instance);
-  metadata.initializedNodes.set(instance._id, instance);
+  metadata.objmap.set(instance._id, instance);
   return instance as any; // todo
 }
 
@@ -324,7 +335,7 @@ function initializeSUnion(
 
   const initialized = initialize(json._value, spec, metadata);
   const result = new SUnion(initialized, json._id);
-  metadata.initializedNodes.set(result._id, result);
+  metadata.objmap.set(result._id, result);
   return result;
 }
 
@@ -392,14 +403,6 @@ export function initialize(
     }
     case "ref": {
       return initializeRef(json, metadata);
-      // // fetch acutal node
-      // const simple = nullthrows(
-      //   metadata.knownSimples.get(json._id),
-      //   `ref:${json._id}:${json.kind}: didn't find it pre-initialized nor in simples`
-      // );
-      // assertRefKind(simple, json.kind);
-      // // initialize it
-      // return initialize(simple, spec, metadata);
     }
     default:
       exhaustive(json, "invalid $$ type");
@@ -425,20 +428,6 @@ export type InitFunctions = Readonly<{
   ) => InstanceType<Spec>;
   set: <T>(json: SimplifiedSet<T>, spec: StructSchema) => SSet<T>;
 }>;
-
-export class InitializationMetadata {
-  constructor(
-    readonly knownSimples: OrderedMap<string, Simplified>,
-    readonly initializedNodes: Map<string, StructuredKind>,
-  ) {}
-
-  static fromPackage(pkg: SimplePackage) {
-    return new InitializationMetadata(
-      OrderedMap.fromEntries(pkg.nodes),
-      new Map(),
-    );
-  }
-}
 
 /** `this` on second argument to avoid double-initializing the same elements */
 function initOfPkg(metadata: InitializationMetadata): InitFunctions {

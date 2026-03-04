@@ -2,10 +2,8 @@ import * as s from "./index";
 import { Structured } from "./index";
 import { OrderedMap } from "./lib/OrderedMap";
 import { EmptyObject } from "./lib/types";
-import {
-  InitializationMetadata,
-  initializeStructured,
-} from "./serialization/initialize";
+import { initializeStructured } from "./serialization/initialize";
+import { InitializationMetadata } from "./serialization/construct";
 
 export class Minimal extends s.Structured<EmptyObject, typeof Minimal> {
   override replace(): void {}

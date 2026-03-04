@@ -282,7 +282,10 @@ function ProjectDebug({ project }: { project: Project }) {
             fontFamily: "monospace",
           }}
         >
-          <JSONView json={JSON.parse(serialize(project))} />
+          <JSONView
+            defaultExpandedLevels={3}
+            json={JSON.parse(serialize(project))}
+          />
         </div>
       )}
     </div>

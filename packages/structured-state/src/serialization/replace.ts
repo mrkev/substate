@@ -20,7 +20,8 @@ import { Struct2 } from "../obj/Struct2";
 import { Structured } from "../obj/Structured";
 import { StructuredKind } from "../state/StructuredKinds";
 import { SUnion } from "../sunion";
-import { InitializationMetadata, initialize } from "./initialize";
+import { initialize } from "./initialize";
+import { InitializationMetadata } from "./construct";
 import { replaceSchemaArray, replaceSimpleArray } from "./replace.array";
 import { replaceSSet } from "./replace.set";
 import {
@@ -82,10 +83,7 @@ export function replace(
         return replaceSUnion(json, obj);
       }
       case "ref": {
-        const simple = nullthrows(
-          acc.knownSimples.get(json._id),
-          "ref not found",
-        );
+        const simple = nullthrows(acc.refmap.get(json._id), "ref not found");
         return replace(simple, obj, acc);
         // return replaceRef(json, obj, acc);
       }
@@ -109,7 +107,7 @@ export function replacePrimitive<T>(
       return;
     }
     case "ref": {
-      const prim = nullthrows(acc.knownSimples.get(json._id), "ref not found");
+      const prim = nullthrows(acc.refmap.get(json._id), "ref not found");
       // todo, ensure primitive
       obj.replace((prim as any)._value);
       return;

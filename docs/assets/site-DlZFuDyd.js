@@ -15330,6 +15330,275 @@ function assertConstructableStructured(spec) {
     throw new Error(`is not a Structured`);
   }
 }
+function serialize$1(state) {
+  const simplified = simplifyAndPackage$1(state);
+  const result = JSON.stringify(simplified);
+  return result;
+}
+function isSimplified$1(json) {
+  return typeof json === "object" && json != null && !Array.isArray(json) && "$$" in json;
+}
+function isSeralizedStructured(json) {
+  return isSimplified$1(json) && json.$$ === "structured";
+}
+function find(json, metadata, kind) {
+  const found = metadata.objmap.get(json._id);
+  if (found == null) {
+    return null;
+  }
+  if (!(found instanceof kind)) {
+    throw new Error(`found isn't ${kind.name}`);
+  }
+  return found;
+}
+function initializeRef(json, metadata) {
+  const existing = metadata.objmap.get(json._id);
+  if (existing != null) {
+    return existing;
+  }
+  metadata.refmap.get(json._id);
+  let result;
+  switch (json.kind) {
+    case "prim":
+      result = initializePrimitiveRef(json, metadata);
+      break;
+    case "arr-schema":
+    case "arr-simple":
+    case "ref":
+    case "set":
+    case "struct":
+    case "struct2":
+    case "structured":
+    case "union":
+      throw new Error("unimplemented ref of kind " + json.kind);
+    default:
+      exhaustive$2(json.kind);
+  }
+  metadata.objmap.set(json._id, result);
+  return result;
+}
+function initializePrimitiveRef(json, metadata) {
+  const simple = nullthrows$4(
+    metadata.refmap.get(json._id),
+    `ref:${json._id}:${json.kind}: didn't find it pre-initialized nor in simples`
+  );
+  assertRefKind(simple, "prim");
+  const result = new LinkedPrimitive(simple._value, json._id);
+  metadata.objmap.set(result._id, result);
+  return result;
+}
+function assertRefKind(simple, kind) {
+  if (simple.$$ !== kind) {
+    throw new Error(
+      `expected a reference to a ${kind}, found one to a ${simple.$$}`
+    );
+  }
+}
+function initializePrimitive(json, metadata) {
+  const found = find(json, metadata, LinkedPrimitive);
+  if (found != null) {
+    return found;
+  }
+  const result = new LinkedPrimitive(json._value, json._id);
+  metadata.objmap.set(result._id, result);
+  return result;
+}
+function initializeSchemaArray(json, spec, metadata) {
+  const found = find(json, metadata, SSchemaArray);
+  if (found != null) {
+    return found;
+  }
+  const initialized = json._value.map((x) => {
+    return initialize$1(x, spec[0], metadata);
+  });
+  const result = new SSchemaArray(initialized, json._id, spec);
+  metadata.objmap.set(result._id, result);
+  return result;
+}
+function initializeSimpleArray(json, metadata) {
+  const found = find(json, metadata, LinkedArray);
+  if (found != null) {
+    return found;
+  }
+  const result = new LinkedArray(json._value, json._id);
+  metadata.objmap.set(result._id, result);
+  return result;
+}
+function initializeSet(json, spec, metadata) {
+  const found = find(json, metadata, SSet);
+  if (found != null) {
+    return found;
+  }
+  let result;
+  if (json._schema) {
+    const initialized = json._value.map((x) => {
+      return initialize$1(x, spec, metadata);
+    });
+    result = SSet._create(initialized, json._id);
+  } else {
+    result = SSet._create(json._value, json._id, null);
+  }
+  metadata.objmap.set(result._id, result);
+  return result;
+}
+function initializeStruct(json, spec, metadata) {
+  const found = find(json, metadata, spec);
+  if (found != null) {
+    return found;
+  }
+  if ("_construct" in spec && typeof spec._construct === "function") {
+    const instance2 = spec._construct(json._value);
+    instance2._id = json._id;
+    instance2._initConstructed(Object.keys(json._value));
+    return instance2;
+  }
+  const initialized = {};
+  for (const key of Object.keys(json._value)) {
+    const value = json._value[key];
+    if (isSimplified$1(value)) {
+      initialized[key] = initialize$1(
+        json._value[key],
+        [initialized[key]?.schema],
+        metadata
+      );
+    } else {
+      initialized[key] = value;
+    }
+  }
+  const instance = new spec(json._value);
+  instance._id = json._id;
+  for (const key of Object.keys(json._value)) {
+    const value = json._value[key];
+    if (isSimplified$1(value)) {
+      instance[key] = initialize$1(
+        json._value[key],
+        [instance[key]?.schema],
+        metadata
+      );
+    } else {
+      instance[key] = value;
+    }
+  }
+  instance._initConstructed(Object.keys(json._value));
+  metadata.objmap.set(instance._id, instance);
+  return instance;
+}
+function initializeStruct2(json, spec, metadata) {
+  const found = find(json, metadata, spec);
+  if (found != null) {
+    return found;
+  }
+  const { _id, _value } = json;
+  const instance = new spec(..._value);
+  instance._id = _id;
+  instance._initConstructed(Object.keys(_value));
+  metadata.objmap.set(instance._id, instance);
+  return instance;
+}
+function initializeStructured(json, spec, metadata) {
+  const found = find(json, metadata, spec);
+  if (found != null) {
+    return found;
+  }
+  const instance = spec.construct(json._value, initOfPkg(metadata));
+  overrideId(instance, json._id);
+  initStructured(instance);
+  metadata.objmap.set(instance._id, instance);
+  return instance;
+}
+function initializeSUnion(json, spec, metadata) {
+  const found = find(json, metadata, SUnion);
+  if (found != null) {
+    return found;
+  }
+  const initialized = initialize$1(json._value, spec, metadata);
+  const result = new SUnion(initialized, json._id);
+  metadata.objmap.set(result._id, result);
+  return result;
+}
+function initialize$1(json, spec, metadata) {
+  if (!isSimplified$1(json)) {
+    console.log("not serialized", json);
+    throw new Error("invalid serialization is not a non-null object");
+  }
+  switch (json.$$) {
+    case "prim": {
+      return initializePrimitive(json, metadata);
+    }
+    case "arr-schema": {
+      assertArray(spec);
+      return initializeSchemaArray(json, spec, metadata);
+    }
+    case "arr-simple": {
+      return initializeSimpleArray(json, metadata);
+    }
+    case "struct": {
+      assertNotArray(spec);
+      assertNotNull(spec);
+      assertConstructableStruct(spec);
+      return initializeStruct(json, spec, metadata);
+    }
+    case "struct2": {
+      assertNotArray(spec);
+      assertNotNull(spec);
+      assertConstructableStruct2(spec);
+      return initializeStruct2(json, spec, metadata);
+    }
+    case "structured": {
+      assertNotArray(spec);
+      assertNotNull(spec, `Need constructor to initialize a Structured object`);
+      assertConstructableStructured(spec);
+      return initializeStructured(json, spec, metadata);
+    }
+    case "set": {
+      assertNotArray(spec);
+      return initializeSet(json, spec, metadata);
+    }
+    case "union": {
+      assertNotArray(spec);
+      assertNotNull(spec);
+      return initializeSUnion(json, spec, metadata);
+    }
+    case "ref": {
+      return initializeRef(json, metadata);
+    }
+    default:
+      exhaustive$2(json, "invalid $$ type");
+  }
+}
+function initOfPkg(metadata) {
+  const primitive2 = (json) => {
+    switch (json.$$) {
+      case "prim":
+        return initializePrimitive(json, metadata);
+      case "ref":
+        return initializePrimitiveRef(json, metadata);
+    }
+  };
+  return {
+    string: primitive2,
+    number: primitive2,
+    boolean: primitive2,
+    null: primitive2,
+    primitive: primitive2,
+    schemaArray: (json, spec) => initializeSchemaArray(json, spec, metadata),
+    array: (json) => initializeSimpleArray(json, metadata),
+    struct: (json, spec) => initializeStruct(json, spec, metadata),
+    struct2: (json, spec) => initializeStruct2(json, spec, metadata),
+    structured: (json, spec) => {
+      switch (json.$$) {
+        case "structured":
+          return initializeStructured(json, spec, metadata);
+        case "ref":
+          throw new Error("not implemented foo");
+      }
+    },
+    set: (json, spec) => initializeSet(json, spec, metadata)
+  };
+}
+function overrideId(obj, id) {
+  obj._id = id;
+}
 class OrderedMap {
   constructor(_map = /* @__PURE__ */ new Map()) {
     this._map = _map;
@@ -15419,237 +15688,10 @@ class OrderedMap {
     return this;
   }
 }
-function serialize$1(state) {
-  const simplified = simplifyAndPackage$1(state);
-  const result = JSON.stringify(simplified);
-  return result;
-}
-function isSimplified$1(json) {
-  return typeof json === "object" && json != null && !Array.isArray(json) && "$$" in json;
-}
-function isSeralizedStructured(json) {
-  return isSimplified$1(json) && json.$$ === "structured";
-}
-function find(json, metadata, kind) {
-  const found = metadata.initializedNodes.get(json._id);
-  if (found == null) {
-    return null;
-  }
-  if (!(found instanceof kind)) {
-    throw new Error(`found isn't ${kind.name}`);
-  }
-  return found;
-}
-function initializeRef(json, metadata) {
-  switch (json.kind) {
-    case "prim":
-      return initializePrimitiveRef(json, metadata);
-    case "arr-schema":
-    case "arr-simple":
-    case "ref":
-    case "set":
-    case "struct":
-    case "struct2":
-    case "structured":
-    case "union":
-      throw new Error("unimplemented ref of kind " + json.kind);
-    default:
-      exhaustive$2(json.kind);
-  }
-}
-function initializePrimitiveRef(json, metadata) {
-  const simple = nullthrows$4(
-    metadata.knownSimples.get(json._id),
-    `ref:${json._id}:${json.kind}: didn't find it pre-initialized nor in simples`
-  );
-  assertRefKind(simple, "prim");
-  const result = new LinkedPrimitive(simple._value, json._id);
-  metadata.initializedNodes.set(result._id, result);
-  return result;
-}
-function assertRefKind(simple, kind) {
-  if (simple.$$ !== kind) {
-    throw new Error(
-      `expected a reference to a ${kind}, found one to a ${simple.$$}`
-    );
-  }
-}
-function initializePrimitive(json, metadata) {
-  const found = find(json, metadata, LinkedPrimitive);
-  if (found != null) {
-    return found;
-  }
-  const result = new LinkedPrimitive(json._value, json._id);
-  metadata.initializedNodes.set(result._id, result);
-  return result;
-}
-function initializeSchemaArray(json, spec, metadata) {
-  const found = find(json, metadata, SSchemaArray);
-  if (found != null) {
-    return found;
-  }
-  const initialized = json._value.map((x) => {
-    return initialize$1(x, spec[0], metadata);
-  });
-  const result = new SSchemaArray(initialized, json._id, spec);
-  metadata.initializedNodes.set(result._id, result);
-  return result;
-}
-function initializeSimpleArray(json, metadata) {
-  const found = find(json, metadata, LinkedArray);
-  if (found != null) {
-    return found;
-  }
-  const result = new LinkedArray(json._value, json._id);
-  metadata.initializedNodes.set(result._id, result);
-  return result;
-}
-function initializeSet(json, spec, metadata) {
-  const found = find(json, metadata, SSet);
-  if (found != null) {
-    return found;
-  }
-  let result;
-  if (json._schema) {
-    const initialized = json._value.map((x) => {
-      return initialize$1(x, spec, metadata);
-    });
-    result = SSet._create(initialized, json._id);
-  } else {
-    result = SSet._create(json._value, json._id, null);
-  }
-  metadata.initializedNodes.set(result._id, result);
-  return result;
-}
-function initializeStruct(json, spec, metadata) {
-  const found = find(json, metadata, spec);
-  if (found != null) {
-    return found;
-  }
-  if ("_construct" in spec && typeof spec._construct === "function") {
-    const instance2 = spec._construct(json._value);
-    instance2._id = json._id;
-    instance2._initConstructed(Object.keys(json._value));
-    return instance2;
-  }
-  const initialized = {};
-  for (const key of Object.keys(json._value)) {
-    const value = json._value[key];
-    if (isSimplified$1(value)) {
-      initialized[key] = initialize$1(
-        json._value[key],
-        [initialized[key]?.schema],
-        metadata
-      );
-    } else {
-      initialized[key] = value;
-    }
-  }
-  const instance = new spec(json._value);
-  instance._id = json._id;
-  for (const key of Object.keys(json._value)) {
-    const value = json._value[key];
-    if (isSimplified$1(value)) {
-      instance[key] = initialize$1(
-        json._value[key],
-        [instance[key]?.schema],
-        metadata
-      );
-    } else {
-      instance[key] = value;
-    }
-  }
-  instance._initConstructed(Object.keys(json._value));
-  metadata.initializedNodes.set(instance._id, instance);
-  return instance;
-}
-function initializeStruct2(json, spec, metadata) {
-  const found = find(json, metadata, spec);
-  if (found != null) {
-    return found;
-  }
-  const { _id, _value } = json;
-  const instance = new spec(..._value);
-  instance._id = _id;
-  instance._initConstructed(Object.keys(_value));
-  metadata.initializedNodes.set(instance._id, instance);
-  return instance;
-}
-function initializeStructured(json, spec, metadata) {
-  const found = find(json, metadata, spec);
-  if (found != null) {
-    return found;
-  }
-  const instance = spec.construct(json._value, initOfPkg(metadata));
-  overrideId(instance, json._id);
-  initStructured(instance);
-  metadata.initializedNodes.set(instance._id, instance);
-  return instance;
-}
-function initializeSUnion(json, spec, metadata) {
-  const found = find(json, metadata, SUnion);
-  if (found != null) {
-    return found;
-  }
-  const initialized = initialize$1(json._value, spec, metadata);
-  const result = new SUnion(initialized, json._id);
-  metadata.initializedNodes.set(result._id, result);
-  return result;
-}
-function initialize$1(json, spec, metadata) {
-  if (!isSimplified$1(json)) {
-    console.log("not serialized", json);
-    throw new Error("invalid serialization is not a non-null object");
-  }
-  switch (json.$$) {
-    case "prim": {
-      return initializePrimitive(json, metadata);
-    }
-    case "arr-schema": {
-      assertArray(spec);
-      return initializeSchemaArray(json, spec, metadata);
-    }
-    case "arr-simple": {
-      return initializeSimpleArray(json, metadata);
-    }
-    case "struct": {
-      assertNotArray(spec);
-      assertNotNull(spec);
-      assertConstructableStruct(spec);
-      return initializeStruct(json, spec, metadata);
-    }
-    case "struct2": {
-      assertNotArray(spec);
-      assertNotNull(spec);
-      assertConstructableStruct2(spec);
-      return initializeStruct2(json, spec, metadata);
-    }
-    case "structured": {
-      assertNotArray(spec);
-      assertNotNull(spec, `Need constructor to initialize a Structured object`);
-      assertConstructableStructured(spec);
-      return initializeStructured(json, spec, metadata);
-    }
-    case "set": {
-      assertNotArray(spec);
-      return initializeSet(json, spec, metadata);
-    }
-    case "union": {
-      assertNotArray(spec);
-      assertNotNull(spec);
-      return initializeSUnion(json, spec, metadata);
-    }
-    case "ref": {
-      return initializeRef(json, metadata);
-    }
-    default:
-      exhaustive$2(json, "invalid $$ type");
-  }
-}
 class InitializationMetadata {
-  constructor(knownSimples, initializedNodes) {
-    this.knownSimples = knownSimples;
-    this.initializedNodes = initializedNodes;
+  constructor(refmap, objmap) {
+    this.refmap = refmap;
+    this.objmap = objmap;
   }
   static fromPackage(pkg) {
     return new InitializationMetadata(
@@ -15658,38 +15700,19 @@ class InitializationMetadata {
     );
   }
 }
-function initOfPkg(metadata) {
-  const primitive2 = (json) => {
-    switch (json.$$) {
-      case "prim":
-        return initializePrimitive(json, metadata);
-      case "ref":
-        return initializePrimitiveRef(json, metadata);
+function construct$1(str, spec) {
+  try {
+    const json = JSON.parse(str);
+    if (!isSimplePackage(json)) {
+      throw new Error("not a simple package");
     }
-  };
-  return {
-    string: primitive2,
-    number: primitive2,
-    boolean: primitive2,
-    null: primitive2,
-    primitive: primitive2,
-    schemaArray: (json, spec) => initializeSchemaArray(json, spec, metadata),
-    array: (json) => initializeSimpleArray(json, metadata),
-    struct: (json, spec) => initializeStruct(json, spec, metadata),
-    struct2: (json, spec) => initializeStruct2(json, spec, metadata),
-    structured: (json, spec) => {
-      switch (json.$$) {
-        case "structured":
-          return initializeStructured(json, spec, metadata);
-        case "ref":
-          throw new Error("not implemented foo");
-      }
-    },
-    set: (json, spec) => initializeSet(json, spec, metadata)
-  };
-}
-function overrideId(obj, id) {
-  obj._id = id;
+    const metadata = InitializationMetadata.fromPackage(json);
+    const result = initialize$1(json.simplified, spec, metadata);
+    return result;
+  } catch (e) {
+    console.log("issue with", JSON.parse(str));
+    throw e;
+  }
 }
 function replaceSchemaArray(json, arr, acc) {
   arr._replace((raw) => {
@@ -15869,10 +15892,7 @@ function replace(json, obj, acc) {
         return replaceSUnion(json, obj);
       }
       case "ref": {
-        const simple = nullthrows$4(
-          acc.knownSimples.get(json._id),
-          "ref not found"
-        );
+        const simple = nullthrows$4(acc.refmap.get(json._id), "ref not found");
         return replace(simple, obj, acc);
       }
       default:
@@ -15890,7 +15910,7 @@ function replacePrimitive(json, obj, acc) {
       return;
     }
     case "ref": {
-      const prim = nullthrows$4(acc.knownSimples.get(json._id), "ref not found");
+      const prim = nullthrows$4(acc.refmap.get(json._id), "ref not found");
       obj.replace(prim._value);
       return;
     }
@@ -18047,34 +18067,6 @@ function debugOutPrimitive(obj) {
     return `${header(obj)} ${val}`;
   }
 }
-function preInitialize(json, metadata) {
-  console.log(
-    "pre-init of nodes",
-    json.nodes.map(([_, node]) => `${node.$$}:${node._id}`)
-  );
-  for (const [id, node] of json.nodes) {
-    if (node.$$ !== "prim") {
-      continue;
-    }
-    initializePrimitive(node, metadata);
-    console.log("inited", id);
-  }
-}
-function construct$1(str, spec) {
-  try {
-    const json = JSON.parse(str);
-    if (!isSimplePackage(json)) {
-      throw new Error("not a simple package");
-    }
-    const metadata = InitializationMetadata.fromPackage(json);
-    preInitialize(json, metadata);
-    const result = initialize$1(json.simplified, spec, metadata);
-    return result;
-  } catch (e) {
-    console.log("issue with", JSON.parse(str));
-    throw e;
-  }
-}
 class MutationFlag {
   _subscriptors = /* @__PURE__ */ new Set();
   _hash = 0;
@@ -18342,7 +18334,7 @@ function JSONArray({
         " ",
         arr.map((x) => string(x)).join(", "),
         " "
-      ] })
+      ] }, "summary")
     );
   }
   for (let i = 0; i < arr.length && displayState === "full"; i++) {
@@ -18961,7 +18953,13 @@ function ProjectDebug({ project: project2 }) {
           textAlign: "left",
           fontFamily: "monospace"
         },
-        children: /* @__PURE__ */ jsxRuntimeExports$1.jsx(JSONView, { json: JSON.parse(serialize$1(project2)) })
+        children: /* @__PURE__ */ jsxRuntimeExports$1.jsx(
+          JSONView,
+          {
+            defaultExpandedLevels: 3,
+            json: JSON.parse(serialize$1(project2))
+          }
+        )
       }
     )
   ] });
@@ -24627,13 +24625,13 @@ function nullthrows(val, message) {
   }
   return val;
 }
-class RefPackage {
+class RefMap {
+  refmap = /* @__PURE__ */ new Map();
   constructor(initial) {
     for (const [key, value] of Object.entries(initial)) {
       this.refmap.set(key, value);
     }
   }
-  refmap = /* @__PURE__ */ new Map();
   record(_id, simplified) {
     if (!this.refmap.has(_id)) {
       this.refmap.set(_id, simplified);
@@ -24643,7 +24641,7 @@ class RefPackage {
   get(_id) {
     return nullthrows(this.refmap.get(_id), `ref ${_id} not found`);
   }
-  refs() {
+  index() {
     const result = {};
     for (const [_id, value] of this.refmap) {
       result[_id] = value;
@@ -24658,34 +24656,34 @@ function isPrimitive(val) {
   return typeof val === "number" || typeof val === "string" || typeof val === "boolean" || val === null;
 }
 function simplifyAndPackage(value) {
-  const refpkg = new RefPackage({});
+  const refpkg = new RefMap({});
   const result = simplify(value, refpkg);
-  return { root: result, refs: refpkg.refs() };
+  return { root: result, refs: refpkg.index() };
 }
-function simplify(value, refpkg) {
+function simplify(value, refmap) {
   if (typeof value === "string" || typeof value === "number" || typeof value === "boolean" || value == null) {
     return value;
   } else if (typeof value === "function") {
     throw new Error("cant simplify function");
   } else if (isSerializable(value)) {
-    const res = simplifyMarkedObject(value, refpkg);
-    const ref2 = refpkg.record(value.$$mark._id, res);
+    const res = simplifyMarkedObject(value, refmap);
+    const ref2 = refmap.record(value.$$mark._id, res);
     return ref2;
   } else if (value instanceof MarkedArray) {
-    const res = simplifyMarkedArray(value, refpkg);
-    const ref2 = refpkg.record(value.$$mark._id, res);
+    const res = simplifyMarkedArray(value, refmap);
+    const ref2 = refmap.record(value.$$mark._id, res);
     return ref2;
   } else if (value instanceof MarkedMap) {
-    const res = simplifyMarkedMap(value, refpkg);
-    const ref2 = refpkg.record(value.$$mark._id, res);
+    const res = simplifyMarkedMap(value, refmap);
+    const ref2 = refmap.record(value.$$mark._id, res);
     return ref2;
   } else if (value instanceof MarkedSet) {
-    const res = simplifyMarkedSet(value, refpkg);
-    const ref2 = refpkg.record(value.$$mark._id, res);
+    const res = simplifyMarkedSet(value, refmap);
+    const ref2 = refmap.record(value.$$mark._id, res);
     return ref2;
   } else if (value instanceof MarkedValue) {
-    const res = simplifyMarkedValue(value, refpkg);
-    const ref2 = refpkg.record(value.$$mark._id, res);
+    const res = simplifyMarkedValue(value, refmap);
+    const ref2 = refmap.record(value.$$mark._id, res);
     return ref2;
   } else {
     exhaustive(value);
@@ -24737,9 +24735,9 @@ function simplifyMarkedSet(map2, refpkg) {
   };
 }
 function constructSimplifiedPackage(pkg, index) {
-  const refpkg = new RefPackage(pkg.refs);
+  const refmap = new RefMap(pkg.refs);
   const objmap = /* @__PURE__ */ new Map();
-  const result = initialize(pkg.root, { index, refpkg, objmap });
+  const result = initialize(pkg.root, { index, refmap, objmap });
   return result;
 }
 function initialize(json, rsc) {
@@ -24768,7 +24766,7 @@ function initialize(json, rsc) {
         if (existing != null) {
           return existing;
         } else {
-          const result = initialize(rsc.refpkg.get(json._id), rsc);
+          const result = initialize(rsc.refmap.get(json._id), rsc);
           rsc.objmap.set(json._id, result);
           return result;
         }
@@ -24959,23 +24957,13 @@ function MProjectDebug({ project: project2 }) {
       }
     ),
     tab === "struct" && /* @__PURE__ */ jsxRuntimeExports$1.jsx(DebugTree, { val: project2 }),
-    tab === "serialized" && /* @__PURE__ */ jsxRuntimeExports$1.jsx(
-      "div",
+    tab === "serialized" && /* @__PURE__ */ jsxRuntimeExports$1.jsx("div", { className: "font-mono text-left overflow-scroll", children: /* @__PURE__ */ jsxRuntimeExports$1.jsx(
+      JSONView,
       {
-        style: {
-          overflow: "scroll",
-          textAlign: "left",
-          fontFamily: "monospace"
-        },
-        children: /* @__PURE__ */ jsxRuntimeExports$1.jsx(
-          JSONView,
-          {
-            defaultExpandedLevels: 3,
-            json: JSON.parse(JSON.stringify(simplifyAndPackage(project2)))
-          }
-        )
+        defaultExpandedLevels: 3,
+        json: JSON.parse(JSON.stringify(simplifyAndPackage(project2)))
       }
-    )
+    ) })
   ] });
 }
 class HistoryStack {

@@ -1,14 +1,30 @@
+import { OrderedMap } from "../lib/OrderedMap";
 import { Struct } from "../obj/Struct";
 import { ConstructableStructure } from "../obj/Structured";
-import { StructSchema } from "../state/StructuredKinds";
+import { StructSchema, StructuredKind } from "../state/StructuredKinds";
 import {
-  InitializationMetadata,
   initialize,
   initializePrimitive,
   initializeStructured,
 } from "./initialize";
+import { Simplified } from "./serialization";
 import { isSimplePackage, SimplePackage } from "./simplify";
 
+export class InitializationMetadata {
+  constructor(
+    readonly refmap: OrderedMap<string, Simplified>,
+    readonly objmap: Map<string, StructuredKind>,
+  ) {}
+
+  static fromPackage(pkg: SimplePackage) {
+    return new InitializationMetadata(
+      OrderedMap.fromEntries(pkg.nodes),
+      new Map(),
+    );
+  }
+}
+
+// TODO: delete, unused
 function preInitialize(json: SimplePackage, metadata: InitializationMetadata) {
   console.log(
     "pre-init of nodes",
@@ -42,7 +58,7 @@ export function construct(
     }
 
     const metadata = InitializationMetadata.fromPackage(json);
-    preInitialize(json, metadata);
+    // preInitialize(json, metadata);
 
     const result = initialize(json.simplified, spec, metadata);
     return result;

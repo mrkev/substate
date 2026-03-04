@@ -2,7 +2,8 @@ import { SArray, SSchemaArray, Struct } from "..";
 import { nullthrows } from "../lib/nullthrows";
 import { Struct2 } from "../obj/Struct2";
 import { Structured } from "../obj/Structured";
-import { InitializationMetadata, initialize } from "./initialize";
+import { initialize } from "./initialize";
+import { InitializationMetadata } from "./construct";
 import { replaceOfPkg } from "./replace";
 import {
   isSeralizedStructured,

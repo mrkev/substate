@@ -6,7 +6,7 @@ import { HashRouter, Outlet, Route, Routes } from "react-router-dom";
 import { App } from "./App.tsx";
 import { LinkableStateNested } from "./ls/LinkableStateNestedPage.tsx";
 import { LinkableStateTest } from "./ls/LinkableStatePage.tsx";
-import { MarkedStateTest } from "./marked/MarkedPage.tsx";
+import { MarkedStateTest } from "./marked/page.tsx";
 import { MarkedProjectTest } from "./marked/MarkedProjectTest.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -42,5 +42,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </Route>
       </Routes>
     </HashRouter>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
