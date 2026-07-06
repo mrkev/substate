@@ -493,7 +493,7 @@ function requireReact_production$1() {
   react_production$1.useTransition = function() {
     return ReactSharedInternals.H.useTransition();
   };
-  react_production$1.version = "19.2.4";
+  react_production$1.version = "19.2.7";
   return react_production$1;
 }
 var hasRequiredReact$1;
@@ -921,7 +921,7 @@ function requireReactDom_production() {
   reactDom_production.useFormStatus = function() {
     return ReactSharedInternals.H.useHostTransitionStatus();
   };
-  reactDom_production.version = "19.2.4";
+  reactDom_production.version = "19.2.7";
   return reactDom_production;
 }
 var hasRequiredReactDom;
@@ -12365,12 +12365,12 @@ function requireReactDomClient_production() {
     }
   };
   var isomorphicReactPackageVersion$jscomp$inline_1840 = React2.version;
-  if ("19.2.4" !== isomorphicReactPackageVersion$jscomp$inline_1840)
+  if ("19.2.7" !== isomorphicReactPackageVersion$jscomp$inline_1840)
     throw Error(
       formatProdErrorMessage(
         527,
         isomorphicReactPackageVersion$jscomp$inline_1840,
-        "19.2.4"
+        "19.2.7"
       )
     );
   ReactDOMSharedInternals.findDOMNode = function(componentOrElement) {
@@ -12388,10 +12388,10 @@ function requireReactDomClient_production() {
   };
   var internals$jscomp$inline_2347 = {
     bundleType: 0,
-    version: "19.2.4",
+    version: "19.2.7",
     rendererPackageName: "react-dom",
     currentDispatcherRef: ReactSharedInternals,
-    reconcilerVersion: "19.2.4"
+    reconcilerVersion: "19.2.7"
   };
   if ("undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__) {
     var hook$jscomp$inline_2348 = __REACT_DEVTOOLS_GLOBAL_HOOK__;
@@ -12458,7 +12458,7 @@ function requireReactDomClient_production() {
     listenToAllSupportedEvents(container);
     return new ReactDOMHydrationRoot(initialChildren);
   };
-  reactDomClient_production.version = "19.2.4";
+  reactDomClient_production.version = "19.2.7";
   return reactDomClient_production;
 }
 var hasRequiredClient;
@@ -12483,7 +12483,15 @@ function requireClient() {
 }
 var clientExports = requireClient();
 const ReactDOM = /* @__PURE__ */ getDefaultExportFromCjs$1(clientExports);
+var ABSOLUTE_URL_REGEX = /^(?:[a-z][a-z0-9+.-]*:|[\\/]{2})/i;
+var PROTOCOL_RELATIVE_URL_REGEX = /^[\\/]{2}/;
+function normalizeProtocolRelativeUrl(url, protocol) {
+  return protocol + url.replace(/\\/g, "/");
+}
 var PopStateEventType = "popstate";
+function isLocation(obj) {
+  return typeof obj === "object" && obj != null && "pathname" in obj && "search" in obj && "hash" in obj && "state" in obj && "key" in obj;
+}
 function createHashHistory(options = {}) {
   function createHashLocation(window2, globalHistory) {
     let {
@@ -12548,10 +12556,15 @@ function getHistoryState(location, index) {
   return {
     usr: location.state,
     key: location.key,
-    idx: index
+    idx: index,
+    masked: location.mask ? {
+      pathname: location.pathname,
+      search: location.search,
+      hash: location.hash
+    } : void 0
   };
 }
-function createLocation(current, to, state = null, key) {
+function createLocation(current, to, state = null, key, mask) {
   let location = {
     pathname: typeof current === "string" ? current : current.pathname,
     search: "",
@@ -12562,7 +12575,8 @@ function createLocation(current, to, state = null, key) {
     // full Locations now and avoid the need to run through this flow at all
     // But that's a pretty big refactor to the current test suite so going to
     // keep as is for the time being and just let any incoming keys take precedence
-    key: to && to.key || key || createKey()
+    key: to && to.key || key || createKey(),
+    mask
   };
   return location;
 }
@@ -12621,11 +12635,11 @@ function getUrlBasedHistory(getLocation, createHref2, validateLocation, options 
   }
   function push(to, state) {
     action = "PUSH";
-    let location = createLocation(history2.location, to, state);
+    let location = isLocation(to) ? to : createLocation(history2.location, to, state);
     if (validateLocation) validateLocation(location, to);
     index = getIndex() + 1;
     let historyState = getHistoryState(location, index);
-    let url = history2.createHref(location);
+    let url = history2.createHref(location.mask || location);
     try {
       globalHistory.pushState(historyState, "", url);
     } catch (error) {
@@ -12640,18 +12654,18 @@ function getUrlBasedHistory(getLocation, createHref2, validateLocation, options 
   }
   function replace2(to, state) {
     action = "REPLACE";
-    let location = createLocation(history2.location, to, state);
+    let location = isLocation(to) ? to : createLocation(history2.location, to, state);
     if (validateLocation) validateLocation(location, to);
     index = getIndex();
     let historyState = getHistoryState(location, index);
-    let url = history2.createHref(location);
+    let url = history2.createHref(location.mask || location);
     globalHistory.replaceState(historyState, "", url);
     if (v5Compat && listener) {
       listener({ action, location: history2.location, delta: 0 });
     }
   }
   function createURL(to) {
-    return createBrowserURLImpl(to);
+    return createBrowserURLImpl(window2, to);
   }
   let history2 = {
     get action() {
@@ -12691,15 +12705,15 @@ function getUrlBasedHistory(getLocation, createHref2, validateLocation, options 
   };
   return history2;
 }
-function createBrowserURLImpl(to, isAbsolute = false) {
+function createBrowserURLImpl(windowImpl, to, isAbsolute = false) {
   let base = "http://localhost";
-  if (typeof window !== "undefined") {
-    base = window.location.origin !== "null" ? window.location.origin : window.location.href;
+  if (windowImpl) {
+    base = windowImpl.location.origin !== "null" ? windowImpl.location.origin : windowImpl.location.href;
   }
   invariant(base, "No window.location.(origin|href) available to create URL");
   let href = typeof to === "string" ? to : createPath(to);
   href = href.replace(/ $/, "%20");
-  if (!isAbsolute && href.startsWith("//")) {
+  if (!isAbsolute && PROTOCOL_RELATIVE_URL_REGEX.test(href)) {
     href = base + href;
   }
   return new URL(href, base);
@@ -12707,17 +12721,16 @@ function createBrowserURLImpl(to, isAbsolute = false) {
 function matchRoutes(routes, locationArg, basename = "/") {
   return matchRoutesImpl(routes, locationArg, basename, false);
 }
-function matchRoutesImpl(routes, locationArg, basename, allowPartial) {
+function matchRoutesImpl(routes, locationArg, basename, allowPartial, precomputedBranches) {
   let location = typeof locationArg === "string" ? parsePath(locationArg) : locationArg;
   let pathname = stripBasename(location.pathname || "/", basename);
   if (pathname == null) {
     return null;
   }
-  let branches = flattenRoutes(routes);
-  rankRouteBranches(branches);
+  let branches = flattenAndRankRoutes(routes);
   let matches = null;
+  let decoded = decodePath(pathname);
   for (let i = 0; matches == null && i < branches.length; ++i) {
-    let decoded = decodePath(pathname);
     matches = matchRouteBranch(
       branches[i],
       decoded,
@@ -12725,6 +12738,11 @@ function matchRoutesImpl(routes, locationArg, basename, allowPartial) {
     );
   }
   return matches;
+}
+function flattenAndRankRoutes(routes) {
+  let branches = flattenRoutes(routes);
+  rankRouteBranches(branches);
+  return branches;
 }
 function flattenRoutes(routes, branches = [], parentsMeta = [], parentPath = "", _hasParentOptionalSegments = false) {
   let flattenRoute = (route, index, hasParentOptionalSegments = _hasParentOptionalSegments, relativePath) => {
@@ -12767,7 +12785,18 @@ function flattenRoutes(routes, branches = [], parentsMeta = [], parentPath = "",
     branches.push({
       path,
       score: computeScore(path, route.index),
-      routesMeta
+      routesMeta: routesMeta.map((meta2, i) => {
+        let [matcher, params] = compilePath(
+          meta2.relativePath,
+          meta2.caseSensitive,
+          i === routesMeta.length - 1
+        );
+        return {
+          ...meta2,
+          matcher,
+          compiledParams: params
+        };
+      })
     });
   };
   routes.forEach((route, index) => {
@@ -12856,9 +12885,19 @@ function matchRouteBranch(branch, pathname, allowPartial = false) {
     let meta = routesMeta[i];
     let end = i === routesMeta.length - 1;
     let remainingPathname = matchedPathname === "/" ? pathname : pathname.slice(matchedPathname.length) || "/";
-    let match = matchPath(
-      { path: meta.relativePath, caseSensitive: meta.caseSensitive, end },
-      remainingPathname
+    let pattern = {
+      path: meta.relativePath,
+      caseSensitive: meta.caseSensitive,
+      end
+    };
+    let match = (
+      // Use precomputed matcher if it exists
+      meta.matcher && meta.compiledParams ? matchPathImpl(
+        pattern,
+        remainingPathname,
+        meta.matcher,
+        meta.compiledParams
+      ) : matchPath(pattern, remainingPathname)
     );
     let route = meta.route;
     if (!match && end && allowPartial && !routesMeta[routesMeta.length - 1].route.index) {
@@ -12899,6 +12938,9 @@ function matchPath(pattern, pathname) {
     pattern.caseSensitive,
     pattern.end
   );
+  return matchPathImpl(pattern, pathname, matcher, compiledParams);
+}
+function matchPathImpl(pattern, pathname, matcher, compiledParams) {
   let match = pathname.match(matcher);
   if (!match) return null;
   let matchedPathname = match[0];
@@ -12935,9 +12977,16 @@ function compilePath(path, caseSensitive = false, end = true) {
   let params = [];
   let regexpSource = "^" + path.replace(/\/*\*?$/, "").replace(/^\/*/, "/").replace(/[\\.*+^${}|()[\]]/g, "\\$&").replace(
     /\/:([\w-]+)(\?)?/g,
-    (_, paramName, isOptional) => {
+    (match, paramName, isOptional, index, str) => {
       params.push({ paramName, isOptional: isOptional != null });
-      return isOptional ? "/?([^\\/]+)?" : "/([^\\/]+)";
+      if (isOptional) {
+        let nextChar = str.charAt(index + match.length);
+        if (nextChar && nextChar !== "/") {
+          return "/([^\\/]*)";
+        }
+        return "(?:/([^\\/]*))?";
+      }
+      return "/([^\\/]+)";
     }
   ).replace(/\/([\w-]+)\?(\/|$)/g, "(/$1)?$2");
   if (path.endsWith("*")) {
@@ -12974,7 +13023,6 @@ function stripBasename(pathname, basename) {
   }
   return pathname.slice(startIndex) || "/";
 }
-var ABSOLUTE_URL_REGEX = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i;
 function resolvePath(to, fromPathname = "/") {
   let {
     pathname: toPathname,
@@ -12983,7 +13031,7 @@ function resolvePath(to, fromPathname = "/") {
   } = typeof to === "string" ? parsePath(to) : to;
   let pathname;
   if (toPathname) {
-    toPathname = toPathname.replace(/\/\/+/g, "/");
+    toPathname = removeDoubleSlashes(toPathname);
     if (toPathname.startsWith("/")) {
       pathname = resolvePathname(toPathname.substring(1), "/");
     } else {
@@ -12999,7 +13047,7 @@ function resolvePath(to, fromPathname = "/") {
   };
 }
 function resolvePathname(relativePath, fromPathname) {
-  let segments = fromPathname.replace(/\/+$/, "").split("/");
+  let segments = removeTrailingSlash(fromPathname).split("/");
   let relativeSegments = relativePath.split("/");
   relativeSegments.forEach((segment) => {
     if (segment === "..") {
@@ -13070,8 +13118,10 @@ function resolveTo(toArg, routePathnames, locationPathname, isPathRelative = fal
   }
   return path;
 }
-var joinPaths = (paths) => paths.join("/").replace(/\/\/+/g, "/");
-var normalizePathname = (pathname) => pathname.replace(/\/+$/, "").replace(/^\/*/, "/");
+var removeDoubleSlashes = (path) => path.replace(/[\\/]{2,}/g, "/");
+var joinPaths = (paths) => removeDoubleSlashes(paths.join("/"));
+var removeTrailingSlash = (path) => path.replace(/\/+$/, "");
+var normalizePathname = (pathname) => removeTrailingSlash(pathname).replace(/^\/*/, "/");
 var normalizeSearch = (search) => !search || search === "?" ? "" : search.startsWith("?") ? search : "?" + search;
 var normalizeHash = (hash) => !hash || hash === "#" ? "" : hash.startsWith("#") ? hash : "#" + hash;
 var ErrorResponseImpl = class {
@@ -13091,7 +13141,8 @@ function isRouteErrorResponse(error) {
   return error != null && typeof error.status === "number" && typeof error.statusText === "string" && typeof error.internal === "boolean" && "data" in error;
 }
 function getRoutePattern(matches) {
-  return matches.map((m) => m.route.path).filter(Boolean).join("/").replace(/\/\/*/g, "/") || "/";
+  let parts = matches.map((m) => m.route.path).filter(Boolean);
+  return joinPaths(parts) || "/";
 }
 var isBrowser = typeof window !== "undefined" && typeof window.document !== "undefined" && typeof window.document.createElement !== "undefined";
 function parseToInfo(_to, basename) {
@@ -13108,7 +13159,7 @@ function parseToInfo(_to, basename) {
   if (isBrowser) {
     try {
       let currentUrl = new URL(window.location.href);
-      let targetUrl = to.startsWith("//") ? new URL(currentUrl.protocol + to) : new URL(to);
+      let targetUrl = PROTOCOL_RELATIVE_URL_REGEX.test(to) ? new URL(normalizeProtocolRelativeUrl(to, currentUrl.protocol)) : new URL(to);
       let path = stripBasename(targetUrl.pathname, basename);
       if (targetUrl.origin === currentUrl.origin && path != null) {
         to = path + targetUrl.search + targetUrl.hash;
@@ -13143,11 +13194,34 @@ var validRequestMethodsArr = [
   ...validMutationMethodsArr
 ];
 new Set(validRequestMethodsArr);
+var invalidProtocols = [
+  "about:",
+  "blob:",
+  "chrome:",
+  "chrome-untrusted:",
+  "content:",
+  "data:",
+  "devtools:",
+  "file:",
+  "filesystem:",
+  // eslint-disable-next-line no-script-url
+  "javascript:"
+];
+function hasInvalidProtocol(location) {
+  try {
+    return invalidProtocols.includes(new URL(location).protocol);
+  } catch {
+    return false;
+  }
+}
 var DataRouterContext = reactExports$1.createContext(null);
 DataRouterContext.displayName = "DataRouter";
 var DataRouterStateContext = reactExports$1.createContext(null);
 DataRouterStateContext.displayName = "DataRouterState";
 var RSCRouterContext = reactExports$1.createContext(false);
+function useIsRSCRouterContext() {
+  return reactExports$1.useContext(RSCRouterContext);
+}
 var ViewTransitionContext = reactExports$1.createContext({
   isTransitioning: false
 });
@@ -13317,7 +13391,7 @@ function useResolvedPath(to, { relative } = {}) {
 function useRoutes(routes, locationArg) {
   return useRoutesImpl(routes, locationArg);
 }
-function useRoutesImpl(routes, locationArg, dataRouterState, onError, future) {
+function useRoutesImpl(routes, locationArg, dataRouterOpts) {
   invariant(
     useInRouterContext(),
     // TODO: This error is probably because they somehow have 2 versions of the
@@ -13360,7 +13434,15 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
     let segments = pathname.replace(/^\//, "").split("/");
     remainingPathname = "/" + segments.slice(parentSegments.length).join("/");
   }
-  let matches = matchRoutes(routes, { pathname: remainingPathname });
+  let matches = dataRouterOpts && dataRouterOpts.state.matches.length ? (
+    // If we're in a data router, use the matches we've already identified but ensure
+    // we have the latest route instances from the manifest in case elements have changed
+    dataRouterOpts.state.matches.map(
+      (m) => Object.assign(m, {
+        route: dataRouterOpts.manifest[m.route.id] || m.route
+      })
+    )
+  ) : matchRoutes(routes, { pathname: remainingPathname });
   {
     warning(
       parentRoute || matches != null,
@@ -13378,29 +13460,27 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
         pathname: joinPaths([
           parentPathnameBase,
           // Re-encode pathnames that were decoded inside matchRoutes.
-          // Pre-encode `?` and `#` ahead of `encodeLocation` because it uses
+          // Pre-encode `%`, `?` and `#` ahead of `encodeLocation` because it uses
           // `new URL()` internally and we need to prevent it from treating
           // them as separators
           navigator2.encodeLocation ? navigator2.encodeLocation(
-            match.pathname.replace(/\?/g, "%3F").replace(/#/g, "%23")
+            match.pathname.replace(/%/g, "%25").replace(/\?/g, "%3F").replace(/#/g, "%23")
           ).pathname : match.pathname
         ]),
         pathnameBase: match.pathnameBase === "/" ? parentPathnameBase : joinPaths([
           parentPathnameBase,
           // Re-encode pathnames that were decoded inside matchRoutes
-          // Pre-encode `?` and `#` ahead of `encodeLocation` because it uses
+          // Pre-encode `%`, `?` and `#` ahead of `encodeLocation` because it uses
           // `new URL()` internally and we need to prevent it from treating
           // them as separators
           navigator2.encodeLocation ? navigator2.encodeLocation(
-            match.pathnameBase.replace(/\?/g, "%3F").replace(/#/g, "%23")
+            match.pathnameBase.replace(/%/g, "%25").replace(/\?/g, "%3F").replace(/#/g, "%23")
           ).pathname : match.pathnameBase
         ])
       })
     ),
     parentMatches,
-    dataRouterState,
-    onError,
-    future
+    dataRouterOpts
   );
   if (locationArg && renderedMatches) {
     return /* @__PURE__ */ reactExports$1.createElement(
@@ -13413,6 +13493,7 @@ Please change the parent <Route path="${parentPath}"> to <Route path="${parentPa
             hash: "",
             state: null,
             key: "default",
+            mask: void 0,
             ...location
           },
           navigationType: "POP"
@@ -13510,9 +13591,13 @@ function RSCErrorHandler({
       let existingRedirect = errorRedirectHandledMap.get(error);
       if (existingRedirect) throw existingRedirect;
       let parsed = parseToInfo(redirect2.location, basename);
+      let target = parsed.absoluteURL || parsed.to;
+      if (hasInvalidProtocol(target)) {
+        throw new Error("Invalid redirect location");
+      }
       if (isBrowser && !errorRedirectHandledMap.get(error)) {
         if (parsed.isExternal || redirect2.reloadDocument) {
-          window.location.href = parsed.absoluteURL || parsed.to;
+          window.location.href = target;
         } else {
           const redirectPromise = Promise.resolve().then(
             () => window.__reactRouterDataRouter.navigate(parsed.to, {
@@ -13523,13 +13608,7 @@ function RSCErrorHandler({
           throw redirectPromise;
         }
       }
-      return /* @__PURE__ */ reactExports$1.createElement(
-        "meta",
-        {
-          httpEquiv: "refresh",
-          content: `0;url=${parsed.absoluteURL || parsed.to}`
-        }
-      );
+      return /* @__PURE__ */ reactExports$1.createElement("meta", { httpEquiv: "refresh", content: `0;url=${target}` });
     }
   }
   return children;
@@ -13541,7 +13620,8 @@ function RenderedRoute({ routeContext, match, children }) {
   }
   return /* @__PURE__ */ reactExports$1.createElement(RouteContext.Provider, { value: routeContext }, children);
 }
-function _renderMatches(matches, parentMatches = [], dataRouterState = null, onErrorHandler = null, future = null) {
+function _renderMatches(matches, parentMatches = [], dataRouterOpts) {
+  let dataRouterState = dataRouterOpts?.state;
   if (matches == null) {
     if (!dataRouterState) {
       return null;
@@ -13573,7 +13653,8 @@ function _renderMatches(matches, parentMatches = [], dataRouterState = null, onE
   }
   let renderFallback = false;
   let fallbackIndex = -1;
-  if (dataRouterState) {
+  if (dataRouterOpts && dataRouterState) {
+    renderFallback = dataRouterState.renderFallback;
     for (let i = 0; i < renderedMatches.length; i++) {
       let match = renderedMatches[i];
       if (match.route.HydrateFallback || match.route.hydrateFallbackElement) {
@@ -13583,7 +13664,9 @@ function _renderMatches(matches, parentMatches = [], dataRouterState = null, onE
         let { loaderData, errors: errors2 } = dataRouterState;
         let needsToRunLoader = match.route.loader && !loaderData.hasOwnProperty(match.route.id) && (!errors2 || errors2[match.route.id] === void 0);
         if (match.route.lazy || needsToRunLoader) {
-          renderFallback = true;
+          if (dataRouterOpts.isStatic) {
+            renderFallback = true;
+          }
           if (fallbackIndex >= 0) {
             renderedMatches = renderedMatches.slice(0, fallbackIndex + 1);
           } else {
@@ -13594,11 +13677,12 @@ function _renderMatches(matches, parentMatches = [], dataRouterState = null, onE
       }
     }
   }
+  let onErrorHandler = dataRouterOpts?.onError;
   let onError = dataRouterState && onErrorHandler ? (error, errorInfo) => {
     onErrorHandler(error, {
       location: dataRouterState.location,
       params: dataRouterState.matches?.[0]?.params ?? {},
-      unstable_pattern: getRoutePattern(dataRouterState.matches),
+      pattern: getRoutePattern(dataRouterState.matches),
       errorInfo
     });
   } : void 0;
@@ -13751,14 +13835,21 @@ function warningOnce(key, cond, message) {
     warning(false, message);
   }
 }
-reactExports$1.memo(DataRoutes);
-function DataRoutes({
+reactExports$1.memo(DataRoutes2);
+function DataRoutes2({
   routes,
+  manifest,
   future,
   state,
+  isStatic,
   onError
 }) {
-  return useRoutesImpl(routes, void 0, state, onError, future);
+  return useRoutesImpl(routes, void 0, {
+    manifest,
+    state,
+    isStatic,
+    onError
+  });
 }
 function Outlet(props) {
   return useOutlet(props.context);
@@ -13776,7 +13867,7 @@ function Router({
   navigationType = "POP",
   navigator: navigator2,
   static: staticProp = false,
-  unstable_useTransitions
+  useTransitions
 }) {
   invariant(
     !useInRouterContext(),
@@ -13788,10 +13879,10 @@ function Router({
       basename,
       navigator: navigator2,
       static: staticProp,
-      unstable_useTransitions,
+      useTransitions,
       future: {}
     }),
-    [basename, navigator2, staticProp, unstable_useTransitions]
+    [basename, navigator2, staticProp, useTransitions]
   );
   if (typeof locationProp === "string") {
     locationProp = parsePath(locationProp);
@@ -13801,7 +13892,8 @@ function Router({
     search = "",
     hash = "",
     state = null,
-    key = "default"
+    key = "default",
+    mask
   } = locationProp;
   let locationContext = reactExports$1.useMemo(() => {
     let trailingPathname = stripBasename(pathname, basename);
@@ -13814,11 +13906,12 @@ function Router({
         search,
         hash,
         state,
-        key
+        key,
+        mask
       },
       navigationType
     };
-  }, [basename, pathname, search, hash, state, key, navigationType]);
+  }, [basename, pathname, search, hash, state, key, navigationType, mask]);
   warning(
     locationContext != null,
     `<Router basename="${basename}"> is not able to match the URL "${pathname}${search}${hash}" because it does not start with the basename, so the <Router> won't render anything.`
@@ -14011,9 +14104,9 @@ function singleFetchUrl(reqUrl, basename, trailingSlashAware, extension) {
     if (url.pathname === "/") {
       url.pathname = `_root.${extension}`;
     } else if (basename && stripBasename(url.pathname, basename) === "/") {
-      url.pathname = `${basename.replace(/\/$/, "")}/_root.${extension}`;
+      url.pathname = `${removeTrailingSlash(basename)}/_root.${extension}`;
     } else {
-      url.pathname = `${url.pathname.replace(/\/$/, "")}.${extension}`;
+      url.pathname = `${removeTrailingSlash(url.pathname)}.${extension}`;
     }
   }
   return url;
@@ -14253,6 +14346,8 @@ function composeEventHandlers(theirHandler, ourHandler) {
   };
 }
 function PrefetchPageLinks({ page, ...linkProps }) {
+  let rsc = useIsRSCRouterContext();
+  let { nonce: contextNonce } = useFrameworkContext();
   let { router } = useDataRouterContext2();
   let matches = reactExports$1.useMemo(
     () => matchRoutes(router.routes, page, router.basename),
@@ -14260,6 +14355,12 @@ function PrefetchPageLinks({ page, ...linkProps }) {
   );
   if (!matches) {
     return null;
+  }
+  if (linkProps.nonce == null && contextNonce) {
+    linkProps = { ...linkProps, nonce: contextNonce };
+  }
+  if (rsc) {
+    return /* @__PURE__ */ reactExports$1.createElement(RSCPrefetchPageLinksImpl, { page, matches, ...linkProps });
   }
   return /* @__PURE__ */ reactExports$1.createElement(PrefetchPageLinksImpl, { page, matches, ...linkProps });
 }
@@ -14280,6 +14381,46 @@ function useKeyedPrefetchLinks(matches) {
     };
   }, [matches, manifest, routeModules]);
   return keyedPrefetchLinks;
+}
+function RSCPrefetchPageLinksImpl({
+  page,
+  matches: nextMatches,
+  ...linkProps
+}) {
+  let location = useLocation();
+  let { future } = useFrameworkContext();
+  let { basename } = useDataRouterContext2();
+  let dataHrefs = reactExports$1.useMemo(() => {
+    if (page === location.pathname + location.search + location.hash) {
+      return [];
+    }
+    let url = singleFetchUrl(
+      page,
+      basename,
+      future.v8_trailingSlashAwareDataRequests,
+      "rsc"
+    );
+    let hasSomeRoutesWithShouldRevalidate = false;
+    let targetRoutes = [];
+    for (let match of nextMatches) {
+      if (typeof match.route.shouldRevalidate === "function") {
+        hasSomeRoutesWithShouldRevalidate = true;
+      } else {
+        targetRoutes.push(match.route.id);
+      }
+    }
+    if (hasSomeRoutesWithShouldRevalidate && targetRoutes.length > 0) {
+      url.searchParams.set("_routes", targetRoutes.join(","));
+    }
+    return [url.pathname + url.search];
+  }, [
+    basename,
+    future.v8_trailingSlashAwareDataRequests,
+    page,
+    location,
+    nextMatches
+  ]);
+  return /* @__PURE__ */ reactExports$1.createElement(reactExports$1.Fragment, null, dataHrefs.map((href) => /* @__PURE__ */ reactExports$1.createElement("link", { key: href, rel: "prefetch", as: "fetch", href, ...linkProps })));
 }
 function PrefetchPageLinksImpl({
   page,
@@ -14337,7 +14478,7 @@ function PrefetchPageLinksImpl({
     let url = singleFetchUrl(
       page,
       basename,
-      future.unstable_trailingSlashAwareDataRequests,
+      future.v8_trailingSlashAwareDataRequests,
       "data"
     );
     if (foundOptOutRoute && routesParams.size > 0) {
@@ -14349,7 +14490,7 @@ function PrefetchPageLinksImpl({
     return [url.pathname + url.search];
   }, [
     basename,
-    future.unstable_trailingSlashAwareDataRequests,
+    future.v8_trailingSlashAwareDataRequests,
     loaderData,
     location,
     manifest,
@@ -14392,14 +14533,14 @@ var isBrowser2 = typeof window !== "undefined" && typeof window.document !== "un
 try {
   if (isBrowser2) {
     window.__reactRouterVersion = // @ts-expect-error
-    "7.13.0";
+    "7.18.1";
   }
 } catch (e) {
 }
 function HashRouter({
   basename,
   children,
-  unstable_useTransitions,
+  useTransitions,
   window: window2
 }) {
   let historyRef = reactExports$1.useRef();
@@ -14413,13 +14554,13 @@ function HashRouter({
   });
   let setState = reactExports$1.useCallback(
     (newState) => {
-      if (unstable_useTransitions === false) {
+      if (useTransitions === false) {
         setStateImpl(newState);
       } else {
         reactExports$1.startTransition(() => setStateImpl(newState));
       }
     },
-    [unstable_useTransitions]
+    [useTransitions]
   );
   reactExports$1.useLayoutEffect(() => history2.listen(setState), [history2, setState]);
   return /* @__PURE__ */ reactExports$1.createElement(
@@ -14430,11 +14571,10 @@ function HashRouter({
       location: state.location,
       navigationType: state.action,
       navigator: history2,
-      unstable_useTransitions
+      useTransitions
     }
   );
 }
-var ABSOLUTE_URL_REGEX2 = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i;
 var Link = reactExports$1.forwardRef(
   function LinkWithRef({
     onClick,
@@ -14443,32 +14583,48 @@ var Link = reactExports$1.forwardRef(
     relative,
     reloadDocument,
     replace: replace2,
+    mask,
     state,
     target,
     to,
     preventScrollReset,
     viewTransition,
-    unstable_defaultShouldRevalidate,
+    defaultShouldRevalidate,
     ...rest
   }, forwardedRef) {
-    let { basename, unstable_useTransitions } = reactExports$1.useContext(NavigationContext);
-    let isAbsolute = typeof to === "string" && ABSOLUTE_URL_REGEX2.test(to);
+    let { basename, navigator: navigator2, useTransitions } = reactExports$1.useContext(NavigationContext);
+    let isAbsolute = typeof to === "string" && ABSOLUTE_URL_REGEX.test(to);
     let parsed = parseToInfo(to, basename);
     to = parsed.to;
     let href = useHref(to, { relative });
+    let location = useLocation();
+    let maskedHref = null;
+    if (mask) {
+      let resolved = resolveTo(
+        mask,
+        [],
+        location.mask ? location.mask.pathname : "/",
+        true
+      );
+      if (basename !== "/") {
+        resolved.pathname = resolved.pathname === "/" ? basename : joinPaths([basename, resolved.pathname]);
+      }
+      maskedHref = navigator2.createHref(resolved);
+    }
     let [shouldPrefetch, prefetchRef, prefetchHandlers] = usePrefetchBehavior(
       prefetch,
       rest
     );
     let internalOnClick = useLinkClickHandler(to, {
       replace: replace2,
+      mask,
       state,
       target,
       preventScrollReset,
       relative,
       viewTransition,
-      unstable_defaultShouldRevalidate,
-      unstable_useTransitions
+      defaultShouldRevalidate,
+      useTransitions
     });
     function handleClick(event) {
       if (onClick) onClick(event);
@@ -14476,6 +14632,7 @@ var Link = reactExports$1.forwardRef(
         internalOnClick(event);
       }
     }
+    let isSpaLink = !(parsed.isExternal || reloadDocument);
     let link = (
       // eslint-disable-next-line jsx-a11y/anchor-has-content
       /* @__PURE__ */ reactExports$1.createElement(
@@ -14483,8 +14640,8 @@ var Link = reactExports$1.forwardRef(
         {
           ...rest,
           ...prefetchHandlers,
-          href: parsed.absoluteURL || href,
-          onClick: parsed.isExternal || reloadDocument ? onClick : handleClick,
+          href: (isSpaLink ? maskedHref : void 0) || parsed.absoluteURL || href,
+          onClick: isSpaLink ? handleClick : onClick,
           ref: mergeRefs(forwardedRef, prefetchRef),
           target,
           "data-discover": !isAbsolute && discover === "render" ? "true" : void 0
@@ -14576,14 +14733,14 @@ var Form = reactExports$1.forwardRef(
     relative,
     preventScrollReset,
     viewTransition,
-    unstable_defaultShouldRevalidate,
+    defaultShouldRevalidate,
     ...props
   }, forwardedRef) => {
-    let { unstable_useTransitions } = reactExports$1.useContext(NavigationContext);
+    let { useTransitions } = reactExports$1.useContext(NavigationContext);
     let submit = useSubmit();
     let formAction = useFormAction(action, { relative });
     let formMethod = method.toLowerCase() === "get" ? "get" : "post";
-    let isAbsolute = typeof action === "string" && ABSOLUTE_URL_REGEX2.test(action);
+    let isAbsolute = typeof action === "string" && ABSOLUTE_URL_REGEX.test(action);
     let submitHandler = (event) => {
       onSubmit && onSubmit(event);
       if (event.defaultPrevented) return;
@@ -14599,9 +14756,9 @@ var Form = reactExports$1.forwardRef(
         relative,
         preventScrollReset,
         viewTransition,
-        unstable_defaultShouldRevalidate
+        defaultShouldRevalidate
       });
-      if (unstable_useTransitions && navigate !== false) {
+      if (useTransitions && navigate !== false) {
         reactExports$1.startTransition(() => doSubmit());
       } else {
         doSubmit();
@@ -14632,12 +14789,13 @@ function useDataRouterContext3(hookName) {
 function useLinkClickHandler(to, {
   target,
   replace: replaceProp,
+  mask,
   state,
   preventScrollReset,
   relative,
   viewTransition,
-  unstable_defaultShouldRevalidate,
-  unstable_useTransitions
+  defaultShouldRevalidate,
+  useTransitions
 } = {}) {
   let navigate = useNavigate();
   let location = useLocation();
@@ -14649,13 +14807,14 @@ function useLinkClickHandler(to, {
         let replace2 = replaceProp !== void 0 ? replaceProp : createPath(location) === createPath(path);
         let doNavigate = () => navigate(to, {
           replace: replace2,
+          mask,
           state,
           preventScrollReset,
           relative,
           viewTransition,
-          unstable_defaultShouldRevalidate
+          defaultShouldRevalidate
         });
-        if (unstable_useTransitions) {
+        if (useTransitions) {
           reactExports$1.startTransition(() => doNavigate());
         } else {
           doNavigate();
@@ -14667,14 +14826,15 @@ function useLinkClickHandler(to, {
       navigate,
       path,
       replaceProp,
+      mask,
       state,
       target,
       to,
       preventScrollReset,
       relative,
       viewTransition,
-      unstable_defaultShouldRevalidate,
-      unstable_useTransitions
+      defaultShouldRevalidate,
+      useTransitions
     ]
   );
 }
@@ -14698,7 +14858,7 @@ function useSubmit() {
       if (options.navigate === false) {
         let key = options.fetcherKey || getUniqueFetcherId();
         await routerFetch(key, currentRouteId, options.action || action, {
-          unstable_defaultShouldRevalidate: options.unstable_defaultShouldRevalidate,
+          defaultShouldRevalidate: options.defaultShouldRevalidate,
           preventScrollReset: options.preventScrollReset,
           formData,
           body,
@@ -14708,7 +14868,7 @@ function useSubmit() {
         });
       } else {
         await routerNavigate(options.action || action, {
-          unstable_defaultShouldRevalidate: options.unstable_defaultShouldRevalidate,
+          defaultShouldRevalidate: options.defaultShouldRevalidate,
           preventScrollReset: options.preventScrollReset,
           formData,
           body,
@@ -14770,7 +14930,7 @@ function useViewTransitionState(to, { relative } = {}) {
   let nextPath = stripBasename(vtContext.nextLocation.pathname, basename) || vtContext.nextLocation.pathname;
   return matchPath(path.pathname, nextPath) != null || matchPath(path.pathname, currentPath) != null;
 }
-const urlAlphabet$1 = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
+let urlAlphabet$1 = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
 let nanoid$1 = (size = 21) => {
   let id = "";
   let bytes = crypto.getRandomValues(new Uint8Array(size |= 0));
@@ -19308,15 +19468,27 @@ const createConfigUtils = (config) => ({
   cache: createLruCache(config.cacheSize),
   parseClassName: createParseClassName(config),
   sortModifiers: createSortModifiers(config),
+  postfixLookupClassGroupIds: createPostfixLookupClassGroupIds(config),
   ...createClassGroupUtils(config)
 });
+const createPostfixLookupClassGroupIds = (config) => {
+  const lookup = /* @__PURE__ */ Object.create(null);
+  const classGroupIds = config.postfixLookupClassGroups;
+  if (classGroupIds) {
+    for (let i = 0; i < classGroupIds.length; i++) {
+      lookup[classGroupIds[i]] = true;
+    }
+  }
+  return lookup;
+};
 const SPLIT_CLASSES_REGEX = /\s+/;
 const mergeClassList = (classList, configUtils) => {
   const {
     parseClassName,
     getClassGroupId,
     getConflictingClassGroupIds,
-    sortModifiers
+    sortModifiers,
+    postfixLookupClassGroupIds
   } = configUtils;
   const classGroupsInConflict = [];
   const classNames = classList.trim().split(SPLIT_CLASSES_REGEX);
@@ -19335,7 +19507,18 @@ const mergeClassList = (classList, configUtils) => {
       continue;
     }
     let hasPostfixModifier = !!maybePostfixModifierPosition;
-    let classGroupId = getClassGroupId(hasPostfixModifier ? baseClassName.substring(0, maybePostfixModifierPosition) : baseClassName);
+    let classGroupId;
+    if (hasPostfixModifier) {
+      const baseClassNameWithoutPostfix = baseClassName.substring(0, maybePostfixModifierPosition);
+      classGroupId = getClassGroupId(baseClassNameWithoutPostfix);
+      const classGroupIdWithPostfix = classGroupId && postfixLookupClassGroupIds[classGroupId] ? getClassGroupId(baseClassName) : void 0;
+      if (classGroupIdWithPostfix && classGroupIdWithPostfix !== classGroupId) {
+        classGroupId = classGroupIdWithPostfix;
+        hasPostfixModifier = false;
+      }
+    } else {
+      classGroupId = getClassGroupId(baseClassName);
+    }
     if (!classGroupId) {
       if (!hasPostfixModifier) {
         result = originalClassName + (result.length > 0 ? " " + result : result);
@@ -19428,7 +19611,7 @@ const fromTheme = (key) => {
 };
 const arbitraryValueRegex = /^\[(?:(\w[\w-]*):)?(.+)\]$/i;
 const arbitraryVariableRegex = /^\((?:(\w[\w-]*):)?(.+)\)$/i;
-const fractionRegex = /^\d+\/\d+$/;
+const fractionRegex = /^\d+(?:\.\d+)?\/\d+(?:\.\d+)?$/;
 const tshirtUnitRegex = /^(\d+(\.\d+)?)?(xs|sm|md|lg|xl)$/;
 const lengthUnitRegex = /\d+(%|px|r?em|[sdl]?v([hwib]|min|max)|pt|pc|in|cm|mm|cap|ch|ex|r?lh|cq(w|h|i|b|min|max))|\b(calc|min|max|clamp)\(.+\)|^0$/;
 const colorFunctionRegex = /^(rgba?|hsla?|hwb|(ok)?(lab|lch)|color-mix)\(.+\)$/;
@@ -19450,10 +19633,13 @@ const isNever = () => false;
 const isShadow = (value) => shadowRegex.test(value);
 const isImage = (value) => imageRegex.test(value);
 const isAnyNonArbitrary = (value) => !isArbitraryValue(value) && !isArbitraryVariable(value);
+const isNamedContainerQuery = (value) => value.startsWith("@container") && (value[10] === "/" && value[11] !== void 0 || value[11] === "s" && value[16] !== void 0 && value.startsWith("-size/", 10) || value[11] === "n" && value[18] !== void 0 && value.startsWith("-normal/", 10));
 const isArbitrarySize = (value) => getIsArbitraryValue(value, isLabelSize, isNever);
 const isArbitraryValue = (value) => arbitraryValueRegex.test(value);
 const isArbitraryLength = (value) => getIsArbitraryValue(value, isLabelLength, isLengthOnly);
 const isArbitraryNumber = (value) => getIsArbitraryValue(value, isLabelNumber, isNumber);
+const isArbitraryWeight = (value) => getIsArbitraryValue(value, isLabelWeight, isAny);
+const isArbitraryFamilyName = (value) => getIsArbitraryValue(value, isLabelFamilyName, isNever);
 const isArbitraryPosition = (value) => getIsArbitraryValue(value, isLabelPosition, isNever);
 const isArbitraryImage = (value) => getIsArbitraryValue(value, isLabelImage, isImage);
 const isArbitraryShadow = (value) => getIsArbitraryValue(value, isLabelShadow, isShadow);
@@ -19464,6 +19650,7 @@ const isArbitraryVariablePosition = (value) => getIsArbitraryVariable(value, isL
 const isArbitraryVariableSize = (value) => getIsArbitraryVariable(value, isLabelSize);
 const isArbitraryVariableImage = (value) => getIsArbitraryVariable(value, isLabelImage);
 const isArbitraryVariableShadow = (value) => getIsArbitraryVariable(value, isLabelShadow, true);
+const isArbitraryVariableWeight = (value) => getIsArbitraryVariable(value, isLabelWeight, true);
 const getIsArbitraryValue = (value, testLabel, testValue) => {
   const result = arbitraryValueRegex.exec(value);
   if (result) {
@@ -19490,6 +19677,7 @@ const isLabelSize = (label) => label === "length" || label === "size" || label =
 const isLabelLength = (label) => label === "length";
 const isLabelNumber = (label) => label === "number";
 const isLabelFamilyName = (label) => label === "family-name";
+const isLabelWeight = (label) => label === "number" || label === "weight";
 const isLabelShadow = (label) => label === "shadow";
 const getDefaultConfig = () => {
   const themeColor = fromTheme("color");
@@ -19546,6 +19734,8 @@ const getDefaultConfig = () => {
   const scaleAlignSecondaryAxis = () => ["start", "end", "center", "stretch", "center-safe", "end-safe"];
   const scaleMargin = () => ["auto", ...scaleUnambiguousSpacing()];
   const scaleSizing = () => [isFraction, "auto", "full", "dvw", "dvh", "lvw", "lvh", "svw", "svh", "min", "max", "fit", ...scaleUnambiguousSpacing()];
+  const scaleSizingInline = () => [isFraction, "screen", "full", "dvw", "lvw", "svw", "min", "max", "fit", ...scaleUnambiguousSpacing()];
+  const scaleSizingBlock = () => [isFraction, "screen", "full", "lh", "dvh", "lvh", "svh", "min", "max", "fit", ...scaleUnambiguousSpacing()];
   const scaleColor = () => [themeColor, isArbitraryVariable, isArbitraryValue];
   const scaleBgPosition = () => [...scalePosition(), isArbitraryVariablePosition, isArbitraryPosition, {
     position: [isArbitraryVariable, isArbitraryValue]
@@ -19622,6 +19812,18 @@ const getDefaultConfig = () => {
        * @deprecated since Tailwind CSS v4.0.0
        */
       container: ["container"],
+      /**
+       * Container Type
+       * @see https://tailwindcss.com/docs/responsive-design#container-queries
+       */
+      "container-type": [{
+        "@container": ["", "normal", "size", isArbitraryVariable, isArbitraryValue]
+      }],
+      /**
+       * Container Name
+       * @see https://tailwindcss.com/docs/responsive-design#named-containers
+       */
+      "container-named": [isNamedContainerQuery],
       /**
        * Columns
        * @see https://tailwindcss.com/docs/columns
@@ -19755,39 +19957,65 @@ const getDefaultConfig = () => {
        */
       position: ["static", "fixed", "absolute", "relative", "sticky"],
       /**
-       * Top / Right / Bottom / Left
+       * Inset
        * @see https://tailwindcss.com/docs/top-right-bottom-left
        */
       inset: [{
         inset: scaleInset()
       }],
       /**
-       * Right / Left
+       * Inset Inline
        * @see https://tailwindcss.com/docs/top-right-bottom-left
        */
       "inset-x": [{
         "inset-x": scaleInset()
       }],
       /**
-       * Top / Bottom
+       * Inset Block
        * @see https://tailwindcss.com/docs/top-right-bottom-left
        */
       "inset-y": [{
         "inset-y": scaleInset()
       }],
       /**
-       * Start
+       * Inset Inline Start
        * @see https://tailwindcss.com/docs/top-right-bottom-left
+       * @todo class group will be renamed to `inset-s` in next major release
        */
       start: [{
+        "inset-s": scaleInset(),
+        /**
+         * @deprecated since Tailwind CSS v4.2.0 in favor of `inset-s-*` utilities.
+         * @see https://github.com/tailwindlabs/tailwindcss/pull/19613
+         */
         start: scaleInset()
       }],
       /**
-       * End
+       * Inset Inline End
        * @see https://tailwindcss.com/docs/top-right-bottom-left
+       * @todo class group will be renamed to `inset-e` in next major release
        */
       end: [{
+        "inset-e": scaleInset(),
+        /**
+         * @deprecated since Tailwind CSS v4.2.0 in favor of `inset-e-*` utilities.
+         * @see https://github.com/tailwindlabs/tailwindcss/pull/19613
+         */
         end: scaleInset()
+      }],
+      /**
+       * Inset Block Start
+       * @see https://tailwindcss.com/docs/top-right-bottom-left
+       */
+      "inset-bs": [{
+        "inset-bs": scaleInset()
+      }],
+      /**
+       * Inset Block End
+       * @see https://tailwindcss.com/docs/top-right-bottom-left
+       */
+      "inset-be": [{
+        "inset-be": scaleInset()
       }],
       /**
        * Top
@@ -20055,32 +20283,46 @@ const getDefaultConfig = () => {
         p: scaleUnambiguousSpacing()
       }],
       /**
-       * Padding X
+       * Padding Inline
        * @see https://tailwindcss.com/docs/padding
        */
       px: [{
         px: scaleUnambiguousSpacing()
       }],
       /**
-       * Padding Y
+       * Padding Block
        * @see https://tailwindcss.com/docs/padding
        */
       py: [{
         py: scaleUnambiguousSpacing()
       }],
       /**
-       * Padding Start
+       * Padding Inline Start
        * @see https://tailwindcss.com/docs/padding
        */
       ps: [{
         ps: scaleUnambiguousSpacing()
       }],
       /**
-       * Padding End
+       * Padding Inline End
        * @see https://tailwindcss.com/docs/padding
        */
       pe: [{
         pe: scaleUnambiguousSpacing()
+      }],
+      /**
+       * Padding Block Start
+       * @see https://tailwindcss.com/docs/padding
+       */
+      pbs: [{
+        pbs: scaleUnambiguousSpacing()
+      }],
+      /**
+       * Padding Block End
+       * @see https://tailwindcss.com/docs/padding
+       */
+      pbe: [{
+        pbe: scaleUnambiguousSpacing()
       }],
       /**
        * Padding Top
@@ -20118,32 +20360,46 @@ const getDefaultConfig = () => {
         m: scaleMargin()
       }],
       /**
-       * Margin X
+       * Margin Inline
        * @see https://tailwindcss.com/docs/margin
        */
       mx: [{
         mx: scaleMargin()
       }],
       /**
-       * Margin Y
+       * Margin Block
        * @see https://tailwindcss.com/docs/margin
        */
       my: [{
         my: scaleMargin()
       }],
       /**
-       * Margin Start
+       * Margin Inline Start
        * @see https://tailwindcss.com/docs/margin
        */
       ms: [{
         ms: scaleMargin()
       }],
       /**
-       * Margin End
+       * Margin Inline End
        * @see https://tailwindcss.com/docs/margin
        */
       me: [{
         me: scaleMargin()
+      }],
+      /**
+       * Margin Block Start
+       * @see https://tailwindcss.com/docs/margin
+       */
+      mbs: [{
+        mbs: scaleMargin()
+      }],
+      /**
+       * Margin Block End
+       * @see https://tailwindcss.com/docs/margin
+       */
+      mbe: [{
+        mbe: scaleMargin()
       }],
       /**
        * Margin Top
@@ -20206,6 +20462,48 @@ const getDefaultConfig = () => {
        */
       size: [{
         size: scaleSizing()
+      }],
+      /**
+       * Inline Size
+       * @see https://tailwindcss.com/docs/width
+       */
+      "inline-size": [{
+        inline: ["auto", ...scaleSizingInline()]
+      }],
+      /**
+       * Min-Inline Size
+       * @see https://tailwindcss.com/docs/min-width
+       */
+      "min-inline-size": [{
+        "min-inline": ["auto", ...scaleSizingInline()]
+      }],
+      /**
+       * Max-Inline Size
+       * @see https://tailwindcss.com/docs/max-width
+       */
+      "max-inline-size": [{
+        "max-inline": ["none", ...scaleSizingInline()]
+      }],
+      /**
+       * Block Size
+       * @see https://tailwindcss.com/docs/height
+       */
+      "block-size": [{
+        block: ["auto", ...scaleSizingBlock()]
+      }],
+      /**
+       * Min-Block Size
+       * @see https://tailwindcss.com/docs/min-height
+       */
+      "min-block-size": [{
+        "min-block": ["auto", ...scaleSizingBlock()]
+      }],
+      /**
+       * Max-Block Size
+       * @see https://tailwindcss.com/docs/max-height
+       */
+      "max-block-size": [{
+        "max-block": ["none", ...scaleSizingBlock()]
       }],
       /**
        * Width
@@ -20291,7 +20589,7 @@ const getDefaultConfig = () => {
        * @see https://tailwindcss.com/docs/font-weight
        */
       "font-weight": [{
-        font: [themeFontWeight, isArbitraryVariable, isArbitraryNumber]
+        font: [themeFontWeight, isArbitraryVariableWeight, isArbitraryWeight]
       }],
       /**
        * Font Stretch
@@ -20305,7 +20603,14 @@ const getDefaultConfig = () => {
        * @see https://tailwindcss.com/docs/font-family
        */
       "font-family": [{
-        font: [isArbitraryVariableFamilyName, isArbitraryValue, themeFont]
+        font: [isArbitraryVariableFamilyName, isArbitraryFamilyName, themeFont]
+      }],
+      /**
+       * Font Feature Settings
+       * @see https://tailwindcss.com/docs/font-feature-settings
+       */
+      "font-features": [{
+        "font-features": [isArbitraryValue]
       }],
       /**
        * Font Variant Numeric
@@ -20461,6 +20766,13 @@ const getDefaultConfig = () => {
        */
       indent: [{
         indent: scaleUnambiguousSpacing()
+      }],
+      /**
+       * Tab Size
+       * @see https://tailwindcss.com/docs/tab-size
+       */
+      "tab-size": [{
+        tab: [isInteger, isArbitraryVariable, isArbitraryValue]
       }],
       /**
        * Vertical Alignment
@@ -20727,32 +21039,46 @@ const getDefaultConfig = () => {
         border: scaleBorderWidth()
       }],
       /**
-       * Border Width X
+       * Border Width Inline
        * @see https://tailwindcss.com/docs/border-width
        */
       "border-w-x": [{
         "border-x": scaleBorderWidth()
       }],
       /**
-       * Border Width Y
+       * Border Width Block
        * @see https://tailwindcss.com/docs/border-width
        */
       "border-w-y": [{
         "border-y": scaleBorderWidth()
       }],
       /**
-       * Border Width Start
+       * Border Width Inline Start
        * @see https://tailwindcss.com/docs/border-width
        */
       "border-w-s": [{
         "border-s": scaleBorderWidth()
       }],
       /**
-       * Border Width End
+       * Border Width Inline End
        * @see https://tailwindcss.com/docs/border-width
        */
       "border-w-e": [{
         "border-e": scaleBorderWidth()
+      }],
+      /**
+       * Border Width Block Start
+       * @see https://tailwindcss.com/docs/border-width
+       */
+      "border-w-bs": [{
+        "border-bs": scaleBorderWidth()
+      }],
+      /**
+       * Border Width Block End
+       * @see https://tailwindcss.com/docs/border-width
+       */
+      "border-w-be": [{
+        "border-be": scaleBorderWidth()
       }],
       /**
        * Border Width Top
@@ -20828,32 +21154,46 @@ const getDefaultConfig = () => {
         border: scaleColor()
       }],
       /**
-       * Border Color X
+       * Border Color Inline
        * @see https://tailwindcss.com/docs/border-color
        */
       "border-color-x": [{
         "border-x": scaleColor()
       }],
       /**
-       * Border Color Y
+       * Border Color Block
        * @see https://tailwindcss.com/docs/border-color
        */
       "border-color-y": [{
         "border-y": scaleColor()
       }],
       /**
-       * Border Color S
+       * Border Color Inline Start
        * @see https://tailwindcss.com/docs/border-color
        */
       "border-color-s": [{
         "border-s": scaleColor()
       }],
       /**
-       * Border Color E
+       * Border Color Inline End
        * @see https://tailwindcss.com/docs/border-color
        */
       "border-color-e": [{
         "border-e": scaleColor()
+      }],
+      /**
+       * Border Color Block Start
+       * @see https://tailwindcss.com/docs/border-color
+       */
+      "border-color-bs": [{
+        "border-bs": scaleColor()
+      }],
+      /**
+       * Border Color Block End
+       * @see https://tailwindcss.com/docs/border-color
+       */
+      "border-color-be": [{
+        "border-be": scaleColor()
       }],
       /**
        * Border Color Top
@@ -21659,6 +21999,13 @@ const getDefaultConfig = () => {
        * @see https://tailwindcss.com/docs/translate
        */
       "translate-none": ["translate-none"],
+      /**
+       * Zoom
+       * @see https://tailwindcss.com/docs/zoom
+       */
+      zoom: [{
+        zoom: [isInteger, isArbitraryVariable, isArbitraryValue]
+      }],
       // ---------------------
       // --- Interactivity ---
       // ---------------------
@@ -21726,6 +22073,34 @@ const getDefaultConfig = () => {
         scroll: ["auto", "smooth"]
       }],
       /**
+       * Scrollbar Thumb Color
+       * @see https://tailwindcss.com/docs/scrollbar-color
+       */
+      "scrollbar-thumb-color": [{
+        "scrollbar-thumb": scaleColor()
+      }],
+      /**
+       * Scrollbar Track Color
+       * @see https://tailwindcss.com/docs/scrollbar-color
+       */
+      "scrollbar-track-color": [{
+        "scrollbar-track": scaleColor()
+      }],
+      /**
+       * Scrollbar Gutter
+       * @see https://tailwindcss.com/docs/scrollbar-gutter
+       */
+      "scrollbar-gutter": [{
+        "scrollbar-gutter": ["auto", "stable", "both"]
+      }],
+      /**
+       * Scrollbar Width
+       * @see https://tailwindcss.com/docs/scrollbar-width
+       */
+      "scrollbar-w": [{
+        scrollbar: ["auto", "thin", "none"]
+      }],
+      /**
        * Scroll Margin
        * @see https://tailwindcss.com/docs/scroll-margin
        */
@@ -21733,32 +22108,46 @@ const getDefaultConfig = () => {
         "scroll-m": scaleUnambiguousSpacing()
       }],
       /**
-       * Scroll Margin X
+       * Scroll Margin Inline
        * @see https://tailwindcss.com/docs/scroll-margin
        */
       "scroll-mx": [{
         "scroll-mx": scaleUnambiguousSpacing()
       }],
       /**
-       * Scroll Margin Y
+       * Scroll Margin Block
        * @see https://tailwindcss.com/docs/scroll-margin
        */
       "scroll-my": [{
         "scroll-my": scaleUnambiguousSpacing()
       }],
       /**
-       * Scroll Margin Start
+       * Scroll Margin Inline Start
        * @see https://tailwindcss.com/docs/scroll-margin
        */
       "scroll-ms": [{
         "scroll-ms": scaleUnambiguousSpacing()
       }],
       /**
-       * Scroll Margin End
+       * Scroll Margin Inline End
        * @see https://tailwindcss.com/docs/scroll-margin
        */
       "scroll-me": [{
         "scroll-me": scaleUnambiguousSpacing()
+      }],
+      /**
+       * Scroll Margin Block Start
+       * @see https://tailwindcss.com/docs/scroll-margin
+       */
+      "scroll-mbs": [{
+        "scroll-mbs": scaleUnambiguousSpacing()
+      }],
+      /**
+       * Scroll Margin Block End
+       * @see https://tailwindcss.com/docs/scroll-margin
+       */
+      "scroll-mbe": [{
+        "scroll-mbe": scaleUnambiguousSpacing()
       }],
       /**
        * Scroll Margin Top
@@ -21796,32 +22185,46 @@ const getDefaultConfig = () => {
         "scroll-p": scaleUnambiguousSpacing()
       }],
       /**
-       * Scroll Padding X
+       * Scroll Padding Inline
        * @see https://tailwindcss.com/docs/scroll-padding
        */
       "scroll-px": [{
         "scroll-px": scaleUnambiguousSpacing()
       }],
       /**
-       * Scroll Padding Y
+       * Scroll Padding Block
        * @see https://tailwindcss.com/docs/scroll-padding
        */
       "scroll-py": [{
         "scroll-py": scaleUnambiguousSpacing()
       }],
       /**
-       * Scroll Padding Start
+       * Scroll Padding Inline Start
        * @see https://tailwindcss.com/docs/scroll-padding
        */
       "scroll-ps": [{
         "scroll-ps": scaleUnambiguousSpacing()
       }],
       /**
-       * Scroll Padding End
+       * Scroll Padding Inline End
        * @see https://tailwindcss.com/docs/scroll-padding
        */
       "scroll-pe": [{
         "scroll-pe": scaleUnambiguousSpacing()
+      }],
+      /**
+       * Scroll Padding Block Start
+       * @see https://tailwindcss.com/docs/scroll-padding
+       */
+      "scroll-pbs": [{
+        "scroll-pbs": scaleUnambiguousSpacing()
+      }],
+      /**
+       * Scroll Padding Block End
+       * @see https://tailwindcss.com/docs/scroll-padding
+       */
+      "scroll-pbe": [{
+        "scroll-pbe": scaleUnambiguousSpacing()
       }],
       /**
        * Scroll Padding Top
@@ -21955,17 +22358,18 @@ const getDefaultConfig = () => {
       }]
     },
     conflictingClassGroups: {
+      "container-named": ["container-type"],
       overflow: ["overflow-x", "overflow-y"],
       overscroll: ["overscroll-x", "overscroll-y"],
-      inset: ["inset-x", "inset-y", "start", "end", "top", "right", "bottom", "left"],
+      inset: ["inset-x", "inset-y", "inset-bs", "inset-be", "start", "end", "top", "right", "bottom", "left"],
       "inset-x": ["right", "left"],
       "inset-y": ["top", "bottom"],
       flex: ["basis", "grow", "shrink"],
       gap: ["gap-x", "gap-y"],
-      p: ["px", "py", "ps", "pe", "pt", "pr", "pb", "pl"],
+      p: ["px", "py", "ps", "pe", "pbs", "pbe", "pt", "pr", "pb", "pl"],
       px: ["pr", "pl"],
       py: ["pt", "pb"],
-      m: ["mx", "my", "ms", "me", "mt", "mr", "mb", "ml"],
+      m: ["mx", "my", "ms", "me", "mbs", "mbe", "mt", "mr", "mb", "ml"],
       mx: ["mr", "ml"],
       my: ["mt", "mb"],
       size: ["w", "h"],
@@ -21985,18 +22389,18 @@ const getDefaultConfig = () => {
       "rounded-b": ["rounded-br", "rounded-bl"],
       "rounded-l": ["rounded-tl", "rounded-bl"],
       "border-spacing": ["border-spacing-x", "border-spacing-y"],
-      "border-w": ["border-w-x", "border-w-y", "border-w-s", "border-w-e", "border-w-t", "border-w-r", "border-w-b", "border-w-l"],
+      "border-w": ["border-w-x", "border-w-y", "border-w-s", "border-w-e", "border-w-bs", "border-w-be", "border-w-t", "border-w-r", "border-w-b", "border-w-l"],
       "border-w-x": ["border-w-r", "border-w-l"],
       "border-w-y": ["border-w-t", "border-w-b"],
-      "border-color": ["border-color-x", "border-color-y", "border-color-s", "border-color-e", "border-color-t", "border-color-r", "border-color-b", "border-color-l"],
+      "border-color": ["border-color-x", "border-color-y", "border-color-s", "border-color-e", "border-color-bs", "border-color-be", "border-color-t", "border-color-r", "border-color-b", "border-color-l"],
       "border-color-x": ["border-color-r", "border-color-l"],
       "border-color-y": ["border-color-t", "border-color-b"],
       translate: ["translate-x", "translate-y", "translate-none"],
       "translate-none": ["translate", "translate-x", "translate-y", "translate-z"],
-      "scroll-m": ["scroll-mx", "scroll-my", "scroll-ms", "scroll-me", "scroll-mt", "scroll-mr", "scroll-mb", "scroll-ml"],
+      "scroll-m": ["scroll-mx", "scroll-my", "scroll-ms", "scroll-me", "scroll-mbs", "scroll-mbe", "scroll-mt", "scroll-mr", "scroll-mb", "scroll-ml"],
       "scroll-mx": ["scroll-mr", "scroll-ml"],
       "scroll-my": ["scroll-mt", "scroll-mb"],
-      "scroll-p": ["scroll-px", "scroll-py", "scroll-ps", "scroll-pe", "scroll-pt", "scroll-pr", "scroll-pb", "scroll-pl"],
+      "scroll-p": ["scroll-px", "scroll-py", "scroll-ps", "scroll-pe", "scroll-pbs", "scroll-pbe", "scroll-pt", "scroll-pr", "scroll-pb", "scroll-pl"],
       "scroll-px": ["scroll-pr", "scroll-pl"],
       "scroll-py": ["scroll-pt", "scroll-pb"],
       touch: ["touch-x", "touch-y", "touch-pz"],
@@ -22007,6 +22411,7 @@ const getDefaultConfig = () => {
     conflictingClassGroupModifiers: {
       "font-size": ["leading"]
     },
+    postfixLookupClassGroups: ["container-type"],
     orderSensitiveModifiers: ["*", "**", "after", "backdrop", "before", "details-content", "file", "first-letter", "first-line", "marker", "placeholder", "selection"]
   };
 };
@@ -23408,7 +23813,7 @@ function LinkableStateTest() {
     )
   ] });
 }
-const urlAlphabet = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
+let urlAlphabet = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
 let nanoid = (size = 21) => {
   let id = "";
   let bytes = crypto.getRandomValues(new Uint8Array(size |= 0));
