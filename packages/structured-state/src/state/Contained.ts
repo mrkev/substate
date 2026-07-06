@@ -9,6 +9,7 @@ import { Subbable } from "./Subbable";
 export interface Contained {
   readonly _container: Set<Subbable>;
 }
+
 export type Containable =
   | LinkedPrimitive<unknown>
   | LinkedArray<unknown>

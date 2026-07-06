@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 import type { LinkedPrimitive } from "../obj/LinkedPrimitive";
 import { MutationHashable } from "../state/MutationHashable";
 import { Subbable, subscribe } from "../state/Subbable";
@@ -9,15 +9,7 @@ export type StateDispath<S> = (value: S | ((prevState: S) => S)) => void;
 export function usePrimitive<S>(
   linkedState: LinkedPrimitive<S>,
 ): [S, StateDispath<S>] {
-  const [state, setState] = useState<S>(() => linkedState.get());
-
-  useEffect(() => {
-    return subscribe(linkedState, (target) => {
-      if (target === linkedState) {
-        setState(() => linkedState.get());
-      }
-    });
-  }, [linkedState]);
+  useSubscribeToSubbableMutationHashable(linkedState, undefined, false);
 
   const setter: StateDispath<S> = useCallback(
     (newVal) => {
@@ -30,7 +22,7 @@ export function usePrimitive<S>(
     [linkedState],
   );
 
-  return [state, setter];
+  return [linkedState.get(), setter];
 }
 
 export function useContainer<S extends SubbableContainer>(

@@ -14847,18 +14847,6 @@ class WeakRefMap {
     }
   }
 }
-function subscribe(subbable2, cb) {
-  subbable2._subscriptors.add(cb);
-  return () => subbable2._subscriptors.delete(cb);
-}
-function notify(subbable2, target) {
-  for (const cb of subbable2._subscriptors) {
-    cb(target, subbable2);
-  }
-  if ("_changed" in subbable2 && typeof subbable2._changed === "function") {
-    subbable2._changed(target, subbable2);
-  }
-}
 class Struct2 {
   _id;
   _hash = 0;
@@ -15105,6 +15093,18 @@ class SSet {
 function isContainable$2(val) {
   return val instanceof LinkedPrimitive || val instanceof LinkedArray || val instanceof Struct || val instanceof Struct2 || val instanceof Structured || val instanceof SSet;
 }
+function subscribe(subbable2, cb) {
+  subbable2._subscriptors.add(cb);
+  return () => subbable2._subscriptors.delete(cb);
+}
+function notify(subbable2, target) {
+  for (const cb of subbable2._subscriptors) {
+    cb(target, subbable2);
+  }
+  if ("_changed" in subbable2 && typeof subbable2._changed === "function") {
+    subbable2._changed(target, subbable2);
+  }
+}
 const mutationHashable = {
   getMutationHash(mh) {
     return mh._hash;
@@ -15180,9 +15180,11 @@ const subbableContainer$2 = {
 };
 class LinkedPrimitive {
   _id;
+  _hash = 0;
   _value;
   _subscriptors = /* @__PURE__ */ new Set();
   _container = /* @__PURE__ */ new Set();
+  _propagatedTokens = /* @__PURE__ */ new WeakSet();
   constructor(initialValue, id) {
     this._value = initialValue;
     this._id = id;
@@ -15195,11 +15197,7 @@ class LinkedPrimitive {
   set(value) {
     saveForHistory(this);
     this._value = value;
-    notify(this, this);
-    const token = new UpdateToken$2(this);
-    for (const container of this._container) {
-      subbableContainer$2._childChanged(container, token);
-    }
+    subbableContainer$2._notifyChange(this, this);
   }
   setDyn(cb) {
     const newVal = cb(this.get());
@@ -17226,14 +17224,7 @@ function requireReact() {
 }
 var reactExports = requireReact();
 function usePrimitive(linkedState) {
-  const [state, setState] = reactExports.useState(() => linkedState.get());
-  reactExports.useEffect(() => {
-    return subscribe(linkedState, (target) => {
-      if (target === linkedState) {
-        setState(() => linkedState.get());
-      }
-    });
-  }, [linkedState]);
+  useSubscribeToSubbableMutationHashable(linkedState, void 0, false);
   const setter = reactExports.useCallback(
     (newVal) => {
       if (newVal instanceof Function) {
@@ -17244,7 +17235,7 @@ function usePrimitive(linkedState) {
     },
     [linkedState]
   );
-  return [state, setter];
+  return [linkedState.get(), setter];
 }
 function useContainer(obj, recursiveChanges = false) {
   useSubscribeToSubbableMutationHashable(obj, void 0, recursiveChanges);

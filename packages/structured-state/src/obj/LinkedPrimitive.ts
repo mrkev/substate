@@ -1,7 +1,8 @@
 import { nanoid } from "nanoid";
 import { getGlobalState, saveForHistory } from "../sstate.history";
 import { Contained } from "../state/Contained";
-import { notify, Subbable, SubbableCallback } from "../state/Subbable";
+import { MutationHashable } from "../state/MutationHashable";
+import { Subbable, SubbableCallback } from "../state/Subbable";
 import {
   subbableContainer,
   SubbableContainer,
@@ -11,11 +12,17 @@ import {
 /**
  * LinkedState is a Subbable, a single atomic primitive
  */
-export class LinkedPrimitive<S> implements Contained, Subbable {
+export class LinkedPrimitive<S>
+  // TODO: merge subbable and Contained
+  implements Contained, Subbable, MutationHashable, SubbableContainer
+{
   readonly _id: string;
+  public _hash: number = 0;
+
   private _value: Readonly<S>;
   readonly _subscriptors: Set<SubbableCallback> = new Set();
   readonly _container = new Set<SubbableContainer>();
+  readonly _propagatedTokens: WeakSet<UpdateToken> = new WeakSet();
 
   constructor(initialValue: S, id: string) {
     this._value = initialValue;
@@ -31,14 +38,7 @@ export class LinkedPrimitive<S> implements Contained, Subbable {
   set(value: Readonly<S>): void {
     saveForHistory(this);
     this._value = value;
-    // TODO: when merging Subbable and Contained, put this in `notify`
-    notify(this, this);
-    // TODO: add hash to subbable to just do subbableContainer._notifyChange(this, this);??
-    // we don't need to save the token, since primitvies, being leaves, will never be notified when a child changes
-    const token = new UpdateToken(this);
-    for (const container of this._container) {
-      subbableContainer._childChanged(container, token);
-    }
+    subbableContainer._notifyChange(this, this);
   }
 
   setDyn(cb: (prevState: S) => S) {
