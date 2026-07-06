@@ -1,3 +1,4 @@
+import { fixupConfigRules, fixupPluginRules } from "@eslint/compat";
 import tsParser from "@typescript-eslint/parser";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -7,6 +8,10 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 import js from "@eslint/js";
 
+// eslint-plugin-react 7.37.5 still calls the context methods (getFilename, etc.)
+// that ESLint 10 removed. Wrap it with @eslint/compat until it ships native support.
+const reactCompat = fixupPluginRules(react);
+
 export default defineConfig([
   {
     ignores: ["**/dist", "eslint.config.mjs", "docs"],
@@ -14,7 +19,7 @@ export default defineConfig([
 
   js.configs.recommended,
   tseslint.configs.recommended,
-  react.configs.flat.recommended,
+  ...fixupConfigRules(react.configs.flat.recommended),
   reactHooks.configs.flat.recommended,
 
   {
@@ -25,7 +30,7 @@ export default defineConfig([
       },
     },
     plugins: {
-      react,
+      react: reactCompat,
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
     },
@@ -45,7 +50,6 @@ export default defineConfig([
     },
 
     rules: {
-      "@typescript-eslint/no-unnecessary-type-constraint": "warn",
       "@typescript-eslint/no-unused-vars": ["off", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-expressions": "off",
