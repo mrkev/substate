@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "lib": ["ES2025", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
 
@@ -25,17 +25,11 @@
   "include": [],
 
   "references": [
-    { "path": "./packages/site/tsconfig.node.json" },
-    { "path": "./packages/site/tsconfig.src.json" },
-    { "path": "./packages/old-state/tsconfig.src.json" },
-    { "path": "./packages/old-state/tsconfig.node.json" },
-    { "path": "./packages/structured-state/tsconfig.src.json" },
-    { "path": "./packages/structured-state/tsconfig.node.json" },
-    { "path": "./packages/linked-state/tsconfig.src.json" },
-    { "path": "./packages/linked-state/tsconfig.node.json" },
-    { "path": "./packages/marked-subbable/tsconfig.src.json" },
-    { "path": "./packages/marked-subbable/tsconfig.node.json" },
-    { "path": "./packages/marked-serializable/tsconfig.src.json" },
-    { "path": "./packages/marked-serializable/tsconfig.node.json" }
+    { "path": "./packages/site" },
+    { "path": "./packages/old-state" },
+    { "path": "./packages/structured-state" },
+    { "path": "./packages/linked-state" },
+    { "path": "./packages/marked-subbable" },
+    { "path": "./packages/marked-serializable" }
   ]
 }

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import * as Struct from "../../../structured-state";
+import * as Struct from "../../../structured-state/src/index";
 import { debugOut } from "../../../structured-state/src/debug.text";
 import { setWindow } from "../../../structured-state/src/lib/nullthrows";
 import { construct } from "../../../structured-state/src/serialization/construct";
-import { serialize } from "../../../structured-state";
-import * as s from "../../../structured-state";
+import { serialize } from "../../../structured-state/src/index";
+import * as s from "../../../structured-state/src/index";
 import {
   getGlobalState,
   history,
@@ -14,9 +14,9 @@ import {
   useContainer,
   usePrimitive,
   SPrimitive,
-} from "../../../structured-state";
+} from "../../../structured-state/src/index";
 import "./App.css";
-import { SSchemaArray } from "../../../structured-state";
+import { SSchemaArray } from "../../../structured-state/src/index";
 
 export class BusLine extends Struct.Struct<BusLine> {
   readonly distance = s.number();
