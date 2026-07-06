@@ -5,11 +5,9 @@ import { defineConfig } from "vite";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    react({
-      babel: {
-        // plugins: ["babel-plugin-react-compiler"],
-      },
-    }),
+    // React Compiler is available via plugin-react v6's `reactCompilerPreset`
+    // (oxc-based). Left disabled, matching the previous config.
+    react(),
     tailwindcss(),
   ],
   build: {
