@@ -49,6 +49,7 @@ export type { DirtyState } from "./DirtyObserver";
 // export { init } from "./serialization.initialize";
 export type { InitFunctions } from "./serialization/initialize";
 export type { PrimitiveKind, StructuredKind } from "./state/StructuredKinds";
+export type { Subbable, SubbableCallback } from "./state/Subbable";
 
 export const simplify = {
   structured: simplifyStructured,

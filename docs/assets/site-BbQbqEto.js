@@ -13140,6 +13140,14 @@ var LinkedArray = class {
 			return clone.push(...items);
 		});
 	}
+	pushAll(items) {
+		if (items.length < 1) return this.length;
+		subbableContainer$2._containAll(this, items);
+		return this.mutate((clone) => {
+			for (const item of items) clone.push(item);
+			return clone.length;
+		});
+	}
 	unshift(...items) {
 		if (items.length < 1) return this.length;
 		subbableContainer$2._containAll(this, items);
@@ -19867,6 +19875,15 @@ var MarkedArray = class extends Array {
 		return this.$$mark.mutate(this, (contain) => {
 			contain(items);
 			return super.push(...items);
+		});
+	}
+	pushAll(items) {
+		if (items.length < 1) return this.length;
+		subbableContainer._containAll(this, items);
+		return this.$$mark.mutate(this, (contain) => {
+			contain(items);
+			for (const item of items) super.push(item);
+			return this.length;
 		});
 	}
 	unshift(...items) {

@@ -13,7 +13,7 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
   }
 
   public static create<T>(
-    initialValue?: (readonly T[] | null) | Iterable<T> | null | undefined
+    initialValue?: (readonly T[] | null) | Iterable<T> | null | undefined,
   ) {
     return new this<T>(initialValue ?? [], nanoid(5));
   }
@@ -53,6 +53,22 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
     return this.$$mark.mutate(this, (contain) => {
       contain(items);
       return super.push(...items);
+    });
+  }
+
+  // added by me, mutates
+  pushAll(items: S[]): number {
+    if (items.length < 1) {
+      return this.length;
+    }
+    subbableContainer._containAll(this, items);
+
+    return this.$$mark.mutate(this, (contain) => {
+      contain(items);
+      for (const item of items) {
+        super.push(item);
+      }
+      return this.length;
     });
   }
 

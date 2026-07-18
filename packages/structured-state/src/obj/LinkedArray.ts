@@ -1,11 +1,11 @@
 import { nanoid } from "nanoid";
 import { mutablearr } from "../lib/nullthrows";
 import { getGlobalState, saveForHistory } from "../sstate.history";
+import { SubbableCallback } from "../state/Subbable";
 import {
   subbableContainer,
   SubbableContainer,
 } from "../state/SubbableContainer";
-import { SubbableCallback } from "../state/Subbable";
 
 // .sort, .reverse, .fill, .copyWithin operate in place and return the array. SubbableArray
 // is not quite an array so the return types don't match.
@@ -148,6 +148,21 @@ export class LinkedArray<S>
 
     return this.mutate((clone) => {
       return clone.push(...items);
+    });
+  }
+
+  // added by me, mutates
+  pushAll(items: S[]): number {
+    if (items.length < 1) {
+      return this.length;
+    }
+    subbableContainer._containAll(this, items);
+
+    return this.mutate((clone) => {
+      for (const item of items) {
+        clone.push(item);
+      }
+      return clone.length;
     });
   }
 

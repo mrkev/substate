@@ -1,4 +1,9 @@
 import { describe, expect, it } from "vitest";
+// Import the package entry first so the module graph loads in an order where
+// LinkedPrimitive is defined before the modules that reference it (via
+// sstate.history) are evaluated. Importing ./LinkedPrimitive directly as the
+// entry point hits a circular-import error.
+import "..";
 import { LinkedPrimitive } from "./LinkedPrimitive";
 
 describe("sstate", () => {

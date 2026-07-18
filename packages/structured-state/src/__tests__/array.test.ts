@@ -3,10 +3,9 @@ import { array } from "..";
 
 vi.mock("../sstate.history", () => ({
   saveForHistory: vi.fn(),
-}));
-
-vi.mock("./SubbableContainer", () => ({
-  _notifyChange: vi.fn(),
+  // LinkedArray's constructor registers itself via
+  // getGlobalState().knownObjects.set(...); a Map is enough for these tests.
+  getGlobalState: () => ({ knownObjects: new Map() }),
 }));
 
 describe("array", () => {

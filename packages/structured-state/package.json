@@ -5,10 +5,10 @@
   "type": "module",
   "main": "./dist/structured-state.umd.cjs",
   "module": "./dist/structured-state.js",
-  "types": "./dist/src/index.d.ts",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/src/index.d.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/structured-state.js",
       "require": "./dist/structured-state.umd.cjs"
     }
