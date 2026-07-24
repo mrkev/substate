@@ -58,4 +58,45 @@ describe("SArray", () => {
       expect(arr._hash).toBe(before);
     });
   });
+
+  describe(".filter", () => {
+    it("returns a plain array of the matching items", () => {
+      const arr = LinkedArray.create([1, 2, 3, 4]);
+      const even = arr.filter((n) => n % 2 === 0);
+      expect(even).toEqual([2, 4]);
+      expect(Array.isArray(even)).toBe(true);
+    });
+
+    it("passes index and the backing array to the predicate", () => {
+      const arr = LinkedArray.create(["a", "b"]);
+      const seen: [string, number, string[]][] = [];
+      arr.filter((value, index, array) => {
+        seen.push([value, index, array]);
+        return true;
+      });
+      expect(seen).toEqual([
+        ["a", 0, ["a", "b"]],
+        ["b", 1, ["a", "b"]],
+      ]);
+    });
+
+    it("narrows via a type guard", () => {
+      const arr = LinkedArray.create<string | number>([1, "a", 2]);
+      const nums: number[] = arr.filter(
+        (value): value is number => typeof value === "number",
+      );
+      expect(nums).toEqual([1, 2]);
+    });
+
+    it("does not mutate or notify", () => {
+      const arr = LinkedArray.create([1, 2, 3]);
+      const cb = vi.fn();
+      subscribe(arr, cb);
+      const before = arr._hash;
+      arr.filter((n) => n > 1);
+      expect([...arr]).toEqual([1, 2, 3]);
+      expect(cb).not.toHaveBeenCalled();
+      expect(arr._hash).toBe(before);
+    });
+  });
 });

@@ -297,16 +297,16 @@ export class LinkedArray<S>
     throw new Error("Method not implemented.");
   }
 
-  filter<S>(
-    predicate: (value: S, index: number, array: S[]) => value is S,
+  filter<U extends S>(
+    predicate: (value: S, index: number, array: S[]) => value is U,
     thisArg?: any,
-  ): S[];
+  ): U[];
   filter(
     predicate: (value: S, index: number, array: S[]) => unknown,
     thisArg?: any,
   ): S[];
-  filter(predicate: any, thisArg?: any): S[] | S[] {
-    throw new Error("Method not implemented.");
+  filter(predicate: any, thisArg?: any): S[] {
+    return this._array.filter(predicate, thisArg);
   }
 
   find<S>(
