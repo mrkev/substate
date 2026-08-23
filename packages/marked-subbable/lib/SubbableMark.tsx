@@ -33,7 +33,7 @@ export class SubbableMark implements Subbable, SubbableContainer, Contained {
 
   public register<T>(
     holder: MarkedSubbable,
-    contain?: (readonly T[] | null) | Iterable<T> | null | undefined
+    contain?: (readonly T[] | null) | Iterable<T> | null | undefined,
   ) {
     subbableContainer._containAll(holder, new Set(contain));
   }
@@ -42,22 +42,22 @@ export class SubbableMark implements Subbable, SubbableContainer, Contained {
     struct: MarkedSubbable,
     mutator: (
       contain: (items: IterableCollection) => void,
-      uncontain: (items: IterableCollection) => void
-    ) => V
+      uncontain: (items: IterableCollection) => void,
+    ) => V,
   ): V {
     // saveForHistory(this);
     const changes = {
       contained: [] as MarkedSubbable[],
       uncontained: [] as MarkedSubbable[],
     };
+
     const result = mutator(
       (items) =>
         (changes.contained = subbableContainer._containAll(struct, items)),
       (items) =>
-        (changes.uncontained = subbableContainer._uncontainAll(struct, items))
+        (changes.uncontained = subbableContainer._uncontainAll(struct, items)),
     );
 
-    // console.log("changes", changes);
     subbableContainer._notifyChange(struct, struct);
     return result;
   }

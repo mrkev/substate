@@ -111,7 +111,6 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
   override splice(start: number, deleteCount: number, ...items: S[]): S[];
   override splice(start: any, deleteCount?: any, ...items: any[]): S[] {
     return this.$$mark.mutate(this, (contain, uncontain) => {
-      // TODO: test correct contain/uncontain
       contain(items);
       const deleted = super.splice(start, deleteCount, ...items);
       uncontain(deleted);
