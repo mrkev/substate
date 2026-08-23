@@ -1,11 +1,11 @@
 import { useCallback, useSyncExternalStore } from "react";
-import { subbable } from "../lib/Subbable";
-import { MarkedSubbable } from "../lib/SubbableMark";
+import { subbable } from "./lib/Subbable";
+import { MarkedSubbable } from "./lib/SubbableMark";
 import { MarkedValue } from "./MarkedValue";
 
 export function useLink<S extends MarkedSubbable>(
   obj: S,
-  recursiveChanges: boolean = false
+  recursiveChanges: boolean = false,
 ): () => S {
   "use no memo"; // dont memo this hook
   const _hash = useSyncExternalStore(
@@ -25,10 +25,10 @@ export function useLink<S extends MarkedSubbable>(
           }
         });
       },
-      [obj, recursiveChanges]
+      [obj, recursiveChanges],
     ),
     useCallback(() => obj.$$mark._hash, [obj]),
-    useCallback(() => obj.$$mark._hash, [obj])
+    useCallback(() => obj.$$mark._hash, [obj]),
   );
   return () => obj;
 }
@@ -54,13 +54,13 @@ export function useLinkAsState<S>(prim: MarkedValue<S>): [S, StateDispath<S>] {
         }
       });
     },
-    [prim]
+    [prim],
   );
 
   const value = useSyncExternalStore(
     externalStoreSub,
     useCallback(() => prim.get(), [prim]),
-    useCallback(() => prim.get(), [prim])
+    useCallback(() => prim.get(), [prim]),
   );
 
   const setter: StateDispath<S> = useCallback(
@@ -71,7 +71,7 @@ export function useLinkAsState<S>(prim: MarkedValue<S>): [S, StateDispath<S>] {
         prim.set(newVal);
       }
     },
-    [prim]
+    [prim],
   );
 
   return [value, setter];

@@ -9,10 +9,10 @@ export { MarkedMap } from "./src/MarkedMap";
 export { MarkedSet } from "./src/MarkedSet";
 export { MarkedValue } from "./src/MarkedValue";
 
-export { SubbableMark } from "./lib/SubbableMark";
-export type { MarkedSubbable } from "./lib/SubbableMark";
+export { SubbableMark } from "./src/lib/SubbableMark";
+export type { MarkedSubbable } from "./src/lib/SubbableMark";
 
-export { DebugTree } from "./debug/DebugTree";
+export { DebugTree } from "./src/debug/DebugTree";
 
 export {
   //
@@ -25,4 +25,4 @@ export const mArray = MarkedArray.create.bind(MarkedArray);
 export const mMap = MarkedMap.create.bind(MarkedMap);
 export const mValue = MarkedValue.create.bind(MarkedValue);
 
-export { subbable } from "./lib/Subbable";
+export { subbable } from "./src/lib/Subbable";

@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
-import { subbableContainer } from "../lib/SubbableContainer";
-import { MarkedSubbable, SubbableMark } from "../lib/SubbableMark";
+import { subbableContainer } from "./lib/SubbableContainer";
+import { MarkedSubbable, SubbableMark } from "./lib/SubbableMark";
 
 /**
  * MarkedValue is a MarkedSubbable holding a single atomic value. It's

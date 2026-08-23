@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { MarkedSubbable, SubbableMark } from "../lib/SubbableMark";
+import { MarkedSubbable, SubbableMark } from "./lib/SubbableMark";
 
 // A Subbable set that works via a $$mark (vs implementing
 // everything that makes a subbable itself)
@@ -18,7 +18,7 @@ export class MarkedSet<S> extends Set<S> implements MarkedSubbable {
   }
 
   public static create<T>(
-    initial?: (readonly T[] | null) | Iterable<T> | null | undefined
+    initial?: (readonly T[] | null) | Iterable<T> | null | undefined,
   ) {
     return new this<T>(new Set(initial), nanoid(5));
   }

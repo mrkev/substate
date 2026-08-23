@@ -2,12 +2,12 @@ import stringify from "json-stringify-deterministic";
 import { ReactNode, useState } from "react";
 import { isContainable } from "../lib/Contained";
 import { MarkedSubbable, SubbableMark } from "../lib/SubbableMark";
-import { exhaustive } from "../src/exhaustive";
-import { useLink } from "../src/useLink";
-import { MarkedArray } from "../src/MarkedArray";
-import { MarkedMap } from "../src/MarkedMap";
-import { MarkedSet } from "../src/MarkedSet";
-import { MarkedValue } from "../src/MarkedValue";
+import { exhaustive } from "../exhaustive";
+import { useLink } from "../useLink";
+import { MarkedArray } from "../MarkedArray";
+import { MarkedMap } from "../MarkedMap";
+import { MarkedSet } from "../MarkedSet";
+import { MarkedValue } from "../MarkedValue";
 
 type PrimitiveKind = number | string | boolean | null;
 
@@ -155,7 +155,7 @@ function TreeMarkedSubbable({
         pad={baseline}
         path={`${path}/${key}`}
         showUnknowns={showUnknowns}
-      />
+      />,
     );
   }
 
@@ -220,7 +220,7 @@ function TreeMarkedArray({
         pad={baseline}
         path={`${path}/${i}`}
         showUnknowns={showUnknowns}
-      />
+      />,
     );
     // result += `\n${DebugOutReact(elem, pad, showUnknowns)
     //   .split("\n")
@@ -267,7 +267,7 @@ function TreeMarkedSet({
         pad={baseline}
         path={`${path}/${i}-s`}
         showUnknowns={showUnknowns}
-      />
+      />,
     );
     i++;
     // result += `\n${DebugOutReact(elem, pad, showUnknowns)
@@ -323,7 +323,7 @@ function TreeMarkedMap({
         pad={baseline}
         path={`${path}/${i}-s`}
         showUnknowns={showUnknowns}
-      />
+      />,
     );
     i++;
     // result += `\n${DebugOutReact(elem, pad, showUnknowns)
@@ -430,7 +430,7 @@ function DebugOutSimplePrm({ val }: { val: PrimitiveKind | undefined }) {
 }
 
 const classOfKind = (
-  kind: "string" | "kind" | "number" | "classname" | "hash" | "attr" | "prm"
+  kind: "string" | "kind" | "number" | "classname" | "hash" | "attr" | "prm",
 ): string => {
   switch (kind) {
     case "attr":

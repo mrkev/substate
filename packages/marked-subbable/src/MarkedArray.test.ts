@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { subbable } from "../lib/Subbable";
+import { subbable } from "./lib/Subbable";
 import { MarkedArray } from "./MarkedArray";
 import { MarkedValue } from "./MarkedValue";
 

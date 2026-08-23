@@ -1,4 +1,3 @@
-import { printId } from "../src/printId";
 import { isContainable } from "./Contained";
 import { subbable, SubbableCallback } from "./Subbable";
 import { MarkedSubbable } from "./SubbableMark";
@@ -58,7 +57,7 @@ export const subbableContainer = {
           "_uncontain:",
           item.$$mark._container,
           "does not contain",
-          item
+          item,
         );
       }
 

@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
-import { subbableContainer } from "../lib/SubbableContainer";
-import { MarkedSubbable, SubbableMark } from "../lib/SubbableMark";
+import { subbableContainer } from "./lib/SubbableContainer";
+import { MarkedSubbable, SubbableMark } from "./lib/SubbableMark";
 
 export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
   public readonly $$mark: SubbableMark;

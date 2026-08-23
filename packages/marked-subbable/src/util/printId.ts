@@ -3,7 +3,7 @@
 // import { LinkableValue } from "./LinkableValue";
 // import { LinkableSet } from "./LinkableSet";
 
-import { MarkedSubbable } from "../lib/SubbableMark";
+import { MarkedSubbable } from "./lib/SubbableMark";
 
 export function printId(obj: MarkedSubbable) {
   const kindStr = (() => {
