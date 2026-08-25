@@ -120,11 +120,42 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
 
   // Array<S> interface, mutates
   override fill(value: S, start?: number, end?: number): this {
-    throw new Error("unimplemented");
-    return this.$$mark.mutate(this, (contain) => {
+    const len = this.length;
+    // normalize the range the same way Array.prototype.fill does
+    const lo =
+      start === undefined
+        ? 0
+        : start < 0
+          ? Math.max(len + start, 0)
+          : Math.min(start, len);
+    const hi =
+      end === undefined
+        ? len
+        : end < 0
+          ? Math.max(len + end, 0)
+          : Math.min(end, len);
+
+    // empty range: nothing changes, so don't notify subscribers
+    if (lo >= hi) {
+      return this;
+    }
+
+    return this.$$mark.mutate(this, (contain, uncontain) => {
+      const overwritten = super.slice(lo, hi);
+      super.fill(value, lo, hi);
       contain([value]);
-      // TODO: uncontain overwritten elements
-      super.fill(value, start, end);
+      // Release overwritten elements that no longer appear in the array (a
+      // duplicate elsewhere, or `value` itself, must stay contained). Build the
+      // survivor set once — O(n) — instead of scanning per element — O(n·k) —
+      // and collect releases into a Set so a repeated element is released once.
+      const present = new Set<S>(this);
+      const released = new Set<S>();
+      for (const old of overwritten) {
+        if (!present.has(old)) {
+          released.add(old);
+        }
+      }
+      uncontain(released);
       return this;
     });
   }

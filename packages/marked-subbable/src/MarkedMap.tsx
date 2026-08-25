@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { MarkedSubbable, SubbableMark } from "./lib/SubbableMark";
-import { nullthrows } from "./nullthrows";
+import { nullthrows } from "./util/nullthrows";
 
 export class MarkedMap<K, V> extends Map<K, V> implements MarkedSubbable {
   readonly $$mark: SubbableMark;

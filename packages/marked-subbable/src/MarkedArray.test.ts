@@ -162,4 +162,99 @@ describe("MarkedArray", () => {
       expect(cb).toHaveBeenCalledWith(child, parent);
     });
   });
+
+  describe(".fill", () => {
+    it("fills the whole array by default", () => {
+      const arr = MarkedArray.create([1, 2, 3]);
+      arr.fill(0);
+      expect([...arr]).toEqual([0, 0, 0]);
+    });
+
+    it("fills a [start, end) range", () => {
+      const arr = MarkedArray.create([1, 2, 3, 4]);
+      arr.fill(9, 1, 3);
+      expect([...arr]).toEqual([1, 9, 9, 4]);
+    });
+
+    it("supports negative start/end", () => {
+      const arr = MarkedArray.create([1, 2, 3, 4]);
+      arr.fill(9, -3, -1);
+      expect([...arr]).toEqual([1, 9, 9, 4]);
+    });
+
+    it("returns the array itself", () => {
+      const arr = MarkedArray.create([1, 2, 3]);
+      expect(arr.fill(0)).toBe(arr);
+    });
+
+    describe("containment", () => {
+      it("contains the fill value", () => {
+        const arr = MarkedArray.create<MarkedValue<number>>([
+          MarkedValue.create(1),
+          MarkedValue.create(2),
+        ]);
+        const value = MarkedValue.create(0);
+        arr.fill(value);
+        expect(value.$$mark._container.has(arr)).toBe(true);
+      });
+
+      it("uncontains overwritten items", () => {
+        const a = MarkedValue.create("a");
+        const b = MarkedValue.create("b");
+        const c = MarkedValue.create("c");
+        const arr = MarkedArray.create([a, b, c]);
+        const value = MarkedValue.create("x");
+
+        arr.fill(value, 1, 3);
+
+        expect(a.$$mark._container.has(arr)).toBe(true); // untouched
+        expect(b.$$mark._container.has(arr)).toBe(false); // overwritten
+        expect(c.$$mark._container.has(arr)).toBe(false); // overwritten
+        expect(value.$$mark._container.has(arr)).toBe(true);
+      });
+
+      it("keeps an overwritten item contained if it survives elsewhere", () => {
+        const dup = MarkedValue.create("dup");
+        const arr = MarkedArray.create([dup, MarkedValue.create("b"), dup]);
+        const value = MarkedValue.create("x");
+
+        // overwrite index 1 only; `dup` still lives at indices 0 and 2
+        arr.fill(value, 1, 2);
+
+        expect(dup.$$mark._container.has(arr)).toBe(true);
+        expect(value.$$mark._container.has(arr)).toBe(true);
+      });
+
+      it("keeps the fill value contained even when it was overwritten", () => {
+        const value = MarkedValue.create("x");
+        const arr = MarkedArray.create([value, MarkedValue.create("b")]);
+
+        // value is both an existing element (index 0) and the fill value
+        arr.fill(value);
+
+        expect(value.$$mark._container.has(arr)).toBe(true);
+      });
+    });
+
+    it("notifies subscribers exactly once and bumps the hash", () => {
+      const arr = MarkedArray.create([1, 2, 3]);
+      const cb = vi.fn();
+      subbable.subscribe(arr, cb);
+      const before = arr.$$mark._hash;
+      arr.fill(0);
+      expect(cb).toHaveBeenCalledTimes(1);
+      expect(arr.$$mark._hash).toBe(before + 1);
+    });
+
+    it("is a no-op for an empty range and does not notify", () => {
+      const arr = MarkedArray.create([1, 2, 3]);
+      const cb = vi.fn();
+      subbable.subscribe(arr, cb);
+      const before = arr.$$mark._hash;
+      arr.fill(0, 2, 2);
+      expect([...arr]).toEqual([1, 2, 3]);
+      expect(cb).not.toHaveBeenCalled();
+      expect(arr.$$mark._hash).toBe(before);
+    });
+  });
 });

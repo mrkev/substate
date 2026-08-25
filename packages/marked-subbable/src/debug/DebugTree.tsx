@@ -2,7 +2,7 @@ import stringify from "json-stringify-deterministic";
 import { ReactNode, useState } from "react";
 import { isContainable } from "../lib/Contained";
 import { MarkedSubbable, SubbableMark } from "../lib/SubbableMark";
-import { exhaustive } from "../exhaustive";
+import { exhaustive } from "../util/exhaustive";
 import { useLink } from "../useLink";
 import { MarkedArray } from "../MarkedArray";
 import { MarkedMap } from "../MarkedMap";
