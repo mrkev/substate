@@ -20181,7 +20181,20 @@ var MarkedArray = class extends Array {
 		});
 	}
 	fill(value, start, end) {
-		throw new Error("unimplemented");
+		const len = this.length;
+		const lo = start === void 0 ? 0 : start < 0 ? Math.max(len + start, 0) : Math.min(start, len);
+		const hi = end === void 0 ? len : end < 0 ? Math.max(len + end, 0) : Math.min(end, len);
+		if (lo >= hi) return this;
+		return this.$$mark.mutate(this, (contain, uncontain) => {
+			const overwritten = super.slice(lo, hi);
+			super.fill(value, lo, hi);
+			contain([value]);
+			const present = new Set(this);
+			const released = /* @__PURE__ */ new Set();
+			for (const old of overwritten) if (!present.has(old)) released.add(old);
+			uncontain(released);
+			return this;
+		});
 	}
 	copyWithin(target, start, end) {
 		throw new Error("unimplemented");
