@@ -20,6 +20,43 @@ Assessment of `marked-subbable` + `marked-serializable` against `structured-stat
 - **History / undo.** The real gap. structured-state's undo restores old state *into existing objects* (components holding references stay valid), which relies on stable ids. `constructSimplifiedPackage` only builds new objects with new ids, so an id-keyed history stack can't map back to live objects. Decide on restore-in-place and id stability across save/load next. `site/src/marked/exp/historyStackFor.tsx` is the starting point.
 - `DirtyObserver` (easy port), unions, schema validation.
 
+## Stable ids (for history)
+
+History needs to match a saved snapshot back to the live object it came from, by id. Today that doesn't work:
+
+- **Loading assigns new ids.** Every object rebuilt by `constructSimplifiedPackage` gets a fresh random id, so ids don't survive a save and load.
+- **Id collisions silently lose data.** Saving keys references by `$$mark._id`. If two different objects share an id, the second is saved as a reference to the first and comes back with the first's contents (confirmed with a probe). Ids are 5-character `nanoid`s; the chance that some pair of live objects shares one is 0.05% with 1,000 objects, 4.6% with 10,000, and 69% with 50,000.
+
+### How structured-state handles ids
+
+- **Assigning ids.** Built-ins (`LinkedPrimitive`, `LinkedArray`, `SSet`, `SSchemaArray`, `SUnion`) take the id as a constructor parameter: `create()` passes a random `nanoid(5)`, the loader passes the saved id. Structs (`Struct`, `Struct2`, `Structured`) generate a random id in their constructor and the loader overwrites it (`instance._id = json._id`, `overrideId`), before the object registers itself so the temporary id is never registered.
+- **`knownObjects`.** A global map from id to `WeakRef`, written by constructors. Its only reads are in history (`sstate.history.tsx`): undo and redo look up each recorded id's live object to `replacePackage` the snapshot into it, and both first snapshot those same objects' current state to build the opposite entry. Without it, each lookup would walk the state tree from a root.
+- **No duplicate detection.** Ids are never checked against `knownObjects`, and `WeakRefMap.set` overwrites, so a collision replaces the registry entry, and undo then restores one object's snapshot into a different object. `LinkedMap` never registers, and dead entries are only cleaned up every 10,000 writes.
+
+### Registry options
+
+Restore-in-place needs id → live object for any object a snapshot mentions, not just the ones that changed: a parent's snapshot refers to its children by id, and restoring it should reuse live children (so components holding them keep working) and rebuild missing ones with their saved ids.
+
+- **A. Checked global registry (leaning this way).** id → `WeakRef`, plus a `FinalizationRegistry` to drop entries after garbage collection. Generated ids retry on a clash, explicit duplicate ids throw (all marks are created through `SubbableMark`'s constructor, so one check covers everything), and loading can detect saved ids that are already live. Guarantees no two live objects share an id, and doubles as history's lookup. Costs about 0.4 µs and 180 bytes per object on top of a bare object (measured: 0.12 → 0.49 µs, 78 → 255 bytes), and brings back global state, kept to id → `WeakRef` only.
+- **B. No registry.** Longer ids make collisions practically impossible, collision-safe saving covers the rest (ref keys per object, eg `abc12~2` with an `"id"` field on collision), loading only catches duplicates within one file, and history keeps its own lookup of objects reachable from its root. No per-object cost or global state, but no guarantee.
+
+### Plan, step by step
+
+1. [ ] **Let the loader assign ids.** Built-ins already take the id as a private constructor parameter; custom objects create their mark in a field initializer (`SubbableMark.create()`, always random) and the loader only calls `construct(description)`. Open decision between:
+   - **Set it after building.** An internal `SubbableMark._setId(id)` the loader calls on every object it builds; one place, every kind, no changes to user code. But every loaded object briefly has a random id (with a registry, registered then moved), code running during construction sees that id, and ids become changeable after creation (`_setId` must be public for `marked-serializable` to call it).
+   - **Pass it in.** `create(items, { id })` for built-ins and `construct(description, { id })` forwarded by each class to `SubbableMark.create(id)`. Objects are born with their final id and ids never change, but every custom class must forward it (the loader checks `instance.$$mark._id === id`) and carries more boilerplate.
+   - **Split, as structured-state does.** Built-ins created with their id (`create(items, { id })`); custom objects through `_setId` after `construct` (structured-state's `initialize.ts`: built-ins via constructors, `Struct` / `Struct2` / `Structured` via `instance._id = …` / `overrideId`).
+   - **Pending id (idea to keep).** The loader sets a pending id right before calling `construct`, and only `SubbableMark.create()` (a custom object's own mark) takes it; the built-in factories (`mArray`, `mMap`, `mSet`, `mValue`) always generate their own id, and the loader gives built-ins their saved id explicitly. A single slot is enough (the loader builds children before parents, so nothing nests). Every object is born with its final id and ids never change, with no changes to user code. Remaining hazard: a custom object created before the one being loaded takes its id (a `construct` calling `MTime.of(...)` before `new`, a custom-object field declared above `$$mark`, a base-class constructor creating custom objects). Guards: clear the pending id in a `finally`, and check the id after `construct` (eg "construct for 'mclip' created another marked object before its own $$mark"), so a misassigned id always fails loudly.
+2. [ ] **Registry.** Option A or B above. Open decision.
+3. [ ] **Longer ids.** 12 characters (about 1 in 10 billion odds of any collision with a million objects; 7 more characters per id in the JSON) or `nanoid`'s default 21. Open decision.
+4. [ ] **Saving handles collisions.** With A, a collision can only come from a bug (eg two copies of `marked-subbable` loaded), so saving throws. With B, collision-safe saving as described above. Either way, cycle detection moves from ids to objects (with ids, a collision could look like a cycle).
+5. [ ] **Loading keeps saved ids.** Using step 1. Default: keep ids, so opening a project gives the same ids every time. `constructSimplifiedPackage(pkg, index, { ids: "new" })` for copies (duplicate, paste). With A, loading an id that's already live fails or falls back to new ids.
+6. [ ] **Later, with history: restore into existing objects.** The loader reuses live objects (looked up through the registry with A, or the history stack's own lookup with B) instead of building new ones; history updates their contents in place.
+
+Related history issue: the experiment (`site/src/marked/exp/historyStackFor.tsx`) snapshots in a change notification, which fires after the change, so it records the new state, not the old one. Undo needs a hook before a mutation (`SubbableMark.mutate` has a commented-out `// saveForHistory(this);` in that spot).
+
+Tests: ids survive save and load for every kind (incl. nested and shared objects); `{ ids: "new" }` gives fresh ids; collisions are caught (A: on creation and save; B: both objects survive a save and load); a collision doesn't look like a cycle; new ids have the new length.
+
 ## Decisions to revisit
 
 - **Direct index writes on `MarkedArray`.** `arr[i] = x`, `delete arr[i]` and `arr.length = n` skip notifications and linking. This is documented (marked-subbable README, `MarkedArray` doc comment) with `splice` as the replacement. Making them work would mean returning a `Proxy` from the constructor to intercept index and `length` writes, at a cost on every index read.
