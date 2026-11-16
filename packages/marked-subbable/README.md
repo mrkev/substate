@@ -21,7 +21,7 @@ Wraps a value to make it marked:
 
 ```typescript
 // creates a linkable value from this number
-const countState = lValue(0);
+const countState = mValue(0);
 
 count.get(); // reads the value
 count.set(); // sets the value
@@ -30,7 +30,7 @@ count.set(); // sets the value
 Usage with React:
 
 ```tsx
-const counterState = lValue(0);
+const counterState = mValue(0);
 
 function App() {
   // link this component to counterState. When counterState
@@ -60,7 +60,7 @@ window.addEventListener("keydown", function () {
 Creates a linkable Array-like:
 
 ```typescript
-const datesState = lArray([new Date()]);
+const datesState = mArray([new Date()]);
 
 datesState.at(0);
 datesState.push(new Date());
@@ -68,12 +68,31 @@ datesState.map((date) => {});
 // etc...
 ```
 
+### Mutate through methods, not indexes
+
+`MarkedArray` extends `Array`, so JavaScript lets you write to it directly, but direct writes skip `MarkedArray`'s methods:
+
+- `arr[i] = x` and `delete arr[i]`
+- `arr.length = n`, including `arr.length = 0` to clear it
+
+They change the array without notifying subscribers (components don't re-render) and without linking or unlinking items: an item added this way doesn't notify the array when it changes, and an item removed this way keeps notifying it.
+
+Use the methods instead:
+
+| Instead of                 | Use                     |
+| -------------------------- | ----------------------- |
+| `arr[i] = x`               | `arr.splice(i, 1, x)`   |
+| `arr.length = 0`           | `arr.splice(0)`         |
+| `arr.length = n` (shorten) | `arr.splice(n)`         |
+
+Reading by index (`arr[i]`, `arr.at(i)`) is fine.
+
 ## MarkedMap
 
 Creates a linkable Map:
 
 ```typescript
-const taskState = lMap([
+const taskState = mMap([
   ["buy milk", "done"],
   ["buy eggs", "pending"],
 ]);
@@ -92,7 +111,7 @@ the map notifies its recursive listeners.
 Creates a linkable Set:
 
 ```typescript
-const visitorsState = lSet(["Ajay", "Kevin"]);
+const visitorsState = mSet(["Ajay", "Kevin"]);
 
 visitorsState.add("Ajay");
 visitorsState.delete("Kevin");
@@ -109,9 +128,9 @@ Example:
 
 ```tsx
 // represents a task list
-const listState = lMap([
-  ["buy milk", lValue(true)],
-  ["buy eggs", lValue(false)],
+const listState = mMap([
+  ["buy milk", mValue(true)],
+  ["buy eggs", mValue(false)],
 ]);
 
 function ListExample() {

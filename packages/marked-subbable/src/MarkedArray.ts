@@ -3,6 +3,13 @@ import { subbableContainer } from "./lib/SubbableContainer";
 import { MarkedSubbable, SubbableMark } from "./lib/SubbableMark";
 import { relativeIndex, toIntegerOrInfinity } from "./util/arrayIndex";
 
+/**
+ * A reactive Array. Mutate it through its methods (`push`, `splice`, `fill`,
+ * ...): writing by index (`arr[i] = x`) or to `length` (`arr.length = 0`)
+ * changes the array without notifying subscribers or linking / unlinking items.
+ * Use `arr.splice(i, 1, x)` and `arr.splice(n)` instead. Reading by index is
+ * fine.
+ */
 export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
   public readonly $$mark: SubbableMark;
 
