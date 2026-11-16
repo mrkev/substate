@@ -365,4 +365,92 @@ describe("MarkedArray", () => {
       expect(arr.$$mark._hash).toBe(before);
     });
   });
+
+  describe("duplicates", () => {
+    // the same child at two indices
+    function setup() {
+      const child = MarkedValue.create(0);
+      const other = MarkedValue.create(1);
+      const arr = MarkedArray.create([child, other, child]);
+      return { child, other, arr };
+    }
+
+    function stillLinked(child: MarkedValue<number>, arr: MarkedArray<any>) {
+      const cb = vi.fn();
+      const unsub = subbable.subscribe(arr, cb);
+      child.set(child.get() + 1);
+      unsub();
+      return child.$$mark._container.has(arr) && cb.mock.calls.length === 1;
+    }
+
+    it("counts each copy", () => {
+      const { child, other, arr } = setup();
+      expect(child.$$mark._container.get(arr)).toBe(2);
+      expect(other.$$mark._container.get(arr)).toBe(1);
+    });
+
+    it("pop of one copy keeps the other linked", () => {
+      const { child, arr } = setup();
+      arr.pop();
+      expect(stillLinked(child, arr)).toBe(true);
+    });
+
+    it("shift of one copy keeps the other linked", () => {
+      const { child, arr } = setup();
+      arr.shift();
+      expect(stillLinked(child, arr)).toBe(true);
+    });
+
+    it("splice of one copy keeps the other linked", () => {
+      const { child, arr } = setup();
+      arr.splice(0, 1);
+      expect(stillLinked(child, arr)).toBe(true);
+    });
+
+    it("fill over one copy keeps the other linked", () => {
+      const { child, arr } = setup();
+      arr.fill(MarkedValue.create(9), 0, 1);
+      expect(stillLinked(child, arr)).toBe(true);
+    });
+
+    it("fill with the same value in many slots counts each slot", () => {
+      const value = MarkedValue.create(0);
+      const arr = MarkedArray.create<MarkedValue<number>>([
+        MarkedValue.create(1),
+        MarkedValue.create(2),
+        MarkedValue.create(3),
+      ]);
+      arr.fill(value);
+      expect(value.$$mark._container.get(arr)).toBe(3);
+      arr.pop();
+      arr.pop();
+      expect(stillLinked(value, arr)).toBe(true);
+      arr.pop();
+      expect(value.$$mark._container.has(arr)).toBe(false);
+    });
+
+    it("removing every copy unlinks the child", () => {
+      const { child, arr } = setup();
+      arr.pop();
+      arr.shift();
+      expect(child.$$mark._container.has(arr)).toBe(false);
+    });
+
+    it("a duplicated child notifies the array once per change", () => {
+      const { child, arr } = setup();
+      const cb = vi.fn();
+      subbable.subscribe(arr, cb);
+      child.set(5);
+      expect(cb).toHaveBeenCalledTimes(1);
+    });
+
+    it("pushAll contains each item once", () => {
+      const child = MarkedValue.create(0);
+      const arr = MarkedArray.create<MarkedValue<number>>();
+      arr.pushAll([child]);
+      expect(child.$$mark._container.get(arr)).toBe(1);
+      arr.pop();
+      expect(child.$$mark._container.has(arr)).toBe(false);
+    });
+  });
 });

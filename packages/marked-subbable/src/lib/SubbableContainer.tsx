@@ -27,20 +27,34 @@ export interface SubbableContainer {
   _hash: number;
 
   // Contained
-  readonly _container: Set<MarkedSubbable>; // all containers can be contained
+  // all containers can be contained. container => number of times it contains us
+  readonly _container: Map<MarkedSubbable, number>;
 }
 
 export const subbableContainer = {
   // abstract _replace(val: T): void;
 
+  /**
+   * Records that `container` holds one more copy of `item`.
+   * @returns how many copies of `item` `container` now holds, or 0 if `item`
+   * isn't containable
+   */
+  _contain(container: MarkedSubbable, item: unknown): number {
+    if (!isContainable(item)) {
+      return 0;
+    }
+    const containers = item.$$mark._container;
+    const count = (containers.get(container) ?? 0) + 1;
+    containers.set(container, count);
+    return count;
+  },
+
   _containAll(container: MarkedSubbable, items: IterableCollection) {
     const contained = [];
     for (const elem of items) {
-      if (!isContainable(elem)) {
-        continue;
+      if (subbableContainer._contain(container, elem) > 0) {
+        contained.push(elem);
       }
-      elem.$$mark._container.add(container);
-      contained.push(elem);
     }
     return contained;
   },
@@ -52,16 +66,16 @@ export const subbableContainer = {
         continue;
       }
 
-      if (!item.$$mark._container.has(container)) {
-        console.warn(
-          "_uncontain:",
-          item.$$mark._container,
-          "does not contain",
-          item,
-        );
+      const containers = item.$$mark._container;
+      const count = containers.get(container);
+      if (count == null) {
+        console.warn("_uncontain:", container, "does not contain", item);
+      } else if (count > 1) {
+        // container still holds other copies of this item
+        containers.set(container, count - 1);
+      } else {
+        containers.delete(container);
       }
-
-      item.$$mark._container.delete(container);
       // TODO: safety
       if ("_destroy" in item) {
         (item as any)._destroy();
@@ -87,7 +101,7 @@ export const subbableContainer = {
     // );
 
     subbable.mutated(struct, target);
-    for (const container of struct.$$mark._container) {
+    for (const container of struct.$$mark._container.keys()) {
       subbableContainer._childChanged(container, token);
     }
 
@@ -112,7 +126,7 @@ export const subbableContainer = {
     struct.$$mark._propagatedTokens.add(token);
 
     subbable.mutated(struct, token.target);
-    for (const container of struct.$$mark._container) {
+    for (const container of struct.$$mark._container.keys()) {
       subbableContainer._childChanged(container, token);
     }
 

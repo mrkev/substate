@@ -62,7 +62,6 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
     if (items.length < 1) {
       return this.length;
     }
-    subbableContainer._containAll(this, items);
 
     return this.$$mark.mutate(this, (contain) => {
       contain(items);
@@ -159,19 +158,9 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
     return this.$$mark.mutate(this, (contain, uncontain) => {
       const overwritten = super.slice(lo, hi);
       super.fill(value, lo, hi);
-      contain([value]);
-      // Release overwritten elements that no longer appear in the array (a
-      // duplicate elsewhere, or `value` itself, must stay contained). Build the
-      // survivor set once — O(n) — instead of scanning per element — O(n·k) —
-      // and collect releases into a Set so a repeated element is released once.
-      const present = new Set<S>(this);
-      const released = new Set<S>();
-      for (const old of overwritten) {
-        if (!present.has(old)) {
-          released.add(old);
-        }
-      }
-      uncontain(released);
+      // value now occupies hi - lo slots, and each overwritten slot is released
+      contain(Array.from({ length: hi - lo }, () => value));
+      uncontain(overwritten);
       return this;
     });
   }

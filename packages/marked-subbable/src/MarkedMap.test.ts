@@ -142,4 +142,42 @@ describe("MarkedMap", () => {
     map.replace(new Map());
     expect(counter.count).toBe(0);
   });
+
+  describe("duplicates", () => {
+    it("the same value under two keys stays linked after deleting one", () => {
+      const v = MarkedValue.create("v");
+      const map = MarkedMap.create([
+        ["a", v],
+        ["b", v],
+      ]);
+      expect(v.$$mark._container.get(map)).toBe(2);
+      map.delete("a");
+      expect(linked(v, map)).toBe(true);
+      map.delete("b");
+      expect(linked(v, map)).toBe(false);
+    });
+
+    it("overwriting one of two keys holding the same value keeps it linked", () => {
+      const v = MarkedValue.create("v");
+      const map = MarkedMap.create([
+        ["a", v],
+        ["b", v],
+      ]);
+      map.set("a", MarkedValue.create("other"));
+      expect(linked(v, map)).toBe(true);
+    });
+
+    it("an object that is both a key and a value is counted twice", () => {
+      const kv = MarkedValue.create("kv");
+      const map = MarkedMap.create<MarkedValue<string>, MarkedValue<string>>([
+        [kv, kv],
+      ]);
+      expect(kv.$$mark._container.get(map)).toBe(2);
+      map.set(kv, MarkedValue.create("other"));
+      // still a key
+      expect(linked(kv, map)).toBe(true);
+      map.delete(kv);
+      expect(linked(kv, map)).toBe(false);
+    });
+  });
 });

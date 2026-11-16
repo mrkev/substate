@@ -385,7 +385,7 @@ function Header({
   const sub = useLink(obj, true);
 
   const container = showContainerId
-    ? ` -^ ${[...obj.$$mark._container.values()]
+    ? ` -^ ${[...obj.$$mark._container.keys()]
         .map((v) => v.$$mark._id)
         .join(",")}`
     : "";

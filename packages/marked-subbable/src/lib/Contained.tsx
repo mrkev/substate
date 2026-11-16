@@ -1,7 +1,8 @@
 import { MarkedSubbable, SubbableMark } from "./SubbableMark";
 
 export interface Contained {
-  readonly _container: Set<MarkedSubbable>;
+  // container => number of times it contains us
+  readonly _container: Map<MarkedSubbable, number>;
 }
 
 export function isContainable(value: unknown): value is MarkedSubbable {

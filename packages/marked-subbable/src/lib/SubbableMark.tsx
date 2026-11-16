@@ -20,7 +20,7 @@ export class SubbableMark implements Subbable, SubbableContainer, Contained {
   public _hash: number = 0;
 
   // Contained
-  public readonly _container = new Set<MarkedSubbable>();
+  public readonly _container = new Map<MarkedSubbable, number>();
 
   constructor(_id: string) {
     this._id = _id;
@@ -35,7 +35,21 @@ export class SubbableMark implements Subbable, SubbableContainer, Contained {
     holder: MarkedSubbable,
     contain?: (readonly T[] | null) | Iterable<T> | null | undefined,
   ) {
-    subbableContainer._containAll(holder, new Set(contain));
+    // No de-duping: holding the same child in two fields contains it twice, so
+    // swapping one field later (uncontain + contain) keeps it contained via the
+    // other. But two fields pointing at the same marked object means they share
+    // state, which is rarely intended (eg, new Clip(time, time)), so warn.
+    // TODO: revisit this decision, see "Decisions to revisit" in
+    // MARKED_STATE_REVIEW.md
+    for (const child of contain ?? []) {
+      if (subbableContainer._contain(holder, child) > 1) {
+        console.warn(
+          "SubbableMark.register: holder contains the same child more than once.",
+          "Fields holding the same marked object share state.",
+          { holder, child },
+        );
+      }
+    }
   }
 
   public mutate<V>(

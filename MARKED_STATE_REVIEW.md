@@ -24,8 +24,13 @@ Assessment of `marked-subbable` + `marked-serializable` against `structured-stat
 
 - [ ] **Map deserialization is broken.** `initializeMarkedMap` uses `.map((key, value) => …)` but the callback receives `(entry, index)` (`packages/marked-serializable/src/construct.ts`).
 - [ ] **`simplify` doesn't check for already-visited nodes** before recursing (`packages/marked-serializable/src/simplify.ts`). Cycles recurse forever; shared subtrees are re-serialized on every visit. Recording the node before recursing fixes both.
-- [ ] **Duplicates aren't ref-counted.** Containers are tracked in a `Set`. If an array holds the same child twice and one copy is removed, the child stops notifying the array. `fill` works around this; `pop` / `shift` / `splice` (and duplicate `MarkedMap` values) don't.
-- [ ] **Direct index writes skip notifications.** Because `MarkedArray` extends `Array`, `arr[i] = x` and `arr.length = 0` mutate without notifying. Document it or wrap in a Proxy.
+- [ ] **Direct index writes skip notifications.** Because `MarkedArray` extends `Array`, `arr[i] = x` and `arr.length = 0` mutate without notifying. Since containment is ref-counted, direct writes also leave the counts wrong. Document it or wrap in a Proxy.
+- [ ] **`MarkedArray.create([n])` with a single number creates `n` empty slots.** The constructor calls `super(..._array)`, and `new Array(5)` means "length 5" (`packages/marked-subbable/src/MarkedArray.ts`). *Confirmed with a probe test.*
+- [ ] **`MarkedArray.create(iterator)` never links the items.** The constructor iterates the input twice (`super(...)`, then `_containAll`), so a one-shot iterator such as a generator is empty the second time. *Confirmed with a probe test.*
+
+## Decisions to revisit
+
+- **`SubbableMark.register` with the same child twice.** Containment is ref-counted, and `register` counts a child once per occurrence, so a struct whose two fields hold the same marked object counts it twice and swapping one field keeps it linked via the other. Because two fields holding the same marked object share state (eg, `new Clip(time, time)`), which is rarely intended, `register` also `console.warn`s whenever it leaves the holder containing a child more than once. That includes calling `register` twice with the same child (eg, from a base class and a subclass constructor). Revisit whether this should stay a warning, become an error, or be allowed silently once we see real usage.
 
 ## Suggested order
 
