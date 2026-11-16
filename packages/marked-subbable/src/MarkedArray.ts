@@ -7,10 +7,17 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
   public readonly $$mark: SubbableMark;
 
   private constructor(_array: Iterable<S>, _id: string) {
-    // apparently, unlike with MarkedSet, I can just pass the values to the constructor here?
-    super(..._array);
+    // Call super() bare and add items ourselves. Spreading them, super(..._array),
+    // breaks: new Array(5) means "length 5", not [5] (and new Array(1.5) throws),
+    // large inputs exceed the engine's argument limit, and iterating _array a
+    // second time to contain items would find a one-shot iterator empty.
+    super();
     this.$$mark = new SubbableMark(_id);
-    subbableContainer._containAll(this, _array);
+    for (const item of _array) {
+      // super.push, not this.push: don't notify during construction
+      super.push(item);
+      subbableContainer._contain(this, item);
+    }
   }
 
   public static create<T>(

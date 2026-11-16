@@ -69,6 +69,43 @@ describe("MarkedArray", () => {
     });
   });
 
+  describe(".create", () => {
+    it("treats a single number as an item, not a length", () => {
+      expect([...MarkedArray.create([5])]).toEqual([5]);
+      expect([...MarkedArray.create([1.5])]).toEqual([1.5]);
+      expect([...MarkedArray.create([-1])]).toEqual([-1]);
+    });
+
+    it("handles large inputs", () => {
+      const arr = MarkedArray.create(new Array(1_000_000).fill(0));
+      expect(arr.length).toBe(1_000_000);
+    });
+
+    it("accepts a one-shot iterator and contains its items", () => {
+      const a = MarkedValue.create(1);
+      const b = MarkedValue.create(2);
+      function* items() {
+        yield a;
+        yield b;
+      }
+      const arr = MarkedArray.create(items());
+      expect([...arr]).toEqual([a, b]);
+      expect(a.$$mark._container.get(arr)).toBe(1);
+      expect(b.$$mark._container.get(arr)).toBe(1);
+    });
+
+    it("counts duplicate items in the input", () => {
+      const child = MarkedValue.create(1);
+      const arr = MarkedArray.create([child, child]);
+      expect(child.$$mark._container.get(arr)).toBe(2);
+    });
+
+    it("doesn't bump the hash", () => {
+      const arr = MarkedArray.create([1, 2, 3]);
+      expect(arr.$$mark._hash).toBe(0);
+    });
+  });
+
   describe(".shift", () => {
     it("removes and returns the first item", () => {
       const arr = MarkedArray.create([1, 2, 3]);

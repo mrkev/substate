@@ -25,8 +25,7 @@ Assessment of `marked-subbable` + `marked-serializable` against `structured-stat
 - [ ] **Map deserialization is broken.** `initializeMarkedMap` uses `.map((key, value) => …)` but the callback receives `(entry, index)` (`packages/marked-serializable/src/construct.ts`).
 - [ ] **`simplify` doesn't check for already-visited nodes** before recursing (`packages/marked-serializable/src/simplify.ts`). Cycles recurse forever; shared subtrees are re-serialized on every visit. Recording the node before recursing fixes both.
 - [ ] **Direct index writes skip notifications.** Because `MarkedArray` extends `Array`, `arr[i] = x` and `arr.length = 0` mutate without notifying. Since containment is ref-counted, direct writes also leave the counts wrong. Document it or wrap in a Proxy.
-- [ ] **`MarkedArray.create([n])` with a single number creates `n` empty slots.** The constructor calls `super(..._array)`, and `new Array(5)` means "length 5" (`packages/marked-subbable/src/MarkedArray.ts`). *Confirmed with a probe test.*
-- [ ] **`MarkedArray.create(iterator)` never links the items.** The constructor iterates the input twice (`super(...)`, then `_containAll`), so a one-shot iterator such as a generator is empty the second time. *Confirmed with a probe test.*
+- [ ] **`MarkedArray.from` / `MarkedArray.of` don't work.** They're inherited from `Array`, which calls the constructor with no input (`new C()` / `new C(length)`), so both throw `TypeError: _array is not iterable`. Even with a constructor that tolerated that, they'd bypass `create` and fill slots directly, so items would never be contained. Override them to go through `create`, or make them throw a clear "use `MarkedArray.create`" error. *Confirmed with a probe test.*
 
 ## Decisions to revisit
 
