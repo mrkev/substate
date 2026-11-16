@@ -1,4 +1,4 @@
-//#region \0rolldown/runtime.js
+// \0rolldown/runtime.js
 var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -29,8 +29,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 	value: mod,
 	enumerable: true
 }) : target, mod));
-//#endregion
-//#region \0vite/modulepreload-polyfill.js
+// \0vite/modulepreload-polyfill.js
 (function polyfill() {
 	const relList = document.createElement("link").relList;
 	if (relList && relList.supports && relList.supports("modulepreload")) return;
@@ -60,8 +59,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 		fetch(link.href, fetchOpts);
 	}
 })();
-//#endregion
-//#region ../../node_modules/.pnpm/react@19.3.1/node_modules/react/cjs/react.production.js
+// ../../node_modules/.pnpm/react@19.3.1/node_modules/react/cjs/react.production.js
 /**
 * @license React
 * react.production.js
@@ -447,13 +445,11 @@ var require_react_production$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.version = "19.3.1";
 }));
-//#endregion
-//#region ../../node_modules/.pnpm/react@19.3.1/node_modules/react/index.js
+// ../../node_modules/.pnpm/react@19.3.1/node_modules/react/index.js
 var require_react$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_react_production$1();
 }));
-//#endregion
-//#region ../../node_modules/.pnpm/scheduler@0.28.0/node_modules/scheduler/cjs/scheduler.production.js
+// ../../node_modules/.pnpm/scheduler@0.28.0/node_modules/scheduler/cjs/scheduler.production.js
 /**
 * @license React
 * scheduler.production.js
@@ -707,13 +703,11 @@ var require_scheduler_production = /* @__PURE__ */ __commonJSMin(((exports) => {
 		};
 	};
 }));
-//#endregion
-//#region ../../node_modules/.pnpm/scheduler@0.28.0/node_modules/scheduler/index.js
+// ../../node_modules/.pnpm/scheduler@0.28.0/node_modules/scheduler/index.js
 var require_scheduler = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_scheduler_production();
 }));
-//#endregion
-//#region ../../node_modules/.pnpm/react-dom@19.3.1_react@19.3.1/node_modules/react-dom/cjs/react-dom.production.js
+// ../../node_modules/.pnpm/react-dom@19.3.1_react@19.3.1/node_modules/react-dom/cjs/react-dom.production.js
 /**
 * @license React
 * react-dom.production.js
@@ -865,8 +859,7 @@ var require_react_dom_production = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 	exports.version = "19.3.1";
 }));
-//#endregion
-//#region ../../node_modules/.pnpm/react-dom@19.3.1_react@19.3.1/node_modules/react-dom/index.js
+// ../../node_modules/.pnpm/react-dom@19.3.1_react@19.3.1/node_modules/react-dom/index.js
 var require_react_dom = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	function checkDCE() {
 		if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ === "undefined" || typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.checkDCE !== "function") return;
@@ -879,8 +872,7 @@ var require_react_dom = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	checkDCE();
 	module.exports = require_react_dom_production();
 }));
-//#endregion
-//#region ../../node_modules/.pnpm/react-dom@19.3.1_react@19.3.1/node_modules/react-dom/cjs/react-dom-client.production.js
+// ../../node_modules/.pnpm/react-dom@19.3.1_react@19.3.1/node_modules/react-dom/cjs/react-dom-client.production.js
 /**
 * @license React
 * react-dom-client.production.js
@@ -11454,8 +11446,7 @@ var require_react_dom_client_production = /* @__PURE__ */ __commonJSMin(((export
 		return new ReactDOMRoot(options);
 	};
 }));
-//#endregion
-//#region ../../node_modules/.pnpm/react-dom@19.3.1_react@19.3.1/node_modules/react-dom/client.js
+// ../../node_modules/.pnpm/react-dom@19.3.1_react@19.3.1/node_modules/react-dom/client.js
 var require_client = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	function checkDCE() {
 		if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ === "undefined" || typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.checkDCE !== "function") return;
@@ -11468,109 +11459,10 @@ var require_client = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	checkDCE();
 	module.exports = require_react_dom_client_production();
 }));
-//#endregion
-//#region ../../node_modules/.pnpm/react-json-pretty@2.2.0_react-dom@19.3.1_react@19.3.1__react@19.3.1/node_modules/react-json-pretty/themes/monikai.css
+// ../../node_modules/.pnpm/react-router@7.18.5_react-dom@19.3.1_react@19.3.1__react@19.3.1/node_modules/react-router/dist/development/chunk-6KYCQHYJ.mjs
 var import_react$1 = /* @__PURE__ */ __toESM(require_react$1(), 1);
-var import_client = /* @__PURE__ */ __toESM(require_client(), 1);
-//#endregion
-//#region \0vite/preload-helper.js
-var scriptRel = "modulepreload";
-var assetsURL = function(dep, importerUrl) {
-	return new URL(dep, importerUrl).href;
-};
-var seen = {};
-var isCssPreloadUrl = function isCssPreloadUrl(url) {
-	return url.pathname.endsWith(".css");
-};
-var preloadOnce = function preloadOnce(seen, href, preload) {
-	if (href in seen) return seen[href];
-	const promise = preload();
-	if (!promise) {
-		seen[href] = void 0;
-		return;
-	}
-	const preloadPromise = promise.then(() => {
-		seen[href] = void 0;
-	}, (err) => {
-		seen[href] = void 0;
-		throw err;
-	});
-	seen[href] = preloadPromise;
-	return preloadPromise;
-};
-var __vitePreload = function preload(baseModule, deps, importerUrl) {
-	let promise = Promise.resolve();
-	if (deps && deps.length > 0) {
-		let preloadedHrefs;
-		const cspNonceMeta = document.querySelector("meta[property=csp-nonce]");
-		const cspNonce = cspNonceMeta?.nonce || cspNonceMeta?.getAttribute("nonce");
-		function allSettled(promises) {
-			return Promise.all(promises.map((p) => Promise.resolve(p).then((value) => ({
-				status: "fulfilled",
-				value
-			}), (reason) => ({
-				status: "rejected",
-				reason
-			}))));
-		}
-		function importMetaResolve(specifier) {
-			if (import.meta.resolve) return new URL(import.meta.resolve(specifier));
-			return new URL(
-				specifier,
-				/** #__KEEP__ */
-				import.meta.url
-			);
-		}
-		promise = allSettled(deps.map((depString) => {
-			depString = assetsURL(depString, importerUrl);
-			const dep = importMetaResolve(depString);
-			const isCss = isCssPreloadUrl(dep);
-			return preloadOnce(seen, dep.href, () => {
-				if (preloadedHrefs === void 0) {
-					preloadedHrefs = {
-						all: /* @__PURE__ */ new Set(),
-						styles: /* @__PURE__ */ new Set()
-					};
-					const links = document.getElementsByTagName("link");
-					for (let i = links.length - 1; i >= 0; i--) {
-						const link = links[i];
-						preloadedHrefs.all.add(link.href);
-						if (link.rel === "stylesheet") preloadedHrefs.styles.add(link.href);
-					}
-				}
-				if ((isCss ? preloadedHrefs.styles : preloadedHrefs.all).has(dep.href)) return;
-				const link = document.createElement("link");
-				link.rel = isCss ? "stylesheet" : scriptRel;
-				if (!isCss) link.as = "script";
-				link.crossOrigin = "";
-				link.href = dep.href;
-				if (cspNonce) link.setAttribute("nonce", cspNonce);
-				document.head.appendChild(link);
-				if (isCss) return new Promise((res, rej) => {
-					link.addEventListener("load", res);
-					link.addEventListener("error", () => rej(/* @__PURE__ */ new Error(`Unable to preload CSS for ${dep}`)));
-				});
-			});
-		}).filter((p) => p !== void 0));
-	}
-	function handlePreloadError(err) {
-		const e = new Event("vite:preloadError", { cancelable: true });
-		e.payload = err;
-		window.dispatchEvent(e);
-		if (!e.defaultPrevented) throw err;
-	}
-	return promise.then((res) => {
-		for (const item of res || []) {
-			if (item.status !== "rejected") continue;
-			handlePreloadError(item.reason);
-		}
-		return baseModule().catch(handlePreloadError);
-	});
-};
-//#endregion
-//#region ../../node_modules/.pnpm/react-router@7.18.4_react-dom@19.3.1_react@19.3.1__react@19.3.1/node_modules/react-router/dist/development/chunk-OB3PAWPO.mjs
 /**
-* react-router v7.18.4
+* react-router v7.18.5
 *
 * Copyright (c) Remix Software Inc.
 *
@@ -12805,11 +12697,11 @@ function singleFetchUrl(reqUrl, basename, trailingSlashAware, extension) {
 async function loadRouteModule(route, routeModulesCache) {
 	if (route.id in routeModulesCache) return routeModulesCache[route.id];
 	try {
-		let routeModule = await __vitePreload(() => import(
+		let routeModule = await import(
 			/* @vite-ignore */
 			/* webpackIgnore: true */
 			route.module
-), [], import.meta.url);
+);
 		routeModulesCache[route.id] = routeModule;
 		return routeModule;
 	} catch (error) {
@@ -13139,7 +13031,7 @@ function mergeRefs(...refs) {
 import_react$1.Component;
 var isBrowser2 = typeof window !== "undefined" && typeof window.document !== "undefined" && typeof window.document.createElement !== "undefined";
 try {
-	if (isBrowser2) window.__reactRouterVersion = "7.18.4";
+	if (isBrowser2) window.__reactRouterVersion = "7.18.5";
 } catch (e) {}
 function HashRouter({ basename, children, useTransitions, window: window2 }) {
 	let historyRef = import_react$1.useRef();
@@ -13563,25 +13455,23 @@ function useViewTransitionState(to, { relative } = {}) {
 	let nextPath = stripBasename(vtContext.nextLocation.pathname, basename) || vtContext.nextLocation.pathname;
 	return matchPath(path.pathname, nextPath) != null || matchPath(path.pathname, currentPath) != null;
 }
-//#endregion
-//#region ../../node_modules/.pnpm/nanoid@6.0.2/node_modules/nanoid/url-alphabet/index.js
+// ../../node_modules/.pnpm/nanoid@6.0.2/node_modules/nanoid/url-alphabet/index.js
+var import_client = /* @__PURE__ */ __toESM(require_client(), 1);
 var urlAlphabet$1 = "57X6y3wQZNzYjJB2L_10pxbackgroundhimselfUTF-8DEMOGRAPHICSVqvt4KW9";
-//#endregion
-//#region ../../node_modules/.pnpm/nanoid@6.0.2/node_modules/nanoid/index.browser.js
+// ../../node_modules/.pnpm/nanoid@6.0.2/node_modules/nanoid/index.browser.js
 var nanoid$1 = (size = 21) => {
 	var id = "";
 	var bytes = crypto.getRandomValues(new Uint8Array(size |= 0));
 	while (size--) id += urlAlphabet$1[bytes[size] & 63];
 	return id;
 };
-//#endregion
-//#region ../structured-state/src/lib/nullthrows.ts
+// ../structured-state/src/lib/nullthrows.ts
 function nullthrows$3(val, message) {
-	if (val == null) throw new Error(message || `Expected ${val} to be non nil.`);
+	if (val == null) throw new Error(message || `Expected ${String(val)} to be non nil.`);
 	return val;
 }
 function assertNotNull(val, message) {
-	if (val == null) throw new Error(message || `AssertionError: expected ${val} to be non nil.`);
+	if (val == null) throw new Error(message || `AssertionError: expected ${String(val)} to be non nil.`);
 }
 function mutablearr$1(arr) {
 	return arr;
@@ -13592,8 +13482,7 @@ function mutableset$1(set) {
 function setWindow$1(prop, value) {
 	globalThis[prop] = value;
 }
-//#endregion
-//#region ../structured-state/src/lib/WeakRefMap.ts
+// ../structured-state/src/lib/WeakRefMap.ts
 var WeakRefMap = class {
 	map = /* @__PURE__ */ new Map();
 	cleanFactor;
@@ -13632,8 +13521,7 @@ var WeakRefMap = class {
 		for (const [key, value] of this.map.entries()) console.log(key, value.deref() ?? null);
 	}
 };
-//#endregion
-//#region ../structured-state/src/obj/Struct2.ts
+// ../structured-state/src/obj/Struct2.ts
 var Struct2 = class {
 	_id;
 	_hash = 0;
@@ -13680,8 +13568,7 @@ function create2(Klass, ...args) {
 	res._init();
 	return res;
 }
-//#endregion
-//#region ../structured-state/src/obj/Structured.ts
+// ../structured-state/src/obj/Structured.ts
 var Structured = class Structured {
 	_id;
 	_hash = 0;
@@ -13716,8 +13603,7 @@ function initStructured(structured) {
 	}
 	getGlobalState().knownObjects.set(structured._id, structured);
 }
-//#endregion
-//#region ../structured-state/src/obj/LinkedSet.ts
+// ../structured-state/src/obj/LinkedSet.ts
 var SSet = class {
 	_set;
 	_schema;
@@ -13829,13 +13715,11 @@ var SSet = class {
 		return result;
 	}
 };
-//#endregion
-//#region ../structured-state/src/state/Contained.ts
+// ../structured-state/src/state/Contained.ts
 function isContainable$2(val) {
 	return val instanceof LinkedPrimitive || val instanceof LinkedArray || val instanceof Struct || val instanceof Struct2 || val instanceof Structured || val instanceof SSet;
 }
-//#endregion
-//#region ../structured-state/src/state/Subbable.ts
+// ../structured-state/src/state/Subbable.ts
 function subscribe$2(subbable, cb) {
 	subbable._subscriptors.add(cb);
 	return () => subbable._subscriptors.delete(cb);
@@ -13844,8 +13728,7 @@ function notify(subbable, target) {
 	for (const cb of subbable._subscriptors) cb(target, subbable);
 	if ("_changed" in subbable && typeof subbable._changed === "function") subbable._changed(target, subbable);
 }
-//#endregion
-//#region ../structured-state/src/state/MutationHashable.ts
+// ../structured-state/src/state/MutationHashable.ts
 var mutationHashable = {
 	getMutationHash(mh) {
 		return mh._hash;
@@ -13855,8 +13738,7 @@ var mutationHashable = {
 		notify(mh, target);
 	}
 };
-//#endregion
-//#region ../structured-state/src/state/SubbableContainer.ts
+// ../structured-state/src/state/SubbableContainer.ts
 /** Keys to ignore from SubbableContainer when serializing */
 var CONTAINER_IGNORE_KEYS = /* @__PURE__ */ new Set([
 	"_id",
@@ -13910,8 +13792,7 @@ var subbableContainer$2 = {
 		for (const container of node._container) subbableContainer$2._childChanged(container, token);
 	}
 };
-//#endregion
-//#region ../structured-state/src/obj/LinkedPrimitive.ts
+// ../structured-state/src/obj/LinkedPrimitive.ts
 /**
 * LinkedState is a Subbable, a single atomic primitive
 */
@@ -13952,8 +13833,7 @@ var LinkedPrimitive = class {
 		};
 	}
 };
-//#endregion
-//#region ../structured-state/src/sunion.ts
+// ../structured-state/src/sunion.ts
 /**
 * SUnion holds a single Structured value. Accepts multiple kinds.
 * Also works as an "sreference".
@@ -13991,8 +13871,7 @@ var SUnion = class {
 		this.set(value);
 	}
 };
-//#endregion
-//#region ../structured-state/src/lib/assertions.tsx
+// ../structured-state/src/lib/assertions.tsx
 function assertSPrimitive(value) {
 	if (!(value instanceof LinkedPrimitive)) {
 		console.log("ERR:", value, "to be primitive");
@@ -14059,8 +13938,7 @@ function assertConstructableStruct2(spec) {
 function assertConstructableStructured(spec) {
 	if (spec.__proto__ !== Structured) throw new Error(`is not a Structured`);
 }
-//#endregion
-//#region ../structured-state/src/serialization/serialization.ts
+// ../structured-state/src/serialization/serialization.ts
 function serialize$1(state) {
 	const simplified = simplifyAndPackage$1(state);
 	return JSON.stringify(simplified);
@@ -14071,8 +13949,7 @@ function isSimplified$1(json) {
 function isSeralizedStructured(json) {
 	return isSimplified$1(json) && json.$$ === "structured";
 }
-//#endregion
-//#region ../structured-state/src/serialization/initialize.ts
+// ../structured-state/src/serialization/initialize.ts
 function find(json, metadata, kind) {
 	const found = metadata.objmap.get(json._id);
 	if (found == null) return null;
@@ -14267,8 +14144,7 @@ function initOfPkg(metadata) {
 function overrideId(obj, id) {
 	obj._id = id;
 }
-//#endregion
-//#region ../structured-state/src/lib/OrderedMap.ts
+// ../structured-state/src/lib/OrderedMap.ts
 var OrderedMap = class OrderedMap {
 	_map;
 	_order;
@@ -14344,8 +14220,7 @@ var OrderedMap = class OrderedMap {
 		return this;
 	}
 };
-//#endregion
-//#region ../structured-state/src/serialization/construct.ts
+// ../structured-state/src/serialization/construct.ts
 var InitializationMetadata = class InitializationMetadata {
 	refmap;
 	objmap;
@@ -14368,8 +14243,7 @@ function construct$1(str, spec) {
 		throw e;
 	}
 }
-//#endregion
-//#region ../structured-state/src/serialization/replace.array.ts
+// ../structured-state/src/serialization/replace.array.ts
 function replaceSchemaArray(json, arr, acc) {
 	arr._replace((raw) => {
 		const jsonIndex = /* @__PURE__ */ new Map();
@@ -14419,16 +14293,14 @@ function replaceSimpleArray(json, arr) {
 		return json._value;
 	});
 }
-//#endregion
-//#region ../structured-state/src/state/StructuredKinds.tsx
+// ../structured-state/src/state/StructuredKinds.tsx
 function isPrimitiveKind$3(val) {
 	return typeof val === "number" || typeof val === "string" || typeof val === "boolean" || val === null;
 }
 function isStructuredKind(val) {
 	return val instanceof LinkedPrimitive || val instanceof Struct || val instanceof Struct2 || val instanceof Structured || val instanceof LinkedArray || val instanceof SSchemaArray || val instanceof SSet || val instanceof SUnion;
 }
-//#endregion
-//#region ../structured-state/src/serialization/replace.set.ts
+// ../structured-state/src/serialization/replace.set.ts
 /**
 * Replaces a set
 *
@@ -14476,8 +14348,7 @@ function replaceSSet(json, set, acc) {
 		set.add(prepared);
 	}
 }
-//#endregion
-//#region ../structured-state/src/serialization/replace.ts
+// ../structured-state/src/serialization/replace.ts
 function replacePackage(json, obj) {
 	if (!isSimplePackage(json)) throw new Error("not a simple package");
 	const acc = InitializationMetadata.fromPackage(json);
@@ -14550,7 +14421,7 @@ function replaceStruct2(json, obj) {
 		return;
 	}
 	for (const key in json._value) {
-		if (key === "$$" || isSimplified$1(json._value[key])) continue;
+		if (key === "$" || isSimplified$1(json._value[key])) continue;
 		obj[key] = json._value[key];
 	}
 	subbableContainer$2._notifyChange(obj, obj);
@@ -14580,8 +14451,7 @@ function replaceOfPkg(metadata) {
 		set: (json, set) => replaceSSet(json, set, metadata)
 	};
 }
-//#endregion
-//#region ../structured-state/src/sstate.history.tsx
+// ../structured-state/src/sstate.history.tsx
 var GlobalState = class {
 	HISTORY_RECORDING = false;
 	knownObjects = new WeakRefMap(1e4);
@@ -14688,8 +14558,7 @@ var history$1 = {
 	undo: popHistory,
 	redo: forwardHistory
 };
-//#endregion
-//#region ../structured-state/src/obj/LinkedArray.ts
+// ../structured-state/src/obj/LinkedArray.ts
 var LinkedArray = class {
 	_id;
 	_array;
@@ -14738,7 +14607,7 @@ var LinkedArray = class {
 		return `${this.constructor.name}[${this._array.toString()}]`;
 	}
 	toLocaleString() {
-		throw this._array.toLocaleString();
+		return this._array.toLocaleString();
 	}
 	pop() {
 		if (this.length < 1) return;
@@ -14880,8 +14749,7 @@ var LinkedArray = class {
 		throw new Error("Method not implemented.");
 	}
 };
-//#endregion
-//#region ../structured-state/src/obj/SSchemaArray.ts
+// ../structured-state/src/obj/SSchemaArray.ts
 /** Describes an array of subbable objects */
 var SSchemaArray = class extends LinkedArray {
 	_schema;
@@ -14901,8 +14769,7 @@ var SSchemaArray = class extends LinkedArray {
 		*/
 	}
 };
-//#endregion
-//#region ../structured-state/src/obj/LinkedMap.ts
+// ../structured-state/src/obj/LinkedMap.ts
 var LinkedMap = class {
 	_map;
 	_id;
@@ -14983,8 +14850,7 @@ var LinkedMap = class {
 		return this.constructor.name;
 	}
 };
-//#endregion
-//#region ../structured-state/src/sstate.tsx
+// ../structured-state/src/sstate.tsx
 var SString = class extends LinkedPrimitive {
 	static create(val) {
 		return LinkedPrimitive.of(val);
@@ -15040,8 +14906,7 @@ function map$2(initialValue) {
 function set$1(initialValue) {
 	return SSet._create(initialValue);
 }
-//#endregion
-//#region ../structured-state/src/obj/Struct.ts
+// ../structured-state/src/obj/Struct.ts
 var Struct = class {
 	_id;
 	_hash = 0;
@@ -15091,8 +14956,7 @@ function create(klass, ...args) {
 	res._init(...args);
 	return res;
 }
-//#endregion
-//#region ../structured-state/src/serialization/simplify.ts
+// ../structured-state/src/serialization/simplify.ts
 function ref(simplified) {
 	return {
 		$$: "ref",
@@ -15242,8 +15106,7 @@ function simplifyStructuredKind(state, acc) {
 	else if (state instanceof SUnion) return simplifyUnion(state, acc);
 	else exhaustive$2(state);
 }
-//#endregion
-//#region ../../node_modules/.pnpm/react@19.2.0/node_modules/react/cjs/react.production.js
+// ../../node_modules/.pnpm/react@19.2.0/node_modules/react/cjs/react.production.js
 /**
 * @license React
 * react.production.js
@@ -15310,8 +15173,7 @@ var require_react_production = /* @__PURE__ */ __commonJSMin(((exports) => {
 		return ReactSharedInternals.H.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 	};
 }));
-//#endregion
-//#region ../structured-state/src/react/hooks.tsx
+// ../structured-state/src/react/hooks.tsx
 var import_react = (/* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_react_production();
 })))();
@@ -15343,8 +15205,7 @@ function useSubscribeToSubbableMutationHashable(obj, cb, recursiveChanges = fals
 	]), (0, import_react.useCallback)(() => obj._hash, [obj]), (0, import_react.useCallback)(() => obj._hash, [obj]));
 	return obj;
 }
-//#endregion
-//#region ../structured-state/src/react/useNew.tsx
+// ../structured-state/src/react/useNew.tsx
 function useNewLinkedSet() {
 	const [set] = (0, import_react.useState)(() => SSet._create());
 	useSubscribeToSubbableMutationHashable(set);
@@ -15355,8 +15216,7 @@ function useNewLinkedMap() {
 	useSubscribeToSubbableMutationHashable(map);
 	return map;
 }
-//#endregion
-//#region ../../node_modules/.pnpm/json-stringify-deterministic@1.0.18/node_modules/json-stringify-deterministic/lib/defaults.js
+// ../../node_modules/.pnpm/json-stringify-deterministic@1.0.18/node_modules/json-stringify-deterministic/lib/defaults.js
 var require_defaults = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = {
 		space: "",
@@ -15365,8 +15225,7 @@ var require_defaults = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		stringify: JSON.stringify
 	};
 }));
-//#endregion
-//#region ../../node_modules/.pnpm/json-stringify-deterministic@1.0.18/node_modules/json-stringify-deterministic/lib/util.js
+// ../../node_modules/.pnpm/json-stringify-deterministic@1.0.18/node_modules/json-stringify-deterministic/lib/util.js
 var require_util = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = {
 		isArray: Array.isArray,
@@ -15378,8 +15237,7 @@ var require_util = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		keys: Object.keys
 	};
 }));
-//#endregion
-//#region ../structured-state/src/debug.html.tsx
+// ../structured-state/src/debug.html.tsx
 var import_lib = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((exports, module) => {
 	var DEFAULTS = require_defaults();
 	var isFunction = require_util().isFunction;
@@ -15524,7 +15382,7 @@ function header$1(elem, showContainerId = false) {
 function debugOutSPrimitive(obj) {
 	const val = obj.get();
 	if (isPrimitiveKind$3(val)) return `${header$1(obj)} ${debugOutPrm(val)}`;
-	else return `${header$1(obj)} ${val}`;
+	else return `${header$1(obj)} ${String(val)}`;
 }
 function debugOutPrm(val) {
 	switch (true) {
@@ -15547,8 +15405,7 @@ function span(kind, value) {
 		}
 	})()}">${value}</span>`;
 }
-//#endregion
-//#region ../../node_modules/.pnpm/react@19.2.0/node_modules/react/cjs/react-jsx-runtime.production.js
+// ../../node_modules/.pnpm/react@19.2.0/node_modules/react/cjs/react-jsx-runtime.production.js
 /**
 * @license React
 * react-jsx-runtime.production.js
@@ -15582,8 +15439,7 @@ var require_react_jsx_runtime_production$1 = /* @__PURE__ */ __commonJSMin(((exp
 	exports.jsx = jsxProd;
 	exports.jsxs = jsxProd;
 }));
-//#endregion
-//#region ../structured-state/src/debug.react.tsx
+// ../structured-state/src/debug.react.tsx
 var import_jsx_runtime$1 = (/* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_react_jsx_runtime_production$1();
 })))();
@@ -15843,8 +15699,7 @@ var classOfKind$3 = (kind) => {
 		default: exhaustive$2(kind);
 	}
 };
-//#endregion
-//#region ../structured-state/src/debug.text.tsx
+// ../structured-state/src/debug.text.tsx
 function stringifyUnknown$3(val) {
 	const res = (0, import_lib.default)(val, {
 		space: " ",
@@ -15915,10 +15770,9 @@ function header(elem, showContainerId = false) {
 function debugOutPrimitive(obj) {
 	const val = obj.get();
 	if (typeof val === "string") return `${header(obj)} "${val}"`;
-	else return `${header(obj)} ${val}`;
+	else return `${header(obj)} ${String(val)}`;
 }
-//#endregion
-//#region ../structured-state/src/DirtyObserver.ts
+// ../structured-state/src/DirtyObserver.ts
 var MutationFlag = class MutationFlag {
 	_subscriptors = /* @__PURE__ */ new Set();
 	_hash = 0;
@@ -15963,8 +15817,7 @@ function useDirtyTracker(obj, defaultState = "clean") {
 	useSubscribeToSubbableMutationHashable(observer.flag, void 0, false);
 	return [observer.dirtyState(), (0, import_react.useCallback)(() => observer.markClean(), [observer])];
 }
-//#endregion
-//#region ../structured-state/src/index.ts
+// ../structured-state/src/index.ts
 var src_exports = /* @__PURE__ */ __exportAll({
 	DebugOut: () => DebugOut,
 	DirtyObserver: () => DirtyObserver,
@@ -16006,8 +15859,7 @@ var src_exports = /* @__PURE__ */ __exportAll({
 	useSubscribeToSubbableMutationHashable: () => useSubscribeToSubbableMutationHashable
 });
 var simplify$1 = { structured: simplifyStructured };
-//#endregion
-//#region ../../node_modules/.pnpm/react@19.3.1/node_modules/react/cjs/react-jsx-runtime.production.js
+// ../../node_modules/.pnpm/react@19.3.1/node_modules/react/cjs/react-jsx-runtime.production.js
 /**
 * @license React
 * react-jsx-runtime.production.js
@@ -16041,8 +15893,7 @@ var require_react_jsx_runtime_production = /* @__PURE__ */ __commonJSMin(((expor
 	exports.jsx = jsxProd;
 	exports.jsxs = jsxProd;
 }));
-//#endregion
-//#region src/JSONView.tsx
+// src/JSONView.tsx
 var import_jsx_runtime = (/* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_react_jsx_runtime_production();
 })))();
@@ -16214,8 +16065,7 @@ var classOfKind$2 = (kind) => {
 		default: exhaustive$2(kind);
 	}
 };
-//#endregion
-//#region src/structs/TimelineT.ts
+// src/structs/TimelineT.ts
 var TimelineT = class TimelineT extends Structured {
 	t;
 	u;
@@ -16247,8 +16097,7 @@ var TimelineT = class TimelineT extends Structured {
 function time(t, u) {
 	return Structured.create(TimelineT, t, u);
 }
-//#endregion
-//#region src/structs/AudioClip.ts
+// src/structs/AudioClip.ts
 var AudioClip = class AudioClip extends Structured {
 	timelineStart;
 	timelineLength;
@@ -16274,8 +16123,7 @@ var AudioClip = class AudioClip extends Structured {
 		return Structured.create(AudioClip, init.structured(auto.timelineStart, TimelineT), init.structured(auto.timelineLength, TimelineT));
 	}
 };
-//#endregion
-//#region src/structs/AudioTrack.ts
+// src/structs/AudioTrack.ts
 var AudioTrack = class AudioTrack extends Structured {
 	name;
 	clips;
@@ -16301,8 +16149,7 @@ var AudioTrack = class AudioTrack extends Structured {
 		return Structured.create(AudioTrack, init.string(auto.name), init.schemaArray(auto.clips, [AudioClip]));
 	}
 };
-//#endregion
-//#region src/structs/Project.ts
+// src/structs/Project.ts
 var Project = class Project extends Structured {
 	name;
 	tracks;
@@ -16347,8 +16194,7 @@ var Project = class Project extends Structured {
 		while (this.tracks.pop());
 	}
 };
-//#endregion
-//#region src/UtilityToggle.tsx
+// src/UtilityToggle.tsx
 function UtilityToggle({ className, style: styleArg, toggleStyle = { background: "SaddleBrown" }, toggled, onToggle, ...props }) {
 	const style = toggled ? {
 		...styleArg,
@@ -16364,8 +16210,7 @@ function UtilityToggle({ className, style: styleArg, toggleStyle = { background:
 		}
 	});
 }
-//#endregion
-//#region src/ui/renderFlash.ts
+// src/ui/renderFlash.ts
 /**
 * Render highlighting. Components call useRenderFlash() and attach the ref to
 * their root element. Every commit bumps a counter on that element
@@ -16422,8 +16267,7 @@ function useRenderFlash() {
 function useRenderFlashEnabled() {
 	return (0, import_react$1.useSyncExternalStore)(subscribe$1, () => enabled);
 }
-//#endregion
-//#region src/ui/ClipA.tsx
+// src/ui/ClipA.tsx
 function ClipA$1({ clip, onRemove }) {
 	const timelineStart = useContainer(clip.timelineStart);
 	const timelineLength = useContainer(clip.timelineLength);
@@ -16471,8 +16315,7 @@ function ClipA$1({ clip, onRemove }) {
 		]
 	});
 }
-//#endregion
-//#region src/ui/TrackA.tsx
+// src/ui/TrackA.tsx
 function TrackA$1({ track, project }) {
 	const [name, setName] = usePrimitive(track.name);
 	const [draft, setDraft] = (0, import_react$1.useState)(null);
@@ -16541,8 +16384,7 @@ function TrackA$1({ track, project }) {
 		]
 	});
 }
-//#endregion
-//#region src/unused/SchedulerTest.tsx
+// src/unused/SchedulerTest.tsx
 var import_scheduler = require_scheduler();
 function SchedulerTest() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
@@ -16574,14 +16416,12 @@ function SchedulerTest() {
 		children: "test"
 	});
 }
-//#endregion
-//#region src/util.ts
+// src/util.ts
 function nullthrows$2(val, message) {
-	if (val == null) throw new Error(message || `Expected ${val} to be non nil.`);
+	if (val == null) throw new Error(message || `Expected ${String(val)} to be non nil.`);
 	return val;
 }
-//#endregion
-//#region ../../node_modules/.pnpm/tailwind-merge@3.7.0/node_modules/tailwind-merge/dist/bundle-mjs.mjs
+// ../../node_modules/.pnpm/tailwind-merge@3.7.0/node_modules/tailwind-merge/dist/bundle-mjs.mjs
 /**
 * Concatenates two arrays faster than the array spread operator.
 */
@@ -20039,8 +19879,7 @@ var getDefaultConfig = () => {
 	};
 };
 var twMerge = /*#__PURE__*/ createTailwindMerge(getDefaultConfig);
-//#endregion
-//#region src/ui/Panel.tsx
+// src/ui/Panel.tsx
 function Panel({ title, actions, className, children, ref }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 		ref,
@@ -20060,8 +19899,7 @@ function Panel({ title, actions, className, children, ref }) {
 		})]
 	});
 }
-//#endregion
-//#region src/App.tsx
+// src/App.tsx
 setWindow$1("s", src_exports);
 /**
 * TODO:
@@ -20316,8 +20154,7 @@ function HistoryItem({ entry }) {
 		})
 	})] });
 }
-//#endregion
-//#region src/ui/RenderFlashToggle.tsx
+// src/ui/RenderFlashToggle.tsx
 function RenderFlashToggle({ className }) {
 	const enabled = useRenderFlashEnabled();
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
@@ -20331,8 +20168,7 @@ function RenderFlashToggle({ className }) {
 		}), "highlight renders"]
 	});
 }
-//#endregion
-//#region src/Layout.tsx
+// src/Layout.tsx
 function Layout({ routes }) {
 	const { pathname } = useLocation();
 	const current = routes.find((route) => route.path === pathname);
@@ -20378,19 +20214,16 @@ function Layout({ routes }) {
 		]
 	});
 }
-//#endregion
-//#region ../../node_modules/.pnpm/nanoid@5.1.16/node_modules/nanoid/url-alphabet/index.js
+// ../../node_modules/.pnpm/nanoid@5.1.16/node_modules/nanoid/url-alphabet/index.js
 var urlAlphabet = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
-//#endregion
-//#region ../../node_modules/.pnpm/nanoid@5.1.16/node_modules/nanoid/index.browser.js
+// ../../node_modules/.pnpm/nanoid@5.1.16/node_modules/nanoid/index.browser.js
 var nanoid = (size = 21) => {
 	let id = "";
 	let bytes = crypto.getRandomValues(new Uint8Array(size |= 0));
 	while (size--) id += urlAlphabet[bytes[size] & 63];
 	return id;
 };
-//#endregion
-//#region ../linked-state/lib/Subbable.tsx
+// ../linked-state/lib/Subbable.tsx
 var subbable$1 = {
 	/**
 	* Records a callback, so that changes to "subbable" trigger a call of "callback"
@@ -20411,8 +20244,7 @@ var subbable$1 = {
 		for (const cb of mh._subscriptors) cb(target, mh);
 	}
 };
-//#endregion
-//#region ../linked-state/src/LinkableMap.tsx
+// ../linked-state/src/LinkableMap.tsx
 var LinkableMap = class {
 	_map;
 	_id;
@@ -20493,10 +20325,9 @@ var LinkableMap = class {
 		return this.constructor.name;
 	}
 };
-//#endregion
-//#region ../linked-state/src/nullthrows.ts
+// ../linked-state/src/nullthrows.ts
 function nullthrows$1(val, message) {
-	if (val == null) throw new Error(message || `Expected ${val} to be non nil.`);
+	if (val == null) throw new Error(message || `Expected ${String(val)} to be non nil.`);
 	return val;
 }
 function mutablearr(arr) {
@@ -20508,8 +20339,7 @@ function mutableset(set) {
 function setWindow(prop, value) {
 	globalThis[prop] = value;
 }
-//#endregion
-//#region ../linked-state/src/LinkableSet.tsx
+// ../linked-state/src/LinkableSet.tsx
 var LinkableSet = class {
 	_set;
 	_id;
@@ -20617,8 +20447,7 @@ var LinkableSet = class {
 		return result;
 	}
 };
-//#endregion
-//#region ../linked-state/src/LinkableValue.tsx
+// ../linked-state/src/LinkableValue.tsx
 /**
 * LinkableValue is a Subbable holding a single atomic value
 */
@@ -20658,13 +20487,11 @@ var LinkableValue = class {
 		};
 	}
 };
-//#endregion
-//#region ../linked-state/lib/Contained.tsx
+// ../linked-state/lib/Contained.tsx
 function isContainable$1(val) {
 	return val instanceof LinkableValue || val instanceof LinkableArray || val instanceof LinkableMap || val instanceof LinkableSet;
 }
-//#endregion
-//#region ../linked-state/lib/SubbableContainer.tsx
+// ../linked-state/lib/SubbableContainer.tsx
 /**
 * A token is unique to an update (a call to _notifyChange). It serves two purposes:
 * - it helps us prevent loops by ensuring an event isn't processed twice
@@ -20710,8 +20537,7 @@ var subbableContainer$1 = {
 		for (const container of node._container) subbableContainer$1._childChanged(container, token);
 	}
 };
-//#endregion
-//#region ../linked-state/src/LinkableArray.tsx
+// ../linked-state/src/LinkableArray.tsx
 var LinkableArray = class {
 	_array;
 	_id;
@@ -20758,7 +20584,7 @@ var LinkableArray = class {
 		return `${this.constructor.name}[${this._array.toString()}]`;
 	}
 	toLocaleString() {
-		throw this._array.toLocaleString();
+		return this._array.toLocaleString();
 	}
 	pop() {
 		if (this.length < 1) return;
@@ -20892,8 +20718,7 @@ var LinkableArray = class {
 		throw new Error("Method not implemented.");
 	}
 };
-//#endregion
-//#region ../linked-state/src/hooks.tsx
+// ../linked-state/src/hooks.tsx
 function useLinkAsState(prim) {
 	const externalStoreSub = (0, import_react.useCallback)((onStoreChange) => {
 		return subbable$1.subscribe(prim, (target) => {
@@ -20914,15 +20739,13 @@ function useLink$1(obj, recursiveChanges = false) {
 	}, [obj, recursiveChanges]), (0, import_react.useCallback)(() => obj._hash, [obj]), (0, import_react.useCallback)(() => obj._hash, [obj]));
 	return () => obj;
 }
-//#endregion
-//#region ../linked-state/index.ts
+// ../linked-state/index.ts
 var lValue = LinkableValue.create.bind(LinkableValue);
 var lArray = LinkableArray.create.bind(LinkableArray);
 var lMap = LinkableMap.create.bind(LinkableMap);
 var lSet = LinkableSet.create.bind(LinkableSet);
-subbable$1.subscribe;
-//#endregion
-//#region src/ls/classOfKind.ts
+subbable$1.subscribe.bind(subbable$1);
+// src/ls/classOfKind.ts
 var classOfKind$1 = (kind) => {
 	switch (kind) {
 		case "attr": return "hljs-attr";
@@ -20935,8 +20758,7 @@ var classOfKind$1 = (kind) => {
 		default: exhaustive$2(kind);
 	}
 };
-//#endregion
-//#region src/ls/LinkedStateDebug.tsx
+// src/ls/LinkedStateDebug.tsx
 var TAB_SIZE$5 = 2;
 function stringifyUnknown$2(val) {
 	const res = (0, import_lib.default)(val, {
@@ -20986,15 +20808,15 @@ function DebugOutMap({ map: linkedMap, pad, path = "", showUnknowns }) {
 	for (let i = 0; i < entries.length && showBody; i++) {
 		const [key, val] = entries[i];
 		const baseline = pad + TAB_SIZE$5;
-		body.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+		body.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}, `br-${String(key)}`), " ".repeat(baseline), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 			className: classOfKind$1("attr"),
 			children: String(key)
-		}, `span-${key}`), ": ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DynamicTest$1, {
+		}, `span-${String(key)}`), ": ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DynamicTest$1, {
 			val,
 			pad: baseline,
-			path: `${path}/${key}`,
+			path: `${path}/${String(key)}`,
 			showUnknowns
-		}, `elem-${key}`));
+		}, `elem-${String(key)}`));
 	}
 	if (!showBody) body.push("...", "}");
 	else body.push("\n", " ".repeat(pad), "}");
@@ -21118,8 +20940,7 @@ function DebugOutSimplePrm$1({ val }) {
 function isPrimitiveKind$2(val) {
 	return typeof val === "number" || typeof val === "string" || typeof val === "boolean" || val === null;
 }
-//#endregion
-//#region src/ls/TxtButton.tsx
+// src/ls/TxtButton.tsx
 function TxtButton({ style, className, ...rest }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 		className: twMerge("border-0 p-0 text-gray-500 hover:underline", className),
@@ -21130,8 +20951,7 @@ function TxtButton({ style, className, ...rest }) {
 		...rest
 	});
 }
-//#endregion
-//#region src/ls/LinkableArrayTest.tsx
+// src/ls/LinkableArrayTest.tsx
 var TAB_SIZE$4 = 2;
 function LinkableArrayTest({ linkedArray, className }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Panel, {
@@ -21256,8 +21076,7 @@ function DynamicTestArray({ arr, pad, path = "", showUnknowns }) {
 		]
 	});
 }
-//#endregion
-//#region src/ls/LinkableMapTest.tsx
+// src/ls/LinkableMapTest.tsx
 function LinkableMapTest({ map, className }) {
 	const [key, setKey] = (0, import_react$1.useState)(0);
 	const handleAdd = () => {
@@ -21342,8 +21161,7 @@ function DynamicTestMap({ map, pad, path = "", showUnknowns, onAdd, renderValue 
 		]
 	});
 }
-//#endregion
-//#region src/ls/LinkableValueTest.tsx
+// src/ls/LinkableValueTest.tsx
 function LinkableValueTest({ prim, className }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Panel, {
 		title: "LinkableValue",
@@ -21433,8 +21251,7 @@ function DebugOutBoolean({ prim, path = "" }) {
 		]
 	});
 }
-//#endregion
-//#region src/ls/LinkableStateNestedPage.tsx
+// src/ls/LinkableStateNestedPage.tsx
 var map$1 = lMap();
 lSet();
 lValue(0);
@@ -21514,8 +21331,7 @@ function ListItem({ name, doneState }) {
 		]
 	});
 }
-//#endregion
-//#region src/ls/LinkableSetTest.tsx
+// src/ls/LinkableSetTest.tsx
 function LinkableSetTest({ linkedSet, className }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Panel, {
 		title: "LinkableSet",
@@ -21595,8 +21411,7 @@ function DebugOutSet({ set, pad, path = "", showUnknowns }) {
 		]
 	});
 }
-//#endregion
-//#region src/ls/LinkableStatePage.tsx
+// src/ls/LinkableStatePage.tsx
 var map = LinkableMap.create();
 var set = LinkableSet.create();
 var array$1 = LinkableArray.create();
@@ -21612,8 +21427,7 @@ function LinkableStateTest() {
 		]
 	});
 }
-//#endregion
-//#region ../marked-subbable/src/lib/SubbableMark.tsx
+// ../marked-subbable/src/lib/SubbableMark.tsx
 var SubbableMark = class SubbableMark {
 	_id;
 	_subscriptors = /* @__PURE__ */ new Set();
@@ -21642,13 +21456,11 @@ var SubbableMark = class SubbableMark {
 		return result;
 	}
 };
-//#endregion
-//#region ../marked-subbable/src/lib/Contained.tsx
+// ../marked-subbable/src/lib/Contained.tsx
 function isContainable(value) {
 	return typeof value === "object" && value !== null && "$$mark" in value && value.$$mark instanceof SubbableMark;
 }
-//#endregion
-//#region ../marked-subbable/src/lib/Subbable.tsx
+// ../marked-subbable/src/lib/Subbable.tsx
 var subbable = {
 	/**
 	* Records a callback, so that changes to "subbable" trigger a call of "callback"
@@ -21669,8 +21481,7 @@ var subbable = {
 		for (const cb of mh.$$mark._subscriptors) cb(target, mh);
 	}
 };
-//#endregion
-//#region ../marked-subbable/src/lib/SubbableContainer.tsx
+// ../marked-subbable/src/lib/SubbableContainer.tsx
 /**
 * A token is unique to an update (a call to _notifyChange). It serves two purposes:
 * - it helps us prevent loops by ensuring an event isn't processed twice
@@ -21738,8 +21549,7 @@ var subbableContainer = {
 		for (const container of struct.$$mark._container.keys()) subbableContainer._childChanged(container, token);
 	}
 };
-//#endregion
-//#region ../marked-subbable/src/util/arrayIndex.ts
+// ../marked-subbable/src/util/arrayIndex.ts
 /**
 * Converts a number to an integer the way Array.prototype methods do
 * (ToIntegerOrInfinity): truncates, NaN and undefined become 0, ±Infinity is
@@ -21757,8 +21567,7 @@ function relativeIndex(index, length) {
 	const int = toIntegerOrInfinity(index);
 	return int < 0 ? Math.max(length + int, 0) : Math.min(int, length);
 }
-//#endregion
-//#region ../marked-subbable/src/MarkedArray.ts
+// ../marked-subbable/src/MarkedArray.ts
 /**
 * A reactive Array. Mutate it through its methods (`push`, `splice`, `fill`,
 * ...): writing by index (`arr[i] = x`) or to `length` (`arr.length = 0`)
@@ -21879,15 +21688,13 @@ var MarkedArray = class MarkedArray extends Array {
 		return this.splice(index, 1)[0];
 	}
 };
-//#endregion
-//#region ../marked-subbable/src/util/keysAndValues.tsx
+// ../marked-subbable/src/util/keysAndValues.tsx
 /** @returns a generator that iterates over all keys followed by all values in a Map */
 function* keysAndValues(map) {
 	yield* map.keys();
 	yield* map.values();
 }
-//#endregion
-//#region ../marked-subbable/src/MarkedMap.tsx
+// ../marked-subbable/src/MarkedMap.tsx
 var MarkedMap = class extends Map {
 	$$mark;
 	constructor(initialValue, id) {
@@ -21942,8 +21749,7 @@ var MarkedMap = class extends Map {
 		return mapped;
 	}
 };
-//#endregion
-//#region ../marked-subbable/src/MarkedSet.ts
+// ../marked-subbable/src/MarkedSet.ts
 var MarkedSet = class extends Set {
 	$$mark;
 	constructor(_set, _id) {
@@ -21994,8 +21800,7 @@ var MarkedSet = class extends Set {
 		return result;
 	}
 };
-//#endregion
-//#region ../marked-subbable/src/MarkedValue.tsx
+// ../marked-subbable/src/MarkedValue.tsx
 /**
 * MarkedValue is a MarkedSubbable holding a single atomic value. It's
 * the simplest subbable container.
@@ -22029,8 +21834,7 @@ var MarkedValue = class {
 		this.set(value);
 	}
 };
-//#endregion
-//#region ../marked-subbable/src/util/printId.ts
+// ../marked-subbable/src/util/printId.ts
 function printId(obj) {
 	(() => {
 		return obj.constructor.name;
@@ -22038,13 +21842,11 @@ function printId(obj) {
 	const hashStr = `.${obj.$$mark._hash}`;
 	return `${obj.constructor.name}:${obj.$$mark._id}${hashStr}`;
 }
-//#endregion
-//#region ../marked-subbable/src/util/exhaustive.ts
+// ../marked-subbable/src/util/exhaustive.ts
 function exhaustive$1(x, msg) {
 	throw new Error(msg ?? `Exhaustive violation, unexpected value ${x}`);
 }
-//#endregion
-//#region ../marked-subbable/src/useLink.tsx
+// ../marked-subbable/src/useLink.tsx
 function useLink(obj, recursiveChanges = false) {
 	"use no memo";
 	(0, import_react$1.useSyncExternalStore)((0, import_react$1.useCallback)((onStoreChange) => {
@@ -22054,8 +21856,7 @@ function useLink(obj, recursiveChanges = false) {
 	}, [obj, recursiveChanges]), (0, import_react$1.useCallback)(() => obj.$$mark._hash, [obj]), (0, import_react$1.useCallback)(() => obj.$$mark._hash, [obj]));
 	return () => obj;
 }
-//#endregion
-//#region ../marked-subbable/src/debug/DebugTree.tsx
+// ../marked-subbable/src/debug/DebugTree.tsx
 function isPrimitiveKind(val) {
 	return typeof val === "number" || typeof val === "string" || typeof val === "boolean" || val == null;
 }
@@ -22127,7 +21928,7 @@ function TreeMarkedSubbable({ mobj, pad, path = "", showUnknowns }) {
 		const baseline = pad + TAB_SIZE$1;
 		if (key === "$$mark" || key === "$$serialization") continue;
 		const val = struct()[key];
-		body.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+		body.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}, `br-${String(key)}`), " ".repeat(baseline), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 			className: classOfKind("attr"),
 			children: key
 		}, `span-${key}`), ": ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DebugOutReact, {
@@ -22214,7 +22015,7 @@ function TreeMarkedMap({ map: mmap, pad, path = "", showUnknowns }) {
 	let i = 0;
 	for (const [key, value] of map()) {
 		const baseline = pad + TAB_SIZE$1;
-		result.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}, `br-${key}`), " ".repeat(baseline), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DebugOutReact, {
+		result.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}, `br-${String(key)}`), " ".repeat(baseline), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DebugOutReact, {
 			val: key,
 			pad: baseline,
 			path: `${path}/${i}-s`,
@@ -22317,8 +22118,7 @@ function stringifyUnknown$1(val) {
 	if (res === "{\n}") return "{}";
 	else return res;
 }
-//#endregion
-//#region ../marked-subbable/index.ts
+// ../marked-subbable/index.ts
 var mSet = MarkedSet.create.bind(MarkedSet);
 var mArray = MarkedArray.create.bind(MarkedArray);
 var mMap = MarkedMap.create.bind(MarkedMap);
@@ -22428,8 +22228,7 @@ function stringifyUnknown(val) {
 	if (res === "{\n}") return "{}";
 	else return res;
 }
-//#endregion
-//#region src/marked/MarkedCollection.tsx
+// src/marked/MarkedCollection.tsx
 function MarkedCollection({ set, pad, showUnknowns, handleAdd, handleClear, handleDelete, renderValue, getLen, delimiters: [open, close] }) {
 	const lset = useLink(set);
 	const ref = useRenderFlash();
@@ -22478,8 +22277,7 @@ function MarkedCollection({ set, pad, showUnknowns, handleAdd, handleClear, hand
 		]
 	});
 }
-//#endregion
-//#region src/marked/MarkedArrayTest.tsx
+// src/marked/MarkedArrayTest.tsx
 var array = MarkedArray.create();
 function MarkedArrayTest({ className }) {
 	const larr = useLink(array);
@@ -22512,8 +22310,7 @@ function MarkedArrayTest({ className }) {
 		})
 	});
 }
-//#endregion
-//#region src/marked/page.tsx
+// src/marked/page.tsx
 function MarkedStateTest() {
 	const [set] = (0, import_react$1.useState)(() => {
 		return MarkedSet.create([MarkedSet.create([0])]);
@@ -22557,13 +22354,11 @@ function MarkedSetTest({ markedSet, className }) {
 		})
 	});
 }
-//#endregion
-//#region ../marked-serializable/src/exhaustive.ts
+// ../marked-serializable/src/exhaustive.ts
 function exhaustive(x, msg) {
 	throw new Error(msg ?? `Exhaustive violation, unexpected value ${x}`);
 }
-//#endregion
-//#region ../marked-serializable/src/MarkedSerializable.ts
+// ../marked-serializable/src/MarkedSerializable.ts
 var SerializationMark = class SerializationMark {
 	kind;
 	construct;
@@ -22588,14 +22383,12 @@ function consolidateMarks(marks) {
 	}
 	return map;
 }
-//#endregion
-//#region ../marked-serializable/src/nullthrows.ts
+// ../marked-serializable/src/nullthrows.ts
 function nullthrows(val, message) {
-	if (val == null) throw new Error(message || `Expected ${val} to be non nil.`);
+	if (val == null) throw new Error(message || `Expected ${String(val)} to be non nil.`);
 	return val;
 }
-//#endregion
-//#region ../marked-serializable/src/RefMap.ts
+// ../marked-serializable/src/RefMap.ts
 /**
 * id -> Simplified object
 */
@@ -22631,8 +22424,7 @@ var RefMap = class {
 		return result;
 	}
 };
-//#endregion
-//#region ../marked-serializable/src/simplify.ts
+// ../marked-serializable/src/simplify.ts
 function isSimplified(json) {
 	return typeof json === "object" && json != null && !Array.isArray(json) && "$$" in json;
 }
@@ -22713,8 +22505,7 @@ function simplifyMarkedSet(map, refpkg) {
 		entries: map.map((value) => simplify(value, refpkg))
 	};
 }
-//#endregion
-//#region ../marked-serializable/src/construct.ts
+// ../marked-serializable/src/construct.ts
 function constructSimplifiedPackage(pkg, index) {
 	const refmap = new RefMap(pkg.refs);
 	const objmap = /* @__PURE__ */ new Map();
@@ -22766,13 +22557,11 @@ function initializeMarkedMap(map, rsc) {
 function initializeMarkedSet(set, rsc) {
 	return MarkedSet.create(set.entries.map((x) => initialize(x, rsc)));
 }
-//#endregion
-//#region ../marked-serializable/src/isSimplifiable.ts
+// ../marked-serializable/src/isSimplifiable.ts
 function isSimplifiable(target) {
 	return isSerializable(target) || target instanceof MarkedArray || target instanceof MarkedMap || target instanceof MarkedSet || target instanceof MarkedValue;
 }
-//#endregion
-//#region src/marked/MTime.ts
+// src/marked/MTime.ts
 var MTime = class MTime {
 	t;
 	u;
@@ -22805,8 +22594,7 @@ var serialization_mtime = SerializationMark.create({
 		};
 	}
 });
-//#endregion
-//#region src/marked/MAudioClip.ts
+// src/marked/MAudioClip.ts
 var MAudioClip = class MAudioClip {
 	timelineStart;
 	timelineLength;
@@ -22833,8 +22621,7 @@ var serialization_maudioclip = SerializationMark.create({
 		};
 	}
 });
-//#endregion
-//#region src/marked/MAudioTrack.ts
+// src/marked/MAudioTrack.ts
 var MAudioTrack = class MAudioTrack {
 	name;
 	clips;
@@ -22861,8 +22648,7 @@ var serialization_maudiotrack = SerializationMark.create({
 		};
 	}
 });
-//#endregion
-//#region src/marked/MProject.ts
+// src/marked/MProject.ts
 var MProject = class MProject {
 	name;
 	tracks;
@@ -22910,8 +22696,7 @@ var serialization_mproject = SerializationMark.create({
 		};
 	}
 });
-//#endregion
-//#region src/marked/MProjectDebug.tsx
+// src/marked/MProjectDebug.tsx
 function MProjectDebug({ project }) {
 	const [tab, setTab] = (0, import_react$1.useState)("struct");
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Panel, {
@@ -22935,8 +22720,7 @@ function MProjectDebug({ project }) {
 		})]
 	});
 }
-//#endregion
-//#region src/marked/exp/historyStackFor.tsx
+// src/marked/exp/historyStackFor.tsx
 var HistoryStack = class {
 	serializationIndex;
 	unsubscribe;
@@ -22994,8 +22778,7 @@ var HistoryStack = class {
 function historyStackFor(m, serializationIndex) {
 	return new HistoryStack(m, serializationIndex);
 }
-//#endregion
-//#region src/marked/MarkedProjectTest.tsx
+// src/marked/MarkedProjectTest.tsx
 var project = MProject.of("untitled project", [MAudioTrack.of("track 1", [MAudioClip.of(0, 4)]), MAudioTrack.of("track 2", [])], [[0, "foo"], [1, "bar"]]);
 var serializationIndex = consolidateMarks([
 	serialization_mtime,
@@ -23280,8 +23063,7 @@ function ClipA({ clip, onRemove }) {
 		]
 	});
 }
-//#endregion
-//#region src/main.tsx
+// src/main.tsx
 var routes = [
 	{
 		path: "/",
@@ -23326,4 +23108,3 @@ import_client.createRoot(document.getElementById("root")).render(/* @__PURE__ */
 		element: route.element
 	}, route.path))
 }) }) }) }));
-//#endregion
