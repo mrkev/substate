@@ -36,11 +36,12 @@ Done: the marked packages' `build` is now `tsc -b && vite build`, so type errors
 
 Done: `structured-state`'s `main` / `exports` no longer point at a `structured-state.umd.cjs` that was never built (only `formats: ["es"]` is built); `main` is now the ES file and the `require` entry is gone. Cleanups: tsconfig `include`s are just `["src", "./index.ts"]` in both marked packages (dropped nonexistent and redundant folders), and the unused dev dependencies (`marked-subbable` on itself, `structured-state` on `@mrkev/linked-state`) are removed. `pnpm install` also dropped a stale root `@types/scheduler` lockfile entry, left over from `9e8e218` removing it from `package.json`.
 
+Done: compiler options live in two shared files at the root, which every package extends: `tsconfig.base.json` (each `tsconfig.src.json`, the browser code; includes `customConditions`) and `tsconfig.node.base.json` (each `tsconfig.node.json`, which checks `vite.config.ts` and needs Node's types). Package configs only set `include`, since inherited paths resolve relative to the base file. The root `tsconfig.json` is now just the project list for `pnpm tsc`. Effective settings are unchanged except `customConditions` in every package and `strict` for the `vite.config.ts` checks.
+
 Note: the per-package `tsconfig.json` files have `"files": []` and only reference `tsconfig.src.json` / `tsconfig.node.json`, so `tsc -p packages/<pkg>` checks nothing. Use `pnpm tsc` (or `tsc -p packages/<pkg>/tsconfig.src.json`).
 
-1. [ ] **Compiler options are copied five times.** Each package's `tsconfig.src.json` repeats the same options. The root `tsconfig.json` lists them too, but they apply to nothing (empty `files` / `include`; referenced projects don't inherit options). Fix: a single `tsconfig.base.json` that each package `extends`.
-2. [ ] **Runtime vs. types.** `lib: ES2025` lets code type-check against APIs newer than `"engines": { "node": ">=18" }` promises. Only case today: `MarkedArray.fromAsync` (Node 22+). Raise `engines` to `>=22`.
-3. [ ] **`pnpm lint` fails on `main`.** 2 errors and 5 warnings, all in site files: `react-hooks/set-state-in-effect` errors in `site/src/ui/TrackA.tsx` and `site/src/unused/Simple.tsx`, plus `react-refresh/only-export-components` warnings in `site/src/ls/LinkedStateDebug.tsx`, `site/src/unused/Api1.tsx` and `Simple.tsx`. Not caused by the marked packages.
+1. [ ] **Runtime vs. types.** `lib: ES2025` lets code type-check against APIs newer than `"engines": { "node": ">=18" }` promises. Only case today: `MarkedArray.fromAsync` (Node 22+). Raise `engines` to `>=22`.
+2. [ ] **`pnpm lint` fails on `main`.** 2 errors and 5 warnings, all in site files: `react-hooks/set-state-in-effect` errors in `site/src/ui/TrackA.tsx` and `site/src/unused/Simple.tsx`, plus `react-refresh/only-export-components` warnings in `site/src/ls/LinkedStateDebug.tsx`, `site/src/unused/Api1.tsx` and `Simple.tsx`. Not caused by the marked packages.
 
 
 ## Decisions to revisit

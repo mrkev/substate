@@ -1,0 +1,14 @@
+// Shared compiler options for every package's tsconfig.node.json, which
+// type-checks vite.config.ts. It runs in Node, so it gets Node's types, which
+// the browser code in tsconfig.base.json must not see.
+{
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "types": ["node"],
+    "noEmit": true,
+    "strict": true
+  }
+}
