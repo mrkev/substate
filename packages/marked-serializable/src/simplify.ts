@@ -2,6 +2,7 @@ import {
   MarkedArray,
   MarkedMap,
   MarkedSet,
+  MarkedSubbable,
   MarkedValue,
 } from "@mrkev/marked-subbable";
 import { exhaustive } from "./exhaustive";
@@ -11,7 +12,7 @@ import {
   MarkedSerializable,
   SerializationMark,
 } from "./MarkedSerializable";
-import { RefMap } from "./RefMap";
+import { RefMap, SimplifiedNonRef } from "./RefMap";
 
 export type Primitive = number | string | boolean | null;
 
@@ -114,28 +115,49 @@ function simplify(
   } else if (typeof value === "function") {
     throw new Error("cant simplify function");
   } else if (isSerializable(value)) {
-    const res = simplifyMarkedObject(value, refmap);
-    const ref = refmap.record(value.$$mark._id, res);
-    return ref;
+    return simplifyOnce(value, refmap, () =>
+      simplifyMarkedObject(value, refmap),
+    );
   } else if (value instanceof MarkedArray) {
-    const res = simplifyMarkedArray(value, refmap);
-    const ref = refmap.record(value.$$mark._id, res);
-    return ref;
+    return simplifyOnce(value, refmap, () =>
+      simplifyMarkedArray(value, refmap),
+    );
   } else if (value instanceof MarkedMap) {
-    const res = simplifyMarkedMap(value, refmap);
-    const ref = refmap.record(value.$$mark._id, res);
-    return ref;
+    return simplifyOnce(value, refmap, () => simplifyMarkedMap(value, refmap));
   } else if (value instanceof MarkedSet) {
-    const res = simplifyMarkedSet(value, refmap);
-    const ref = refmap.record(value.$$mark._id, res);
-    return ref;
+    return simplifyOnce(value, refmap, () => simplifyMarkedSet(value, refmap));
   } else if (value instanceof MarkedValue) {
-    const res = simplifyMarkedValue(value, refmap);
-    const ref = refmap.record(value.$$mark._id, res);
-    return ref;
+    return simplifyOnce(value, refmap, () =>
+      simplifyMarkedValue(value, refmap),
+    );
   } else {
     exhaustive(value);
   }
+}
+
+/**
+ * Serializes a marked object once, as a ref into the package. An object
+ * reachable from several places is serialized the first time and referenced
+ * after that. An object that (indirectly) contains itself is a cycle, which
+ * loading can't rebuild yet, so that throws instead of recursing forever.
+ */
+function simplifyOnce(
+  value: MarkedSubbable,
+  refmap: RefMap,
+  simplifyContents: () => SimplifiedNonRef,
+): SimplifiedRef {
+  const id = value.$$mark._id;
+  if (refmap.has(id)) {
+    return { $$: "ref", _id: id };
+  }
+  if (refmap.isPending(id)) {
+    const name = isSerializable(value)
+      ? value.$$serialization.kind
+      : value.constructor.name;
+    throw new Error(`can't serialize a cycle: ${name} ${id} contains itself`);
+  }
+  refmap.markPending(id);
+  return refmap.record(id, simplifyContents());
 }
 
 function simplifyMarkedObject<

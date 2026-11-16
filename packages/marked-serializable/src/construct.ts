@@ -20,6 +20,8 @@ type Resources = {
   index: SerializationIndex;
   refmap: RefMap;
   objmap: Map<string, Simplifiable>;
+  // ids of refs being built right now; meeting one again means a cycle
+  pending: Set<string>;
 };
 
 export function constructSimplifiedPackage(
@@ -28,7 +30,12 @@ export function constructSimplifiedPackage(
 ) {
   const refmap = new RefMap(pkg.refs);
   const objmap = new Map<string, Simplifiable>();
-  const result = initialize(pkg.root, { index, refmap, objmap });
+  const result = initialize(pkg.root, {
+    index,
+    refmap,
+    objmap,
+    pending: new Set(),
+  });
   return result;
 }
 
@@ -58,11 +65,17 @@ function initialize(json: unknown, rsc: Resources): Simplifiable {
         const existing = rsc.objmap.get(json._id);
         if (existing != null) {
           return existing;
-        } else {
-          const result = initialize(rsc.refmap.get(json._id), rsc);
-          rsc.objmap.set(json._id, result);
-          return result;
         }
+        // objects are stored in objmap only once built, so a ref to one
+        // that's still being built means the package contains a cycle
+        if (rsc.pending.has(json._id)) {
+          throw new Error(`can't load a cycle: ${json._id} contains itself`);
+        }
+        rsc.pending.add(json._id);
+        const result = initialize(rsc.refmap.get(json._id), rsc);
+        rsc.pending.delete(json._id);
+        rsc.objmap.set(json._id, result);
+        return result;
       }
       default:
         exhaustive(json, "invalid $$ type");

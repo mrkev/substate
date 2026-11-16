@@ -22,7 +22,6 @@ Assessment of `marked-subbable` + `marked-serializable` against `structured-stat
 
 ## Bugs
 
-- [ ] **`simplify` doesn't check for already-visited nodes** before recursing (`packages/marked-serializable/src/simplify.ts`). Cycles recurse forever; shared subtrees are re-serialized on every visit. Recording the node before recursing fixes both.
 - [ ] **Direct index writes skip notifications.** Because `MarkedArray` extends `Array`, `arr[i] = x` and `arr.length = 0` mutate without notifying. Since containment is ref-counted, direct writes also leave the counts wrong. Document it or wrap in a Proxy.
 
 ## Testing gaps
@@ -31,13 +30,13 @@ From a v8 coverage run (2026-11-16: `marked-subbable` 47% of lines, `marked-seri
 
 1. [ ] **React hooks (0%).** `useLink` / `useLinkAsState` are untested. Cover: re-render on own change; with `recursive`, also on nested changes; no re-render for unrelated changes; `useLink` returns a new function each render (what keeps React Compiler output fresh); `useLinkAsState`'s `[value, setter]` incl. `setter(prev => …)`. Needs a DOM test environment (`happy-dom` or `jsdom`); `@testing-library/react` is already installed at the root.
 2. [ ] **Notification propagation.** The loop guard in `_childChanged` (`SubbableContainer.tsx`, "token seen") is never exercised: two objects containing each other. Also untested: a grandparent's listener receives the grandchild as `target` on deep changes, which is how `useLink` tells shallow from deep.
-3. [ ] **Serialization beyond `MarkedMap`.** Untested: custom objects with a `SerializationMark` like `MAudioTrack` (`simplifyMarkedObject` / `initializeObj` at 0%); `MarkedValue` / `MarkedArray` / `MarkedSet` round trips; a shared object comes back as one instance; errors for an unknown `kind` and for duplicate kinds in `consolidateMarks`.
-4. [ ] **Small uncalled methods.** `MarkedSet.delete` / `replace` / `map`; `MarkedArray.sort` / `reverse` / `remove` (incl. not found); `MarkedValue.setDyn` / `replace`; `MarkedMap.map`; no-op paths (`add` of an existing item, `unshift()`, `pushAll([])`).
+3. [ ] **Small uncalled methods.** `MarkedSet.delete` / `replace` / `map`; `MarkedArray.sort` / `reverse` / `remove` (incl. not found); `MarkedValue.setDyn` / `replace`; `MarkedMap.map`; no-op paths (`add` of an existing item, `unshift()`, `pushAll([])`).
 
 Not worth testing now: `DebugTree`, `util/` helpers, `copyWithin` (deliberately unimplemented), `isSimplifiable`.
 
 ## Decisions to revisit
 
+- **Cycles in serialization.** Saving a cycle (an object that indirectly contains itself) throws `can't serialize a cycle: …`, and loading a cyclic package throws `can't load a cycle: …`, because `constructSimplifiedPackage` builds each object only after its children. Shared objects (no cycle) work and are serialized once. Supporting cycles would mean loading in two phases: create empty containers, register them, then fill them. That works for `MarkedArray` / `MarkedMap` / `MarkedSet` / `MarkedValue`, but custom objects' `construct(description)` needs its children first, so they'd need a `SerializationMark` API change. Overlaps with history's restore-in-place.
 - **Publishing the marked packages with the `mrkev:source` export condition.** Each package's `exports` has `"mrkev:source": "./index.ts"` so workspace packages resolve each other to source. `index.ts` isn't in the published files (`"files": ["dist"]`); that's harmless for consumers that don't set the condition, but before publishing, strip the entry (or override `exports` via `publishConfig`). Both packages are `"private": true` for now.
 - **`SubbableMark.register` with the same child twice.** Containment is ref-counted, and `register` counts a child once per occurrence, so a struct whose two fields hold the same marked object counts it twice and swapping one field keeps it linked via the other. Because two fields holding the same marked object share state (eg, `new Clip(time, time)`), which is rarely intended, `register` also `console.warn`s whenever it leaves the holder containing a child more than once. That includes calling `register` twice with the same child (eg, from a base class and a subclass constructor). Revisit whether this should stay a warning, become an error, or be allowed silently once we see real usage.
 
