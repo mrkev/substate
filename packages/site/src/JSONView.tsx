@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { exhaustive } from "../../structured-state/src/lib/assertions";
 import { UtilityToggle } from "./UtilityToggle";
 
@@ -42,11 +42,12 @@ export function JSONView({
 
   return (
     <div style={style}>
-      <div className="mb-2 flex items-center gap-1 text-xs">
+      <div className="mb-2 flex flex-wrap items-center gap-1 text-xs">
         <span className="mr-1 text-gray-500">expand:</span>
         {LEVEL_PRESETS.map((preset) => (
           <UtilityToggle
             key={preset.label}
+            className="whitespace-nowrap"
             toggled={levels === preset.levels}
             onToggle={() => {
               setLevels(preset.levels);
@@ -74,17 +75,55 @@ export function JSONView({
 
 const utf8 = new TextEncoder();
 
-/** size of `json` when stringified (compact, UTF-8) */
+/** size of `json` when stringified (compact, UTF-8), raw and gzipped */
 function SerializedSize({ json }: { json: JSON }) {
-  const bytes = utf8.encode(JSON.stringify(json)).byteLength;
+  const text = JSON.stringify(json);
+  const bytes = utf8.encode(text).byteLength;
+  const gzipBytes = useGzipSize(text);
   return (
     <span
-      className="ml-auto text-gray-500"
-      title={`${bytes.toLocaleString()} bytes`}
+      className="ml-auto whitespace-nowrap text-gray-500"
+      title={
+        `${bytes.toLocaleString()} bytes` +
+        (gzipBytes == null
+          ? ""
+          : `, ${gzipBytes.toLocaleString()} bytes gzipped`)
+      }
     >
       {formatBytes(bytes)}
+      {" · "}
+      {gzipBytes == null ? "…" : formatBytes(gzipBytes)} gzip
     </span>
   );
+}
+
+/** gzipped size of `text` in bytes; null while it's being computed */
+function useGzipSize(text: string): number | null {
+  // CompressionStream is async, so the result is tagged with the text it
+  // belongs to; a stale result reads as "still computing"
+  const [result, setResult] = useState<{ text: string; bytes: number }>();
+
+  useEffect(() => {
+    let cancelled = false;
+    void gzipSize(text).then((bytes) => {
+      if (!cancelled) {
+        setResult({ text, bytes });
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [text]);
+
+  return result?.text === text ? result.bytes : null;
+}
+
+async function gzipSize(text: string): Promise<number> {
+  const stream = new Blob([text])
+    .stream()
+    .pipeThrough(new CompressionStream("gzip"));
+  const compressed = await new Response(stream).arrayBuffer();
+  return compressed.byteLength;
 }
 
 function formatBytes(bytes: number): string {
