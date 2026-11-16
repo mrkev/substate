@@ -34,7 +34,7 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
 
   // Array<S> interface, mutates
   override shift(): S | undefined {
-    if (super.length < 1) {
+    if (this.length < 1) {
       return;
     }
 
@@ -48,7 +48,7 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
   // Array<S> interface, mutates
   override push(...items: S[]): number {
     if (items.length < 1) {
-      return super.length;
+      return this.length;
     }
 
     return this.$$mark.mutate(this, (contain) => {
@@ -76,7 +76,7 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
   // Array<S> interface, mutates
   override unshift(...items: S[]): number {
     if (items.length < 1) {
-      return super.length;
+      return this.length;
     }
 
     return this.$$mark.mutate(this, (contain) => {

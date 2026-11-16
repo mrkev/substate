@@ -69,6 +69,35 @@ describe("MarkedArray", () => {
     });
   });
 
+  describe(".shift", () => {
+    it("removes and returns the first item", () => {
+      const arr = MarkedArray.create([1, 2, 3]);
+      expect(arr.shift()).toBe(1);
+      expect([...arr]).toEqual([2, 3]);
+    });
+
+    it("returns undefined and doesn't notify on an empty array", () => {
+      const arr = MarkedArray.create<number>([]);
+      const cb = vi.fn();
+      subbable.subscribe(arr, cb);
+      expect(arr.shift()).toBeUndefined();
+      expect(cb).not.toHaveBeenCalled();
+    });
+
+    it("uncontains the removed item", () => {
+      const child = MarkedValue.create(1);
+      const arr = MarkedArray.create([child]);
+      arr.shift();
+      expect(child.$$mark._container.has(arr)).toBe(false);
+    });
+  });
+
+  it("push() and unshift() with no items return the length", () => {
+    const arr = MarkedArray.create([1, 2, 3]);
+    expect(arr.push()).toBe(3);
+    expect(arr.unshift()).toBe(3);
+  });
+
   describe(".splice", () => {
     it("removes and returns the deleted items", () => {
       const arr = MarkedArray.create([1, 2, 3, 4]);
