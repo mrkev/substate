@@ -1,6 +1,7 @@
 import { nanoid } from "nanoid";
 import { subbableContainer } from "./lib/SubbableContainer";
 import { MarkedSubbable, SubbableMark } from "./lib/SubbableMark";
+import { relativeIndex, toIntegerOrInfinity } from "./util/arrayIndex";
 
 export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
   public readonly $$mark: SubbableMark;
@@ -109,11 +110,36 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
   // Array<S> interface, mutates
   override splice(start: number, deleteCount?: number): S[];
   override splice(start: number, deleteCount: number, ...items: S[]): S[];
-  override splice(start: any, deleteCount?: any, ...items: any[]): S[] {
+  override splice(
+    // rest args so we forward exactly what the caller passed: native splice
+    // treats splice(1) (delete to end) differently from splice(1, undefined)
+    // (delete nothing)
+    ...args: [start?: number, deleteCount?: number, ...items: S[]]
+  ): S[] {
+    const len = this.length;
+    const actualStart = relativeIndex(args[0], len);
+    const deleteCount =
+      args.length === 0
+        ? 0
+        : args.length === 1
+          ? len - actualStart
+          : Math.min(
+              Math.max(toIntegerOrInfinity(args[1]), 0),
+              len - actualStart,
+            );
+    const items = args.slice(2) as S[];
+
+    // nothing removed or inserted: nothing changes, so don't notify subscribers
+    if (deleteCount === 0 && items.length === 0) {
+      return [];
+    }
+
     return this.$$mark.mutate(this, (contain, uncontain) => {
-      contain(items);
-      const deleted = super.splice(start, deleteCount, ...items);
+      const deleted = super.splice(...(args as [number, number, ...S[]]));
+      // uncontain before containing, so an item that is both removed and
+      // re-inserted (eg, splice(i, 1, arr[i])) stays contained
       uncontain(deleted);
+      contain(items);
       return deleted;
     });
   }
@@ -122,18 +148,8 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
   override fill(value: S, start?: number, end?: number): this {
     const len = this.length;
     // normalize the range the same way Array.prototype.fill does
-    const lo =
-      start === undefined
-        ? 0
-        : start < 0
-          ? Math.max(len + start, 0)
-          : Math.min(start, len);
-    const hi =
-      end === undefined
-        ? len
-        : end < 0
-          ? Math.max(len + end, 0)
-          : Math.min(end, len);
+    const lo = relativeIndex(start, len);
+    const hi = end === undefined ? len : relativeIndex(end, len);
 
     // empty range: nothing changes, so don't notify subscribers
     if (lo >= hi) {

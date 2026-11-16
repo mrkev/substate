@@ -22,7 +22,6 @@ Assessment of `marked-subbable` + `marked-serializable` against `structured-stat
 
 ## Bugs
 
-- [ ] **`MarkedArray.splice(start)`** removes nothing: it forwards `deleteCount` even when `undefined`, and native `splice` reads an explicit `undefined` as 0 (`packages/marked-subbable/src/MarkedArray.ts`). It also notifies even when nothing changed. *Confirmed with a probe test.*
 - [ ] **Map deserialization is broken.** `initializeMarkedMap` uses `.map((key, value) => …)` but the callback receives `(entry, index)` (`packages/marked-serializable/src/construct.ts`).
 - [ ] **`simplify` doesn't check for already-visited nodes** before recursing (`packages/marked-serializable/src/simplify.ts`). Cycles recurse forever; shared subtrees are re-serialized on every visit. Recording the node before recursing fixes both.
 - [ ] **Duplicates aren't ref-counted.** Containers are tracked in a `Set`. If an array holds the same child twice and one copy is removed, the child stops notifying the array. `fill` works around this; `pop` / `shift` / `splice` (and duplicate `MarkedMap` values) don't.

@@ -84,6 +84,85 @@ describe("MarkedArray", () => {
       expect([...arr]).toEqual([1, 2, 3, 4]);
     });
 
+    describe("matches native Array.prototype.splice", () => {
+      const cases: any[][] = [
+        [],
+        [1],
+        [-1],
+        [-10],
+        [10],
+        [NaN],
+        [1, undefined],
+        [1, 1],
+        [1, -1],
+        [1, Infinity],
+        [1, 1.7],
+        [1, 0, "x", "y"],
+        [-2, 1, "x"],
+      ];
+
+      for (const args of cases) {
+        it(`splice(${args.map(String).join(", ")})`, () => {
+          const native = ["a", "b", "c", "d"];
+          const marked = MarkedArray.create(["a", "b", "c", "d"]);
+          const nativeDeleted = (native.splice as any)(...args);
+          const markedDeleted = (marked.splice as any)(...args);
+          expect(markedDeleted).toEqual(nativeDeleted);
+          expect([...marked]).toEqual(native);
+        });
+      }
+    });
+
+    it("splice(start) removes to the end and uncontains removed items", () => {
+      const a = MarkedValue.create("a");
+      const b = MarkedValue.create("b");
+      const c = MarkedValue.create("c");
+      const arr = MarkedArray.create([a, b, c]);
+
+      const deleted = arr.splice(1);
+
+      expect(deleted).toEqual([b, c]);
+      expect([...arr]).toEqual([a]);
+      expect(a.$$mark._container.has(arr)).toBe(true);
+      expect(b.$$mark._container.has(arr)).toBe(false);
+      expect(c.$$mark._container.has(arr)).toBe(false);
+    });
+
+    it("replacing an item with itself keeps it contained", () => {
+      const child = MarkedValue.create(1);
+      const arr = MarkedArray.create([child]);
+      arr.splice(0, 1, child);
+      expect(child.$$mark._container.has(arr)).toBe(true);
+    });
+
+    describe("no-op splices don't notify", () => {
+      const noops: [string, (arr: MarkedArray<number>) => void][] = [
+        ["splice(0, 0)", (arr) => arr.splice(0, 0)],
+        ["splice(length)", (arr) => arr.splice(arr.length)],
+        ["splice(1, -1)", (arr) => arr.splice(1, -1)],
+        ["splice(1, undefined)", (arr) => arr.splice(1, undefined)],
+      ];
+
+      for (const [name, op] of noops) {
+        it(name, () => {
+          const arr = MarkedArray.create([1, 2, 3]);
+          const cb = vi.fn();
+          subbable.subscribe(arr, cb);
+          op(arr);
+          expect(cb).not.toHaveBeenCalled();
+          expect([...arr]).toEqual([1, 2, 3]);
+        });
+      }
+
+      it("splice(0) on an empty array", () => {
+        const arr = MarkedArray.create<number>([]);
+        const cb = vi.fn();
+        subbable.subscribe(arr, cb);
+        arr.splice(0);
+        expect(cb).not.toHaveBeenCalled();
+      });
+    });
+
     it("returns a plain Array, not a MarkedArray", () => {
       const arr = MarkedArray.create([1, 2, 3]);
       const deleted = arr.splice(0, 1);
