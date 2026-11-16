@@ -22,7 +22,7 @@ export class MarkedValue<S> implements MarkedSubbable {
 
   set(value: Readonly<S>): void {
     return this.$$mark.mutate(this, (contain, uncontain) => {
-      uncontain([value]);
+      uncontain([this._value]);
       contain([value]);
       this._value = value;
     });
