@@ -45,4 +45,16 @@ describe("LinkableValue", () => {
     holder.set(a);
     expect(a.$$mark._container.has(holder)).toBe(true);
   });
+
+  it(".setDyn sets from the previous value", () => {
+    const prim = MarkedValue.create(1);
+    prim.setDyn((prev) => prev + 1);
+    expect(prim.get()).toBe(2);
+  });
+
+  it(".replace sets the value", () => {
+    const prim = MarkedValue.create("a");
+    prim.replace("b");
+    expect(prim.get()).toBe("b");
+  });
 });

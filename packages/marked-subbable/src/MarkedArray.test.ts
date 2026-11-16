@@ -571,4 +571,60 @@ describe("MarkedArray", () => {
       expect(child.$$mark._container.has(arr)).toBe(false);
     });
   });
+
+  describe(".sort and .reverse", () => {
+    it(".sort sorts in place, returns the array and notifies once", () => {
+      const arr = MarkedArray.create([3, 1, 2]);
+      const cb = vi.fn();
+      subbable.subscribe(arr, cb);
+      expect(arr.sort((a, b) => b - a)).toBe(arr);
+      expect([...arr]).toEqual([3, 2, 1]);
+      expect(cb).toHaveBeenCalledTimes(1);
+    });
+
+    it(".reverse reverses in place, returns the array and notifies once", () => {
+      const arr = MarkedArray.create([1, 2, 3]);
+      const cb = vi.fn();
+      subbable.subscribe(arr, cb);
+      expect(arr.reverse()).toBe(arr);
+      expect([...arr]).toEqual([3, 2, 1]);
+      expect(cb).toHaveBeenCalledTimes(1);
+    });
+
+    it("don't notify on an empty array", () => {
+      const arr = MarkedArray.create<number>([]);
+      const cb = vi.fn();
+      subbable.subscribe(arr, cb);
+      arr.sort();
+      arr.reverse();
+      expect(cb).not.toHaveBeenCalled();
+    });
+  });
+
+  describe(".remove", () => {
+    it("removes the first occurrence, returns it and unlinks it", () => {
+      const child = MarkedValue.create(1);
+      const arr = MarkedArray.create<unknown>([0, child, 2]);
+      expect(arr.remove(child)).toBe(child);
+      expect([...arr]).toEqual([0, 2]);
+      expect(child.$$mark._container.has(arr)).toBe(false);
+    });
+
+    it("returns null and doesn't notify for a missing item", () => {
+      const arr = MarkedArray.create([1, 2]);
+      const cb = vi.fn();
+      subbable.subscribe(arr, cb);
+      expect(arr.remove(9)).toBeNull();
+      expect(cb).not.toHaveBeenCalled();
+    });
+  });
+
+  it("unshift() and pushAll([]) don't notify", () => {
+    const arr = MarkedArray.create([1, 2]);
+    const cb = vi.fn();
+    subbable.subscribe(arr, cb);
+    expect(arr.unshift()).toBe(2);
+    expect(arr.pushAll([])).toBe(2);
+    expect(cb).not.toHaveBeenCalled();
+  });
 });

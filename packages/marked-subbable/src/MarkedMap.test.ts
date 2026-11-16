@@ -180,4 +180,15 @@ describe("MarkedMap", () => {
       expect(linked(kv, map)).toBe(false);
     });
   });
+
+  it(".map returns an array, calling back with value, key and the map", () => {
+    const map = MarkedMap.create([
+      ["a", 1],
+      ["b", 2],
+    ]);
+    expect(map.map((v, k, m) => [k, v * 10, m === map])).toEqual([
+      ["a", 10, true],
+      ["b", 20, true],
+    ]);
+  });
 });
