@@ -106,6 +106,87 @@ describe("MarkedArray", () => {
     });
   });
 
+  describe(".from", () => {
+    it("builds a MarkedArray from an array", () => {
+      const arr = MarkedArray.from([1, 2, 3]);
+      expect(arr).toBeInstanceOf(MarkedArray);
+      expect(arr.$$mark).toBeDefined();
+      expect([...arr]).toEqual([1, 2, 3]);
+    });
+
+    it("accepts an array-like", () => {
+      const arr = MarkedArray.from({ length: 2, 0: "a", 1: "b" });
+      expect([...arr]).toEqual(["a", "b"]);
+    });
+
+    it("applies mapfn with the index and thisArg", () => {
+      const ctx = { offset: 10 };
+      const arr = MarkedArray.from(
+        [1, 2],
+        function (this: typeof ctx, v, i) {
+          return v + i + this.offset;
+        },
+        ctx,
+      );
+      expect([...arr]).toEqual([11, 13]);
+    });
+
+    it("throws on a non-callable mapfn, like native", () => {
+      expect(() => MarkedArray.from([1], null as any)).toThrow(TypeError);
+    });
+
+    it("contains items from a one-shot iterator", () => {
+      const a = MarkedValue.create(1);
+      function* items() {
+        yield a;
+        yield a;
+      }
+      const arr = MarkedArray.from(items());
+      expect([...arr]).toEqual([a, a]);
+      expect(a.$$mark._container.get(arr)).toBe(2);
+    });
+  });
+
+  describe(".of", () => {
+    it("treats a single number as an item", () => {
+      const arr = MarkedArray.of(5);
+      expect(arr).toBeInstanceOf(MarkedArray);
+      expect([...arr]).toEqual([5]);
+    });
+
+    it("contains its items", () => {
+      const a = MarkedValue.create(1);
+      const b = MarkedValue.create(2);
+      const arr = MarkedArray.of(a, b);
+      expect(a.$$mark._container.get(arr)).toBe(1);
+      expect(b.$$mark._container.get(arr)).toBe(1);
+    });
+  });
+
+  describe(".fromAsync", () => {
+    it("builds a MarkedArray from an async iterable and contains items", async () => {
+      const a = MarkedValue.create(1);
+      const b = MarkedValue.create(2);
+      async function* items() {
+        yield a;
+        yield b;
+      }
+      const arr = await MarkedArray.fromAsync(items());
+      expect(arr).toBeInstanceOf(MarkedArray);
+      expect([...arr]).toEqual([a, b]);
+      expect(a.$$mark._container.get(arr)).toBe(1);
+      expect(b.$$mark._container.get(arr)).toBe(1);
+    });
+
+    it("awaits promises and applies mapfn", async () => {
+      const arr = await MarkedArray.fromAsync(
+        [Promise.resolve(1), 2],
+        (v, i) => v * 10 + i,
+      );
+      expect([...arr]).toEqual([10, 21]);
+    });
+  });
+
   describe(".shift", () => {
     it("removes and returns the first item", () => {
       const arr = MarkedArray.create([1, 2, 3]);

@@ -26,6 +26,60 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
     return new this<T>(initialValue ?? [], nanoid(5));
   }
 
+  // The inherited Array.from / .of / .fromAsync construct `new MarkedArray()`
+  // with no input and write items straight into slots, which throws (and would
+  // skip containment anyway). Let native Array build a plain array, then go
+  // through create.
+
+  static override from<T>(arrayLike: ArrayLike<T>): MarkedArray<T>;
+  static override from<T, U>(
+    arrayLike: ArrayLike<T>,
+    mapfn: (v: T, k: number) => U,
+    thisArg?: unknown,
+  ): MarkedArray<U>;
+  static override from<T>(iterable: Iterable<T> | ArrayLike<T>): MarkedArray<T>;
+  static override from<T, U>(
+    iterable: Iterable<T> | ArrayLike<T>,
+    mapfn: (v: T, k: number) => U,
+    thisArg?: unknown,
+  ): MarkedArray<U>;
+  static override from<T, U>(
+    items: Iterable<T> | ArrayLike<T>,
+    mapfn?: (v: T, k: number) => U,
+    thisArg?: unknown,
+  ): MarkedArray<T | U> {
+    return MarkedArray.create<T | U>(
+      // check for undefined, not falsy: native throws on a non-callable mapfn
+      mapfn === undefined
+        ? Array.from(items)
+        : Array.from(items, mapfn, thisArg),
+    );
+  }
+
+  static override of<T>(...items: T[]): MarkedArray<T> {
+    return MarkedArray.create(items);
+  }
+
+  // not `override`: Array.fromAsync is only typed in TypeScript's esnext lib
+  static fromAsync<T>(
+    items: AsyncIterable<T> | Iterable<T | PromiseLike<T>> | ArrayLike<T | PromiseLike<T>>,
+  ): Promise<MarkedArray<Awaited<T>>>;
+  static fromAsync<T, U>(
+    items: AsyncIterable<T> | Iterable<T> | ArrayLike<T>,
+    mapfn: (value: Awaited<T>, index: number) => U,
+    thisArg?: unknown,
+  ): Promise<MarkedArray<Awaited<U>>>;
+  static async fromAsync(
+    ...args: [items: unknown, mapfn?: unknown, thisArg?: unknown]
+  ): Promise<MarkedArray<unknown>> {
+    const nativeFromAsync = (
+      Array as unknown as {
+        fromAsync: (...args: unknown[]) => Promise<unknown[]>;
+      }
+    ).fromAsync;
+    return MarkedArray.create(await nativeFromAsync.apply(Array, args));
+  }
+
   // Array<S> interface, mutates
   override pop(): S | undefined {
     if (this.length < 1) {
