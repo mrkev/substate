@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid";
+import { subbableContainer } from "./lib/SubbableContainer";
 import { MarkedSubbable, SubbableMark } from "./lib/SubbableMark";
 import { keysAndValues } from "./util/keysAndValues";
 
@@ -8,8 +9,11 @@ export class MarkedMap<K, V> extends Map<K, V> implements MarkedSubbable {
   private constructor(initialValue: Map<K, V>, id: string) {
     super();
     this.$$mark = new SubbableMark(id);
+    // super.set, not this.set: don't notify during construction
     for (const [key, value] of initialValue) {
-      this.set(key, value);
+      super.set(key, value);
+      subbableContainer._contain(this, key);
+      subbableContainer._contain(this, value);
     }
   }
 
@@ -64,7 +68,9 @@ export class MarkedMap<K, V> extends Map<K, V> implements MarkedSubbable {
   // non-standard
 
   public replace(map: Map<K, V>) {
-    if (this.size === 0 && map.size === 0) {
+    // replacing with itself changes nothing (and clearing first would empty
+    // `map` too); nothing to replace when both are empty
+    if (map === this || (this.size === 0 && map.size === 0)) {
       return;
     }
 

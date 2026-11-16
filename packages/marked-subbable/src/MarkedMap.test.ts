@@ -191,4 +191,30 @@ describe("MarkedMap", () => {
       ["b", 20, true],
     ]);
   });
+
+  it(".create doesn't bump the hash", () => {
+    const map = MarkedMap.create([
+      ["a", 1],
+      ["b", 2],
+    ]);
+    expect(map.$$mark._hash).toBe(0);
+  });
+
+  it(".replace with itself keeps the contents and doesn't notify", () => {
+    const k = MarkedValue.create("k");
+    const v = MarkedValue.create("v");
+    const map = MarkedMap.create<unknown, unknown>([
+      [k, v],
+      ["a", 1],
+    ]);
+    const counter = countNotifications(map);
+    map.replace(map);
+    expect([...map.entries()]).toEqual([
+      [k, v],
+      ["a", 1],
+    ]);
+    expect(linked(k, map)).toBe(true);
+    expect(linked(v, map)).toBe(true);
+    expect(counter.count).toBe(0);
+  });
 });

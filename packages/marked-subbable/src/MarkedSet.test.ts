@@ -94,4 +94,33 @@ describe("MarkedSet", () => {
   it(".map returns an array of the mapped items", () => {
     expect(MarkedSet.create([1, 2]).map((x) => x * 10)).toEqual([10, 20]);
   });
+
+  it(".create links each item once and doesn't bump the hash", () => {
+    const a = MarkedValue.create("a");
+    const b = MarkedValue.create("b");
+    const set = MarkedSet.create([a, b, a]);
+    expect(set.size).toBe(2);
+    expect(a.$$mark._container.get(set)).toBe(1);
+    expect(b.$$mark._container.get(set)).toBe(1);
+    expect(set.$$mark._hash).toBe(0);
+  });
+
+  it(".replace with itself keeps the contents and doesn't notify", () => {
+    const a = MarkedValue.create("a");
+    const set = MarkedSet.create([a, "b"]);
+    let notified = 0;
+    subbable.subscribe(set, () => notified++);
+    set.replace(set);
+    expect([...set]).toEqual([a, "b"]);
+    expect(a.$$mark._container.get(set)).toBe(1);
+    expect(notified).toBe(0);
+  });
+
+  it(".replace of an empty set with an empty set doesn't notify", () => {
+    const set = MarkedSet.create<string>();
+    let notified = 0;
+    subbable.subscribe(set, () => notified++);
+    set.replace(new Set());
+    expect(notified).toBe(0);
+  });
 });

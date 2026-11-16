@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid";
+import { subbableContainer } from "./lib/SubbableContainer";
 import { MarkedSubbable, SubbableMark } from "./lib/SubbableMark";
 
 // A Subbable set that works via a $$mark (vs implementing
@@ -7,13 +8,14 @@ export class MarkedSet<S> extends Set<S> implements MarkedSubbable {
   public readonly $$mark: SubbableMark;
 
   private constructor(_set: Set<S>, _id: string) {
-    // calling this with _set as arg calls .add on all elements,
-    // but we override .add, and we need $$mark to be set before we call .add.
-    // let's just call .add ourselves after $$mark is set.
+    // calling super(_set) would call our overridden .add on each element
+    // before $$mark is set, so add elements ourselves afterwards.
+    // super.add, not this.add: don't notify during construction
     super();
     this.$$mark = new SubbableMark(_id);
     for (const elem of _set) {
-      this.add(elem);
+      super.add(elem);
+      subbableContainer._contain(this, elem);
     }
   }
 
@@ -65,6 +67,12 @@ export class MarkedSet<S> extends Set<S> implements MarkedSubbable {
   // non-standard //
 
   public replace(set: Set<S>) {
+    // replacing with itself changes nothing (and clearing first would empty
+    // `set` too); nothing to replace when both are empty
+    if (set === this || (this.size === 0 && set.size === 0)) {
+      return;
+    }
+
     this.$$mark.mutate(this, (contain, uncontain) => {
       uncontain(this);
       for (const elem of this) {
