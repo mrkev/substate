@@ -52,9 +52,11 @@ export const subbableContainer = {
   _containAll(container: MarkedSubbable, items: IterableCollection) {
     const contained = [];
     for (const elem of items) {
-      if (subbableContainer._contain(container, elem) > 0) {
-        contained.push(elem);
+      if (!isContainable(elem)) {
+        continue;
       }
+      subbableContainer._contain(container, elem);
+      contained.push(elem);
     }
     return contained;
   },
