@@ -56,6 +56,7 @@ export function JSONView({
             {preset.label}
           </UtilityToggle>
         ))}
+        <SerializedSize json={json} />
       </div>
       <pre style={{ textAlign: "left", fontSize: 12, overflow: "auto" }}>
         <JsonOutReact
@@ -69,6 +70,32 @@ export function JSONView({
       </pre>
     </div>
   );
+}
+
+const utf8 = new TextEncoder();
+
+/** size of `json` when stringified (compact, UTF-8) */
+function SerializedSize({ json }: { json: JSON }) {
+  const bytes = utf8.encode(JSON.stringify(json)).byteLength;
+  return (
+    <span
+      className="ml-auto text-gray-500"
+      title={`${bytes.toLocaleString()} bytes`}
+    >
+      {formatBytes(bytes)}
+    </span>
+  );
+}
+
+function formatBytes(bytes: number): string {
+  const units = ["B", "KB", "MB", "GB"];
+  let value = bytes;
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit++;
+  }
+  return unit === 0 ? `${value} B` : `${value.toFixed(1)} ${units[unit]}`;
 }
 
 export function JsonOutReact({
