@@ -342,6 +342,10 @@
 @layer components;
 
 @layer utilities {
+  .collapse {
+    visibility: collapse;
+  }
+
   .absolute {
     position: absolute;
   }
@@ -410,6 +414,10 @@
 
   .mr-1 {
     margin-right: var(--spacing);
+  }
+
+  .mb-2 {
+    margin-bottom: calc(var(--spacing) * 2);
   }
 
   .ml-auto {

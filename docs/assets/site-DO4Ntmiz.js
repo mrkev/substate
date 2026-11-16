@@ -15893,48 +15893,156 @@ var require_react_jsx_runtime_production = /* @__PURE__ */ __commonJSMin(((expor
 	exports.jsx = jsxProd;
 	exports.jsxs = jsxProd;
 }));
-// src/JSONView.tsx
+// src/UtilityToggle.tsx
 var import_jsx_runtime = (/* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_react_jsx_runtime_production();
 })))();
+function UtilityToggle({ className, style: styleArg, toggleStyle = { background: "SaddleBrown" }, toggled, onToggle, ...props }) {
+	const style = toggled ? {
+		...styleArg,
+		...toggleStyle
+	} : styleArg;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+		className,
+		style,
+		...props,
+		onClick: function(e) {
+			onToggle(!toggled);
+			e.stopPropagation();
+		}
+	});
+}
+// src/JSONView.tsx
 var TAB_SIZE$6 = 2;
-function JSONView({ json, showUnknowns = false, style, defaultExpandedLevels }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		style: {
-			overflow: "scroll",
-			...style
-		},
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", {
+var LEVEL_PRESETS = [
+	{
+		label: "collapse all",
+		levels: 0
+	},
+	{
+		label: "1",
+		levels: 1
+	},
+	{
+		label: "2",
+		levels: 2
+	},
+	{
+		label: "3",
+		levels: 3
+	},
+	{
+		label: "expand all",
+		levels: Infinity
+	}
+];
+function JSONView({ json, showUnknowns = false, style, defaultExpandedLevels = 1 }) {
+	const [levels, setLevels] = (0, import_react$1.useState)(defaultExpandedLevels);
+	const [generation, setGeneration] = (0, import_react$1.useState)(0);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		style,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "mb-2 flex flex-wrap items-center gap-1 text-xs",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "mr-1 text-gray-500",
+					children: "expand:"
+				}),
+				LEVEL_PRESETS.map((preset) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UtilityToggle, {
+					className: "whitespace-nowrap",
+					toggled: levels === preset.levels,
+					onToggle: () => {
+						setLevels(preset.levels);
+						setGeneration((g) => g + 1);
+					},
+					children: preset.label
+				}, preset.label)),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SerializedSize, { json })
+			]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", {
 			style: {
 				textAlign: "left",
-				width: 300,
-				fontSize: 12
+				fontSize: 12,
+				overflow: "auto"
 			},
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(JsonOutReact, {
 				val: json,
 				pad: 0,
 				path: "ROOT",
 				showUnknowns,
-				defaultExpandedLevels
-			})
-		})
+				expandLevels: levels
+			}, generation)
+		})]
 	});
 }
-function JsonOutReact({ val, pad, path = "", showUnknowns = true, defaultExpandedLevels }) {
+var utf8 = new TextEncoder();
+/** size of `json` when stringified (compact, UTF-8), raw and gzipped */
+function SerializedSize({ json }) {
+	const text = JSON.stringify(json);
+	const bytes = utf8.encode(text).byteLength;
+	const gzipBytes = useGzipSize(text);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+		className: "ml-auto whitespace-nowrap text-gray-500",
+		title: `${bytes.toLocaleString()} bytes` + (gzipBytes == null ? "" : `, ${gzipBytes.toLocaleString()} bytes gzipped`),
+		children: [
+			formatBytes(bytes),
+			" · ",
+			gzipBytes == null ? "…" : formatBytes(gzipBytes),
+			" gzip"
+		]
+	});
+}
+/** gzipped size of `text` in bytes; null while it's being computed */
+function useGzipSize(text) {
+	const [result, setResult] = (0, import_react$1.useState)();
+	(0, import_react$1.useEffect)(() => {
+		let cancelled = false;
+		gzipSize(text).then((bytes) => {
+			if (!cancelled) setResult({
+				text,
+				bytes
+			});
+		});
+		return () => {
+			cancelled = true;
+		};
+	}, [text]);
+	return result?.text === text ? result.bytes : null;
+}
+async function gzipSize(text) {
+	const stream = new Blob([text]).stream().pipeThrough(new CompressionStream("gzip"));
+	return (await new Response(stream).arrayBuffer()).byteLength;
+}
+function formatBytes(bytes) {
+	const units = [
+		"B",
+		"KB",
+		"MB",
+		"GB"
+	];
+	let value = bytes;
+	let unit = 0;
+	while (value >= 1024 && unit < units.length - 1) {
+		value /= 1024;
+		unit++;
+	}
+	return unit === 0 ? `${value} B` : `${value.toFixed(1)} ${units[unit]}`;
+}
+function JsonOutReact({ val, pad, path = "", showUnknowns = true, expandLevels }) {
 	if (typeof val === "string" || typeof val === "number" || typeof val === "boolean" || val == null) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(JSONPrimitive, { val });
 	else if (Array.isArray(val)) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(JSONArray, {
 		arr: val,
 		pad,
 		path,
 		showUnknowns,
-		defaultExpandedLevels
+		expandLevels
 	});
 	else if (typeof val === "function" || typeof val === "bigint" || typeof val === "symbol") return `(invalid: ${typeof val}:${val})`;
 	else return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(JSONRecord, {
 		record: val,
 		pad,
 		showUnknowns,
-		defaultExpandedLevels
+		expandLevels
 	});
 }
 function Collapser({ display, setDisplay }) {
@@ -15957,8 +16065,8 @@ function Collapser({ display, setDisplay }) {
 		children: [display === "collapsed" ? "▶" : display === "full" ? "▼" : "⊖", " "]
 	});
 }
-function JSONRecord({ record, pad, path = "", showUnknowns, defaultExpandedLevels = 0 }) {
-	const [displayState, setDisplayState] = (0, import_react$1.useState)(defaultExpandedLevels > 1 ? "full" : "summary");
+function JSONRecord({ record, pad, path = "", showUnknowns, expandLevels }) {
+	const [displayState, setDisplayState] = (0, import_react$1.useState)(expandLevels > 0 ? "full" : "summary");
 	const body = ["{"];
 	const keys = Object.keys(record);
 	if (displayState === "summary") body.push(/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
@@ -15981,7 +16089,7 @@ function JSONRecord({ record, pad, path = "", showUnknowns, defaultExpandedLevel
 			pad: baseline,
 			path: `${path}/${key}`,
 			showUnknowns,
-			defaultExpandedLevels: defaultExpandedLevels ? defaultExpandedLevels - 1 : void 0
+			expandLevels: expandLevels - 1
 		}, `elem-${key}`));
 	}
 	if (displayState === "collapsed") body.push("...", "}");
@@ -16001,8 +16109,8 @@ function string(val, depth) {
 	else if (typeof val === "function" || typeof val === "bigint" || typeof val === "symbol") return `(invalid: ${typeof val}:${val})`;
 	else return `{${Object.keys(val).map((key) => `${key}`).join(", ")}}`;
 }
-function JSONArray({ arr, pad, path = "", showUnknowns, defaultExpandedLevels = 0 }) {
-	const [displayState, setDisplayState] = (0, import_react$1.useState)(defaultExpandedLevels > 1 ? "full" : "summary");
+function JSONArray({ arr, pad, path = "", showUnknowns, expandLevels }) {
+	const [displayState, setDisplayState] = (0, import_react$1.useState)(expandLevels > 0 ? "full" : "summary");
 	const body = [];
 	if (arr.length < 1) return "[]";
 	if (displayState === "summary") body.push(/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
@@ -16021,7 +16129,7 @@ function JSONArray({ arr, pad, path = "", showUnknowns, defaultExpandedLevels = 
 			pad: baseline,
 			path: `${path}/${i}`,
 			showUnknowns,
-			defaultExpandedLevels: defaultExpandedLevels ? defaultExpandedLevels - 1 : void 0
+			expandLevels: expandLevels - 1
 		}, `elem-${i}`));
 	}
 	if (displayState === "collapsed") body.push("...", "");
@@ -16194,22 +16302,6 @@ var Project = class Project extends Structured {
 		while (this.tracks.pop());
 	}
 };
-// src/UtilityToggle.tsx
-function UtilityToggle({ className, style: styleArg, toggleStyle = { background: "SaddleBrown" }, toggled, onToggle, ...props }) {
-	const style = toggled ? {
-		...styleArg,
-		...toggleStyle
-	} : styleArg;
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-		className,
-		style,
-		...props,
-		onClick: function(e) {
-			onToggle(!toggled);
-			e.stopPropagation();
-		}
-	});
-}
 // src/ui/renderFlash.ts
 /**
 * Render highlighting. Components call useRenderFlash() and attach the ref to
@@ -20109,7 +20201,7 @@ function ProjectDebug({ project }) {
 				fontFamily: "monospace"
 			},
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(JSONView, {
-				defaultExpandedLevels: 3,
+				defaultExpandedLevels: 2,
 				json: JSON.parse(serialize$1(project))
 			})
 		})]
@@ -21427,7 +21519,7 @@ function LinkableStateTest() {
 		]
 	});
 }
-// ../marked-subbable/src/lib/SubbableMark.tsx
+// ../marked-subbable/src/lib/SubbableMark.ts
 var SubbableMark = class SubbableMark {
 	_id;
 	_subscriptors = /* @__PURE__ */ new Set();
@@ -21456,11 +21548,11 @@ var SubbableMark = class SubbableMark {
 		return result;
 	}
 };
-// ../marked-subbable/src/lib/Contained.tsx
+// ../marked-subbable/src/lib/Contained.ts
 function isContainable(value) {
 	return typeof value === "object" && value !== null && "$$mark" in value && value.$$mark instanceof SubbableMark;
 }
-// ../marked-subbable/src/lib/Subbable.tsx
+// ../marked-subbable/src/lib/Subbable.ts
 var subbable = {
 	/**
 	* Records a callback, so that changes to "subbable" trigger a call of "callback"
@@ -21481,7 +21573,7 @@ var subbable = {
 		for (const cb of mh.$$mark._subscriptors) cb(target, mh);
 	}
 };
-// ../marked-subbable/src/lib/SubbableContainer.tsx
+// ../marked-subbable/src/lib/SubbableContainer.ts
 /**
 * A token is unique to an update (a call to _notifyChange). It serves two purposes:
 * - it helps us prevent loops by ensuring an event isn't processed twice
@@ -21694,7 +21786,7 @@ function* keysAndValues(map) {
 	yield* map.keys();
 	yield* map.values();
 }
-// ../marked-subbable/src/MarkedMap.tsx
+// ../marked-subbable/src/MarkedMap.ts
 var MarkedMap = class extends Map {
 	$$mark;
 	constructor(initialValue, id) {
@@ -21800,7 +21892,7 @@ var MarkedSet = class extends Set {
 		return result;
 	}
 };
-// ../marked-subbable/src/MarkedValue.tsx
+// ../marked-subbable/src/MarkedValue.ts
 /**
 * MarkedValue is a MarkedSubbable holding a single atomic value. It's
 * the simplest subbable container.
@@ -21846,7 +21938,7 @@ function printId(obj) {
 function exhaustive$1(x, msg) {
 	throw new Error(msg ?? `Exhaustive violation, unexpected value ${x}`);
 }
-// ../marked-subbable/src/useLink.tsx
+// ../marked-subbable/src/useLink.ts
 function useLink(obj, recursiveChanges = false) {
 	"use no memo";
 	(0, import_react$1.useSyncExternalStore)((0, import_react$1.useCallback)((onStoreChange) => {
@@ -22714,7 +22806,7 @@ function MProjectDebug({ project }) {
 		children: [tab === "struct" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DebugTree, { val: project }), tab === "serialized" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "font-mono text-left overflow-scroll",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(JSONView, {
-				defaultExpandedLevels: 3,
+				defaultExpandedLevels: 2,
 				json: JSON.parse(JSON.stringify(simplifyAndPackage(project)))
 			})
 		})]
