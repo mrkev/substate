@@ -282,7 +282,7 @@ function ProjectDebug({ project }: { project: Project }) {
           }}
         >
           <JSONView
-            defaultExpandedLevels={3}
+            defaultExpandedLevels={2}
             json={JSON.parse(serialize(project))}
           />
         </div>

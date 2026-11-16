@@ -1,5 +1,6 @@
 import { ReactNode, useState } from "react";
 import { exhaustive } from "../../structured-state/src/lib/assertions";
+import { UtilityToggle } from "./UtilityToggle";
 
 export type JSON =
   | string
@@ -12,26 +13,58 @@ export type JSON =
 const TAB_SIZE = 2;
 type DisplayState = "full" | "summary" | "collapsed";
 
+// toolbar presets: how many levels of nesting start expanded. 0 shows the
+// root as a one-line summary.
+const LEVEL_PRESETS: Array<{ label: string; levels: number }> = [
+  { label: "collapse all", levels: 0 },
+  { label: "1", levels: 1 },
+  { label: "2", levels: 2 },
+  { label: "3", levels: 3 },
+  { label: "expand all", levels: Infinity },
+];
+
 export function JSONView({
   json,
   showUnknowns = false,
   style,
-  defaultExpandedLevels,
+  defaultExpandedLevels = 1,
 }: {
   json: JSON;
   showUnknowns?: boolean;
   style?: React.CSSProperties;
+  /** levels of nesting expanded initially (0 = root collapsed) */
   defaultExpandedLevels?: number;
 }) {
+  const [levels, setLevels] = useState(defaultExpandedLevels);
+  // each node keeps its own expanded state, so applying a preset remounts the
+  // tree. Bumped on every click so re-clicking a preset resets manual toggles.
+  const [generation, setGeneration] = useState(0);
+
   return (
-    <div style={{ overflow: "scroll", ...style }}>
-      <pre style={{ textAlign: "left", width: 300, fontSize: 12 }}>
+    <div style={style}>
+      <div className="mb-2 flex items-center gap-1 text-xs">
+        <span className="mr-1 text-gray-500">expand:</span>
+        {LEVEL_PRESETS.map((preset) => (
+          <UtilityToggle
+            key={preset.label}
+            toggled={levels === preset.levels}
+            onToggle={() => {
+              setLevels(preset.levels);
+              setGeneration((g) => g + 1);
+            }}
+          >
+            {preset.label}
+          </UtilityToggle>
+        ))}
+      </div>
+      <pre style={{ textAlign: "left", fontSize: 12, overflow: "auto" }}>
         <JsonOutReact
+          key={generation}
           val={json}
           pad={0}
           path={"ROOT"}
           showUnknowns={showUnknowns}
-          defaultExpandedLevels={defaultExpandedLevels}
+          expandLevels={levels}
         />
       </pre>
     </div>
@@ -43,13 +76,13 @@ export function JsonOutReact({
   pad,
   path = "",
   showUnknowns = true,
-  defaultExpandedLevels,
+  expandLevels,
 }: {
   val: JSON;
   pad: number;
   path?: string;
   showUnknowns?: boolean;
-  defaultExpandedLevels?: number;
+  expandLevels: number;
 }) {
   if (
     typeof val === "string" ||
@@ -65,7 +98,7 @@ export function JsonOutReact({
         pad={pad}
         path={path}
         showUnknowns={showUnknowns}
-        defaultExpandedLevels={defaultExpandedLevels}
+        expandLevels={expandLevels}
       />
     );
   } else if (
@@ -80,7 +113,7 @@ export function JsonOutReact({
         record={val}
         pad={pad}
         showUnknowns={showUnknowns}
-        defaultExpandedLevels={defaultExpandedLevels}
+        expandLevels={expandLevels}
       />
     );
   }
@@ -122,16 +155,16 @@ function JSONRecord({
   pad,
   path = "",
   showUnknowns,
-  defaultExpandedLevels = 0,
+  expandLevels,
 }: {
   record: { [key: string]: JSON };
   pad: number;
   path?: string;
   showUnknowns: boolean;
-  defaultExpandedLevels?: number;
+  expandLevels: number;
 }) {
   const [displayState, setDisplayState] = useState<DisplayState>(
-    defaultExpandedLevels > 1 ? "full" : "summary",
+    expandLevels > 0 ? "full" : "summary",
   );
 
   const body: Array<ReactNode> = ["{"];
@@ -165,9 +198,7 @@ function JSONRecord({
         pad={baseline}
         path={`${path}/${key}`}
         showUnknowns={showUnknowns}
-        defaultExpandedLevels={
-          defaultExpandedLevels ? defaultExpandedLevels - 1 : undefined
-        }
+        expandLevels={expandLevels - 1}
       />,
     );
   }
@@ -221,16 +252,16 @@ function JSONArray({
   pad,
   path = "",
   showUnknowns,
-  defaultExpandedLevels = 0,
+  expandLevels,
 }: {
   arr: JSON[];
   pad: number;
   path?: string;
   showUnknowns: boolean;
-  defaultExpandedLevels?: number;
+  expandLevels: number;
 }) {
   const [displayState, setDisplayState] = useState<DisplayState>(
-    defaultExpandedLevels > 1 ? "full" : "summary",
+    expandLevels > 0 ? "full" : "summary",
   );
 
   const body = [];
@@ -260,9 +291,7 @@ function JSONArray({
         pad={baseline}
         path={`${path}/${i}`}
         showUnknowns={showUnknowns}
-        defaultExpandedLevels={
-          defaultExpandedLevels ? defaultExpandedLevels - 1 : undefined
-        }
+        expandLevels={expandLevels - 1}
       />,
     );
   }

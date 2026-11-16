@@ -33,7 +33,7 @@ export function MProjectDebug({ project }: { project: MProject }) {
       {tab === "serialized" && (
         <div className="font-mono text-left overflow-scroll">
           <JSONView
-            defaultExpandedLevels={3}
+            defaultExpandedLevels={2}
             json={JSON.parse(JSON.stringify(simplifyAndPackage(project)))}
           />
         </div>
