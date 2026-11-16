@@ -8,6 +8,8 @@
 
     /* Bundler mode */
     "moduleResolution": "bundler",
+    // resolve workspace packages (@mrkev/*) to their source, not their dist/
+    "customConditions": ["mrkev:source"],
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,

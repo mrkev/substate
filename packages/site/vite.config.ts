@@ -1,6 +1,6 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defaultClientConditions, defineConfig } from "vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -10,6 +10,11 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  resolve: {
+    // resolve workspace packages (@mrkev/*) to their source, not their dist/,
+    // so the site always runs the current code without rebuilding them
+    conditions: ["mrkev:source", ...defaultClientConditions],
+  },
   build: {
     outDir: "../../docs",
     emptyOutDir: true, // also necessary
