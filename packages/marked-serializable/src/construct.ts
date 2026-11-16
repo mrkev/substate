@@ -121,7 +121,7 @@ function initializeMarkedMap(
 ): MarkedMap<any, any> {
   const result = MarkedMap.create(
     map.entries.map(
-      (key, value) => [initialize(key, rsc), initialize(value, rsc)] as const,
+      ([key, value]) => [initialize(key, rsc), initialize(value, rsc)] as const,
     ),
   );
   return result;
