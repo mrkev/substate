@@ -50,6 +50,10 @@ export class MarkedSet<S> extends Set<S> implements MarkedSubbable {
 
   // Set<S> interface, mutates
   override clear(): void {
+    if (this.size === 0) {
+      return;
+    }
+
     this.$$mark.mutate(this, (_, uncontain) => {
       uncontain(this);
       for (const elem of this) {

@@ -22,7 +22,6 @@ Assessment of `marked-subbable` + `marked-serializable` against `structured-stat
 
 ## Bugs
 
-- [ ] **`MarkedMap.clear` / `MarkedMap.replace`** call `uncontain(this)` and `contain(map)`, which iterate `[key, value]` tuples, not values (`packages/marked-subbable/src/MarkedMap.tsx`). Values are never unlinked on clear and never linked on replace. *Confirmed with a probe test.*
 - [ ] **`MarkedArray.splice(start)`** removes nothing: it forwards `deleteCount` even when `undefined`, and native `splice` reads an explicit `undefined` as 0 (`packages/marked-subbable/src/MarkedArray.ts`). It also notifies even when nothing changed. *Confirmed with a probe test.*
 - [ ] **Map deserialization is broken.** `initializeMarkedMap` uses `.map((key, value) => …)` but the callback receives `(entry, index)` (`packages/marked-serializable/src/construct.ts`).
 - [ ] **`simplify` doesn't check for already-visited nodes** before recursing (`packages/marked-serializable/src/simplify.ts`). Cycles recurse forever; shared subtrees are re-serialized on every visit. Recording the node before recursing fixes both.

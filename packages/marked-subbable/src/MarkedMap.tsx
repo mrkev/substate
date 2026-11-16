@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { MarkedSubbable, SubbableMark } from "./lib/SubbableMark";
-import { nullthrows } from "./util/nullthrows";
+import { keysAndValues } from "./util/keysAndValues";
 
 export class MarkedMap<K, V> extends Map<K, V> implements MarkedSubbable {
   readonly $$mark: SubbableMark;
@@ -25,9 +25,13 @@ export class MarkedMap<K, V> extends Map<K, V> implements MarkedSubbable {
 
   // Map<K, V> interface, mutates
   override clear(): void {
-    return this.$$mark.mutate(this, (_, uncontain) => {
-      uncontain(this);
-      return super.clear();
+    if (this.size === 0) {
+      return;
+    }
+
+    this.$$mark.mutate(this, (_, uncontain) => {
+      uncontain(keysAndValues(this));
+      super.clear();
     });
   }
 
@@ -38,9 +42,7 @@ export class MarkedMap<K, V> extends Map<K, V> implements MarkedSubbable {
     }
 
     return this.$$mark.mutate(this, (_, uncontain) => {
-      // NOTE: We have confirmed above the set has this value
-      const value = nullthrows(this.get(key), "this should never happen");
-      uncontain([value]);
+      uncontain([key, this.get(key)]);
       return super.delete(key);
     });
   }
@@ -48,10 +50,11 @@ export class MarkedMap<K, V> extends Map<K, V> implements MarkedSubbable {
   // Map<K, V> interface, mutates
   override set(key: K, value: V): this {
     return this.$$mark.mutate(this, (contain, uncontain) => {
-      // NOTE: We have confirmed above the set has this value
-      const old = this.get(key);
-      if (old != null) {
-        uncontain([old]);
+      if (this.has(key)) {
+        // the key stays, only its value is replaced
+        uncontain([this.get(key)]);
+      } else {
+        contain([key]);
       }
       contain([value]);
       return super.set(key, value);
@@ -61,12 +64,14 @@ export class MarkedMap<K, V> extends Map<K, V> implements MarkedSubbable {
   // non-standard
 
   public replace(map: Map<K, V>) {
+    if (this.size === 0 && map.size === 0) {
+      return;
+    }
+
     this.$$mark.mutate(this, (contain, uncontain) => {
-      uncontain(this);
-      for (const [key] of this) {
-        super.delete(key);
-      }
-      contain(map);
+      uncontain(keysAndValues(this));
+      super.clear();
+      contain(keysAndValues(map));
       for (const [key, value] of map) {
         super.set(key, value);
       }

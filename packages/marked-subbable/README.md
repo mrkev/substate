@@ -84,6 +84,9 @@ taskState.has("buy tortillas"); // false
 // etc...
 ```
 
+Both keys and values are linked to the map: if a marked key or value changes,
+the map notifies its recursive listeners.
+
 ## MarkedSet
 
 Creates a linkable Set:
