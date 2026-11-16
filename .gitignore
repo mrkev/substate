@@ -31,3 +31,5 @@ dist-ssr
 .github/instructions/nx.instructions.md
 *.tsbuildinfo
 .nx/migrate-runs
+# test coverage reports
+coverage

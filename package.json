@@ -8,6 +8,7 @@
     "build": "pnpx nx run-many -t build",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "test": "pnpm -r --filter '!old-state' run test",
+    "coverage": "pnpm -r --filter '!old-state' run test --run --coverage --coverage.include='src/**' --coverage.include=index.ts",
     "tsc": "tsc -b"
   },
   "devDependencies": {
@@ -22,6 +23,7 @@
     "@types/react-dom": "^19.3.0",
     "@typescript-eslint/eslint-plugin": "^8.72.0",
     "@typescript-eslint/parser": "^8.72.0",
+    "@vitest/coverage-v8": "4.1.12",
     "eslint": "^10.13.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
