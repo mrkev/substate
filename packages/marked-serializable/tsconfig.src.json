@@ -23,5 +23,5 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true
   },
-  "include": ["src", "lib", "debug", "./index.ts"]
+  "include": ["src", "./index.ts"]
 }

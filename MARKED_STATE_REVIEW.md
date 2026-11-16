@@ -34,19 +34,14 @@ Done: workspace packages now resolve each other to source via an `mrkev:source` 
 
 Done: the marked packages' `build` is now `tsc -b && vite build`, so type errors fail it (`vite-plugin-dts` doesn't fail on them by default), and their `dts({ ... })` options exclude `*.test.ts(x)`, so test declarations aren't published. `structured-state` already type-checked in its build; its `dts` options now also exclude tests (`*.test.ts(x)`, `src/__tests__/`, and the test-only `src/testUtils.ts`).
 
+Done: `structured-state`'s `main` / `exports` no longer point at a `structured-state.umd.cjs` that was never built (only `formats: ["es"]` is built); `main` is now the ES file and the `require` entry is gone. Cleanups: tsconfig `include`s are just `["src", "./index.ts"]` in both marked packages (dropped nonexistent and redundant folders), and the unused dev dependencies (`marked-subbable` on itself, `structured-state` on `@mrkev/linked-state`) are removed. `pnpm install` also dropped a stale root `@types/scheduler` lockfile entry, left over from `9e8e218` removing it from `package.json`.
+
 Note: the per-package `tsconfig.json` files have `"files": []` and only reference `tsconfig.src.json` / `tsconfig.node.json`, so `tsc -p packages/<pkg>` checks nothing. Use `pnpm tsc` (or `tsc -p packages/<pkg>/tsconfig.src.json`).
 
-1. [ ] **`structured-state` points at a file that's never built.** `main` and `exports.require` reference `structured-state.umd.cjs`, but the vite config only builds `formats: ["es"]`, so a CommonJS `require` fails. Fix: drop the `require` entry and point `main` at the ES file.
-2. [ ] **Compiler options are copied five times.** Each package's `tsconfig.src.json` repeats the same options. The root `tsconfig.json` lists them too, but they apply to nothing (empty `files` / `include`; referenced projects don't inherit options). Fix: a single `tsconfig.base.json` that each package `extends`.
-3. [ ] **Small cleanups.**
-   - `marked-serializable`'s `tsconfig.src.json` includes folders that don't exist (`"lib"`, `"debug"`).
-   - `marked-subbable`'s includes `"src/lib"` and `"src/debug"`, already covered by `"src"`.
-   - `marked-subbable` has itself (`@mrkev/marked-subbable`) as a dev dependency; nothing imports it.
-   - `structured-state` has an unused dev dependency on `@mrkev/linked-state`.
-4. [ ] **Runtime vs. types.** `lib: ES2025` lets code type-check against APIs newer than `"engines": { "node": ">=18" }` promises. Only case today: `MarkedArray.fromAsync` (Node 22+). Raise `engines` to `>=22`.
-5. [ ] **`pnpm lint` fails on `main`.** 2 errors and 5 warnings, all in site files: `react-hooks/set-state-in-effect` errors in `site/src/ui/TrackA.tsx` and `site/src/unused/Simple.tsx`, plus `react-refresh/only-export-components` warnings in `site/src/ls/LinkedStateDebug.tsx`, `site/src/unused/Api1.tsx` and `Simple.tsx`. Not caused by the marked packages.
+1. [ ] **Compiler options are copied five times.** Each package's `tsconfig.src.json` repeats the same options. The root `tsconfig.json` lists them too, but they apply to nothing (empty `files` / `include`; referenced projects don't inherit options). Fix: a single `tsconfig.base.json` that each package `extends`.
+2. [ ] **Runtime vs. types.** `lib: ES2025` lets code type-check against APIs newer than `"engines": { "node": ">=18" }` promises. Only case today: `MarkedArray.fromAsync` (Node 22+). Raise `engines` to `>=22`.
+3. [ ] **`pnpm lint` fails on `main`.** 2 errors and 5 warnings, all in site files: `react-hooks/set-state-in-effect` errors in `site/src/ui/TrackA.tsx` and `site/src/unused/Simple.tsx`, plus `react-refresh/only-export-components` warnings in `site/src/ls/LinkedStateDebug.tsx`, `site/src/unused/Api1.tsx` and `Simple.tsx`. Not caused by the marked packages.
 
-Suggested order: since `structured-state` is frozen, only fix #1 for it.
 
 ## Decisions to revisit
 
