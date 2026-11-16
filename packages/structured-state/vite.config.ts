@@ -4,7 +4,21 @@ import dts from "vite-plugin-dts";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [dts({ tsconfigPath: "tsconfig.src.json" })],
+  plugins: [
+    dts({
+      tsconfigPath: "tsconfig.src.json",
+      // tsconfig.src.json includes tests so they're type-checked, but they
+      // shouldn't ship. Setting `exclude` replaces the default, so keep
+      // node_modules in it. testUtils.ts is only used by tests.
+      exclude: [
+        "node_modules/**",
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "src/__tests__/**",
+        "src/testUtils.ts",
+      ],
+    }),
+  ],
   build: {
     minify: false,
     lib: {
