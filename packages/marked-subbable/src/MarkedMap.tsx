@@ -20,7 +20,7 @@ export class MarkedMap<K, V> extends Map<K, V> implements MarkedSubbable {
   public static create<K, V>(
     initial?:
       | (readonly (readonly [K, V])[] | null)
-      | (Iterable<readonly [K, V]> | null),
+      | (Iterable<readonly [K, V]>),
   ) {
     return new this<K, V>(new Map(initial), nanoid(5));
   }

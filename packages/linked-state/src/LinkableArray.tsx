@@ -100,7 +100,7 @@ export class LinkableArray<S>
 
   // Array<S> interface
   toLocaleString(): string {
-    throw this._array.toLocaleString();
+    return this._array.toLocaleString();
   }
 
   // Array<S> interface, mutates
@@ -284,7 +284,7 @@ export class LinkableArray<S>
     predicate: (value: S, index: number, array: S[]) => unknown,
     thisArg?: any
   ): S[];
-  filter(predicate: any, thisArg?: any): S[] | S[] {
+  filter(predicate: any, thisArg?: any): S[] {
     throw new Error("Method not implemented.");
   }
 
@@ -296,7 +296,7 @@ export class LinkableArray<S>
     predicate: (value: S, index: number, obj: S[]) => unknown,
     thisArg?: any
   ): S | undefined;
-  find(predicate: any, thisArg?: any): S | S | undefined {
+  find(predicate: any, thisArg?: any): S | undefined {
     return this._array.find(predicate, thisArg);
   }
   findIndex(
@@ -314,7 +314,7 @@ export class LinkableArray<S>
     predicate: (value: S, index: number, array: S[]) => unknown,
     thisArg?: any
   ): S | undefined;
-  findLast(predicate: unknown, thisArg?: unknown): S | S | undefined {
+  findLast(predicate: unknown, thisArg?: unknown): S | undefined {
     throw new Error("Method not implemented.");
   }
 

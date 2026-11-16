@@ -1,5 +1,4 @@
-import { fixupConfigRules, fixupPluginRules } from "@eslint/compat";
-import tsParser from "@typescript-eslint/parser";
+import { fixupConfigRules } from "@eslint/compat";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
@@ -7,10 +6,6 @@ import { defineConfig } from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import js from "@eslint/js";
-
-// eslint-plugin-react 7.37.5 still calls the context methods (getFilename, etc.)
-// that ESLint 10 removed. Wrap it with @eslint/compat until it ships native support.
-const reactCompat = fixupPluginRules(react);
 
 export default defineConfig([
   {
@@ -27,7 +22,10 @@ export default defineConfig([
   },
 
   js.configs.recommended,
-  tseslint.configs.recommended,
+  tseslint.configs.recommendedTypeChecked,
+  // eslint-plugin-react 7.37.5 still calls the context methods (getFilename,
+  // etc.) that ESLint 10 removed. Wrap it with @eslint/compat until it ships
+  // native support. This also registers the "react" plugin.
   ...fixupConfigRules(react.configs.flat.recommended),
   reactHooks.configs.flat.recommended,
 
@@ -39,8 +37,6 @@ export default defineConfig([
       },
     },
     plugins: {
-      react: reactCompat,
-      "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
     },
 
@@ -49,18 +45,32 @@ export default defineConfig([
         ...globals.browser,
       },
 
-      parser: tsParser,
+      parser: tseslint.parser,
       ecmaVersion: "latest",
       sourceType: "module",
 
       parserOptions: {
-        projectService: true, // Auto-discovers tsconfig.*.json files
+        // type information for the type-checked rules; finds the nearest
+        // tsconfig.*.json for each file
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
       },
     },
 
     rules: {
-      "@typescript-eslint/no-unused-vars": ["off", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "off",
+      // `any` is allowed (see no-explicit-any), so don't flag every use of it
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      // `never` shows up in exhaustive-check error messages
+      "@typescript-eslint/restrict-template-expressions": [
+        "error",
+        { allowNever: true },
+      ],
       "@typescript-eslint/no-unused-expressions": "off",
       "@typescript-eslint/no-this-alias": "off",
       "@typescript-eslint/no-unnecessary-type-constraint": "off",
@@ -73,5 +83,11 @@ export default defineConfig([
         },
       ],
     },
+  },
+
+  {
+    // archived, kept for reference: regular lint rules only
+    files: ["packages/old-state/**"],
+    extends: [tseslint.configs.disableTypeChecked],
   },
 ]);

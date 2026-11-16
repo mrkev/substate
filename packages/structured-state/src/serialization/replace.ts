@@ -144,8 +144,11 @@ function replaceStruct2(json: NSimplified["struct2"], obj: Struct2<any>): void {
     return;
   }
 
+  // TODO: struct2 _value is the array of constructor args, so this copies
+  // "0", "1", ... onto obj. Probably not what we want.
+  // eslint-disable-next-line @typescript-eslint/no-for-in-array
   for (const key in json._value) {
-    if (key === "$$" || isSimplified(json._value[key])) {
+    if (key === "$" || isSimplified(json._value[key])) {
       // Serialized state gets replaced separately in history (?)
       continue;
     }

@@ -138,17 +138,17 @@ function DebugOutMap({
     const baseline = pad + TAB_SIZE;
 
     body.push(
-      <br key={`br-${key}`} />,
+      <br key={`br-${String(key)}`} />,
       " ".repeat(baseline),
-      <span key={`span-${key}`} className={classOfKind("attr")}>
+      <span key={`span-${String(key)}`} className={classOfKind("attr")}>
         {String(key)}
       </span>,
       ": ",
       <DynamicTest
-        key={`elem-${key}`}
+        key={`elem-${String(key)}`}
         val={val}
         pad={baseline}
-        path={`${path}/${key}`}
+        path={`${path}/${String(key)}`}
         showUnknowns={showUnknowns}
       />,
     );

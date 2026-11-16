@@ -69,7 +69,7 @@ export type NSimplified = {
     $$: "struct";
     _id: string;
     _value: {
-      [key: string]: Simplified | unknown;
+      [key: string]: unknown; // often Simplified
     };
   }>;
   struct2: Readonly<{

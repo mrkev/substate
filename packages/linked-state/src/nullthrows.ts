@@ -1,6 +1,6 @@
 export function nullthrows<T>(val: T | null | undefined, message?: string): T {
   if (val == null) {
-    throw new Error(message || `Expected ${val} to be non nil.`);
+    throw new Error(message || `Expected ${String(val)} to be non nil.`);
   }
   return val;
 }
@@ -11,7 +11,7 @@ export function assertNotNull<T>(
 ): asserts val is T {
   if (val == null) {
     throw new Error(
-      message || `AssertionError: expected ${val} to be non nil.`
+      message || `AssertionError: expected ${String(val)} to be non nil.`
     );
   }
 }

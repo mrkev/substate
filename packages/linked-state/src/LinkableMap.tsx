@@ -43,7 +43,7 @@ export class LinkableMap<K, V>
   public static create<K, V>(
     initial?:
       | (readonly (readonly [K, V])[] | null)
-      | (Iterable<readonly [K, V]> | null)
+      | (Iterable<readonly [K, V]>)
   ) {
     return new this<K, V>(new Map(initial), nanoid(5));
   }

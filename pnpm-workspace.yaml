@@ -4,3 +4,9 @@ packages:
 onlyBuiltDependencies:
   - esbuild
   - nx
+
+peerDependencyRules:
+  allowedVersions:
+    # eslint-plugin-react 7.37.5 doesn't list ESLint 10 yet; it runs through
+    # @eslint/compat's fixupConfigRules (see eslint.config.mjs)
+    eslint-plugin-react>eslint: "10"

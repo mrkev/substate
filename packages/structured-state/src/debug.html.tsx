@@ -180,7 +180,8 @@ function debugOutSPrimitive(obj: LinkedPrimitive<any>) {
   if (isPrimitiveKind(val)) {
     return `${header(obj)} ${debugOutPrm(val)}`;
   } else {
-    return `${header(obj)} ${val}`;
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string -- todo: non-primitive values print as [object Object]
+    return `${header(obj)} ${String(val)}`;
   }
 }
 

@@ -28,7 +28,7 @@ export class MarkedArray<S> extends Array<S> implements MarkedSubbable {
   }
 
   public static create<T>(
-    initialValue?: (readonly T[] | null) | Iterable<T> | null | undefined,
+    initialValue?: (readonly T[] | null) | Iterable<T>,
   ) {
     return new this<T>(initialValue ?? [], nanoid(5));
   }

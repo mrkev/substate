@@ -179,6 +179,7 @@ export function debugOutPrimitive(obj: LinkedPrimitive<any>) {
   if (typeof val === "string") {
     return `${header(obj)} "${val}"`;
   } else {
-    return `${header(obj)} ${val}`;
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string -- todo: non-primitive values print as [object Object]
+    return `${header(obj)} ${String(val)}`;
   }
 }

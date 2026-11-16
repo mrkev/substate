@@ -1,11 +1,8 @@
 {
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
-    "dev": "npm run --workspace=site dev",
-    "build": "pnpx nx run-many -t build",
+    "dev": "pnpm --filter site dev",
+    "build": "nx run-many -t build",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "test": "pnpm -r --filter '!old-state' run test",
     "coverage": "pnpm -r --filter '!old-state' run test --run --coverage --coverage.include='src/**' --coverage.include=index.ts",
@@ -13,28 +10,22 @@
   },
   "devDependencies": {
     "@eslint/compat": "^2.1.1",
-    "@eslint/eslintrc": "^3.3.7",
     "@eslint/js": "^10.0.1",
-    "@nx/eslint": "23.3.0",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/react": "^16.3.3",
-    "@types/node": "^25.9.9",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@typescript-eslint/eslint-plugin": "^8.72.0",
-    "@typescript-eslint/parser": "^8.72.0",
-    "@vitest/coverage-v8": "4.1.12",
-    "eslint": "^10.13.0",
+    "@vitest/coverage-v8": "5.1.0",
+    "eslint": "^10.15.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.7",
-    "globals": "^17.13.0",
+    "eslint-plugin-react-refresh": "^0.5.8",
+    "globals": "^17.14.0",
     "jsdom": "^31.0.1",
-    "nx": "23.3.0",
-    "typescript": "^6.0.3"
-  },
-  "dependencies": {
-    "typescript-eslint": "^8.72.0"
+    "nx": "24.0.6",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.2"
   },
   "packageManager": "pnpm@10.34.7"
 }

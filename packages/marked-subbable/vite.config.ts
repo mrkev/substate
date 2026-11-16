@@ -1,4 +1,4 @@
-import { resolve } from "path";
+import { resolve } from "node:path";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
 
@@ -17,23 +17,16 @@ export default defineConfig({
     minify: false,
     lib: {
       // Could also be a dictionary or array of multiple entry points
-      entry: resolve(__dirname, "index.ts"),
+      entry: resolve(import.meta.dirname, "index.ts"),
       name: "marked-subbable",
       formats: ["es"],
       // the proper extensions will be added
       fileName: "index",
     },
-    rollupOptions: {
+    rolldownOptions: {
       // make sure to externalize deps that shouldn't be bundled
       // into your library
       external: ["react", "react/jsx-runtime"],
-      output: {
-        // Provide global variables to use in the UMD build
-        // for externalized deps
-        globals: {
-          react: "React",
-        },
-      },
     },
   },
 });

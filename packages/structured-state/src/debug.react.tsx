@@ -409,7 +409,7 @@ function DebugOutSPrimitive({
       <>
         <Header obj={obj} path={`${path}/${obj._id}`} />{" "}
         {
-          // todo
+          // eslint-disable-next-line @typescript-eslint/no-base-to-string -- todo: non-primitive values print as [object Object]
           String(val)
         }
       </>

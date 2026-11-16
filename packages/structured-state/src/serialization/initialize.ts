@@ -266,7 +266,7 @@ function initializeStruct(
     }
   }
 
-  const instance = new (spec as any)(json._value) as any;
+  const instance = new (spec as any)(json._value);
   instance._id = json._id;
 
   for (const key of Object.keys(json._value)) {

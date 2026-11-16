@@ -49,7 +49,7 @@ export class LinkableSet<S>
   }
 
   public static create<T>(
-    initial?: (readonly T[] | null) | Iterable<T> | null | undefined
+    initial?: (readonly T[] | null) | Iterable<T>
   ) {
     return new this<T>(new Set(initial), nanoid(5));
   }

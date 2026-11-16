@@ -167,6 +167,7 @@ describe("MarkedArray", () => {
     it("builds a MarkedArray from an async iterable and contains items", async () => {
       const a = MarkedValue.create(1);
       const b = MarkedValue.create(2);
+      // eslint-disable-next-line @typescript-eslint/require-await -- just needs to be an async iterable
       async function* items() {
         yield a;
         yield b;

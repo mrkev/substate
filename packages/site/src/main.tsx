@@ -1,7 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "react-json-pretty/themes/monikai.css";
-import "react-json-view-lite/dist/index.css";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { App } from "./App.tsx";
 import { Layout, PageRoute } from "./Layout.tsx";

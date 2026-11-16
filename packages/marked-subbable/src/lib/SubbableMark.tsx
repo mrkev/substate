@@ -33,7 +33,7 @@ export class SubbableMark implements Subbable, SubbableContainer, Contained {
 
   public register<T>(
     holder: MarkedSubbable,
-    contain?: (readonly T[] | null) | Iterable<T> | null | undefined,
+    contain?: (readonly T[] | null) | Iterable<T>,
   ) {
     // No de-duping: holding the same child in two fields contains it twice, so
     // swapping one field later (uncontain + contain) keeps it contained via the

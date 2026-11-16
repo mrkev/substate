@@ -79,7 +79,7 @@ export class OrderedMap<K, V> implements Map<K, V> {
   get length(): number {
     return this.size;
   }
-  sort(compareFn?: ((a: [K, V], b: [K, V]) => number) | undefined): this {
+  sort(compareFn?: ((a: [K, V], b: [K, V]) => number) ): this {
     if (compareFn == null) {
       this._order.sort();
     } else {

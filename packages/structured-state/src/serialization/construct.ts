@@ -85,7 +85,7 @@ export const constructFn = {
       const simple = json.simplified;
       if (simple.$$ !== "structured") {
         throw new Error(
-          `Construction: expected ${"structured"} but got ${json.simplified}`,
+          `Construction: expected ${"structured"} but got ${simple.$$}`,
         );
       }
 

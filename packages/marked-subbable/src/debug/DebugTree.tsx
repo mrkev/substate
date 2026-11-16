@@ -143,7 +143,7 @@ function TreeMarkedSubbable({
 
     const val: unknown = (struct() as any)[key];
     body.push(
-      <br key={`br-${key}`} />,
+      <br key={`br-${String(key)}`} />,
       " ".repeat(baseline),
       <span key={`span-${key}`} className={classOfKind("attr")}>
         {key}
@@ -307,7 +307,7 @@ function TreeMarkedMap({
   for (const [key, value] of map()) {
     const baseline = pad + TAB_SIZE;
     result.push(
-      <br key={`br-${key}`} />,
+      <br key={`br-${String(key)}`} />,
       " ".repeat(baseline),
       <DebugOutReact
         key={`key-${i}`}
@@ -365,7 +365,7 @@ function TreeMarkedValue({
       <>
         <Header obj={obj} path={`${path}/${obj.$$mark._id}`} />{" "}
         {
-          // todo
+          // eslint-disable-next-line @typescript-eslint/no-base-to-string -- todo: non-primitive values print as [object Object]
           String(val)
         }
       </>

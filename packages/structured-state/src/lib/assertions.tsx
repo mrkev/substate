@@ -81,7 +81,7 @@ export function exhaustive(x: never, msg?: string): never {
 }
 
 export function assertArray<T>(
-  val: Array<T> | unknown,
+  val: unknown,
 ): asserts val is Array<T> {
   if (!Array.isArray(val)) {
     throw new Error(`not an array`);
