@@ -7,6 +7,7 @@ import {
 } from "@mrkev/marked-subbable";
 import { exhaustive } from "./exhaustive";
 import {
+  AnySerializationMark,
   Description,
   isSerializable,
   MarkedSerializable,
@@ -16,13 +17,18 @@ import { RefMap, SimplifiedNonRef } from "./RefMap";
 
 export type Primitive = number | string | boolean | null;
 
+/**
+ * What can be saved: primitives and marked objects, nested in any way. Plain
+ * objects and arrays can't, not even inside a MarkedValue; use marked
+ * containers (or a MarkedSerializable) for structured data instead.
+ */
 export type Simplifiable =
   | Primitive
-  | MarkedSerializable<any>
-  | MarkedArray<any>
-  | MarkedSet<any>
-  | MarkedMap<any, any>
-  | MarkedValue<any>;
+  | MarkedSerializable<AnySerializationMark>
+  | MarkedArray<Simplifiable>
+  | MarkedSet<Simplifiable>
+  | MarkedMap<Simplifiable, Simplifiable>
+  | MarkedValue<Simplifiable>;
 
 export type Simplified = {
   any: Simplified[Exclude<keyof Simplified, "any">];
@@ -131,7 +137,19 @@ function simplify(
       simplifyMarkedValue(value, refmap),
     );
   } else {
-    exhaustive(value);
+    // unreachable per the types, but plain objects can get here through casts
+    exhaustive(
+      value,
+      `can't save ${describe(value)}: not a primitive or marked object`,
+    );
+  }
+}
+
+function describe(value: unknown): string {
+  try {
+    return JSON.stringify(value) ?? String(value);
+  } catch {
+    return String(value);
   }
 }
 
@@ -182,21 +200,19 @@ function simplifyMarkedObject<
 }
 
 function simplifyMarkedValue(
-  obj: MarkedValue<any>,
+  obj: MarkedValue<Simplifiable>,
   refpkg: RefMap,
 ): Simplified["val"] {
   return {
     $$: "val",
-    value: simplify(
-      // todo as any
-      obj.get() as any,
-      refpkg,
-    ),
+    // get() returns Readonly<S>, which (being a mapped type) drops the private
+    // fields of the marked classes, so it no longer matches Simplifiable
+    value: simplify(obj.get() as Simplifiable, refpkg),
   };
 }
 
 function simplifyMarkedArray(
-  arr: MarkedArray<any>,
+  arr: MarkedArray<Simplifiable>,
   refpkg: RefMap,
 ): Simplified["arr"] {
   return {
@@ -206,7 +222,7 @@ function simplifyMarkedArray(
 }
 
 function simplifyMarkedMap(
-  map: MarkedMap<any, any>,
+  map: MarkedMap<Simplifiable, Simplifiable>,
   refpkg: RefMap,
 ): Simplified["map"] {
   return {
@@ -219,11 +235,11 @@ function simplifyMarkedMap(
 }
 
 function simplifyMarkedSet(
-  map: MarkedSet<any>,
+  set: MarkedSet<Simplifiable>,
   refpkg: RefMap,
 ): Simplified["set"] {
   return {
     $$: "set",
-    entries: map.map((value) => simplify(value, refpkg)),
+    entries: set.map((value) => simplify(value, refpkg)),
   };
 }

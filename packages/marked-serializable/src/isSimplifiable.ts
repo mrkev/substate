@@ -5,8 +5,12 @@ import {
   MarkedValue,
 } from "@mrkev/marked-subbable";
 import { isSerializable } from "./MarkedSerializable";
+import { Primitive, Simplifiable } from "./simplify";
 
-export function isSimplifiable(target: unknown) {
+/** whether `target` is a marked (non-primitive) Simplifiable */
+export function isSimplifiable(
+  target: unknown,
+): target is Exclude<Simplifiable, Primitive> {
   return (
     isSerializable(target) ||
     target instanceof MarkedArray ||

@@ -2,7 +2,15 @@ import { SubbableMark } from "@mrkev/marked-subbable";
 import { Simplifiable } from "./simplify";
 
 export type Description = Record<string, Simplifiable>;
-export interface MarkedSerializable<M extends SerializationMark<any, any>> {
+
+/**
+ * A SerializationMark of any kind. Its type parameters appear both as inputs
+ * and outputs (construct/describe), so no specific mark is assignable to any
+ * other instantiation; `any` here stands for "some D and C".
+ */
+export type AnySerializationMark = SerializationMark<any, any>;
+
+export interface MarkedSerializable<M extends AnySerializationMark> {
   // We want MarkedSerializables to also be MarkedSubbables to get the id for the object.
   // We use the id for packaging, where we serialize nodes as refs, to serialize non-tree graphs
   readonly $$mark: SubbableMark;
@@ -11,14 +19,17 @@ export interface MarkedSerializable<M extends SerializationMark<any, any>> {
 
 export class SerializationMark<
   D extends Description,
-  C extends MarkedSerializable<any>,
+  C extends MarkedSerializable<AnySerializationMark>,
 > {
   constructor(
     readonly kind: string,
     readonly construct: (description: D) => C,
     readonly describe: (constructed: C) => D,
   ) {}
-  static create<D extends Description, C extends MarkedSerializable<any>>({
+  static create<
+    D extends Description,
+    C extends MarkedSerializable<AnySerializationMark>,
+  >({
     kind,
     construct,
     simplify,
@@ -33,7 +44,7 @@ export class SerializationMark<
 
 export function isSerializable(
   value: unknown,
-): value is MarkedSerializable<any> {
+): value is MarkedSerializable<AnySerializationMark> {
   return (
     typeof value === "object" &&
     value !== null &&
@@ -42,12 +53,12 @@ export function isSerializable(
   );
 }
 
-export type SerializationIndex = Map<string, SerializationMark<any, any>>;
+export type SerializationIndex = Map<string, AnySerializationMark>;
 
 export function consolidateMarks(
-  marks: SerializationMark<any, any>[],
+  marks: AnySerializationMark[],
 ): SerializationIndex {
-  const map = new Map<string, SerializationMark<any, any>>();
+  const map: SerializationIndex = new Map();
   for (const mark of marks) {
     if (map.has(mark.kind)) {
       throw new Error(`Duplicate mark ${mark.kind}!`);

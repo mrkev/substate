@@ -32,7 +32,7 @@ function linked(child: MarkedSubbable, parent: MarkedSubbable) {
 
 describe("MarkedMap round trip", () => {
   it("keeps primitive keys and values", () => {
-    const map = MarkedMap.create<string, unknown>([
+    const map = MarkedMap.create<string, Simplifiable>([
       ["a", 1],
       ["b", "two"],
       ["c", true],
@@ -121,8 +121,8 @@ describe("round trips", () => {
 
   it("MarkedArray, with nested marked values linked", () => {
     const back = roundTrip(
-      MarkedArray.create<unknown>([1, MarkedValue.create("x")]),
-    ) as MarkedArray<unknown>;
+      MarkedArray.create<Simplifiable>([1, MarkedValue.create("x")]),
+    ) as MarkedArray<Simplifiable>;
     expect(back).toBeInstanceOf(MarkedArray);
     expect(back[0]).toBe(1);
     const nested = back[1] as MarkedValue<string>;
@@ -186,6 +186,23 @@ describe("errors", () => {
     );
   });
 
+  it("saving a plain object inside a MarkedValue throws", () => {
+    const value = MarkedValue.create({ x: 1 }) as unknown as Simplifiable;
+    expect(() => simplifyAndPackage(value)).toThrow(
+      `can't save {"x":1}: not a primitive or marked object`,
+    );
+  });
+
+  it("loading a plain object (not simplified) throws", () => {
+    const pkg = {
+      root: { $$: "ref", _id: "a" },
+      refs: { a: { $$: "val", value: { not: "simplified" } } },
+    } as unknown as SimplifiedPackage;
+    expect(() => constructSimplifiedPackage(pkg, consolidateMarks([]))).toThrow(
+      `can't load {"not":"simplified"}: not a primitive or simplified value`,
+    );
+  });
+
   it("consolidateMarks rejects duplicate kinds", () => {
     expect(() =>
       consolidateMarks([pairSerialization, pairSerialization]),
@@ -193,8 +210,8 @@ describe("errors", () => {
   });
 
   it("saving a cycle throws a clear error", () => {
-    const a = MarkedArray.create<unknown>([]);
-    const b = MarkedArray.create<unknown>([a]);
+    const a = MarkedArray.create<Simplifiable>([]);
+    const b = MarkedArray.create<Simplifiable>([a]);
     a.push(b);
     expect(() => simplifyAndPackage(a)).toThrow(
       `can't serialize a cycle: MarkedArray ${a.$$mark._id} contains itself`,
@@ -202,7 +219,7 @@ describe("errors", () => {
   });
 
   it("saving a cycle through a custom object names its kind", () => {
-    const arr = MarkedArray.create<unknown>([]);
+    const arr = MarkedArray.create<Simplifiable>([]);
     const pair = new Pair(arr, 1);
     arr.push(pair);
     expect(() => simplifyAndPackage(pair)).toThrow(

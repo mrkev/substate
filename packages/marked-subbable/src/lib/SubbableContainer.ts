@@ -79,8 +79,8 @@ export const subbableContainer = {
         containers.delete(container);
       }
       // TODO: safety
-      if ("_destroy" in item) {
-        (item as any)._destroy();
+      if ("_destroy" in item && typeof item._destroy === "function") {
+        item._destroy();
       }
       uncontained.push(item);
     }

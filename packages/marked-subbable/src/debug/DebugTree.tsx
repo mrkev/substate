@@ -141,7 +141,7 @@ function TreeMarkedSubbable({
       continue;
     }
 
-    const val: unknown = (struct() as any)[key];
+    const val = (struct() as unknown as Record<string, unknown>)[key];
     body.push(
       <br key={`br-${String(key)}`} />,
       " ".repeat(baseline),
@@ -247,7 +247,7 @@ function TreeMarkedSet({
   path = "",
   showUnknowns,
 }: {
-  mset: MarkedSet<any>;
+  mset: MarkedSet<unknown>;
   pad: number;
   path?: string;
   showUnknowns: boolean;
@@ -349,7 +349,7 @@ function TreeMarkedValue({
   obj,
   path = "",
 }: {
-  obj: MarkedValue<any>;
+  obj: MarkedValue<unknown>;
   path?: string;
 }) {
   const val = useLink(obj)().get();

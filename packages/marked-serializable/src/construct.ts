@@ -5,7 +5,11 @@ import {
   MarkedValue,
 } from "@mrkev/marked-subbable";
 import { exhaustive } from "./exhaustive";
-import { MarkedSerializable, SerializationIndex } from "./MarkedSerializable";
+import {
+  AnySerializationMark,
+  MarkedSerializable,
+  SerializationIndex,
+} from "./MarkedSerializable";
 import { nullthrows } from "./nullthrows";
 import { RefMap } from "./RefMap";
 import {
@@ -82,13 +86,15 @@ function initialize(json: unknown, rsc: Resources): Simplifiable {
     }
   }
 
-  return json as any; // todo: right type? Containers can hold normal objects/arrays/etc too
+  // simplify() only ever writes primitives and Simplified objects, so anything
+  // else (a plain object or array) means the package is malformed
+  throw new Error(`can't load ${JSON.stringify(json)}: not a primitive or simplified value`);
 }
 
 function initializeObj(
   simplified: Simplified["obj"],
   rsc: Resources,
-): MarkedSerializable<any> {
+): MarkedSerializable<AnySerializationMark> {
   const mark = nullthrows(
     rsc.index.get(simplified.kind),
     `kind ${simplified.kind} not found in SerializationIndex`,
@@ -111,19 +117,15 @@ function initializeObj(
 function initializeMarkedValue(
   obj: Simplified["val"],
   rsc: Resources,
-): MarkedValue<any> {
-  const value = isSimplified(obj.value)
-    ? initialize(obj.value, rsc)
-    : obj.value;
-
-  const result = MarkedValue.create(value);
+): MarkedValue<Simplifiable> {
+  const result = MarkedValue.create(initialize(obj.value, rsc));
   return result;
 }
 
 function initializeMarkedArray(
   arr: Simplified["arr"],
   rsc: Resources,
-): MarkedArray<any> {
+): MarkedArray<Simplifiable> {
   const result = MarkedArray.create(arr.entries.map((x) => initialize(x, rsc)));
   return result;
 }
@@ -131,7 +133,7 @@ function initializeMarkedArray(
 function initializeMarkedMap(
   map: Simplified["map"],
   rsc: Resources,
-): MarkedMap<any, any> {
+): MarkedMap<Simplifiable, Simplifiable> {
   const result = MarkedMap.create(
     map.entries.map(
       ([key, value]) => [initialize(key, rsc), initialize(value, rsc)] as const,
@@ -143,7 +145,7 @@ function initializeMarkedMap(
 function initializeMarkedSet(
   set: Simplified["set"],
   rsc: Resources,
-): MarkedSet<any> {
+): MarkedSet<Simplifiable> {
   const result = MarkedSet.create(set.entries.map((x) => initialize(x, rsc)));
   return result;
 }

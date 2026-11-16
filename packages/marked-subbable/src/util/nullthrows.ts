@@ -17,13 +17,13 @@ export function assertNotNull<T>(
 }
 
 export function mutablearr<T>(arr: readonly T[]): T[] {
-  return arr as any;
+  return arr as T[];
 }
 
 export function mutableset<T>(set: ReadonlySet<T>): Set<T> {
-  return set as any;
+  return set as Set<T>;
 }
 
-export function setWindow(prop: string, value: any) {
-  (globalThis as any)[prop] = value;
+export function setWindow(prop: string, value: unknown) {
+  (globalThis as Record<string, unknown>)[prop] = value;
 }
