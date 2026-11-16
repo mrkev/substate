@@ -8,6 +8,7 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "mrkev:source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/structured-state.js",
       "require": "./dist/structured-state.umd.cjs"
