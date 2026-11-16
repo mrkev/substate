@@ -24,14 +24,6 @@ Assessment of `marked-subbable` + `marked-serializable` against `structured-stat
 
 - [ ] **Direct index writes skip notifications.** Because `MarkedArray` extends `Array`, `arr[i] = x` and `arr.length = 0` mutate without notifying. Since containment is ref-counted, direct writes also leave the counts wrong. Document it or wrap in a Proxy.
 
-## Testing gaps
-
-From a v8 coverage run (2026-11-16: `marked-subbable` 47% of lines, `marked-serializable` 53%; run `pnpm coverage`). A probe of every area below found no bugs, so these tests would protect working behavior.
-
-1. [ ] **React hooks (0%).** `useLink` / `useLinkAsState` are untested. Cover: re-render on own change; with `recursive`, also on nested changes; no re-render for unrelated changes; `useLink` returns a new function each render (what keeps React Compiler output fresh); `useLinkAsState`'s `[value, setter]` incl. `setter(prev => …)`. Needs a DOM test environment (`happy-dom` or `jsdom`); `@testing-library/react` is already installed at the root.
-
-Not worth testing now: `DebugTree`, `util/` helpers, `copyWithin` (deliberately unimplemented), `isSimplifiable`.
-
 ## Decisions to revisit
 
 - **Cycles in serialization.** Saving a cycle (an object that indirectly contains itself) throws `can't serialize a cycle: …`, and loading a cyclic package throws `can't load a cycle: …`, because `constructSimplifiedPackage` builds each object only after its children. Shared objects (no cycle) work and are serialized once. Supporting cycles would mean loading in two phases: create empty containers, register them, then fill them. That works for `MarkedArray` / `MarkedMap` / `MarkedSet` / `MarkedValue`, but custom objects' `construct(description)` needs its children first, so they'd need a `SerializationMark` API change. Overlaps with history's restore-in-place.
