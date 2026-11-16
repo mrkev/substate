@@ -9,6 +9,9 @@
     "allowSyntheticDefaultImports": true,
     "types": ["node"],
     "noEmit": true,
+    // so vitest.config.ts can import "./vite.config.ts" with its extension,
+    // which Vite's native config loader requires
+    "allowImportingTsExtensions": true,
     "strict": true
   }
 }
