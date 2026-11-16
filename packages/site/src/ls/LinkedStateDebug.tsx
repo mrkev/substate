@@ -7,6 +7,7 @@ import { LinkableSet } from "../../../linked-state/src/LinkableSet";
 import { LinkableValue } from "../../../linked-state/src/LinkableValue";
 import { exhaustive } from "../../../structured-state/src/lib/assertions";
 import { useRenderFlash } from "../ui/renderFlash";
+import { classOfKind } from "./classOfKind";
 
 const TAB_SIZE = 2;
 export type DisplayState = "full" | "native" | "collapsed";
@@ -371,26 +372,6 @@ export function DebugOutSimplePrm({ val }: { val: PrimitiveKind | undefined }) {
   }
 }
 
-export const classOfKind = (
-  kind: "string" | "kind" | "number" | "classname" | "hash" | "attr" | "prm",
-): string => {
-  switch (kind) {
-    case "attr":
-      return "hljs-attr";
-    case "number":
-    case "hash":
-      return "hljs-number";
-    case "string":
-      return "hljs-string";
-    case "classname":
-      return "hljs-title class_";
-    case "prm":
-    case "kind":
-      return "hljs-comment";
-    default:
-      exhaustive(kind);
-  }
-};
 
 function isPrimitiveKind(val: unknown) {
   return (

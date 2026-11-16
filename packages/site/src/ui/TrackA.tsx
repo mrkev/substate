@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Structured,
   useContainer,
@@ -21,22 +21,21 @@ export function TrackA({
   project: Project;
 }) {
   const [name, setName] = usePrimitive(track.name);
-  const [edit, setEdit] = useState(name);
+  // what the user is typing, or null when not editing, so the input shows the
+  // current name without syncing it into local state in an effect
+  const [draft, setDraft] = useState<string | null>(null);
   const clips = useContainer(track.clips);
   const ref = useRenderFlash<HTMLFieldSetElement>();
 
   useContainer(track);
 
-  useEffect(() => {
-    setEdit(name);
-  }, [name]);
-
   function commitEdit() {
-    if (edit !== name) {
+    if (draft !== null && draft !== name) {
       recordHistory("set name", () => {
-        setName(edit);
+        setName(draft);
       });
     }
+    setDraft(null);
   }
 
   return (
@@ -46,9 +45,9 @@ export function TrackA({
         <input
           className="w-[10ch]"
           type="text"
-          value={edit ?? ""}
+          value={draft ?? name ?? ""}
           placeholder="name"
-          onChange={(e) => setEdit(e.target.value)}
+          onChange={(e) => setDraft(e.target.value)}
           onBlur={() => commitEdit()}
           onKeyDown={(e) => {
             if (e.key === "Enter") {

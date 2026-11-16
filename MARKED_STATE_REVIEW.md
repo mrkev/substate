@@ -26,27 +26,9 @@ Assessment of `marked-subbable` + `marked-serializable` against `structured-stat
 - [ ] **`simplify` doesn't check for already-visited nodes** before recursing (`packages/marked-serializable/src/simplify.ts`). Cycles recurse forever; shared subtrees are re-serialized on every visit. Recording the node before recursing fixes both.
 - [ ] **Direct index writes skip notifications.** Because `MarkedArray` extends `Array`, `arr[i] = x` and `arr.length = 0` mutate without notifying. Since containment is ref-counted, direct writes also leave the counts wrong. Document it or wrap in a Proxy.
 
-## TypeScript and build setup
-
-Covers `marked-subbable`, `marked-serializable` and `structured-state`. Already fine: `strict`, `noImplicitOverride`, `isolatedModules` and `moduleResolution: "bundler"` everywhere; test files are type-checked; `pnpm tsc` (`tsc -b`) reaches every package via the root references; `dist/` and `*.tsbuildinfo` are gitignored.
-
-Done: workspace packages now resolve each other to source via an `mrkev:source` export condition (`marked-subbable` and `marked-serializable` `package.json` exports, `customConditions` in `marked-serializable` and site tsconfigs, `resolve.conditions` in the site's vite config). `structured-state`'s `exports` also has the condition (pointing at `./src/index.ts`), for if the site ever imports it by package name; today the site imports it by relative path into `src/`, and doesn't list it as a dependency. `@mrkev/linked-state` (old code) still resolves to its `dist/`. Add the condition to a vitest config once `marked-serializable` has tests. Before publishing either marked package: the source condition points at `./index.ts`, which isn't in the published files (`"files": ["dist"]`). Harmless for consumers that don't set the condition, but strip the entry before publishing (or override `exports` via `publishConfig`). Both packages are `"private": true` for now.
-
-Done: the marked packages' `build` is now `tsc -b && vite build`, so type errors fail it (`vite-plugin-dts` doesn't fail on them by default), and their `dts({ ... })` options exclude `*.test.ts(x)`, so test declarations aren't published. `structured-state` already type-checked in its build; its `dts` options now also exclude tests (`*.test.ts(x)`, `src/__tests__/`, and the test-only `src/testUtils.ts`).
-
-Done: `structured-state`'s `main` / `exports` no longer point at a `structured-state.umd.cjs` that was never built (only `formats: ["es"]` is built); `main` is now the ES file and the `require` entry is gone. Cleanups: tsconfig `include`s are just `["src", "./index.ts"]` in both marked packages (dropped nonexistent and redundant folders), and the unused dev dependencies (`marked-subbable` on itself, `structured-state` on `@mrkev/linked-state`) are removed. `pnpm install` also dropped a stale root `@types/scheduler` lockfile entry, left over from `9e8e218` removing it from `package.json`.
-
-Done: compiler options live in two shared files at the root, which every package extends: `tsconfig.base.json` (each `tsconfig.src.json`, the browser code; includes `customConditions`) and `tsconfig.node.base.json` (each `tsconfig.node.json`, which checks `vite.config.ts` and needs Node's types). Package configs only set `include`, since inherited paths resolve relative to the base file. The root `tsconfig.json` is now just the project list for `pnpm tsc`. Effective settings are unchanged except `customConditions` in every package and `strict` for the `vite.config.ts` checks.
-
-Done: `engines` is `>=22` in both marked packages (Node 18 and 20 are end-of-life). `MarkedArray.fromAsync` needs Node 22+; the only other newer API they use is `Array.prototype.at` (ES2022). `engines` only covers Node; browser support follows the same APIs (roughly Chrome 121, Safari 16.4, Firefox 115 because of `fromAsync`). `linked-state` (old code) still says `>=18`.
-
-Note: the per-package `tsconfig.json` files have `"files": []` and only reference `tsconfig.src.json` / `tsconfig.node.json`, so `tsc -p packages/<pkg>` checks nothing. Use `pnpm tsc` (or `tsc -p packages/<pkg>/tsconfig.src.json`).
-
-1. [ ] **`pnpm lint` fails on `main`.** 2 errors and 5 warnings, all in site files: `react-hooks/set-state-in-effect` errors in `site/src/ui/TrackA.tsx` and `site/src/unused/Simple.tsx`, plus `react-refresh/only-export-components` warnings in `site/src/ls/LinkedStateDebug.tsx`, `site/src/unused/Api1.tsx` and `Simple.tsx`. Not caused by the marked packages.
-
-
 ## Decisions to revisit
 
+- **Publishing the marked packages with the `mrkev:source` export condition.** Each package's `exports` has `"mrkev:source": "./index.ts"` so workspace packages resolve each other to source. `index.ts` isn't in the published files (`"files": ["dist"]`); that's harmless for consumers that don't set the condition, but before publishing, strip the entry (or override `exports` via `publishConfig`). Both packages are `"private": true` for now.
 - **`SubbableMark.register` with the same child twice.** Containment is ref-counted, and `register` counts a child once per occurrence, so a struct whose two fields hold the same marked object counts it twice and swapping one field keeps it linked via the other. Because two fields holding the same marked object share state (eg, `new Clip(time, time)`), which is rarely intended, `register` also `console.warn`s whenever it leaves the holder containing a child more than once. That includes calling `register` twice with the same child (eg, from a base class and a subclass constructor). Revisit whether this should stay a warning, become an error, or be allowed silently once we see real usage.
 
 ## Suggested order

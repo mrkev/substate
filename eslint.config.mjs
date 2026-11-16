@@ -14,7 +14,14 @@ const reactCompat = fixupPluginRules(react);
 
 export default defineConfig([
   {
-    ignores: ["**/dist", "eslint.config.mjs", "docs"],
+    ignores: [
+      "**/dist",
+      "eslint.config.mjs",
+      "docs",
+      // old experiments kept for reference; nothing imports them except
+      // SchedulerTest.tsx (used by App.tsx)
+      "packages/site/src/unused/",
+    ],
   },
 
   js.configs.recommended,

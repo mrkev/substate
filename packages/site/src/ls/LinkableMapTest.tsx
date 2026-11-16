@@ -1,7 +1,8 @@
 import { ReactNode, useState } from "react";
 import { LinkableMap } from "../../../linked-state/src/LinkableMap";
 import { useLink } from "../../../linked-state/src/hooks";
-import { classOfKind, DynamicTest, Header } from "./LinkedStateDebug";
+import { classOfKind } from "./classOfKind";
+import { DynamicTest, Header } from "./LinkedStateDebug";
 import { TxtButton } from "./TxtButton";
 import { Panel } from "../ui/Panel";
 import { useRenderFlash } from "../ui/renderFlash";
