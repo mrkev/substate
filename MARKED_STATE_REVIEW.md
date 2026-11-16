@@ -38,10 +38,11 @@ Done: `structured-state`'s `main` / `exports` no longer point at a `structured-s
 
 Done: compiler options live in two shared files at the root, which every package extends: `tsconfig.base.json` (each `tsconfig.src.json`, the browser code; includes `customConditions`) and `tsconfig.node.base.json` (each `tsconfig.node.json`, which checks `vite.config.ts` and needs Node's types). Package configs only set `include`, since inherited paths resolve relative to the base file. The root `tsconfig.json` is now just the project list for `pnpm tsc`. Effective settings are unchanged except `customConditions` in every package and `strict` for the `vite.config.ts` checks.
 
+Done: `engines` is `>=22` in both marked packages (Node 18 and 20 are end-of-life). `MarkedArray.fromAsync` needs Node 22+; the only other newer API they use is `Array.prototype.at` (ES2022). `engines` only covers Node; browser support follows the same APIs (roughly Chrome 121, Safari 16.4, Firefox 115 because of `fromAsync`). `linked-state` (old code) still says `>=18`.
+
 Note: the per-package `tsconfig.json` files have `"files": []` and only reference `tsconfig.src.json` / `tsconfig.node.json`, so `tsc -p packages/<pkg>` checks nothing. Use `pnpm tsc` (or `tsc -p packages/<pkg>/tsconfig.src.json`).
 
-1. [ ] **Runtime vs. types.** `lib: ES2025` lets code type-check against APIs newer than `"engines": { "node": ">=18" }` promises. Only case today: `MarkedArray.fromAsync` (Node 22+). Raise `engines` to `>=22`.
-2. [ ] **`pnpm lint` fails on `main`.** 2 errors and 5 warnings, all in site files: `react-hooks/set-state-in-effect` errors in `site/src/ui/TrackA.tsx` and `site/src/unused/Simple.tsx`, plus `react-refresh/only-export-components` warnings in `site/src/ls/LinkedStateDebug.tsx`, `site/src/unused/Api1.tsx` and `Simple.tsx`. Not caused by the marked packages.
+1. [ ] **`pnpm lint` fails on `main`.** 2 errors and 5 warnings, all in site files: `react-hooks/set-state-in-effect` errors in `site/src/ui/TrackA.tsx` and `site/src/unused/Simple.tsx`, plus `react-refresh/only-export-components` warnings in `site/src/ls/LinkedStateDebug.tsx`, `site/src/unused/Api1.tsx` and `Simple.tsx`. Not caused by the marked packages.
 
 
 ## Decisions to revisit
