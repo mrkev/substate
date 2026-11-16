@@ -2,6 +2,7 @@ import React from "react";
 import { useLink, MarkedSubbable } from "@mrkev/marked-subbable";
 import { TxtButton } from "../ls/TxtButton";
 import { TAB_SIZE, Header } from "./MarkedSetTest";
+import { useRenderFlash } from "../ui/renderFlash";
 
 export function MarkedCollection<T>({
   set,
@@ -26,6 +27,7 @@ export function MarkedCollection<T>({
   renderValue: (v: T, pad: number, showUnknowns?: boolean) => React.ReactNode;
 }) {
   const lset = useLink(set);
+  const ref = useRenderFlash<HTMLSpanElement>();
   const result = [];
 
   let i = 0;
@@ -54,7 +56,7 @@ export function MarkedCollection<T>({
   }
 
   return (
-    <>
+    <span ref={ref}>
       <Header obj={lset()} /> {open}
       <br />
       {" ".repeat(TAB_SIZE - 1)}
@@ -74,6 +76,6 @@ export function MarkedCollection<T>({
           clear
         </TxtButton>
       )}
-    </>
+    </span>
   );
 }

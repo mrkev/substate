@@ -11,6 +11,7 @@ import { AudioTrack } from "../structs/AudioTrack";
 import { Project } from "../structs/Project";
 import { time } from "../structs/TimelineT";
 import { ClipA } from "./ClipA";
+import { useRenderFlash } from "./renderFlash";
 
 export function TrackA({
   track,
@@ -22,6 +23,7 @@ export function TrackA({
   const [name, setName] = usePrimitive(track.name);
   const [edit, setEdit] = useState(name);
   const clips = useContainer(track.clips);
+  const ref = useRenderFlash<HTMLFieldSetElement>();
 
   useContainer(track);
 
@@ -38,7 +40,7 @@ export function TrackA({
   }
 
   return (
-    <fieldset className="flex flex-col gap-2 p-2 border border-gray-700">
+    <fieldset ref={ref} className="flex flex-col gap-2 p-2">
       <legend>
         {track.constructor.name}{" "}
         <input

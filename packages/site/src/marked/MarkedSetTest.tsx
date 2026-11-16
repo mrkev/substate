@@ -2,6 +2,7 @@ import stringify from "json-stringify-deterministic";
 import { MarkedSet, MarkedSubbable, useLink } from "@mrkev/marked-subbable";
 import { classOfKind, DebugOutSimplePrm } from "../ls/LinkedStateDebug";
 import { TxtButton } from "../ls/TxtButton";
+import { useRenderFlash } from "../ui/renderFlash";
 
 export const TAB_SIZE = 2;
 
@@ -29,6 +30,7 @@ export function DebugOutMarkedSet<T>({
   ) => React.ReactNode;
 }) {
   const lset = useLink(set);
+  const ref = useRenderFlash<HTMLSpanElement>();
 
   const handleClear = () => {
     lset().clear();
@@ -60,7 +62,7 @@ export function DebugOutMarkedSet<T>({
   }
 
   return (
-    <>
+    <span ref={ref}>
       <Header obj={lset()} /> {"("}
       <br />
       {" ".repeat(TAB_SIZE - 1)}
@@ -78,7 +80,7 @@ export function DebugOutMarkedSet<T>({
       <TxtButton title="clear" onClick={handleClear}>
         clear
       </TxtButton>
-    </>
+    </span>
   );
 }
 
@@ -94,6 +96,7 @@ export function Header({
   // we are printing the _hash, which changes every time any child changes,
   // so we want to listen ot recursive changes
   const obj = useLink(objarg, true)();
+  const ref = useRenderFlash<HTMLSpanElement>();
 
   const kindStr = (() => {
     return obj.constructor.name;
@@ -120,7 +123,7 @@ export function Header({
 
   const hash = <span className={classOfKind("hash")}>{hashStr}</span>;
   return (
-    <span className={classOfKind("kind")} title={path}>
+    <span ref={ref} className={classOfKind("kind")} title={path}>
       (<span className={classOfKind("kind")}>{kindStr}</span>: {obj.$$mark._id}
       {hashStr}
       {container})

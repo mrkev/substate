@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { twMerge } from "tailwind-merge";
 import { useLink } from "../../../linked-state/src/hooks";
 import { LinkableArray } from "../../../linked-state/src/LinkableArray";
 import { DynamicTest, Header } from "./LinkedStateDebug";
 import { TxtButton } from "./TxtButton";
+import { Panel } from "../ui/Panel";
+import { useRenderFlash } from "../ui/renderFlash";
 
 const TAB_SIZE = 2;
 
@@ -15,12 +16,11 @@ export function LinkableArrayTest({
   className?: string;
 }) {
   return (
-    <div className={twMerge("overflow-scroll", className)}>
-      <h2>LinkedArray Tester</h2>
-      <pre className="text-start text-sm">
+    <Panel title="LinkableArray" className={className}>
+      <pre className="text-sm">
         <DynamicTestArray arr={linkedArray} pad={0} showUnknowns={true} />
       </pre>
-    </div>
+    </Panel>
   );
 }
 
@@ -37,6 +37,7 @@ export function DynamicTestArray({
 }) {
   const larr = useLink(arr);
   const [input, setInput] = useState(0);
+  const ref = useRenderFlash<HTMLSpanElement>();
 
   const handleAdd = () => {
     larr().push(input);
@@ -103,7 +104,7 @@ export function DynamicTestArray({
   }
 
   return (
-    <>
+    <span ref={ref}>
       <Header obj={larr()} /> {"["}
       <br />
       {" ".repeat(TAB_SIZE + pad)}
@@ -135,6 +136,6 @@ export function DynamicTestArray({
       <TxtButton title="Clear" onClick={handleClear}>
         clear
       </TxtButton>
-    </>
+    </span>
   );
 }

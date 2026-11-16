@@ -1,9 +1,10 @@
 import { ReactNode, useState } from "react";
-import { twMerge } from "tailwind-merge";
 import { LinkableMap } from "../../../linked-state/src/LinkableMap";
 import { useLink } from "../../../linked-state/src/hooks";
 import { classOfKind, DynamicTest, Header } from "./LinkedStateDebug";
 import { TxtButton } from "./TxtButton";
+import { Panel } from "../ui/Panel";
+import { useRenderFlash } from "../ui/renderFlash";
 
 export function LinkableMapTest({
   map,
@@ -19,9 +20,8 @@ export function LinkableMapTest({
   };
 
   return (
-    <div className={twMerge("overflow-scroll", className)}>
-      <h2>LinkedArray Tester</h2>
-      <pre className="text-start text-sm">
+    <Panel title="LinkableMap" className={className}>
+      <pre className="text-sm">
         <DynamicTestMap
           map={map}
           pad={0}
@@ -38,7 +38,7 @@ export function LinkableMapTest({
           )}
         />
       </pre>
-    </div>
+    </Panel>
   );
 }
 
@@ -66,6 +66,7 @@ export function DynamicTestMap<T>({
   ) => React.ReactNode;
 }) {
   const lmap = useLink(map);
+  const ref = useRenderFlash<HTMLSpanElement>();
   const handleDelete = (k: number) => lmap().delete(k);
   const handleClear = () => lmap().clear();
 
@@ -98,7 +99,7 @@ export function DynamicTestMap<T>({
   body.push("\n", " ".repeat(pad), "}");
 
   return (
-    <>
+    <span ref={ref}>
       <Header obj={map} path={`${path}/${map._id}`} /> {"{"}
       <br />
       {" ".repeat(TAB_SIZE - 1)}
@@ -111,6 +112,6 @@ export function DynamicTestMap<T>({
       <span className="text-gray-500">(len. {lmap().size})</span> {body}{" "}
       {/*  */}
       <TxtButton title="clear" onClick={handleClear} children="clear" />
-    </>
+    </span>
   );
 }

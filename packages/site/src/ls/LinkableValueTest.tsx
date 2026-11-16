@@ -1,8 +1,9 @@
-import { twMerge } from "tailwind-merge";
 import { LinkableValue } from "../../../linked-state/src/LinkableValue";
 import { useLinkAsState } from "../../../linked-state/src/hooks";
 import { DebugOutSimplePrm, Header } from "./LinkedStateDebug";
 import { TxtButton } from "./TxtButton";
+import { Panel } from "../ui/Panel";
+import { useRenderFlash } from "../ui/renderFlash";
 
 export function LinkableValueTest({
   prim,
@@ -12,12 +13,11 @@ export function LinkableValueTest({
   className?: string;
 }) {
   return (
-    <div className={twMerge("overflow-scroll", className)}>
-      <h2>LinkedPrimitive Tester</h2>
-      <pre className="text-start text-sm">
+    <Panel title="LinkableValue" className={className}>
+      <pre className="text-sm">
         <DebugOutNumber prim={prim} />
       </pre>
-    </div>
+    </Panel>
   );
 }
 
@@ -39,6 +39,7 @@ function DebugOutNumber({
 }) {
   // Hook it into React — updates automatically when the primitive changes
   const [value, setValue] = useLinkAsState(prim);
+  const ref = useRenderFlash<HTMLSpanElement>();
 
   const increment = () => setValue((v) => v + 1);
   const decrement = () => setValue((v) => v - 1);
@@ -47,24 +48,24 @@ function DebugOutNumber({
 
   if (isPrimitiveKind(value)) {
     return (
-      <>
+      <span ref={ref}>
         <Header obj={prim} path={`${path}/${prim._id}`} />{" "}
         <TxtButton title="decrement" onClick={decrement} children="-" />{" "}
         <DebugOutSimplePrm val={value} />{" "}
         <TxtButton title="increment" onClick={increment} children="+" />{" "}
         <TxtButton title="reset" onClick={reset} children="reset" />{" "}
         <TxtButton title="random" onClick={setRandom} children="random" />
-      </>
+      </span>
     );
   } else {
     return (
-      <>
+      <span ref={ref}>
         <Header obj={prim} path={`${path}/${prim._id}`} />{" "}
         {
           // todo
           String(value)
         }
-      </>
+      </span>
     );
   }
 }
@@ -78,12 +79,13 @@ export function DebugOutBoolean({
 }) {
   const [value, setValue] = useLinkAsState(prim);
   const flip = () => setValue((v) => !v);
+  const ref = useRenderFlash<HTMLSpanElement>();
 
   return (
-    <>
+    <span ref={ref}>
       <Header obj={prim} path={`${path}/${prim._id}`} />{" "}
       <DebugOutSimplePrm val={value} />{" "}
       <TxtButton title="flip" onClick={flip} children="toggle" />
-    </>
+    </span>
   );
 }

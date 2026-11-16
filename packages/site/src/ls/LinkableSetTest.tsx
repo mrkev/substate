@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { twMerge } from "tailwind-merge";
 import { LinkableSet } from "../../../linked-state/src/LinkableSet";
 import { useLink } from "../../../linked-state/src/hooks";
 import { DynamicTest, Header } from "./LinkedStateDebug";
 import { TxtButton } from "./TxtButton";
+import { Panel } from "../ui/Panel";
+import { useRenderFlash } from "../ui/renderFlash";
 
 export function LinkableSetTest({
   linkedSet,
@@ -13,12 +14,11 @@ export function LinkableSetTest({
   className?: string;
 }) {
   return (
-    <div className={twMerge("overflow-scroll", className)}>
-      <h2>LinkedSet Tester</h2>
-      <pre className="text-start text-sm">
+    <Panel title="LinkableSet" className={className}>
+      <pre className="text-sm">
         <DebugOutSet set={linkedSet} pad={0} showUnknowns={false} />
       </pre>
-    </div>
+    </Panel>
   );
 }
 
@@ -37,6 +37,7 @@ function DebugOutSet({
 }) {
   const lset = useLink(set);
   const [input, setInput] = useState(0);
+  const ref = useRenderFlash<HTMLSpanElement>();
 
   const handleAdd = () => {
     lset().add(input);
@@ -81,7 +82,7 @@ function DebugOutSet({
   }
 
   return (
-    <>
+    <span ref={ref}>
       <Header obj={lset()} /> {"("}
       <br />
       {" ".repeat(TAB_SIZE - 1)}
@@ -97,6 +98,6 @@ function DebugOutSet({
       <TxtButton title="clear" onClick={handleClear}>
         clear
       </TxtButton>
-    </>
+    </span>
   );
 }

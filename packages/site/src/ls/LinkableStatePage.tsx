@@ -14,20 +14,11 @@ const primitive = LinkableValue.create(0);
 
 export function LinkableStateTest() {
   return (
-    <div className="grid grid-cols-2 gap-2">
-      <LinkableMapTest className="rounded-sm bg-gray-700/10 p-4" map={map} />
-      <LinkableSetTest
-        className="rounded-sm bg-gray-700/10 p-4"
-        linkedSet={set}
-      />
-      <LinkableArrayTest
-        className="rounded-sm bg-gray-700/10 p-4"
-        linkedArray={array}
-      />
-      <LinkableValueTest
-        className="rounded-sm bg-gray-700/10 p-4"
-        prim={primitive}
-      />
+    <div className="grid grid-cols-2 items-start gap-3">
+      <LinkableMapTest map={map} />
+      <LinkableSetTest linkedSet={set} />
+      <LinkableArrayTest linkedArray={array} />
+      <LinkableValueTest prim={primitive} />
     </div>
   );
 }

@@ -1,73 +1,103 @@
 @import "tailwindcss";
 
+@theme {
+  --color-surface: #18181b;
+  --color-panel: #1f1f23;
+  --color-line: #34343b;
+  --color-text: #e4e4e7;
+  --color-muted: #8a8a94;
+  --color-accent: #8b9cff;
+  --color-flash: #facc15;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
   font-size: 14px;
+  line-height: 1.5;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color-scheme: dark;
+  color: var(--color-text);
+  background-color: var(--color-surface);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
 }
 
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 8px 16px;
-  text-align: center;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  align-items: stretch;
-  gap: 8px;
+@layer base {
+  body {
+    min-height: 100vh;
+  }
+
+  #root {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 16px 32px;
+  }
+
+  a {
+    color: var(--color-accent);
+  }
+
+  button,
+  input[type="button"] {
+    padding: 0 6px;
+    border: 1px solid var(--color-line);
+    border-radius: 3px;
+    background-color: #2a2a30;
+    cursor: pointer;
+  }
+
+  button:hover,
+  input[type="button"]:hover {
+    border-color: var(--color-accent);
+  }
+
+  input[type="text"] {
+    padding: 0 4px;
+    border: 1px solid var(--color-line);
+    border-radius: 3px;
+    background-color: var(--color-surface);
+  }
+
+  fieldset {
+    padding: 4px 8px 8px;
+    border: 1px solid var(--color-line);
+    border-radius: 3px;
+  }
+
+  legend {
+    padding: 0 4px;
+  }
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+/* Render highlighting, see src/ui/renderFlash.ts */
+
+:root[data-render-flash] [data-renders] {
+  outline: 1px solid transparent;
+  outline-offset: -1px;
 }
 
-a:hover {
-  color: #535bf2;
+:root[data-render-flash] [data-renders]::after {
+  content: "r" attr(data-renders);
+  color: var(--color-flash);
+  font: 9px/1 var(--font-mono);
+  pointer-events: none;
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+:root[data-render-flash] [data-renders]:not(span) {
+  position: relative;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+:root[data-render-flash] [data-renders]:not(span)::after {
+  position: absolute;
+  top: 3px;
+  right: 4px;
 }
 
-button,
-input[type="button"] {
-  border: 1px solid transparent;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: gray;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+:root[data-render-flash] span[data-renders]::after {
+  margin-left: 1px;
+  vertical-align: super;
 }

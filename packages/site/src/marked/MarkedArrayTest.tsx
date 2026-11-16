@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { twMerge } from "tailwind-merge";
 import { MarkedArray, useLink } from "@mrkev/marked-subbable";
 import { MarkedCollection } from "./MarkedCollection";
+import { Panel } from "../ui/Panel";
+import { useRenderFlash } from "../ui/renderFlash";
 
 const array = MarkedArray.create<number>();
 
 export function MarkedArrayTest({ className }: { className?: string }) {
   const larr = useLink(array);
   const [input, setInput] = useState(0);
+  const ref = useRenderFlash<HTMLElement>();
 
   function add() {
     larr().push(input);
@@ -19,8 +21,8 @@ export function MarkedArrayTest({ className }: { className?: string }) {
   }
 
   return (
-    <div className={twMerge("overflow-scroll", className)}>
-      <pre className="text-start text-sm">
+    <Panel ref={ref} title="MarkedArray" className={className}>
+      <pre className="text-sm">
         <MarkedCollection
           delimiters={["[", "]"]}
           set={larr()}
@@ -33,6 +35,6 @@ export function MarkedArrayTest({ className }: { className?: string }) {
           }}
         />
       </pre>
-    </div>
+    </Panel>
   );
 }

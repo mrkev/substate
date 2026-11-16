@@ -10,7 +10,7 @@ export function TxtButton({
 >) {
   return (
     <button
-      className={twMerge("text-gray-500 hover:underline", className)}
+      className={twMerge("border-0 p-0 text-gray-500 hover:underline", className)}
       style={{
         background: "none",
         ...style,

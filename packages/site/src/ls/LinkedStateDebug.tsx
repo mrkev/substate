@@ -6,6 +6,7 @@ import { LinkableMap } from "../../../linked-state/src/LinkableMap";
 import { LinkableSet } from "../../../linked-state/src/LinkableSet";
 import { LinkableValue } from "../../../linked-state/src/LinkableValue";
 import { exhaustive } from "../../../structured-state/src/lib/assertions";
+import { useRenderFlash } from "../ui/renderFlash";
 
 const TAB_SIZE = 2;
 export type DisplayState = "full" | "native" | "collapsed";
@@ -297,6 +298,7 @@ export function Header({
   // we are printing the _hash, which changes every time any child changes,
   // so we want to listen ot recursive changes
   const obj = useLink(objarg, true)();
+  const ref = useRenderFlash<HTMLSpanElement>();
 
   const kindStr = (() => {
     if (obj instanceof LinkableMap) {
@@ -320,7 +322,7 @@ export function Header({
 
   const hash = <span className={classOfKind("hash")}>{hashStr}</span>;
   return (
-    <span className={classOfKind("kind")} title={path}>
+    <span ref={ref} className={classOfKind("kind")} title={path}>
       (<span className={classOfKind("kind")}>{kindStr}</span>: {obj._id}
       {hashStr}
       {container})

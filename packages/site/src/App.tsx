@@ -23,6 +23,8 @@ import { TrackA } from "./ui/TrackA";
 import { SchedulerTest } from "./unused/SchedulerTest";
 import { nullthrows } from "./util";
 import { UtilityToggle } from "./UtilityToggle";
+import { Panel } from "./ui/Panel";
+import { useRenderFlash } from "./ui/renderFlash";
 
 setWindow("s", s);
 
@@ -74,8 +76,8 @@ export function App() {
   const [projectDirtyState, markProjectClean] = useDirtyTracker(project);
 
   return (
-    <>
-      <div className="flex flex-row gap-2 justify-center">
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-row flex-wrap items-center gap-2">
         <SchedulerTest />
         useIsDirty: {JSON.stringify(projectDirtyState)}{" "}
         <button
@@ -87,8 +89,6 @@ export function App() {
         </button>
         <button onClick={() => s.history.undo()}>undo</button>
         <button onClick={() => s.history.redo()}>redo</button>
-      </div>
-      <div className="flex flex-row gap-2 justify-center">
         <button
           onClick={() => {
             const serialized = serialize(project);
@@ -102,23 +102,14 @@ export function App() {
           construct test
         </button>
       </div>
-      <div className="flex flex-row grow font-mono gap-2">
+      <div className="flex flex-row items-start gap-3 font-mono">
         <ProjectDebug project={project} />
-
-        <fieldset
-          className="border-none"
-          style={{
-            background: "#181818",
-            alignSelf: "flex-start",
-          }}
-        >
-          <legend>Project</legend>
-
+        <Panel title="Project" className="shrink-0">
           <UProject project={project} />
-        </fieldset>
+        </Panel>
         <HistoryStacks />
       </div>
-    </>
+    </div>
   );
 }
 
@@ -126,8 +117,9 @@ function UProject({ project }: { project: Project }) {
   const tracks = useContainer(project.tracks);
   const randomNumbers = useContainer(project.randomNumbers);
   const markers = useContainer(project.markers);
+  const ref = useRenderFlash<HTMLDivElement>();
   return (
-    <div className="p-1 flex flex-row gap-2">
+    <div ref={ref} className="p-1 flex flex-row gap-2">
       <div className="p-1 flex flex-col gap-2 min-w-50 items-start">
         <div>
           Set: {randomNumbers.size}
@@ -260,19 +252,26 @@ export function Notes(props: { notes: LinkedArray<Note> }) {
 function ProjectDebug({ project }: { project: Project }) {
   const [tab, setTab] = useState<"struct" | "serialized">("struct");
   return (
-    <div style={{ flex: "1 1 1px" }}>
-      <UtilityToggle
-        toggled={tab === "struct"}
-        onToggle={() => setTab("struct")}
-      >
-        struct
-      </UtilityToggle>
-      <UtilityToggle
-        toggled={tab === "serialized"}
-        onToggle={() => setTab("serialized")}
-      >
-        serialized
-      </UtilityToggle>
+    <Panel
+      title="state"
+      className="flex-1"
+      actions={
+        <>
+          <UtilityToggle
+            toggled={tab === "struct"}
+            onToggle={() => setTab("struct")}
+          >
+            struct
+          </UtilityToggle>
+          <UtilityToggle
+            toggled={tab === "serialized"}
+            onToggle={() => setTab("serialized")}
+          >
+            serialized
+          </UtilityToggle>
+        </>
+      }
+    >
       {tab === "struct" && <s.DebugOut val={project}></s.DebugOut>}
       {tab === "serialized" && (
         <div
@@ -288,23 +287,17 @@ function ProjectDebug({ project }: { project: Project }) {
           />
         </div>
       )}
-    </div>
+    </Panel>
   );
 }
 
 function HistoryStacks() {
   const history = useContainer(getGlobalState().history);
   const redoStack = useContainer(getGlobalState().redoStack);
+  const ref = useRenderFlash<HTMLElement>();
 
   return (
-    <div
-      className="flex flex-col"
-      style={{
-        flex: "1 1 1px",
-        textAlign: "left",
-      }}
-    >
-      History:
+    <Panel ref={ref} title="history" className="flex-1">
       {history.map((entry, i) => {
         return <HistoryItem entry={entry} key={i} />;
       })}
@@ -321,7 +314,7 @@ function HistoryStacks() {
       {redoStack.map((entry, i) => {
         return <HistoryItem entry={entry} key={i} />;
       })}
-    </div>
+    </Panel>
   );
 }
 

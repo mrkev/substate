@@ -4,23 +4,31 @@ import { UtilityToggle } from "../UtilityToggle";
 import { MProject } from "./MProject";
 import { JSONView } from "../JSONView";
 import { simplifyAndPackage } from "@mrkev/marked-serializable";
+import { Panel } from "../ui/Panel";
 
 export function MProjectDebug({ project }: { project: MProject }) {
   const [tab, setTab] = useState<"struct" | "serialized">("struct");
   return (
-    <div style={{ flex: "1 1 1px" }}>
-      <UtilityToggle
-        toggled={tab === "struct"}
-        onToggle={() => setTab("struct")}
-      >
-        struct
-      </UtilityToggle>
-      <UtilityToggle
-        toggled={tab === "serialized"}
-        onToggle={() => setTab("serialized")}
-      >
-        serialized
-      </UtilityToggle>
+    <Panel
+      title="state"
+      className="flex-1"
+      actions={
+        <>
+          <UtilityToggle
+            toggled={tab === "struct"}
+            onToggle={() => setTab("struct")}
+          >
+            struct
+          </UtilityToggle>
+          <UtilityToggle
+            toggled={tab === "serialized"}
+            onToggle={() => setTab("serialized")}
+          >
+            serialized
+          </UtilityToggle>
+        </>
+      }
+    >
       {tab === "struct" && <DebugTree val={project}></DebugTree>}
       {tab === "serialized" && (
         <div className="font-mono text-left overflow-scroll">
@@ -30,6 +38,6 @@ export function MProjectDebug({ project }: { project: MProject }) {
           />
         </div>
       )}
-    </div>
+    </Panel>
   );
 }

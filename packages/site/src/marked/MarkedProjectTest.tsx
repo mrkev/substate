@@ -10,6 +10,8 @@ import { useLink } from "@mrkev/marked-subbable";
 import { useState } from "react";
 import { nullthrows, setWindow } from "../../../linked-state/src/nullthrows";
 import { UtilityToggle } from "../UtilityToggle";
+import { Panel } from "../ui/Panel";
+import { useRenderFlash } from "../ui/renderFlash";
 import {
   MAudioClip,
   serialization_maudioclip as MAudioClip_serializationMark,
@@ -60,10 +62,9 @@ export function MarkedProjectTest() {
   // const [projectDirtyState, markProjectClean] = useDirtyTracker(project);
 
   return (
-    <>
-      <div className="flex flex-row gap-2 justify-center">
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-row flex-wrap items-center gap-2">
         <button
-          className="px-1"
           onClick={() => {
             const serialized = serialize(project);
             console.log("serialized", JSON.parse(JSON.stringify(serialized)));
@@ -77,7 +78,6 @@ export function MarkedProjectTest() {
           construct test
         </button>
         <button
-          className="px-1"
           onClick={() => {
             const serialized = serialize(project);
             console.log("should save", serialized);
@@ -87,7 +87,6 @@ export function MarkedProjectTest() {
         </button>
 
         <button
-          className="px-1"
           onClick={() => {
             history.pop();
           }}
@@ -95,23 +94,15 @@ export function MarkedProjectTest() {
           undo
         </button>
       </div>
-      <div className="flex flex-row gap-2 grow font-mono">
+      <div className="flex flex-row items-start gap-3 font-mono">
         <MProjectDebug project={project} />
-
-        <fieldset
-          className="border-none"
-          style={{
-            background: "#181818",
-            alignSelf: "flex-start",
-          }}
-        >
-          <legend>Project</legend>
+        <Panel title="Project" className="shrink-0">
           <UProject project={project} />
-        </fieldset>
+        </Panel>
       </div>
 
       <Changelog mproject={project} />
-    </>
+    </div>
   );
 }
 
@@ -126,8 +117,9 @@ function UProject({ project }: { project: MProject }) {
   const tracks = useLink(project.tracks);
   const randomNumbers = useLink(project.randomNumbers);
   const markers = useLink(project.markers);
+  const ref = useRenderFlash<HTMLDivElement>();
   return (
-    <div className="p-1 flex flex-row gap-2">
+    <div ref={ref} className="p-1 flex flex-row gap-2">
       <div className="p-1 flex flex-col gap-2 min-w-50">
         <div>
           MarkedSet: {randomNumbers().size}
@@ -273,6 +265,7 @@ export function TrackA({
   const [edit, setEdit] = useState(name().get());
   const clips = useLink(track.clips);
   const solodTracks = useLink(project.solodTracks);
+  const ref = useRenderFlash<HTMLFieldSetElement>();
 
   // todo: need this?
   // useContainer(track);
@@ -291,7 +284,7 @@ export function TrackA({
   }
 
   return (
-    <fieldset className="flex flex-col gap-2 p-2 border border-gray-700">
+    <fieldset ref={ref} className="flex flex-col gap-2 p-2">
       <legend>
         {track.constructor.name}{" "}
         <input
@@ -378,9 +371,10 @@ export function ClipA({
   const timelineLength = useLink(clip.timelineLength);
   const { t: st, u: su } = timelineStart();
   const { t: lt, u: lu } = timelineLength();
+  const ref = useRenderFlash<HTMLFieldSetElement>();
 
   return (
-    <fieldset className="bg-gray-800">
+    <fieldset ref={ref} className="bg-gray-800">
       <legend className="flex flex-row text-left w-full justify-between">
         {clip.constructor.name}
         <button onClick={onRemove}>x</button>

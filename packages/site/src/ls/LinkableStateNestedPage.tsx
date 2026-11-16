@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { twMerge } from "tailwind-merge";
 import { lArray, lMap, lSet, lValue } from "../../../linked-state/index";
 import { useLink } from "../../../linked-state/src/hooks";
 import { LinkableArray } from "../../../linked-state/src/LinkableArray";
@@ -7,6 +6,8 @@ import { LinkableValue } from "../../../linked-state/src/LinkableValue";
 import { DynamicTestArray } from "./LinkableArrayTest";
 import { DynamicTestMap } from "./LinkableMapTest";
 import { DebugOutBoolean } from "./LinkableValueTest";
+import { Panel } from "../ui/Panel";
+import { useRenderFlash } from "../ui/renderFlash";
 
 const map = lMap<number, LinkableArray<number>>();
 const set = lSet<number>();
@@ -29,10 +30,9 @@ export function LinkableStateNested({ className }: { className?: string }) {
   };
 
   return (
-    <>
-      <div className={twMerge("overflow-scroll", className)}>
-        <h2>LinkedState Tester</h2>
-        <pre className="text-start text-sm">
+    <div className="grid grid-cols-2 items-start gap-3">
+      <Panel title="LinkableMap<number, LinkableArray<number>>" className={className}>
+        <pre className="text-sm">
           <DynamicTestMap
             map={map}
             pad={0}
@@ -49,19 +49,20 @@ export function LinkableStateNested({ className }: { className?: string }) {
             )}
           />
         </pre>
-      </div>
+      </Panel>
       <ListExample />
-    </>
+    </div>
   );
 }
 
 function ListExample() {
   const list = useLink(listState);
+  const ref = useRenderFlash<HTMLElement>();
 
   return (
-    <>
+    <Panel ref={ref} title="todo list">
       <ListSummary />
-      <ul>
+      <ul className="mt-2 flex flex-col gap-1">
         {list()
           .entries()
           .map(([name, doneState], i) => (
@@ -69,7 +70,7 @@ function ListExample() {
           ))
           .toArray()}
       </ul>
-    </>
+    </Panel>
   );
 }
 
@@ -85,8 +86,13 @@ function ListSummary() {
       return done.get() == true;
     })
     .toArray();
+  const ref = useRenderFlash<HTMLSpanElement>();
 
-  return <i>Tasks done: {done.length}</i>;
+  return (
+    <span ref={ref} className="italic">
+      Tasks done: {done.length}
+    </span>
+  );
 }
 
 function ListItem({
@@ -97,9 +103,10 @@ function ListItem({
   doneState: LinkableValue<boolean>;
 }) {
   const done = useLink(doneState);
+  const ref = useRenderFlash<HTMLLIElement>();
 
   return (
-    <li>
+    <li ref={ref} className="font-mono">
       {name}:{" "}
       {/* {done().get() ? (
         "done"

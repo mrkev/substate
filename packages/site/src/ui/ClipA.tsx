@@ -1,5 +1,6 @@
 import { useContainer } from "../../../structured-state/src";
 import { AudioClip } from "../structs/AudioClip";
+import { useRenderFlash } from "./renderFlash";
 
 export function ClipA({
   clip,
@@ -12,8 +13,9 @@ export function ClipA({
   const timelineLength = useContainer(clip.timelineLength);
   const { t: st, u: su } = timelineStart;
   const { t: lt, u: lu } = timelineLength;
+  const ref = useRenderFlash<HTMLFieldSetElement>();
   return (
-    <fieldset className="bg-gray-800">
+    <fieldset ref={ref} className="bg-gray-800">
       <legend className="flex flex-row text-left w-full justify-between">
         {clip.constructor.name}
         <button onClick={onRemove}>x</button>

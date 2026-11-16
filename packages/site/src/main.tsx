@@ -2,12 +2,55 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "react-json-pretty/themes/monikai.css";
 import "react-json-view-lite/dist/index.css";
-import { HashRouter, Outlet, Route, Routes } from "react-router-dom";
+import { HashRouter, Route, Routes } from "react-router-dom";
 import { App } from "./App.tsx";
+import { Layout, PageRoute } from "./Layout.tsx";
 import { LinkableStateNested } from "./ls/LinkableStateNestedPage.tsx";
 import { LinkableStateTest } from "./ls/LinkableStatePage.tsx";
 import { MarkedStateTest } from "./marked/page.tsx";
 import { MarkedProjectTest } from "./marked/MarkedProjectTest.tsx";
+
+const routes: PageRoute[] = [
+  {
+    path: "/",
+    group: "structured-state",
+    label: "project",
+    description:
+      "Struct-based Project → Tracks → Clips. Undo/redo with recordHistory, dirty tracking, serialize/construct, and the history stack.",
+    element: <App />,
+  },
+  {
+    path: "/ls",
+    group: "linked-state",
+    label: "basic",
+    description:
+      "One tester per primitive. Headers read (kind: id.hash); the hash bumps on every mutation, including nested ones.",
+    element: <LinkableStateTest />,
+  },
+  {
+    path: "/ls2",
+    group: "linked-state",
+    label: "nested",
+    description:
+      "A map of arrays, and a todo list: the summary uses useLink(list, true) to hear nested changes, the list itself only shallow ones. 'shared 1' and 'shared 2' are the same LinkableValue.",
+    element: <LinkableStateNested />,
+  },
+  {
+    path: "/marked",
+    group: "marked",
+    label: "basic",
+    description: "marked-subbable: a MarkedArray, and a MarkedSet of MarkedSets.",
+    element: <MarkedStateTest />,
+  },
+  {
+    path: "/marked2",
+    group: "marked",
+    label: "project",
+    description:
+      "The same project model on marked-subbable + marked-serializable. The history stack is experimental: undo only logs what it would revert.",
+    element: <MarkedProjectTest />,
+  },
+];
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -15,30 +58,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     // basename="/substate"
     >
       <Routes>
-        <Route
-          element={
-            <div className="flex flex-col gap-2">
-              {/* <header>My Application Header</header> */}
-              <nav className="flex flex-row gap-2 justify-center">
-                <a href="./#/">structured-state</a>
-                <a href="./#/ls">linked-state (simple)</a>
-                <a href="./#/ls2">linked-state (complex)</a>
-                <a href="./#/marked">marked (simple)</a>
-                <a href="./#/marked2">marked (complex)</a>
-              </nav>
-              <main>
-                <Outlet /> {/* Renders the content of the nested route */}
-              </main>
-              {/* <footer>My Application Footer</footer> */}
-            </div>
-          }
-        >
-          {/* Parent route with the layout */}
-          <Route path="/" element={<App />} />
-          <Route path="/ls" element={<LinkableStateTest />} />
-          <Route path="/ls2" element={<LinkableStateNested />} />
-          <Route path="/marked" element={<MarkedStateTest />} />
-          <Route path="/marked2" element={<MarkedProjectTest />} />
+        <Route element={<Layout routes={routes} />}>
+          {routes.map((route) => (
+            <Route key={route.path} path={route.path} element={route.element} />
+          ))}
         </Route>
       </Routes>
     </HashRouter>
