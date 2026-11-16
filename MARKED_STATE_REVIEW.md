@@ -29,7 +29,6 @@ Assessment of `marked-subbable` + `marked-serializable` against `structured-stat
 From a v8 coverage run (2026-11-16: `marked-subbable` 47% of lines, `marked-serializable` 53%; run `pnpm coverage`). A probe of every area below found no bugs, so these tests would protect working behavior.
 
 1. [ ] **React hooks (0%).** `useLink` / `useLinkAsState` are untested. Cover: re-render on own change; with `recursive`, also on nested changes; no re-render for unrelated changes; `useLink` returns a new function each render (what keeps React Compiler output fresh); `useLinkAsState`'s `[value, setter]` incl. `setter(prev => …)`. Needs a DOM test environment (`happy-dom` or `jsdom`); `@testing-library/react` is already installed at the root.
-2. [ ] **Notification propagation.** The loop guard in `_childChanged` (`SubbableContainer.tsx`, "token seen") is never exercised: two objects containing each other. Also untested: a grandparent's listener receives the grandchild as `target` on deep changes, which is how `useLink` tells shallow from deep.
 
 Not worth testing now: `DebugTree`, `util/` helpers, `copyWithin` (deliberately unimplemented), `isSimplifiable`.
 
