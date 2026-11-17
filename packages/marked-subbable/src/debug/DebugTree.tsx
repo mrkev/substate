@@ -1,5 +1,5 @@
 import stringify from "json-stringify-deterministic";
-import { ReactNode, useState } from "react";
+import { Fragment, ReactNode, useState } from "react";
 import { isContainable } from "../lib/Contained";
 import { MarkedSubbable, SubbableMark } from "../lib/SubbableMark";
 import { exhaustive } from "../util/exhaustive";
@@ -18,6 +18,28 @@ function isPrimitiveKind(val: unknown) {
     typeof val === "boolean" ||
     val == null
   );
+}
+
+/**
+ * Stable React keys for collection entries. Marked objects are keyed by their
+ * id, so component state (e.g. collapsed) follows the object when entries are
+ * inserted, removed or reordered. Everything else falls back to the index. An
+ * object that appears more than once gets its index appended to stay unique.
+ */
+function entryKeys(elems: Iterable<unknown>): string[] {
+  const keys: string[] = [];
+  const seen = new Set<string>();
+  let i = 0;
+  for (const elem of elems) {
+    let key = isContainable(elem) ? `m-${elem.$$mark._id}` : `i-${i}`;
+    if (seen.has(key)) {
+      key = `${key}-${i}`;
+    }
+    seen.add(key);
+    keys.push(key);
+    i++;
+  }
+  return keys;
 }
 
 const TAB_SIZE = 2;
@@ -104,12 +126,12 @@ export function DebugOutReact({
       />
     );
   } else if (Array.isArray(val)) {
-    return JSON.stringify(val);
+    return safeStringify(() => JSON.stringify(val));
   } else {
     if (showUnknowns) {
-      return `(unknown: ${stringifyUnknown(val)})`;
+      return `(unknown: ${safeStringify(() => stringifyUnknown(val))})`;
     } else {
-      return `(unknown: ${val.constructor.name})`;
+      return `(unknown: ${constructorName(val)})`;
     }
   }
 }
@@ -207,20 +229,22 @@ function TreeMarkedArray({
   const arr = useLink(marr);
 
   const result = [];
+  const keys = entryKeys(arr());
 
   for (let i = 0; i < arr().length; i++) {
     const baseline = pad + TAB_SIZE;
     const elem = arr().at(i);
     result.push(
-      <br key={`br-${i}`} />,
-      " ".repeat(baseline),
-      <DebugOutReact
-        key={`elem-${i}`}
-        val={elem}
-        pad={baseline}
-        path={`${path}/${i}`}
-        showUnknowns={showUnknowns}
-      />,
+      <Fragment key={keys[i]}>
+        <br />
+        {" ".repeat(baseline)}
+        <DebugOutReact
+          val={elem}
+          pad={baseline}
+          path={`${path}/${i}`}
+          showUnknowns={showUnknowns}
+        />
+      </Fragment>,
     );
     // result += `\n${DebugOutReact(elem, pad, showUnknowns)
     //   .split("\n")
@@ -254,20 +278,22 @@ function TreeMarkedSet({
 }) {
   const result = [];
   const set = useLink(mset);
+  const keys = entryKeys(set());
 
   let i = 0;
   for (const elem of set()) {
     const baseline = pad + TAB_SIZE;
     result.push(
-      <br key={`br-${i}`} />,
-      " ".repeat(baseline),
-      <DebugOutReact
-        key={`elem-${i}`}
-        val={elem}
-        pad={baseline}
-        path={`${path}/${i}-s`}
-        showUnknowns={showUnknowns}
-      />,
+      <Fragment key={keys[i]}>
+        <br />
+        {" ".repeat(baseline)}
+        <DebugOutReact
+          val={elem}
+          pad={baseline}
+          path={`${path}/${i}-s`}
+          showUnknowns={showUnknowns}
+        />
+      </Fragment>,
     );
     i++;
     // result += `\n${DebugOutReact(elem, pad, showUnknowns)
@@ -302,28 +328,29 @@ function TreeMarkedMap({
 }) {
   const result = [];
   const map = useLink(mmap);
+  const keys = entryKeys(map().keys());
 
   let i = 0;
   for (const [key, value] of map()) {
     const baseline = pad + TAB_SIZE;
     result.push(
-      <br key={`br-${String(key)}`} />,
-      " ".repeat(baseline),
-      <DebugOutReact
-        key={`key-${i}`}
-        val={key}
-        pad={baseline}
-        path={`${path}/${i}-s`}
-        showUnknowns={showUnknowns}
-      />,
-      ": ",
-      <DebugOutReact
-        key={`value-${i}`}
-        val={value}
-        pad={baseline}
-        path={`${path}/${i}-s`}
-        showUnknowns={showUnknowns}
-      />,
+      <Fragment key={keys[i]}>
+        <br />
+        {" ".repeat(baseline)}
+        <DebugOutReact
+          val={key}
+          pad={baseline}
+          path={`${path}/${i}-k`}
+          showUnknowns={showUnknowns}
+        />
+        {": "}
+        <DebugOutReact
+          val={value}
+          pad={baseline}
+          path={`${path}/${i}-v`}
+          showUnknowns={showUnknowns}
+        />
+      </Fragment>,
     );
     i++;
     // result += `\n${DebugOutReact(elem, pad, showUnknowns)
@@ -419,7 +446,9 @@ function Header({
 function DebugOutSimplePrm({ val }: { val: PrimitiveKind | undefined }) {
   switch (true) {
     case typeof val === "string":
-      return <span className={classOfKind("string")}>&quot;{val}&quot;</span>;
+      return (
+        <span className={classOfKind("string")}>{JSON.stringify(val)}</span>
+      );
     case typeof val === "number":
       return <span className={classOfKind("number")}>{String(val)}</span>;
     default:
@@ -449,6 +478,23 @@ const classOfKind = (
       exhaustive(kind);
   }
 };
+
+/** A debug view should never be the thing that crashes the app. */
+function safeStringify(fn: () => string | undefined): string {
+  try {
+    return fn() ?? "undefined";
+  } catch (e) {
+    return `<unprintable: ${e instanceof Error ? e.message : String(e)}>`;
+  }
+}
+
+function constructorName(val: unknown): string {
+  if (typeof val !== "object" || val === null) {
+    return typeof val;
+  }
+  const ctor = (val as { constructor?: { name?: unknown } }).constructor;
+  return typeof ctor?.name === "string" ? ctor.name : "Object";
+}
 
 function stringifyUnknown(val: unknown) {
   const res = stringify(val, {

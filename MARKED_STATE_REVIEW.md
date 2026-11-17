@@ -17,7 +17,7 @@ Assessment of `marked-subbable` + `marked-serializable` against `structured-stat
 ## What's worse or missing
 
 - **Boilerplate.** `MAudioTrack` names its fields four times (constructor, `register`, `Descriptor` type, `describe`). structured-state does it with one line per field. Don't bring back property inspection; add an optional helper layer that generates the mark and serialization from a field list.
-- **History / undo.** The real gap. structured-state's undo restores old state *into existing objects* (components holding references stay valid), which relies on stable ids. `constructSimplifiedPackage` only builds new objects with new ids, so an id-keyed history stack can't map back to live objects. Decide on restore-in-place and id stability across save/load next. `site/src/marked/exp/historyStackFor.tsx` is the starting point.
+- **History / undo.** The real gap. structured-state's undo restores old state _into existing objects_ (components holding references stay valid), which relies on stable ids. `constructSimplifiedPackage` only builds new objects with new ids, so an id-keyed history stack can't map back to live objects. Decide on restore-in-place and id stability across save/load next. `site/src/marked/exp/historyStackFor.tsx` is the starting point.
 - `DirtyObserver` (easy port), unions, schema validation.
 
 ## Stable ids (for history)
